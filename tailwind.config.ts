@@ -57,6 +57,15 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        notebook: {
+          line: "hsl(var(--notebook-line))",
+          margin: "hsl(var(--notebook-margin))",
+          hole: "hsl(var(--notebook-hole))",
+        },
+        checked: {
+          text: "hsl(var(--checked-text))",
+          mark: "hsl(var(--check-mark))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

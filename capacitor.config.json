@@ -1,0 +1,9 @@
+{
+  "appId": "app.lovable.901d571a88fb4ca2aef181940ef46489",
+  "appName": "Notebook Shopping List",
+  "webDir": "dist",
+  "server": {
+    "url": "https://901d571a-88fb-4ca2-aef1-81940ef46489.lovableproject.com?forceHideBadge=true",
+    "cleartext": true
+  }
+}

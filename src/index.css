@@ -104,18 +104,29 @@ All colors MUST be HSL.
   .notebook-strikethrough {
     position: relative;
     text-decoration: none;
+    font-weight: 700;
   }
   
+  .notebook-strikethrough::before,
   .notebook-strikethrough::after {
     content: '';
     position: absolute;
-    left: -2px;
-    right: -2px;
+    left: -4px;
+    right: -4px;
     top: 50%;
-    height: 3px;
+    height: 2.5px;
     background: hsl(var(--foreground));
-    opacity: 0.7;
-    transform: translateY(-50%) rotate(-1deg);
-    border-radius: 1px;
+    opacity: 0.8;
+    border-radius: 50%;
+  }
+  
+  .notebook-strikethrough::before {
+    transform: translateY(-50%) rotate(-0.5deg);
+  }
+  
+  .notebook-strikethrough::after {
+    transform: translateY(-48%) rotate(0.8deg);
+    height: 2px;
+    opacity: 0.6;
   }
 }

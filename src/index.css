@@ -99,3 +99,21 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  .notebook-strikethrough {
+    position: relative;
+    text-decoration: none;
+  }
+  
+  .notebook-strikethrough::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 2px;
+    background: hsl(var(--notebook-margin));
+    transform: translateY(-50%);
+  }
+}

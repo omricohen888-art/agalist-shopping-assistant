@@ -125,7 +125,7 @@ export const ShoppingList = () => {
                 <span
                   className={`flex-1 transition-all ${
                     item.checked
-                      ? "line-through text-checked-text"
+                      ? "notebook-strikethrough text-checked-text"
                       : "text-foreground"
                   }`}
                 >

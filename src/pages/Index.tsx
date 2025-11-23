@@ -1,11 +1,9 @@
-import { NotebookCanvas } from "@/components/NotebookCanvas";
 import { ShoppingList } from "@/components/ShoppingList";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
-      <NotebookCanvas lineHeight={32} marginLeft={80} />
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       <ThemeToggle />
       <ShoppingList />
     </div>

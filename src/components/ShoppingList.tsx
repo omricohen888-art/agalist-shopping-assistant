@@ -29,7 +29,7 @@ export const ShoppingList = () => {
 
     setItems([...items, ...newItems]);
     setInputText("");
-    toast.success(`Added ${newItems.length} item${newItems.length > 1 ? "s" : ""}`);
+    toast.success(`נוספו ${newItems.length} פריטים`);
   };
 
   const toggleItem = (id: string) => {
@@ -46,10 +46,10 @@ export const ShoppingList = () => {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: "Shopping List",
+          title: "רשימת קניות - עגליסט",
           text: listText,
         });
-        toast.success("List shared!");
+        toast.success("הרשימה שותפה בהצלחה!");
       } catch (err) {
         if ((err as Error).name !== "AbortError") {
           copyToClipboard(listText);
@@ -62,107 +62,115 @@ export const ShoppingList = () => {
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    toast.success("List copied to clipboard!");
+    toast.success("הרשימה הועתקה ללוח!");
   };
 
   const clearCompleted = () => {
     setItems(items.filter((item) => !item.checked));
-    toast.success("Cleared completed items");
+    toast.success("פריטים שסומנו נמחקו");
   };
 
   const clearAll = () => {
     setItems([]);
-    toast.success("List cleared");
+    toast.success("הרשימה נוקתה");
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto px-4 py-8 relative z-10">
-      <div className="mb-8 pl-20">
-        <h1 className="text-3xl font-bold mb-2 text-foreground">Shopping List</h1>
-        <p className="text-muted-foreground">Paste your list from WhatsApp or add items manually</p>
+    <div className="w-full max-w-3xl mx-auto px-4 py-8 animate-fade-in">
+      <div className="mb-10">
+        <h1 className="text-5xl font-bold mb-3 text-primary">🛒 עגליסט</h1>
+        <p className="text-lg text-muted-foreground">הדביקו רשימה מוואטסאפ או הוסיפו פריטים ידנית</p>
       </div>
 
-      <div className="mb-6 pl-20">
-        <Textarea
-          placeholder="Paste your shopping list here (one item per line)..."
-          value={inputText}
-          onChange={(e) => setInputText(e.target.value)}
-          className="min-h-[120px] resize-none bg-background/50 backdrop-blur-sm border-muted"
-        />
-        <div className="flex gap-2 mt-3">
+      <div className="mb-8">
+        <div className="bg-card rounded-2xl shadow-lg border border-border p-6 mb-4">
+          <Textarea
+            placeholder="הדביקו את הרשימה כאן (פריט בכל שורה)..."
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            className="min-h-[140px] resize-none bg-muted/30 border-2 border-border focus:border-primary transition-colors text-lg"
+          />
+        </div>
+        <div className="flex gap-3">
           <Button
             onClick={() => handlePaste(inputText)}
             disabled={!inputText.trim()}
-            className="flex-1"
+            className="flex-1 h-12 text-base font-semibold shadow-md hover:shadow-lg transition-all"
           >
-            <Plus className="mr-2 h-4 w-4" />
-            Add Items
+            <Plus className="mr-2 h-5 w-5" />
+            הוסף פריטים
           </Button>
           <Button
             onClick={shareList}
             disabled={items.length === 0}
             variant="outline"
+            className="h-12 px-6 font-semibold shadow-sm hover:shadow-md transition-all"
           >
-            <Share2 className="mr-2 h-4 w-4" />
-            Share
+            <Share2 className="mr-2 h-5 w-5" />
+            שתף
           </Button>
           <Button
             onClick={clearAll}
             disabled={items.length === 0}
             variant="outline"
+            className="h-12 px-6 font-semibold shadow-sm hover:shadow-md transition-all"
           >
-            <Trash2 className="mr-2 h-4 w-4" />
-            Clear All
+            <Trash2 className="mr-2 h-5 w-5" />
+            נקה הכל
           </Button>
         </div>
       </div>
 
-      <div className="space-y-1 pl-20">
+      <div className="bg-card rounded-2xl shadow-lg border border-border p-6">
         {items.length === 0 ? (
-          <p className="text-muted-foreground text-center py-12">
-            No items yet. Paste a list or add items to get started.
-          </p>
+          <div className="text-center py-16">
+            <div className="text-6xl mb-4">🛍️</div>
+            <p className="text-muted-foreground text-lg">
+              אין פריטים עדיין. הדביקו רשימה או הוסיפו פריטים כדי להתחיל.
+            </p>
+          </div>
         ) : (
           <>
-            {items.map((item) => (
-              <div
-                key={item.id}
-                className="flex items-center gap-3 py-2 group hover:bg-muted/20 rounded-md px-2 transition-colors"
-                style={{ height: "32px" }}
-              >
-                <Checkbox
-                  checked={item.checked}
-                  onCheckedChange={() => toggleItem(item.id)}
-                  className="border-2 data-[state=checked]:bg-checked-mark data-[state=checked]:border-checked-mark"
-                />
-                <span
-                  className={`flex-1 transition-all ${
-                    item.checked
-                      ? "notebook-strikethrough text-checked-text"
-                      : "text-foreground"
-                  }`}
+            <div className="space-y-2">
+              {items.map((item, index) => (
+                <div
+                  key={item.id}
+                  className="flex items-center gap-4 py-3 px-4 group hover:bg-muted/50 rounded-xl transition-all animate-slide-up"
+                  style={{ animationDelay: `${index * 30}ms` }}
                 >
-                  {item.text}
-                </span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => deleteItem(item.id)}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6"
-                >
-                  <Trash2 className="h-3 w-3" />
-                </Button>
-              </div>
-            ))}
+                  <Checkbox
+                    checked={item.checked}
+                    onCheckedChange={() => toggleItem(item.id)}
+                    className="h-6 w-6 border-2 data-[state=checked]:bg-success data-[state=checked]:border-success transition-all"
+                  />
+                  <span
+                    className={`flex-1 text-lg transition-all ${
+                      item.checked
+                        ? "completed-item"
+                        : "text-foreground font-medium"
+                    }`}
+                  >
+                    {item.text}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => deleteItem(item.id)}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity h-9 w-9 hover:bg-destructive/10 hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
             {items.some((item) => item.checked) && (
-              <div className="pt-4">
+              <div className="pt-6 mt-6 border-t border-border">
                 <Button
                   variant="outline"
-                  size="sm"
                   onClick={clearCompleted}
-                  className="w-full"
+                  className="w-full h-11 font-semibold shadow-sm hover:shadow-md transition-all"
                 >
-                  Clear Completed
+                  נקה פריטים שסומנו
                 </Button>
               </div>
             )}

@@ -97,7 +97,7 @@ export const ShoppingList = () => {
             disabled={!inputText.trim()}
             className="flex-1 h-12 text-base font-semibold shadow-md hover:shadow-lg transition-all"
           >
-            <Plus className="mr-2 h-5 w-5" />
+            <Plus className="ml-2 h-5 w-5" />
             הוסף פריטים
           </Button>
           <Button
@@ -106,7 +106,7 @@ export const ShoppingList = () => {
             variant="outline"
             className="h-12 px-6 font-semibold shadow-sm hover:shadow-md transition-all"
           >
-            <Share2 className="mr-2 h-5 w-5" />
+            <Share2 className="ml-2 h-5 w-5" />
             שתף
           </Button>
           <Button
@@ -115,7 +115,7 @@ export const ShoppingList = () => {
             variant="outline"
             className="h-12 px-6 font-semibold shadow-sm hover:shadow-md transition-all"
           >
-            <Trash2 className="mr-2 h-5 w-5" />
+            <Trash2 className="ml-2 h-5 w-5" />
             נקה הכל
           </Button>
         </div>

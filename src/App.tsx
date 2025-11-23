@@ -16,7 +16,7 @@ const App = () => <QueryClientProvider client={queryClient}>
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Index />} className="py-0 mx-0 px-0 rounded" />
+            <Route path="/" element={<Index />} className="w-full overflow-x-hidden" />
             <Route path="/history" element={<History />} />
             <Route path="/compare" element={<Compare />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

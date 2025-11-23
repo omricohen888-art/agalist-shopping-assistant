@@ -125,7 +125,7 @@ export const ShoppingList = () => {
         <div className="bg-card rounded-2xl shadow-lg border border-border p-6 mb-4">
           <Textarea placeholder="הדביקו את הרשימה כאן (פריט בכל שורה)..." value={inputText} onChange={e => setInputText(e.target.value)} className="min-h-[140px] resize-none bg-muted/30 border-2 border-border focus:border-primary transition-colors text-lg" />
         </div>
-        <div className="">
+        <div className="w-full flex flex-col gap-3">
           <Button onClick={() => handlePaste(inputText)} disabled={!inputText.trim()} className="flex-1 h-12 text-base font-semibold shadow-md hover:shadow-lg transition-all">
             <Plus className="ml-2 h-5 w-5" />
             הוסף פריטים

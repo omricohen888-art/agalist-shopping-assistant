@@ -8,85 +8,82 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Notebook paper theme - warm cream */
-    --background: 42 78% 95%;
-    --foreground: 220 13% 20%;
+    /* Modern Google Material theme */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 15%;
 
-    --card: 42 78% 97%;
-    --card-foreground: 220 13% 20%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 15%;
 
-    --popover: 42 78% 97%;
-    --popover-foreground: 220 13% 20%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 15%;
 
-    /* Notebook ink blue-black */
-    --primary: 220 13% 25%;
-    --primary-foreground: 42 78% 95%;
+    /* Google Blue as primary */
+    --primary: 217 89% 61%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 42 40% 88%;
-    --secondary-foreground: 220 13% 25%;
+    --secondary: 210 17% 95%;
+    --secondary-foreground: 0 0% 15%;
 
-    --muted: 42 40% 90%;
-    --muted-foreground: 220 9% 46%;
+    --muted: 210 17% 95%;
+    --muted-foreground: 0 0% 45%;
 
-    --accent: 210 100% 45%;
+    --accent: 217 89% 61%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 42 30% 85%;
-    --input: 42 30% 85%;
-    --ring: 220 13% 25%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 217 89% 61%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    /* Notebook lines - light blue-gray */
-    --notebook-line: 210 20% 85%;
-    --notebook-margin: 0 70% 55%;
-    --notebook-hole: 0 0% 75%;
-    
     /* Checked item styling */
-    --checked-text: 220 9% 60%;
-    --check-mark: 142 71% 45%;
+    --checked-text: 0 0% 60%;
+    --checked-mark: 142 71% 45%;
+    
+    /* Success color (Google green) */
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
   }
 
   .dark {
-    /* Dark mode - charcoal notebook */
-    --background: 220 13% 12%;
-    --foreground: 42 78% 88%;
+    /* Modern dark theme */
+    --background: 0 0% 10%;
+    --foreground: 0 0% 95%;
 
-    --card: 220 13% 15%;
-    --card-foreground: 42 78% 88%;
+    --card: 0 0% 14%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 220 13% 15%;
-    --popover-foreground: 42 78% 88%;
+    --popover: 0 0% 14%;
+    --popover-foreground: 0 0% 95%;
 
-    --primary: 42 78% 88%;
-    --primary-foreground: 220 13% 12%;
+    --primary: 217 89% 61%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 13% 20%;
-    --secondary-foreground: 42 78% 88%;
+    --secondary: 0 0% 20%;
+    --secondary-foreground: 0 0% 95%;
 
-    --muted: 220 13% 20%;
-    --muted-foreground: 42 40% 65%;
+    --muted: 0 0% 20%;
+    --muted-foreground: 0 0% 60%;
 
-    --accent: 210 100% 50%;
+    --accent: 217 89% 61%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 62% 45%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 13% 25%;
-    --input: 220 13% 25%;
-    --ring: 42 78% 88%;
+    --border: 0 0% 25%;
+    --input: 0 0% 25%;
+    --ring: 217 89% 61%;
 
-    /* Dark notebook lines - subtle */
-    --notebook-line: 220 10% 25%;
-    --notebook-margin: 0 50% 40%;
-    --notebook-hole: 0 0% 30%;
+    --checked-text: 0 0% 60%;
+    --checked-mark: 142 71% 50%;
     
-    --checked-text: 220 9% 50%;
-    --check-mark: 142 71% 50%;
+    --success: 142 71% 50%;
+    --success-foreground: 0 0% 100%;
   }
 }
 
@@ -96,37 +93,19 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-rubik;
+    font-feature-settings: "kern" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
 @layer utilities {
-  .notebook-strikethrough {
+  .completed-item {
     position: relative;
-    text-decoration: none;
-    font-weight: 700;
-  }
-  
-  .notebook-strikethrough::before,
-  .notebook-strikethrough::after {
-    content: '';
-    position: absolute;
-    left: -4px;
-    right: -4px;
-    top: 50%;
-    height: 2.5px;
-    background: hsl(var(--foreground));
-    opacity: 0.8;
-    border-radius: 50%;
-  }
-  
-  .notebook-strikethrough::before {
-    transform: translateY(-50%) rotate(-0.5deg);
-  }
-  
-  .notebook-strikethrough::after {
-    transform: translateY(-48%) rotate(0.8deg);
-    height: 2px;
+    text-decoration: line-through;
+    text-decoration-thickness: 2px;
+    text-decoration-color: hsl(var(--checked-text));
     opacity: 0.6;
   }
 }

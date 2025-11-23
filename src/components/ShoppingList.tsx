@@ -121,7 +121,7 @@ export const ShoppingList = () => {
         </Button>
       </div>
 
-      <div className="flex-wrap">
+      <div className="">
         <div className="bg-card rounded-2xl shadow-lg border border-border p-6 mb-4">
           <Textarea placeholder="הדביקו את הרשימה כאן (פריט בכל שורה)..." value={inputText} onChange={e => setInputText(e.target.value)} className="min-h-[140px] resize-none bg-muted/30 border-2 border-border focus:border-primary transition-colors text-lg" />
         </div>
@@ -141,7 +141,7 @@ export const ShoppingList = () => {
         </div>
       </div>
 
-      <div className="bg-card rounded-2xl shadow-lg border border-border p-6">
+      <div className="bg-card rounded-2xl shadow-lg border border-border p-6 my-[24px]">
         {items.length === 0 ? <div className="text-center py-16">
             <div className="text-6xl mb-4">🛍️</div>
             <p className="text-muted-foreground text-lg">

@@ -1,19 +1,38 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Share2, Trash2, Plus } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Share2, Trash2, Plus, CheckCircle2, History } from "lucide-react";
 import { toast } from "sonner";
-
-interface ShoppingItem {
-  id: string;
-  text: string;
-  checked: boolean;
-}
+import { ShoppingItem, ISRAELI_STORES } from "@/types/shopping";
+import { saveShoppingHistory } from "@/utils/storage";
 
 export const ShoppingList = () => {
+  const navigate = useNavigate();
   const [items, setItems] = useState<ShoppingItem[]>([]);
   const [inputText, setInputText] = useState("");
+  const [isFinishDialogOpen, setIsFinishDialogOpen] = useState(false);
+  const [totalAmount, setTotalAmount] = useState("");
+  const [selectedStore, setSelectedStore] = useState("");
+  const [customStore, setCustomStore] = useState("");
 
   const handlePaste = (text: string) => {
     const lines = text
@@ -75,11 +94,66 @@ export const ShoppingList = () => {
     toast.success("הרשימה נוקתה");
   };
 
+  const openFinishDialog = () => {
+    if (items.length === 0) {
+      toast.error("אין פריטים ברשימה");
+      return;
+    }
+    setIsFinishDialogOpen(true);
+  };
+
+  const handleFinishShopping = () => {
+    const amount = parseFloat(totalAmount);
+    if (isNaN(amount) || amount <= 0) {
+      toast.error("אנא הזן סכום תקין");
+      return;
+    }
+
+    const store = selectedStore === "אחר" ? customStore : selectedStore;
+    if (!store) {
+      toast.error("אנא בחר רשת שיווק");
+      return;
+    }
+
+    const completedItems = items.filter((item) => item.checked).length;
+    const history = {
+      id: Date.now().toString(),
+      date: new Date().toISOString(),
+      items: [...items],
+      totalAmount: amount,
+      store,
+      completedItems,
+      totalItems: items.length,
+    };
+
+    if (saveShoppingHistory(history)) {
+      toast.success("הקנייה נשמרה בהצלחה!");
+      setItems([]);
+      setInputText("");
+      setTotalAmount("");
+      setSelectedStore("");
+      setCustomStore("");
+      setIsFinishDialogOpen(false);
+    } else {
+      toast.error("שגיאה בשמירת הקנייה");
+    }
+  };
+
   return (
     <div className="w-full max-w-3xl mx-auto px-4 py-8 animate-fade-in">
-      <div className="mb-10">
-        <h1 className="text-5xl font-bold mb-3 text-primary">🛒 עגליסט</h1>
-        <p className="text-lg text-muted-foreground">הדביקו רשימה מוואטסאפ או הוסיפו פריטים ידנית</p>
+      <div className="mb-10 flex items-center justify-between">
+        <div>
+          <h1 className="text-5xl font-bold mb-3 text-primary">🛒 עגליסט</h1>
+          <p className="text-lg text-muted-foreground">הדביקו רשימה מוואטסאפ או הוסיפו פריטים ידנית</p>
+        </div>
+        <Button
+          variant="outline"
+          onClick={() => navigate("/history")}
+          className="h-12 px-6 font-semibold shadow-sm hover:shadow-md transition-all"
+        >
+          <History className="ml-2 h-5 w-5" />
+          היסטוריה
+        </Button>
       </div>
 
       <div className="mb-8">
@@ -164,19 +238,105 @@ export const ShoppingList = () => {
               ))}
             </div>
             {items.some((item) => item.checked) && (
-              <div className="pt-6 mt-6 border-t border-border">
+              <div className="pt-6 mt-6 border-t border-border flex gap-3">
                 <Button
                   variant="outline"
                   onClick={clearCompleted}
-                  className="w-full h-11 font-semibold shadow-sm hover:shadow-md transition-all"
+                  className="flex-1 h-11 font-semibold shadow-sm hover:shadow-md transition-all"
                 >
                   נקה פריטים שסומנו
+                </Button>
+                <Button
+                  onClick={openFinishDialog}
+                  className="flex-1 h-11 font-semibold shadow-md hover:shadow-lg transition-all bg-success hover:bg-success/90"
+                >
+                  <CheckCircle2 className="ml-2 h-5 w-5" />
+                  סיום קנייה
                 </Button>
               </div>
             )}
           </>
         )}
       </div>
+
+      <Dialog open={isFinishDialogOpen} onOpenChange={setIsFinishDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="text-2xl">סיום קנייה</DialogTitle>
+            <DialogDescription className="text-base">
+              הזן את פרטי הקנייה כדי לשמור אותה בהיסטוריה
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="amount" className="text-base font-semibold">
+                סכום הקנייה (₪)
+              </Label>
+              <Input
+                id="amount"
+                type="number"
+                placeholder="0.00"
+                value={totalAmount}
+                onChange={(e) => setTotalAmount(e.target.value)}
+                className="h-12 text-lg"
+                min="0"
+                step="0.01"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="store" className="text-base font-semibold">
+                רשת שיווק
+              </Label>
+              <Select value={selectedStore} onValueChange={setSelectedStore}>
+                <SelectTrigger className="h-12 text-lg">
+                  <SelectValue placeholder="בחר רשת שיווק" />
+                </SelectTrigger>
+                <SelectContent>
+                  {ISRAELI_STORES.map((store) => (
+                    <SelectItem key={store} value={store} className="text-lg">
+                      {store}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {selectedStore === "אחר" && (
+              <div className="space-y-2">
+                <Label htmlFor="customStore" className="text-base font-semibold">
+                  שם הרשת
+                </Label>
+                <Input
+                  id="customStore"
+                  type="text"
+                  placeholder="הזן שם רשת"
+                  value={customStore}
+                  onChange={(e) => setCustomStore(e.target.value)}
+                  className="h-12 text-lg"
+                />
+              </div>
+            )}
+            <div className="bg-muted/50 rounded-lg p-4 space-y-1">
+              <p className="text-sm text-muted-foreground">סיכום:</p>
+              <p className="text-lg font-semibold">
+                {items.filter((item) => item.checked).length} מתוך {items.length} פריטים הושלמו
+              </p>
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setIsFinishDialogOpen(false)}
+              className="h-11 px-6"
+            >
+              ביטול
+            </Button>
+            <Button onClick={handleFinishShopping} className="h-11 px-6 bg-success hover:bg-success/90">
+              <CheckCircle2 className="ml-2 h-4 w-4" />
+              שמור קנייה
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

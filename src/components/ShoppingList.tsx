@@ -70,6 +70,11 @@ export const ShoppingList = () => {
     toast.success("Cleared completed items");
   };
 
+  const clearAll = () => {
+    setItems([]);
+    toast.success("List cleared");
+  };
+
   return (
     <div className="w-full max-w-2xl mx-auto px-4 py-8 relative z-10">
       <div className="mb-8 pl-20">
@@ -100,6 +105,14 @@ export const ShoppingList = () => {
           >
             <Share2 className="mr-2 h-4 w-4" />
             Share
+          </Button>
+          <Button
+            onClick={clearAll}
+            disabled={items.length === 0}
+            variant="outline"
+          >
+            <Trash2 className="mr-2 h-4 w-4" />
+            Clear All
           </Button>
         </div>
       </div>

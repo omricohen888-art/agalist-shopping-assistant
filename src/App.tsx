@@ -8,18 +8,15 @@ import Index from "./pages/Index";
 import History from "./pages/History";
 import Compare from "./pages/Compare";
 import NotFound from "./pages/NotFound";
-
 const queryClient = new QueryClient();
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
+const App = () => <QueryClientProvider client={queryClient}>
     <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
       <TooltipProvider>
         <Toaster />
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Index />} />
+            <Route path="/" element={<Index />} className="rounded-sm" />
             <Route path="/history" element={<History />} />
             <Route path="/compare" element={<Compare />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
@@ -28,7 +25,5 @@ const App = () => (
         </BrowserRouter>
       </TooltipProvider>
     </ThemeProvider>
-  </QueryClientProvider>
-);
-
+  </QueryClientProvider>;
 export default App;

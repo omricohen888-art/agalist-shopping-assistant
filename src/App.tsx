@@ -16,7 +16,7 @@ const App = () => <QueryClientProvider client={queryClient}>
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Index />} className="rounded-sm" />
+            <Route path="/" element={<Index />} className="rounded-lg" />
             <Route path="/history" element={<History />} />
             <Route path="/compare" element={<Compare />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

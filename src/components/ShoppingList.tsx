@@ -111,14 +111,14 @@ export const ShoppingList = () => {
     }
   };
   const completedCount = items.filter(item => item.checked).length;
-  const progressPercentage = items.length > 0 ? (completedCount / items.length) * 100 : 0;
+  const progressPercentage = items.length > 0 ? completedCount / items.length * 100 : 0;
   return <div className="min-h-screen pb-24 animate-fade-in">
       {/* Header */}
       <div className="bg-primary text-primary-foreground shadow-md sticky top-0 z-10">
         <div className="max-w-3xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between mb-3">
             <h1 className="text-3xl font-bold">🛒 עגליסט</h1>
-            <Button variant="ghost" onClick={() => navigate("/history")} className="h-10 px-4 font-semibold text-primary-foreground hover:bg-primary-foreground/10">
+            <Button variant="ghost" onClick={() => navigate("/history")} className="h-10 px-4 text-primary-foreground hover:bg-primary-foreground/10 font-sans text-base font-bold border-2 border-slate-50">
               <History className="ml-2 h-5 w-5" />
               היסטוריה
             </Button>

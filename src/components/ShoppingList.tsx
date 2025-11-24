@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Progress } from "@/components/ui/progress";
 import { Share2, Trash2, Plus, CheckCircle2, History } from "lucide-react";
 import { toast } from "sonner";
 import { ShoppingItem, ISRAELI_STORES } from "@/types/shopping";
@@ -109,69 +110,79 @@ export const ShoppingList = () => {
       toast.error("שגיאה בשמירת הקנייה");
     }
   };
-  return <div className="w-full max-w-3xl mx-auto px-4 py-8 animate-fade-in">
-      <div className="mb-10 flex items-center justify-between">
-        <div>
-          <h1 className="text-5xl font-bold mb-3 text-primary">🛒 עגליסט</h1>
-          <p className="text-lg text-muted-foreground">הדביקו רשימה מוואטסאפ או הוסיפו פריטים ידנית</p>
-        </div>
-        <Button variant="outline" onClick={() => navigate("/history")} className="h-12 px-6 font-semibold shadow-sm hover:shadow-md transition-all">
-          <History className="ml-2 h-5 w-5" />
-          היסטוריה
-        </Button>
-      </div>
-
-      <div className="">
-        <div className="bg-card rounded-2xl shadow-lg border border-border p-6 mb-4">
-          <Textarea placeholder="הדביקו את הרשימה כאן (פריט בכל שורה)..." value={inputText} onChange={e => setInputText(e.target.value)} className="min-h-[140px] resize-none bg-muted/30 border-2 border-border focus:border-primary transition-colors text-lg" />
-        </div>
-        <div className="w-full flex flex-col gap-3">
-          <Button onClick={() => handlePaste(inputText)} disabled={!inputText.trim()} className="flex-1 h-12 text-base font-semibold shadow-md hover:shadow-lg transition-all">
-            <Plus className="ml-2 h-5 w-5" />
-            הוסף פריטים
-          </Button>
-          <Button onClick={shareList} disabled={items.length === 0} variant="outline" className="h-12 px-6 font-semibold shadow-sm hover:shadow-md transition-all">
-            <Share2 className="ml-2 h-5 w-5" />
-            שתף
-          </Button>
-          <Button onClick={clearAll} disabled={items.length === 0} variant="outline" className="h-12 px-6 font-semibold shadow-sm hover:shadow-md transition-all">
-            <Trash2 className="ml-2 h-5 w-5" />
-            נקה הכל
-          </Button>
+  const completedCount = items.filter(item => item.checked).length;
+  const progressPercentage = items.length > 0 ? (completedCount / items.length) * 100 : 0;
+  return <div className="min-h-screen pb-24 animate-fade-in">
+      {/* Header */}
+      <div className="bg-primary text-primary-foreground shadow-md sticky top-0 z-10">
+        <div className="max-w-3xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between mb-3">
+            <h1 className="text-3xl font-bold">🛒 עגליסט</h1>
+            <Button variant="ghost" onClick={() => navigate("/history")} className="h-10 px-4 font-semibold text-primary-foreground hover:bg-primary-foreground/10">
+              <History className="ml-2 h-5 w-5" />
+              היסטוריה
+            </Button>
+          </div>
+          {items.length > 0 && <div className="space-y-2">
+              <Progress value={progressPercentage} className="h-2 bg-primary-foreground/20" />
+              <p className="text-sm text-primary-foreground/90 text-center">
+                {completedCount} מתוך {items.length} פריטים הושלמו
+              </p>
+            </div>}
         </div>
       </div>
 
-      <div className="bg-card rounded-2xl shadow-lg border border-border p-6 my-[24px]">
+      {/* Main Content */}
+      <div className="max-w-3xl mx-auto px-4 py-6">
+        {/* Input Area */}
+        <div className="bg-card rounded-2xl shadow-md border border-border p-4 mb-6">
+          <Textarea placeholder="הדביקו את הרשימה כאן (פריט בכל שורה)..." value={inputText} onChange={e => setInputText(e.target.value)} className="min-h-[120px] resize-none bg-background border border-input focus:border-primary transition-colors text-base" />
+          <div className="flex gap-2 mt-3">
+            <Button onClick={shareList} disabled={items.length === 0} variant="outline" size="sm" className="flex-1">
+              <Share2 className="ml-2 h-4 w-4" />
+              שתף
+            </Button>
+            <Button onClick={clearAll} disabled={items.length === 0} variant="outline" size="sm" className="flex-1">
+              <Trash2 className="ml-2 h-4 w-4" />
+              נקה הכל
+            </Button>
+          </div>
+        </div>
+
+        {/* List Items */}
         {items.length === 0 ? <div className="text-center py-16">
             <div className="text-6xl mb-4">🛍️</div>
             <p className="text-muted-foreground text-lg">
               אין פריטים עדיין. הדביקו רשימה או הוסיפו פריטים כדי להתחיל.
             </p>
-          </div> : <>
-            <div className="space-y-2">
-              {items.map((item, index) => <div key={item.id} className="flex items-center gap-4 py-3 px-4 group hover:bg-muted/50 rounded-xl transition-all animate-slide-up" style={{
-            animationDelay: `${index * 30}ms`
-          }}>
-                  <Checkbox checked={item.checked} onCheckedChange={() => toggleItem(item.id)} className="h-6 w-6 border-2 data-[state=checked]:bg-success data-[state=checked]:border-success transition-all" />
-                  <span className={`flex-1 text-lg transition-all ${item.checked ? "completed-item" : "text-foreground font-medium"}`}>
-                    {item.text}
-                  </span>
-                  <Button variant="ghost" size="icon" onClick={() => deleteItem(item.id)} className="opacity-0 group-hover:opacity-100 transition-opacity h-9 w-9 hover:bg-destructive/10 hover:text-destructive">
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>)}
-            </div>
-            {items.some(item => item.checked) && <div className="pt-6 mt-6 border-t border-border flex gap-3">
-                <Button variant="outline" onClick={clearCompleted} className="flex-1 h-11 font-semibold shadow-sm hover:shadow-md transition-all">
+          </div> : <div className="space-y-3">
+            {items.map((item, index) => <div key={item.id} className="bg-card rounded-xl shadow-sm border border-border p-4 flex items-center gap-3 group hover:shadow-md transition-all animate-slide-up" style={{
+          animationDelay: `${index * 30}ms`
+        }}>
+                <Checkbox checked={item.checked} onCheckedChange={() => toggleItem(item.id)} className="h-5 w-5 border-2 data-[state=checked]:bg-primary data-[state=checked]:border-primary transition-all" />
+                <span className={`flex-1 text-base transition-all ${item.checked ? "completed-item" : "text-foreground font-medium"}`}>
+                  {item.text}
+                </span>
+                <Button variant="ghost" size="icon" onClick={() => deleteItem(item.id)} className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 hover:bg-destructive/10 hover:text-destructive">
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>)}
+            {items.some(item => item.checked) && <div className="pt-4 flex gap-3">
+                <Button variant="outline" onClick={clearCompleted} className="flex-1 h-11 font-semibold">
                   נקה פריטים שסומנו
                 </Button>
-                <Button onClick={openFinishDialog} className="flex-1 h-11 font-semibold shadow-md hover:shadow-lg transition-all bg-success hover:bg-success/90">
+                <Button onClick={openFinishDialog} className="flex-1 h-11 font-semibold bg-primary hover:bg-primary/90">
                   <CheckCircle2 className="ml-2 h-5 w-5" />
                   סיום קנייה
                 </Button>
               </div>}
-          </>}
+          </div>}
       </div>
+
+      {/* FAB Button */}
+      <Button onClick={() => handlePaste(inputText)} disabled={!inputText.trim()} className="fixed bottom-6 left-6 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-all z-20 p-0">
+        <Plus className="h-6 w-6" />
+      </Button>
 
       <Dialog open={isFinishDialogOpen} onOpenChange={setIsFinishDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">

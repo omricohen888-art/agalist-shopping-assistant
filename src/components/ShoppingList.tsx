@@ -118,7 +118,7 @@ export const ShoppingList = () => {
       <div className="bg-primary text-primary-foreground shadow-md sticky top-0 z-10">
         <div className="max-w-3xl mx-auto px-5 py-4">
           <div className="flex items-center justify-between mb-3">
-            <h1 className="text-2xl sm:text-3xl font-bold">🛒 עגליסט</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold drop-shadow-md">🛒 עגליסט</h1>
             
             {/* Hamburger Menu */}
             <Sheet>
@@ -132,27 +132,15 @@ export const ShoppingList = () => {
                   <SheetTitle className="text-2xl">🛒 תפריט</SheetTitle>
                 </SheetHeader>
                 <nav className="flex flex-col gap-3 mt-8">
-                  <Button 
-                    variant="outline" 
-                    onClick={() => navigate("/")} 
-                    className="h-14 justify-start text-lg font-semibold"
-                  >
+                  <Button variant="outline" onClick={() => navigate("/")} className="h-14 justify-start text-lg font-semibold">
                     <Plus className="ml-3 h-5 w-5" />
                     רשימת קניות
                   </Button>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => navigate("/history")} 
-                    className="h-14 justify-start text-lg font-semibold"
-                  >
+                  <Button variant="outline" onClick={() => navigate("/history")} className="h-14 justify-start text-lg font-semibold">
                     <History className="ml-3 h-5 w-5" />
                     היסטוריה
                   </Button>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => navigate("/compare")} 
-                    className="h-14 justify-start text-lg font-semibold"
-                  >
+                  <Button variant="outline" onClick={() => navigate("/compare")} className="h-14 justify-start text-lg font-semibold">
                     <BarChart3 className="ml-3 h-5 w-5" />
                     השוואת קניות
                   </Button>
@@ -217,12 +205,7 @@ export const ShoppingList = () => {
       </div>
 
       {/* FAB Button */}
-      <Button 
-        onClick={() => handlePaste(inputText)} 
-        disabled={!inputText.trim()} 
-        size="lg" 
-        className="fixed bottom-6 right-6 h-16 w-16 rounded-full shadow-xl hover:shadow-2xl transition-all z-20 p-0 hover:scale-110 animate-pulse disabled:animate-none touch-manipulation"
-      >
+      <Button onClick={() => handlePaste(inputText)} disabled={!inputText.trim()} size="lg" className="fixed bottom-6 right-6 h-16 w-16 rounded-full shadow-xl hover:shadow-2xl transition-all z-20 p-0 hover:scale-110 animate-pulse disabled:animate-none touch-manipulation">
         <Plus className="h-7 w-7" />
       </Button>
 

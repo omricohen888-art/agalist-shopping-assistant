@@ -7,8 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Progress } from "@/components/ui/progress";
-import { Share2, Trash2, Plus, CheckCircle2, History } from "lucide-react";
+import { Share2, Trash2, Plus, CheckCircle2, History, Menu, BarChart3 } from "lucide-react";
 import { toast } from "sonner";
 import { ShoppingItem, ISRAELI_STORES } from "@/types/shopping";
 import { saveShoppingHistory } from "@/utils/storage";
@@ -112,20 +113,56 @@ export const ShoppingList = () => {
   };
   const completedCount = items.filter(item => item.checked).length;
   const progressPercentage = items.length > 0 ? completedCount / items.length * 100 : 0;
-  return <div className="min-h-screen pb-24 animate-fade-in">
+  return <div className="min-h-screen pb-32 animate-fade-in">
       {/* Header */}
       <div className="bg-primary text-primary-foreground shadow-md sticky top-0 z-10">
-        <div className="max-w-3xl mx-auto px-4 py-4">
+        <div className="max-w-3xl mx-auto px-5 py-4">
           <div className="flex items-center justify-between mb-3">
-            <h1 className="text-3xl font-bold">🛒 עגליסט</h1>
-            <Button variant="ghost" onClick={() => navigate("/history")} className="h-10 px-4 text-primary-foreground hover:bg-primary-foreground/10 font-sans text-base font-bold border-2 border-slate-50">
-              <History className="ml-2 h-5 w-5" />
-              היסטוריה
-            </Button>
+            <h1 className="text-2xl sm:text-3xl font-bold">🛒 עגליסט</h1>
+            
+            {/* Hamburger Menu */}
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-11 w-11 text-primary-foreground hover:bg-primary-foreground/10">
+                  <Menu className="h-6 w-6" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[280px] sm:w-[320px]">
+                <SheetHeader>
+                  <SheetTitle className="text-2xl">🛒 תפריט</SheetTitle>
+                </SheetHeader>
+                <nav className="flex flex-col gap-3 mt-8">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => navigate("/")} 
+                    className="h-14 justify-start text-lg font-semibold"
+                  >
+                    <Plus className="ml-3 h-5 w-5" />
+                    רשימת קניות
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => navigate("/history")} 
+                    className="h-14 justify-start text-lg font-semibold"
+                  >
+                    <History className="ml-3 h-5 w-5" />
+                    היסטוריה
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => navigate("/compare")} 
+                    className="h-14 justify-start text-lg font-semibold"
+                  >
+                    <BarChart3 className="ml-3 h-5 w-5" />
+                    השוואת קניות
+                  </Button>
+                </nav>
+              </SheetContent>
+            </Sheet>
           </div>
           {items.length > 0 && <div className="space-y-2">
-              <Progress value={progressPercentage} className="h-2 bg-primary-foreground/20" />
-              <p className="text-sm text-primary-foreground/90 text-center">
+              <Progress value={progressPercentage} className="h-2.5 bg-primary-foreground/20" />
+              <p className="text-sm text-primary-foreground/90 text-center font-medium">
                 {completedCount} מתוך {items.length} פריטים הושלמו
               </p>
             </div>}
@@ -133,16 +170,16 @@ export const ShoppingList = () => {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-3xl mx-auto px-4 py-6">
+      <div className="max-w-3xl mx-auto px-5 py-6">
         {/* Input Area */}
-        <div className="bg-card rounded-2xl shadow-md border border-border p-4 mb-6">
-          <Textarea placeholder="הדביקו את הרשימה כאן (פריט בכל שורה)..." value={inputText} onChange={e => setInputText(e.target.value)} className="min-h-[120px] resize-none bg-background border border-input focus:border-primary transition-colors text-base" />
-          <div className="flex gap-2 mt-3">
-            <Button onClick={shareList} disabled={items.length === 0} variant="outline" className="flex-1 h-11">
+        <div className="bg-card rounded-2xl shadow-md border border-border p-5 mb-6">
+          <Textarea placeholder="הדביקו את הרשימה כאן (פריט בכל שורה)..." value={inputText} onChange={e => setInputText(e.target.value)} className="min-h-[140px] resize-none bg-background border border-input focus:border-primary transition-colors text-base touch-manipulation" />
+          <div className="flex flex-col sm:flex-row gap-3 mt-4">
+            <Button onClick={shareList} disabled={items.length === 0} variant="outline" className="w-full sm:flex-1 h-12 text-base">
               <Share2 className="ml-2 h-5 w-5" />
               שתף
             </Button>
-            <Button onClick={clearAll} disabled={items.length === 0} variant="outline" className="flex-1 h-11">
+            <Button onClick={clearAll} disabled={items.length === 0} variant="outline" className="w-full sm:flex-1 h-12 text-base">
               <Trash2 className="ml-2 h-5 w-5" />
               נקה הכל
             </Button>
@@ -150,28 +187,28 @@ export const ShoppingList = () => {
         </div>
 
         {/* List Items */}
-        {items.length === 0 ? <div className="text-center py-16">
+        {items.length === 0 ? <div className="text-center py-20 px-5">
             <div className="text-6xl mb-4">🛍️</div>
-            <p className="text-muted-foreground text-lg">
+            <p className="text-muted-foreground text-lg leading-relaxed">
               אין פריטים עדיין. הדביקו רשימה או הוסיפו פריטים כדי להתחיל.
             </p>
           </div> : <div className="space-y-3">
-            {items.map((item, index) => <div key={item.id} className="bg-card rounded-xl shadow-sm border border-border p-4 flex items-center gap-3 group hover:shadow-md transition-all animate-slide-up" style={{
+            {items.map((item, index) => <div key={item.id} className="bg-card rounded-xl shadow-sm border border-border p-5 flex items-center gap-4 group hover:shadow-md transition-all animate-slide-up touch-manipulation" style={{
           animationDelay: `${index * 30}ms`
         }}>
-                <Checkbox checked={item.checked} onCheckedChange={() => toggleItem(item.id)} className="h-5 w-5 border-2 data-[state=checked]:bg-primary data-[state=checked]:border-primary transition-all" />
-                <span className={`flex-1 text-base transition-all ${item.checked ? "completed-item" : "text-foreground font-medium"}`}>
+                <Checkbox checked={item.checked} onCheckedChange={() => toggleItem(item.id)} className="h-6 w-6 border-2 data-[state=checked]:bg-primary data-[state=checked]:border-primary transition-all" />
+                <span className={`flex-1 text-base leading-relaxed transition-all ${item.checked ? "completed-item" : "text-foreground font-medium"}`}>
                   {item.text}
                 </span>
-                <Button variant="ghost" size="icon" onClick={() => deleteItem(item.id)} className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 hover:bg-destructive/10 hover:text-destructive">
-                  <Trash2 className="h-4 w-4" />
+                <Button variant="ghost" size="icon" onClick={() => deleteItem(item.id)} className="opacity-0 group-hover:opacity-100 transition-opacity h-10 w-10 hover:bg-destructive/10 hover:text-destructive touch-manipulation">
+                  <Trash2 className="h-5 w-5" />
                 </Button>
               </div>)}
-            {items.some(item => item.checked) && <div className="pt-4 flex gap-3">
-                <Button variant="outline" onClick={clearCompleted} className="flex-1 h-11 font-semibold">
+            {items.some(item => item.checked) && <div className="pt-4 flex flex-col sm:flex-row gap-3">
+                <Button variant="outline" onClick={clearCompleted} className="w-full sm:flex-1 h-12 font-semibold text-base touch-manipulation">
                   נקה פריטים שסומנו
                 </Button>
-                <Button onClick={openFinishDialog} className="flex-1 h-11 font-semibold bg-primary hover:bg-primary/90">
+                <Button onClick={openFinishDialog} className="w-full sm:flex-1 h-12 font-semibold bg-primary hover:bg-primary/90 text-base touch-manipulation">
                   <CheckCircle2 className="ml-2 h-5 w-5" />
                   סיום קנייה
                 </Button>
@@ -180,7 +217,12 @@ export const ShoppingList = () => {
       </div>
 
       {/* FAB Button */}
-      <Button onClick={() => handlePaste(inputText)} disabled={!inputText.trim()} size="lg" className="fixed bottom-6 left-6 h-16 w-16 rounded-full shadow-xl hover:shadow-2xl transition-all z-20 p-0 hover:scale-110">
+      <Button 
+        onClick={() => handlePaste(inputText)} 
+        disabled={!inputText.trim()} 
+        size="lg" 
+        className="fixed bottom-6 right-6 h-16 w-16 rounded-full shadow-xl hover:shadow-2xl transition-all z-20 p-0 hover:scale-110 animate-pulse disabled:animate-none touch-manipulation"
+      >
         <Plus className="h-7 w-7" />
       </Button>
 

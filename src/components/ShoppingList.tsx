@@ -138,12 +138,12 @@ export const ShoppingList = () => {
         <div className="bg-card rounded-2xl shadow-md border border-border p-4 mb-6">
           <Textarea placeholder="הדביקו את הרשימה כאן (פריט בכל שורה)..." value={inputText} onChange={e => setInputText(e.target.value)} className="min-h-[120px] resize-none bg-background border border-input focus:border-primary transition-colors text-base" />
           <div className="flex gap-2 mt-3">
-            <Button onClick={shareList} disabled={items.length === 0} variant="outline" size="sm" className="flex-1">
-              <Share2 className="ml-2 h-4 w-4" />
+            <Button onClick={shareList} disabled={items.length === 0} variant="outline" className="flex-1 h-11">
+              <Share2 className="ml-2 h-5 w-5" />
               שתף
             </Button>
-            <Button onClick={clearAll} disabled={items.length === 0} variant="outline" size="sm" className="flex-1">
-              <Trash2 className="ml-2 h-4 w-4" />
+            <Button onClick={clearAll} disabled={items.length === 0} variant="outline" className="flex-1 h-11">
+              <Trash2 className="ml-2 h-5 w-5" />
               נקה הכל
             </Button>
           </div>
@@ -180,8 +180,8 @@ export const ShoppingList = () => {
       </div>
 
       {/* FAB Button */}
-      <Button onClick={() => handlePaste(inputText)} disabled={!inputText.trim()} className="fixed bottom-6 left-6 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-all z-20 p-0">
-        <Plus className="h-6 w-6" />
+      <Button onClick={() => handlePaste(inputText)} disabled={!inputText.trim()} size="lg" className="fixed bottom-6 left-6 h-16 w-16 rounded-full shadow-xl hover:shadow-2xl transition-all z-20 p-0 hover:scale-110">
+        <Plus className="h-7 w-7" />
       </Button>
 
       <Dialog open={isFinishDialogOpen} onOpenChange={setIsFinishDialogOpen}>

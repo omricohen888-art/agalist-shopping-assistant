@@ -427,7 +427,7 @@ export const ShoppingList = () => {
               <Share2 className="ml-2 h-5 w-5" />
               {t.shareButton}
             </Button>
-            <Button onClick={clearAll} disabled={items.length === 0} variant="outline" className="w-full sm:flex-1 h-12 text-base">
+            <Button onClick={clearAll} disabled={items.length === 0 && !inputText.trim()} variant="outline" className="w-full sm:flex-1 h-12 text-base">
               <Trash2 className="ml-2 h-5 w-5" />
               {t.clearAllButton}
             </Button>

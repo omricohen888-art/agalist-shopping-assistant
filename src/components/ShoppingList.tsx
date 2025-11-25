@@ -32,6 +32,26 @@ const ENGLISH_STORES = [
   "Other"
 ] as const;
 
+// Template data for quick start
+const templates = {
+  he: [
+    { id: "grocery", name: "השלמות למכולת", items: ["חלב", "לחם", "קוטג'", "ביצים", "עגבניות"] },
+    { id: "hiking", name: "ציוד לטיול", items: ["פינג'אן", "קפה שחור", "אוהל", "שק שינה", "בקבוקי מים", "קרם הגנה", "פנס", "מפית לחות"] },
+    { id: "tech", name: "אלקטרוניקה וגאדג'טים", items: ["כבל HDMI", "סוללות AA", "מטען USB-C", "עכבר", "מקלדת", "אוזניות"] },
+    { id: "bbq", name: "על האש", items: ["פחמים", "סטייקים", "קבב", "חומוס", "פיתות", "סלטים", "מלקחיים", "מלח גס"] },
+    { id: "cleaning", name: "ניקיון ופארם", items: ["אקונומיקה", "נוזל רצפות", "שמפו", "משחת שיניים", "אבקת כביסה", "סבון ידיים", "נייר טואלט"] },
+    { id: "family", name: "קנייה משפחתית גדולה", items: ["שניצל", "פסטה", "אורז", "מלפפונים", "פלפלים", "מילקי", "גבינה צהובה", "במבה", "ביסלי", "פיצה קפואה", "חזה עוף", "שמן", "קורנפלקס", "נייר טואלט", "יוגורט", "לחם", "חלב"] }
+  ],
+  en: [
+    { id: "grocery", name: "Small Run", items: ["Milk", "Bread", "Cottage Cheese", "Eggs", "Tomatoes"] },
+    { id: "hiking", name: "Hiking/Camping", items: ["Finjan", "Black Coffee", "Tent", "Sleeping Bag", "Water bottles", "Sunscreen", "Flashlight", "Wet wipes"] },
+    { id: "tech", name: "Tech & Gadgets", items: ["HDMI Cable", "AA Batteries", "USB-C Charger", "Mouse", "Keyboard", "Headphones"] },
+    { id: "bbq", name: "BBQ", items: ["Charcoal", "Steaks", "Kebabs", "Hummus", "Pita bread", "Salads", "Tongs", "Coarse salt"] },
+    { id: "cleaning", name: "Cleaning & Pharmacy", items: ["Bleach", "Floor cleaner", "Shampoo", "Toothpaste", "Laundry detergent", "Hand soap", "Toilet paper"] },
+    { id: "family", name: "Big Family Shop", items: ["Schnitzel", "Pasta", "Rice", "Cucumbers", "Peppers", "Milky", "Yellow Cheese", "Bamba", "Bisli", "Frozen Pizza", "Chicken breast", "Oil", "Cereal", "Toilet paper", "Yogurt", "Bread", "Milk"] }
+  ]
+};
+
 const translations: Record<Language, {
   languageLabel: string;
   languageAria: string;
@@ -41,6 +61,7 @@ const translations: Record<Language, {
   menuTitle: string;
   welcomeHeading: string;
   welcomeSubtitle: string;
+  templatesHeading: string;
   navigation: {
     list: string;
     history: string;
@@ -86,6 +107,7 @@ const translations: Record<Language, {
     menuTitle: "🛒 תפריט",
     welcomeHeading: "שלחו לכם רשימת קניות?",
     welcomeSubtitle: "הדביקו אותה כאן וקבלו חוויית קנייה מהנה, אינטראקטיבית וחסכונית.",
+    templatesHeading: "אין לכם רשימה? נסו אחת לדוגמה:",
     navigation: {
       list: "רשימת קניות",
       history: "היסטוריה",
@@ -131,6 +153,7 @@ const translations: Record<Language, {
     menuTitle: "🛒 Menu",
     welcomeHeading: "Got a list?",
     welcomeSubtitle: "Paste it here. We'll handle the rest.",
+    templatesHeading: "No list? Try a sample:",
     navigation: {
       list: "Shopping list",
       history: "History",
@@ -191,6 +214,9 @@ export const ShoppingList = () => {
   const storeOptions = language === "he" ? ISRAELI_STORES : ENGLISH_STORES;
   const otherLabel = language === "he" ? "אחר" : "Other";
   const direction = language === "he" ? "rtl" : "ltr";
+  const currentTemplates = templates[language];
+
+  const [templateAnimation, setTemplateAnimation] = useState(false);
 
   useEffect(() => {
     setSelectedStore(prev => {
@@ -217,6 +243,13 @@ export const ShoppingList = () => {
     setItems([...items, ...newItems]);
     setInputText("");
     toast.success(t.toasts.itemsAdded(newItems.length));
+  };
+
+  const handleTemplateClick = (templateItems: string[]) => {
+    const templateText = templateItems.join("\n");
+    setInputText(templateText);
+    setTemplateAnimation(true);
+    setTimeout(() => setTemplateAnimation(false), 300);
   };
   const toggleItem = (id: string) => {
     setItems(items.map(item => item.id === id ? {
@@ -367,7 +400,12 @@ export const ShoppingList = () => {
         </div>
         {/* Input Area */}
         <div className="bg-card rounded-2xl shadow-md border border-border p-5 mb-6">
-          <Textarea placeholder={t.textareaPlaceholder} value={inputText} onChange={e => setInputText(e.target.value)} className="min-h-[140px] resize-none bg-background border border-input focus:border-primary transition-colors text-base touch-manipulation" />
+          <Textarea 
+            placeholder={t.textareaPlaceholder} 
+            value={inputText} 
+            onChange={e => setInputText(e.target.value)} 
+            className={`min-h-[140px] resize-none bg-background border border-input focus:border-primary transition-all text-base touch-manipulation ${templateAnimation ? 'ring-2 ring-primary/50 scale-[1.01]' : ''}`} 
+          />
           <div className="flex flex-col sm:flex-row gap-3 mt-4">
             <Button onClick={shareList} disabled={items.length === 0} variant="outline" className="w-full sm:flex-1 h-12 text-base">
               <Share2 className="ml-2 h-5 w-5" />
@@ -377,6 +415,24 @@ export const ShoppingList = () => {
               <Trash2 className="ml-2 h-5 w-5" />
               {t.clearAllButton}
             </Button>
+          </div>
+        </div>
+
+        {/* Quick Start Templates */}
+        <div className="mb-6">
+          <p className="text-sm font-medium text-muted-foreground mb-3 text-center">
+            {t.templatesHeading}
+          </p>
+          <div className="flex flex-wrap justify-center gap-2">
+            {currentTemplates.map((template) => (
+              <button
+                key={template.id}
+                onClick={() => handleTemplateClick(template.items)}
+                className="px-4 py-2 rounded-full bg-secondary/50 hover:bg-secondary text-secondary-foreground text-sm font-medium transition-all hover:scale-105 hover:shadow-md border border-border/50 touch-manipulation"
+              >
+                {template.name}
+              </button>
+            ))}
           </div>
         </div>
 

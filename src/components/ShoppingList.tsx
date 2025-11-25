@@ -347,6 +347,14 @@ export const ShoppingList = () => {
 
       {/* Main Content */}
       <div className="max-w-3xl mx-auto px-5 py-6">
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-bold text-foreground mb-1">
+            שלחו לכם רשימת קניות?
+          </h2>
+          <p className="text-base font-medium text-muted-foreground">
+            הדביקו אותה כאן וקבלו חוויית קנייה מהנה, אינטראקטיבית וחסכונית.
+          </p>
+        </div>
         {/* Input Area */}
         <div className="bg-card rounded-2xl shadow-md border border-border p-5 mb-6">
           <Textarea placeholder={t.textareaPlaceholder} value={inputText} onChange={e => setInputText(e.target.value)} className="min-h-[140px] resize-none bg-background border border-input focus:border-primary transition-colors text-base touch-manipulation" />

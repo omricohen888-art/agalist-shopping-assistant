@@ -62,6 +62,8 @@ const translations: Record<Language, {
   welcomeHeading: string;
   welcomeSubtitle: string;
   templatesHeading: string;
+  addItemButton: string;
+  addItemPlaceholder: string;
   navigation: {
     list: string;
     history: string;
@@ -108,6 +110,8 @@ const translations: Record<Language, {
     welcomeHeading: "שלחו לכם רשימת קניות?",
     welcomeSubtitle: "הדביקו אותה כאן וקבלו חוויית קנייה מהנה, אינטראקטיבית וחסכונית.",
     templatesHeading: "אין לכם רשימה? נסו אחת לדוגמה:",
+    addItemButton: "הוסף פריט",
+    addItemPlaceholder: "שם הפריט...",
     navigation: {
       list: "רשימת קניות",
       history: "היסטוריה",
@@ -154,6 +158,8 @@ const translations: Record<Language, {
     welcomeHeading: "Got a list?",
     welcomeSubtitle: "Paste it here. We'll handle the rest.",
     templatesHeading: "No list? Try a sample:",
+    addItemButton: "Add Item",
+    addItemPlaceholder: "Item name...",
     navigation: {
       list: "Shopping list",
       history: "History",
@@ -216,7 +222,7 @@ export const ShoppingList = () => {
   const direction = language === "he" ? "rtl" : "ltr";
   const currentTemplates = templates[language];
 
-  const [templateAnimation, setTemplateAnimation] = useState(false);
+  const [singleItemInput, setSingleItemInput] = useState("");
 
   useEffect(() => {
     setSelectedStore(prev => {
@@ -248,8 +254,17 @@ export const ShoppingList = () => {
   const handleTemplateClick = (templateItems: string[]) => {
     const templateText = templateItems.join("\n");
     setInputText(templateText);
-    setTemplateAnimation(true);
-    setTimeout(() => setTemplateAnimation(false), 300);
+  };
+
+  const handleAddSingleItem = () => {
+    if (!singleItemInput.trim()) return;
+    const newItem: ShoppingItem = {
+      id: `${Date.now()}`,
+      text: singleItemInput.trim(),
+      checked: false
+    };
+    setItems([...items, newItem]);
+    setSingleItemInput("");
   };
   const toggleItem = (id: string) => {
     setItems(items.map(item => item.id === id ? {
@@ -288,6 +303,7 @@ export const ShoppingList = () => {
   };
   const clearAll = () => {
     setItems([]);
+    setInputText("");
     toast.success(t.toasts.clearedAll);
   };
   const openFinishDialog = () => {
@@ -347,7 +363,7 @@ export const ShoppingList = () => {
             </div>
 
             <div className="flex items-center gap-2">
-              <Button variant="secondary" size="sm" onClick={toggleLanguage} aria-label={t.languageAria} className="h-10 px-4 font-semibold bg-primary-foreground text-primary hover:bg-primary-foreground/90">
+              <Button variant="secondary" size="sm" onClick={toggleLanguage} aria-label={t.languageAria} className="h-8 px-2 text-xs font-medium bg-primary-foreground text-primary hover:bg-primary-foreground/90">
                 {t.languageLabel}
               </Button>
               {/* Hamburger Menu */}
@@ -404,7 +420,7 @@ export const ShoppingList = () => {
             placeholder={t.textareaPlaceholder} 
             value={inputText} 
             onChange={e => setInputText(e.target.value)} 
-            className={`min-h-[140px] resize-none bg-background border border-input focus:border-primary transition-all text-base touch-manipulation ${templateAnimation ? 'ring-2 ring-primary/50 scale-[1.01]' : ''}`} 
+            className="min-h-[140px] resize-none bg-background border border-input focus:border-primary text-base touch-manipulation"
           />
           <div className="flex flex-col sm:flex-row gap-3 mt-4">
             <Button onClick={shareList} disabled={items.length === 0} variant="outline" className="w-full sm:flex-1 h-12 text-base">
@@ -418,23 +434,42 @@ export const ShoppingList = () => {
           </div>
         </div>
 
-        {/* Quick Start Templates */}
-        <div className="mb-6">
-          <p className="text-sm font-medium text-muted-foreground mb-3 text-center">
-            {t.templatesHeading}
-          </p>
-          <div className="flex flex-wrap justify-center gap-2">
-            {currentTemplates.map((template) => (
-              <button
-                key={template.id}
-                onClick={() => handleTemplateClick(template.items)}
-                className="px-4 py-2 rounded-full bg-secondary/50 hover:bg-secondary text-secondary-foreground text-sm font-medium transition-all hover:scale-105 hover:shadow-md border border-border/50 touch-manipulation"
-              >
-                {template.name}
-              </button>
-            ))}
+        {/* Quick Start Templates - only show when no items */}
+        {items.length === 0 && (
+          <div className="mb-6">
+            <p className="text-sm font-medium text-muted-foreground mb-3 text-center">
+              {t.templatesHeading}
+            </p>
+            <div className="flex flex-wrap justify-center gap-2">
+              {currentTemplates.map((template) => (
+                <button
+                  key={template.id}
+                  onClick={() => handleTemplateClick(template.items)}
+                  className="px-4 py-2 rounded-full bg-secondary/50 hover:bg-secondary text-secondary-foreground text-sm font-medium border border-border/50 touch-manipulation"
+                >
+                  {template.name}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Add Item input - only show when list has items */}
+        {items.length > 0 && (
+          <div className="bg-card rounded-xl shadow-sm border border-border p-4 mb-6 flex gap-3">
+            <Input
+              placeholder={t.addItemPlaceholder}
+              value={singleItemInput}
+              onChange={e => setSingleItemInput(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && handleAddSingleItem()}
+              className="flex-1 h-11 text-base"
+            />
+            <Button onClick={handleAddSingleItem} disabled={!singleItemInput.trim()} className="h-11 px-4">
+              <Plus className="h-5 w-5" />
+              {t.addItemButton}
+            </Button>
+          </div>
+        )}
 
         {/* List Items */}
         {items.length === 0 ? <div className="text-center py-20 px-5">
@@ -443,9 +478,7 @@ export const ShoppingList = () => {
               {t.emptyState}
             </p>
           </div> : <div className="space-y-3">
-            {items.map((item, index) => <div key={item.id} className="bg-card rounded-xl shadow-sm border border-border p-5 flex items-center gap-4 group hover:shadow-md transition-all animate-slide-up touch-manipulation" style={{
-          animationDelay: `${index * 30}ms`
-        }}>
+            {items.map((item) => <div key={item.id} className="bg-card rounded-xl shadow-sm border border-border p-5 flex items-center gap-4 group hover:shadow-md touch-manipulation">
                 <Checkbox checked={item.checked} onCheckedChange={() => toggleItem(item.id)} className="h-6 w-6 border-2 data-[state=checked]:bg-primary data-[state=checked]:border-primary transition-all" />
                 <span className={`flex-1 text-base leading-relaxed transition-all ${item.checked ? "completed-item" : "text-foreground font-medium"}`}>
                   {item.text}
@@ -468,7 +501,7 @@ export const ShoppingList = () => {
 
       {/* FAB Button */}
       <div className="fixed bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 z-20">
-        <span className="px-4 py-1 rounded-full bg-card/90 text-card-foreground text-sm font-semibold shadow-lg border border-border animate-pulse text-center">
+        <span className="px-4 py-1 rounded-full bg-card/90 text-card-foreground text-sm font-semibold shadow-lg border border-border text-center">
           {t.fabLabel}
         </span>
         <Button
@@ -476,9 +509,9 @@ export const ShoppingList = () => {
           disabled={!inputText.trim()}
           size="lg"
           aria-label={t.fabLabel}
-          className="h-24 w-24 rounded-full shadow-2xl bg-gradient-to-br from-primary to-primary/80 text-primary-foreground transition-transform duration-200 p-0 hover:scale-105 focus-visible:scale-105 focus-visible:ring-4 focus-visible:ring-primary/60 disabled:opacity-60 disabled:hover:scale-100 touch-manipulation flex items-center justify-center border-4 border-background/40"
+          className="h-20 w-20 rounded-full shadow-xl bg-primary text-primary-foreground p-0 hover:bg-primary/90 disabled:opacity-50 touch-manipulation flex items-center justify-center"
         >
-          <Plus className="h-12 w-12 text-black drop-shadow-xl" strokeWidth={4.5} />
+          <Plus className="h-10 w-10" strokeWidth={3} />
         </Button>
       </div>
 

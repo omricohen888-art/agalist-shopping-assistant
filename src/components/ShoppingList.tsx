@@ -350,10 +350,9 @@ export const ShoppingList = () => {
         disabled={!inputText.trim()}
         size="lg"
         aria-label={language === "he" ? "הוספת פריטים" : "Add items"}
-        className="group fixed bottom-6 right-6 h-16 w-16 rounded-full shadow-[0_20px_45px_rgba(0,0,0,0.25)] bg-gradient-to-br from-primary to-primary/80 text-primary-foreground transition-all z-20 p-0 hover:scale-110 focus-visible:scale-110 focus-visible:ring-4 focus-visible:ring-primary/40 disabled:animate-none touch-manipulation"
+        className="fixed bottom-6 right-6 h-18 w-18 rounded-full shadow-[0_20px_45px_rgba(0,0,0,0.35)] bg-primary text-primary-foreground transition-all z-20 p-0 hover:scale-110 focus-visible:scale-110 focus-visible:ring-4 focus-visible:ring-primary/50 disabled:opacity-60 disabled:hover:scale-100 touch-manipulation flex items-center justify-center"
       >
-        <span className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 bg-primary-foreground/20 transition-opacity" />
-        <Plus className="h-7 w-7 drop-shadow-md" />
+        <Plus className="h-9 w-9 drop-shadow-lg" strokeWidth={3} />
       </Button>
 
       <Dialog open={isFinishDialogOpen} onOpenChange={setIsFinishDialogOpen}>

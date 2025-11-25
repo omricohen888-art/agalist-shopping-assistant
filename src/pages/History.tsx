@@ -7,7 +7,6 @@ import { getShoppingHistory, deleteShoppingHistory, clearAllHistory } from "@/ut
 import { ShoppingHistory as ShoppingHistoryType } from "@/types/shopping";
 import { toast } from "sonner";
 import { useLanguage, Language } from "@/hooks/use-language";
-import LogoMark from "@/assets/logo.svg";
 
 const historyTranslations: Record<
   Language,
@@ -42,7 +41,6 @@ const historyTranslations: Record<
     };
     languageLabel: string;
     languageAria: string;
-    logoAlt: string;
     currencyLabel: string;
     noHistory: string;
   }
@@ -78,7 +76,6 @@ const historyTranslations: Record<
     },
     languageLabel: "English",
     languageAria: "Switch to English",
-    logoAlt: "לוגו עגליסט",
     currencyLabel: "₪",
     noHistory: "אין היסטוריית קניות",
   },
@@ -113,7 +110,6 @@ const historyTranslations: Record<
     },
     languageLabel: "עברית",
     languageAria: "החלף לעברית",
-    logoAlt: "Agalist logo",
     currencyLabel: "₪",
     noHistory: "No shopping history",
   },
@@ -185,12 +181,9 @@ const History = () => {
             >
               <ArrowRight className={`h-6 w-6 ${language === "en" ? "rotate-180" : ""}`} />
             </Button>
-            <div className="flex items-center gap-3">
-              <img src={LogoMark} alt={t.logoAlt} className="h-12 w-12 drop-shadow-md" />
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-primary leading-tight">{t.title}</h1>
-                <p className="text-muted-foreground text-sm sm:text-base">{t.subtitle}</p>
-              </div>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-primary leading-tight">{t.title}</h1>
+              <p className="text-muted-foreground text-sm sm:text-base">{t.subtitle}</p>
             </div>
           </div>
           <div className="flex items-center gap-2 flex-wrap justify-end">

@@ -393,8 +393,8 @@ export const ShoppingList = () => {
       </div>
 
       {/* FAB Button */}
-      <div className="fixed bottom-6 right-4 sm:right-6 flex flex-col items-center gap-2 z-20">
-        <span className="px-4 py-1 rounded-full bg-card/90 text-card-foreground text-sm font-semibold shadow-lg border border-border animate-pulse">
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 z-20">
+        <span className="px-4 py-1 rounded-full bg-card/90 text-card-foreground text-sm font-semibold shadow-lg border border-border animate-pulse text-center">
           {t.fabLabel}
         </span>
         <Button
@@ -402,9 +402,9 @@ export const ShoppingList = () => {
           disabled={!inputText.trim()}
           size="lg"
           aria-label={t.fabLabel}
-          className="h-[5.25rem] w-[5.25rem] rounded-full shadow-[0_25px_55px_rgba(0,0,0,0.45)] bg-gradient-to-br from-primary to-primary/80 text-primary-foreground transition-all p-0 hover:scale-115 focus-visible:scale-110 focus-visible:ring-4 focus-visible:ring-primary/60 disabled:opacity-60 disabled:hover:scale-100 touch-manipulation flex items-center justify-center border-4 border-background/40"
+          className="h-16 w-16 rounded-full shadow-[0_25px_60px_rgba(0,0,0,0.45)] bg-gradient-to-br from-primary to-primary/80 text-primary-foreground transition-transform duration-200 p-0 hover:scale-105 focus-visible:scale-105 focus-visible:ring-4 focus-visible:ring-primary/60 disabled:opacity-60 disabled:hover:scale-100 touch-manipulation flex items-center justify-center border-4 border-background/40"
         >
-          <Plus className="h-11 w-11 text-black drop-shadow-xl" strokeWidth={3.5} />
+          <Plus className="h-10 w-10 text-black drop-shadow-xl" strokeWidth={4} />
         </Button>
       </div>
 

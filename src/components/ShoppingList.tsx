@@ -39,6 +39,8 @@ const translations: Record<Language, {
   tagline: string;
   fabLabel: string;
   menuTitle: string;
+  welcomeHeading: string;
+  welcomeSubtitle: string;
   navigation: {
     list: string;
     history: string;
@@ -82,6 +84,8 @@ const translations: Record<Language, {
     tagline: "רושמת, מארגנת וחוסכת!",
     fabLabel: "להוספת הרשימה לחץ כאן",
     menuTitle: "🛒 תפריט",
+    welcomeHeading: "שלחו לכם רשימת קניות?",
+    welcomeSubtitle: "הדביקו אותה כאן וקבלו חוויית קנייה מהנה, אינטראקטיבית וחסכונית.",
     navigation: {
       list: "רשימת קניות",
       history: "היסטוריה",
@@ -125,6 +129,8 @@ const translations: Record<Language, {
     tagline: "Smart lists. Organized shopping.",
     fabLabel: "Tap here to add your list",
     menuTitle: "🛒 Menu",
+    welcomeHeading: "Got a list?",
+    welcomeSubtitle: "Paste it here. We'll handle the rest.",
     navigation: {
       list: "Shopping list",
       history: "History",
@@ -353,10 +359,10 @@ export const ShoppingList = () => {
       <div className="max-w-3xl mx-auto px-5 py-6">
         <div className="text-center mb-6">
           <h2 className="text-2xl font-bold text-foreground mb-1">
-            שלחו לכם רשימת קניות?
+            {t.welcomeHeading}
           </h2>
           <p className="text-base font-medium text-muted-foreground">
-            הדביקו אותה כאן וקבלו חוויית קנייה מהנה, אינטראקטיבית וחסכונית.
+            {t.welcomeSubtitle}
           </p>
         </div>
         {/* Input Area */}

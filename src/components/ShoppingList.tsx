@@ -151,8 +151,8 @@ const translations: Record<Language, {
   en: {
     languageLabel: "עברית",
     languageAria: "Switch to Hebrew",
-    appTitle: "עגליסט",
-    tagline: "List, Organize, and Save!",
+    appTitle: "ShoppingList",
+    tagline: "Smart lists. Organized shopping.",
     fabLabel: "Tap here to add your list",
     menuTitle: "🛒 Menu",
     welcomeHeading: "Got a list?",

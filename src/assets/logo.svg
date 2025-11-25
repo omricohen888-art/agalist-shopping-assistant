@@ -1,0 +1,22 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Agalist Logo</title>
+  <desc id="desc">Stylized yellow letter L that turns into a shopping cart with a green checkmark</desc>
+  <defs>
+    <linearGradient id="cartGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFD84D" />
+      <stop offset="100%" stop-color="#F5B800" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="110" fill="#fff6d6" />
+  <path d="M120 90h120c20 0 36 16 36 36v196h-156c-19.9 0-36-16.1-36-36V126c0-19.9 16.1-36 36-36z" fill="url(#cartGradient)" />
+  <path d="M120 322h196c18 0 24-9 27-20l20-74H218" fill="none" stroke="#F5B800" stroke-width="28" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M212 180h156l-22 84H220" fill="none" stroke="#F5B800" stroke-width="22" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="212" cy="360" r="30" fill="#F5B800" />
+  <circle cx="320" cy="360" r="30" fill="#F5B800" />
+  <path d="M360 170v-50c0-24-20-44-44-44H140" fill="none" stroke="#F5B800" stroke-width="36" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M318 92l-18 48" stroke="#F5B800" stroke-width="20" stroke-linecap="round" />
+  <path d="M356 356l72-78" stroke="#1FA74E" stroke-width="34" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M396 406l80-138" stroke="#1FA74E" stroke-width="34" stroke-linecap="round" stroke-linejoin="round" />
+</svg>
+
+

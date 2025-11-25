@@ -13,6 +13,8 @@ import { Share2, Trash2, Plus, CheckCircle2, History, Menu, BarChart3 } from "lu
 import { toast } from "sonner";
 import { ShoppingItem, ISRAELI_STORES } from "@/types/shopping";
 import { saveShoppingHistory } from "@/utils/storage";
+import LogoMark from "@/assets/logo.svg";
+import { useLanguage, Language } from "@/hooks/use-language";
 
 const ENGLISH_STORES = [
   "Shufersal",
@@ -31,11 +33,55 @@ const ENGLISH_STORES = [
   "Other"
 ] as const;
 
-const translations = {
+const translations: Record<Language, {
+  languageLabel: string;
+  languageAria: string;
+  appTitle: string;
+  logoAlt: string;
+  tagline: string;
+  menuTitle: string;
+  navigation: {
+    list: string;
+    history: string;
+    compare: string;
+  };
+  shareTitle: string;
+  textareaPlaceholder: string;
+  shareButton: string;
+  clearAllButton: string;
+  emptyState: string;
+  clearCompletedButton: string;
+  finishButton: string;
+  finishDialogTitle: string;
+  finishDialogDescription: string;
+  amountLabel: string;
+  storeLabel: string;
+  selectPlaceholder: string;
+  customStoreLabel: string;
+  customStorePlaceholder: string;
+  summaryLabel: string;
+  cancel: string;
+  save: string;
+  progressText: (completed: number, total: number) => string;
+  toasts: {
+    itemsAdded: (count: number) => string;
+    shareSuccess: string;
+    copySuccess: string;
+    clearedCompleted: string;
+    clearedAll: string;
+    noItems: string;
+    invalidAmount: string;
+    selectStore: string;
+    saveSuccess: string;
+    saveError: string;
+  };
+}> = {
   he: {
     languageLabel: "English",
     languageAria: "Switch to English",
     appTitle: "🛒 עגליסט",
+    logoAlt: "לוגו עגליסט",
+    tagline: "רושמת, מארגנת וחוסכת!",
     menuTitle: "🛒 תפריט",
     navigation: {
       list: "רשימת קניות",
@@ -77,6 +123,8 @@ const translations = {
     languageLabel: "עברית",
     languageAria: "Switch to Hebrew",
     appTitle: "🛒 ShoppingList",
+    logoAlt: "Agalist logo",
+    tagline: "Smart lists. Organized shopping.",
     menuTitle: "🛒 Menu",
     navigation: {
       list: "Shopping list",
@@ -114,9 +162,7 @@ const translations = {
       saveError: "Failed to save purchase"
     }
   }
-} as const;
-
-type Language = keyof typeof translations;
+};
 
 const heToEnStoreMap = ISRAELI_STORES.reduce((acc, store, index) => {
   acc[store] = ENGLISH_STORES[index];
@@ -135,7 +181,7 @@ export const ShoppingList = () => {
   const [totalAmount, setTotalAmount] = useState("");
   const [selectedStore, setSelectedStore] = useState("");
   const [customStore, setCustomStore] = useState("");
-  const [language, setLanguage] = useState<Language>("he");
+  const { language, toggleLanguage } = useLanguage();
   const t = translations[language];
   const storeOptions = language === "he" ? ISRAELI_STORES : ENGLISH_STORES;
   const otherLabel = language === "he" ? "אחר" : "Other";
@@ -252,11 +298,17 @@ export const ShoppingList = () => {
       {/* Header */}
       <div className="bg-primary text-primary-foreground shadow-md sticky top-0 z-10">
         <div className="max-w-3xl mx-auto px-5 py-4">
-          <div className="flex items-center justify-between mb-3">
-            <h1 className="text-2xl sm:text-3xl font-bold drop-shadow-md">{t.appTitle}</h1>
+          <div className="flex items-center justify-between mb-3 gap-4 flex-wrap">
+            <div className="flex items-center gap-3">
+              <img src={LogoMark} alt={t.logoAlt} className="h-14 w-14 drop-shadow-lg" />
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold drop-shadow-md leading-tight">{t.appTitle}</h1>
+                <p className="text-sm sm:text-base text-primary-foreground/90 font-semibold">{t.tagline}</p>
+              </div>
+            </div>
 
             <div className="flex items-center gap-2">
-              <Button variant="secondary" size="sm" onClick={() => setLanguage(language === "he" ? "en" : "he")} aria-label={t.languageAria} className="h-10 px-4 font-semibold bg-primary-foreground text-primary hover:bg-primary-foreground/90">
+              <Button variant="secondary" size="sm" onClick={toggleLanguage} aria-label={t.languageAria} className="h-10 px-4 font-semibold bg-primary-foreground text-primary hover:bg-primary-foreground/90">
                 {t.languageLabel}
               </Button>
               {/* Hamburger Menu */}
@@ -350,7 +402,7 @@ export const ShoppingList = () => {
         disabled={!inputText.trim()}
         size="lg"
         aria-label={language === "he" ? "הוספת פריטים" : "Add items"}
-        className="fixed bottom-6 right-6 h-18 w-18 rounded-full shadow-[0_20px_45px_rgba(0,0,0,0.35)] bg-primary text-primary-foreground transition-all z-20 p-0 hover:scale-110 focus-visible:scale-110 focus-visible:ring-4 focus-visible:ring-primary/50 disabled:opacity-60 disabled:hover:scale-100 touch-manipulation flex items-center justify-center"
+        className="fixed bottom-6 right-6 h-[4.5rem] w-[4.5rem] rounded-full shadow-[0_20px_45px_rgba(0,0,0,0.35)] bg-primary text-primary-foreground transition-all z-20 p-0 hover:scale-110 focus-visible:scale-110 focus-visible:ring-4 focus-visible:ring-primary/50 disabled:opacity-60 disabled:hover:scale-100 touch-manipulation flex items-center justify-center"
       >
         <Plus className="h-9 w-9 drop-shadow-lg" strokeWidth={3} />
       </Button>

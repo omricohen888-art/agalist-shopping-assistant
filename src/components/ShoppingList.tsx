@@ -422,14 +422,22 @@ export const ShoppingList = () => {
             onChange={e => setInputText(e.target.value)} 
             className="min-h-[140px] resize-none bg-background border border-input focus:border-primary text-base touch-manipulation"
           />
-          <div className="flex flex-col sm:flex-row gap-3 mt-4">
+          <div className="flex flex-col sm:flex-row gap-2.5 mt-4 w-full">
+            <Button onClick={clearAll} disabled={items.length === 0 && !inputText.trim()} variant="outline" className="w-full sm:flex-1 h-12 text-base">
+              <Trash2 className="ml-2 h-5 w-5" />
+              {t.clearAllButton}
+            </Button>
             <Button onClick={shareList} disabled={items.length === 0} variant="outline" className="w-full sm:flex-1 h-12 text-base">
               <Share2 className="ml-2 h-5 w-5" />
               {t.shareButton}
             </Button>
-            <Button onClick={clearAll} disabled={items.length === 0 && !inputText.trim()} variant="outline" className="w-full sm:flex-1 h-12 text-base">
-              <Trash2 className="ml-2 h-5 w-5" />
-              {t.clearAllButton}
+            <Button 
+              onClick={() => handlePaste(inputText)} 
+              disabled={!inputText.trim()} 
+              className="w-full sm:flex-[2] h-12 text-base font-semibold bg-primary text-primary-foreground hover:bg-primary/90 px-6"
+            >
+              <Plus className="ml-2 h-5 w-5" />
+              {language === "he" ? "הוסף לרשימה" : "Add to List"}
             </Button>
           </div>
         </div>
@@ -497,22 +505,6 @@ export const ShoppingList = () => {
                 </Button>
               </div>}
           </div>}
-      </div>
-
-      {/* FAB Button */}
-      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 z-20">
-        <span className="px-4 py-1 rounded-full bg-card/90 text-card-foreground text-sm font-semibold shadow-lg border border-border text-center">
-          {t.fabLabel}
-        </span>
-        <Button
-          onClick={() => handlePaste(inputText)}
-          disabled={!inputText.trim()}
-          size="lg"
-          aria-label={t.fabLabel}
-          className="h-20 w-20 rounded-full shadow-xl bg-primary text-primary-foreground p-0 hover:bg-primary/90 disabled:opacity-50 touch-manipulation flex items-center justify-center"
-        >
-          <Plus className="h-10 w-10" strokeWidth={3} />
-        </Button>
       </div>
 
       <Dialog open={isFinishDialogOpen} onOpenChange={setIsFinishDialogOpen}>

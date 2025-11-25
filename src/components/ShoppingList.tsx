@@ -11,7 +11,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Progress } from "@/components/ui/progress";
 import { Share2, Trash2, Plus, CheckCircle2, History, Menu, BarChart3 } from "lucide-react";
 import { toast } from "sonner";
-import { ShoppingItem, ISRAELI_STORES } from "@/types/shopping";
+import { ShoppingItem, ISRAELI_STORES, UNITS, Unit } from "@/types/shopping";
 import { saveShoppingHistory } from "@/utils/storage";
 import { useLanguage, Language } from "@/hooks/use-language";
 
@@ -244,7 +244,9 @@ export const ShoppingList = () => {
     const newItems: ShoppingItem[] = lines.map((line, index) => ({
       id: `${Date.now()}-${index}`,
       text: line,
-      checked: false
+      checked: false,
+      quantity: 1,
+      unit: 'units'
     }));
     setItems([...items, ...newItems]);
     setInputText("");
@@ -261,11 +263,21 @@ export const ShoppingList = () => {
     const newItem: ShoppingItem = {
       id: `${Date.now()}`,
       text: singleItemInput.trim(),
-      checked: false
+      checked: false,
+      quantity: 1,
+      unit: 'units'
     };
     setItems([...items, newItem]);
     setSingleItemInput("");
   };
+  const updateItemQuantity = (id: string, quantity: number) => {
+    setItems(items.map(item => item.id === id ? { ...item, quantity: Math.max(1, quantity) } : item));
+  };
+
+  const updateItemUnit = (id: string, unit: Unit) => {
+    setItems(items.map(item => item.id === id ? { ...item, unit } : item));
+  };
+
   const toggleItem = (id: string) => {
     setItems(items.map(item => item.id === id ? {
       ...item,
@@ -488,7 +500,31 @@ export const ShoppingList = () => {
           </div> : <div className="space-y-3">
             {items.map((item) => <div key={item.id} className="bg-card rounded-xl shadow-sm border border-border p-5 flex items-center gap-4 group hover:shadow-md touch-manipulation">
                 <Checkbox checked={item.checked} onCheckedChange={() => toggleItem(item.id)} className="h-6 w-6 border-2 data-[state=checked]:bg-primary data-[state=checked]:border-primary transition-all" />
-                <span className={`flex-1 text-base leading-relaxed transition-all ${item.checked ? "completed-item" : "text-foreground font-medium"}`}>
+                <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                  <Input 
+                    type="number" 
+                    min="1"
+                    value={item.quantity}
+                    onChange={(e) => updateItemQuantity(item.id, parseInt(e.target.value) || 1)}
+                    className="w-16 h-8 px-2 text-center"
+                  />
+                  <Select 
+                      value={item.unit} 
+                      onValueChange={(val: Unit) => updateItemUnit(item.id, val)}
+                  >
+                    <SelectTrigger className="w-20 h-8 px-2 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {UNITS.map(u => (
+                        <SelectItem key={u.value} value={u.value}>
+                          {language === 'he' ? u.labelHe : u.labelEn}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+<span className={`flex-1 text-base leading-relaxed transition-all ${item.checked ? "completed-item" : "text-foreground font-medium"}`}>
                   {item.text}
                 </span>
                 <Button variant="ghost" size="icon" onClick={() => deleteItem(item.id)} className="opacity-0 group-hover:opacity-100 transition-opacity h-10 w-10 hover:bg-destructive/10 hover:text-destructive touch-manipulation">

@@ -1,7 +1,17 @@
+export type Unit = 'units' | 'kg' | 'g';
+
+export const UNITS = [
+  { value: 'units', labelHe: "יח'", labelEn: 'units' },
+  { value: 'kg', labelHe: 'ק"ג', labelEn: 'kg' },
+  { value: 'g', labelHe: 'גרם', labelEn: 'g' },
+] as const;
+
 export interface ShoppingItem {
   id: string;
   text: string;
   checked: boolean;
+  quantity: number;
+  unit: Unit;
 }
 
 export interface ShoppingHistory {

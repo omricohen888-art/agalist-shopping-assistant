@@ -500,16 +500,19 @@ export const ShoppingList = () => {
           </div> : <div className="space-y-3">
             {items.map((item) => <div key={item.id} className="bg-card rounded-xl shadow-sm border border-border p-5 flex items-center gap-4 group hover:shadow-md touch-manipulation">
                 <Checkbox checked={item.checked} onCheckedChange={() => toggleItem(item.id)} className="h-6 w-6 border-2 data-[state=checked]:bg-primary data-[state=checked]:border-primary transition-all" />
+                <span className={`flex-1 text-base leading-relaxed transition-all ${item.checked ? "completed-item" : "text-foreground font-medium"}`}>
+                  {item.text}
+                </span>
                 <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                   <Input 
                     type="number" 
                     min="1"
-                    value={item.quantity}
+                    value={item.quantity || 1}
                     onChange={(e) => updateItemQuantity(item.id, parseInt(e.target.value) || 1)}
                     className="w-16 h-8 px-2 text-center"
                   />
                   <Select 
-                      value={item.unit} 
+                      value={item.unit || 'units'} 
                       onValueChange={(val: Unit) => updateItemUnit(item.id, val)}
                   >
                     <SelectTrigger className="w-20 h-8 px-2 text-xs">
@@ -524,9 +527,6 @@ export const ShoppingList = () => {
                     </SelectContent>
                   </Select>
                 </div>
-<span className={`flex-1 text-base leading-relaxed transition-all ${item.checked ? "completed-item" : "text-foreground font-medium"}`}>
-                  {item.text}
-                </span>
                 <Button variant="ghost" size="icon" onClick={() => deleteItem(item.id)} className="opacity-0 group-hover:opacity-100 transition-opacity h-10 w-10 hover:bg-destructive/10 hover:text-destructive touch-manipulation">
                   <Trash2 className="h-5 w-5" />
                 </Button>

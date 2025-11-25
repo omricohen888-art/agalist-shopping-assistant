@@ -299,10 +299,10 @@ export const ShoppingList = () => {
         <div className="max-w-3xl mx-auto px-5 py-4">
           <div className="flex items-center justify-between mb-3 gap-4 flex-wrap">
             <div className="flex flex-col gap-1">
-              <div className={`flex items-center gap-1 text-2xl sm:text-3xl font-bold drop-shadow-md leading-tight ${direction === "rtl" ? "flex-row-reverse" : "flex-row"}`}>
+              <div className={`flex items-center gap-0.5 text-2xl sm:text-3xl font-bold drop-shadow-md leading-tight ${direction === "rtl" ? "flex-row-reverse" : "flex-row"}`}>
                 <span>{t.appTitle}</span>
                 <span className="text-3xl sm:text-4xl">🛒</span>
-                <span className="text-green-500 text-4xl sm:text-5xl font-bold leading-none">✓</span>
+                <span className="text-green-500 text-3xl sm:text-4xl font-bold leading-none">✓</span>
               </div>
               <p className="text-sm sm:text-base text-primary-foreground/90 font-semibold">{t.tagline}</p>
             </div>

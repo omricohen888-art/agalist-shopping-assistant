@@ -300,9 +300,9 @@ export const ShoppingList = () => {
           <div className="flex items-center justify-between mb-3 gap-4 flex-wrap">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold drop-shadow-md leading-tight flex items-center gap-2">
+                <span>{t.appTitle}</span>
                 <span className="text-3xl sm:text-4xl">🛒</span>
                 <span className="text-green-500 text-4xl font-bold leading-none">✓</span>
-                <span>{t.appTitle}</span>
               </h1>
               <p className="text-sm sm:text-base text-primary-foreground/90 font-semibold">{t.tagline}</p>
             </div>

@@ -78,7 +78,7 @@ const translations: Record<Language, {
   he: {
     languageLabel: "English",
     languageAria: "Switch to English",
-    appTitle: "🛒 עגליסט",
+    appTitle: "עגליסט",
     tagline: "רושמת, מארגנת וחוסכת!",
     fabLabel: "להוספת הרשימה לחץ כאן",
     menuTitle: "🛒 תפריט",
@@ -121,7 +121,7 @@ const translations: Record<Language, {
   en: {
     languageLabel: "עברית",
     languageAria: "Switch to Hebrew",
-    appTitle: "🛒 ShoppingList",
+    appTitle: "ShoppingList",
     tagline: "Smart lists. Organized shopping.",
     fabLabel: "Tap here to add your list",
     menuTitle: "🛒 Menu",
@@ -299,7 +299,11 @@ export const ShoppingList = () => {
         <div className="max-w-3xl mx-auto px-5 py-4">
           <div className="flex items-center justify-between mb-3 gap-4 flex-wrap">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold drop-shadow-md leading-tight">{t.appTitle}</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold drop-shadow-md leading-tight flex items-center gap-2">
+                <span className="text-3xl sm:text-4xl">🛒</span>
+                <span className="text-green-500 text-4xl font-bold leading-none">✓</span>
+                <span>{t.appTitle}</span>
+              </h1>
               <p className="text-sm sm:text-base text-primary-foreground/90 font-semibold">{t.tagline}</p>
             </div>
 

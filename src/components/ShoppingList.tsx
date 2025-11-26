@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Progress } from "@/components/ui/progress";
-import { Share2, Trash2, Plus, CheckCircle2, History, Menu, BarChart3, Globe, Save, ClipboardList, Book, Square, CheckSquare, Printer, Mail, FileSpreadsheet, Copy, Pencil } from "lucide-react";
+import { Share2, Trash2, Plus, CheckCircle2, History, Menu, BarChart3, Globe, Save, ClipboardList, Book, Square, CheckSquare, Printer, Mail, FileSpreadsheet, Copy, Pencil, X } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import { toast } from "sonner";
 import { ShoppingItem, ISRAELI_STORES, UNITS, Unit, SavedList } from "@/types/shopping";
@@ -148,6 +148,7 @@ const translations: Record<Language, {
   };
   saveListButton: string;
   saveChangesButton: string;
+  exitEditMode: string;
   summarizeButton: string;
   myListsTitle: string;
   emptyLists: string;
@@ -227,6 +228,7 @@ const translations: Record<Language, {
     },
     saveListButton: "שמור רשימה",
     saveChangesButton: "שמור שינויים",
+    exitEditMode: "יציאה מעריכה",
     summarizeButton: "סיום ותיעוד",
     myListsTitle: "הפנקס שלי",
     emptyLists: "אין רשימות שמורות עדיין",
@@ -306,6 +308,7 @@ const translations: Record<Language, {
     },
     saveListButton: "Save List",
     saveChangesButton: "Save Changes",
+    exitEditMode: "Exit Edit Mode",
     summarizeButton: "Summarize & Track",
     myListsTitle: "My Notebooks",
     emptyLists: "No saved lists yet",
@@ -506,6 +509,7 @@ export const ShoppingList = () => {
       if (existingList) {
         const updatedList = {
           ...existingList,
+          name: listName || existingList.name,
           items: [...items]
         };
         if (updateSavedList(updatedList)) {
@@ -570,7 +574,15 @@ export const ShoppingList = () => {
   const handleLoadList = (list: SavedList) => {
     setItems([...list.items]);
     setActiveListId(list.id);
+    setListName(list.name);
     toast.success(t.toasts.listLoaded);
+  };
+
+  const exitEditMode = () => {
+    setActiveListId(null);
+    setItems([]);
+    setInputText("");
+    setListName("");
   };
 
   const handleDeleteList = (id: string, e: React.MouseEvent) => {
@@ -731,6 +743,32 @@ export const ShoppingList = () => {
         }
       </div >
     </div >
+
+    {/* Edit Mode Header */}
+    {activeListId && (
+      <div className="bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-800 sticky top-[88px] z-10">
+        <div className="max-w-3xl mx-auto px-5 py-3 flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={exitEditMode}
+            className="h-9 w-9 flex-shrink-0 hover:bg-amber-200/50 dark:hover:bg-amber-800/50 rounded-full"
+            title={t.exitEditMode}
+          >
+            <X className="h-5 w-5" />
+          </Button>
+          <div className="flex-1 flex items-center gap-2">
+            <Input
+              value={listName}
+              onChange={(e) => setListName(e.target.value)}
+              className="flex-1 h-10 text-lg font-bold bg-transparent border-0 border-b-2 border-dashed border-amber-300 dark:border-amber-700 rounded-none focus-visible:ring-0 focus-visible:border-amber-500 px-1"
+              placeholder={language === 'he' ? 'שם הרשימה...' : 'List name...'}
+            />
+            <Pencil className="h-4 w-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+          </div>
+        </div>
+      </div>
+    )}
 
     {/* Main Content */}
     < div className="max-w-3xl mx-auto px-5 py-6" >

@@ -49,7 +49,7 @@ const QuantityInput = ({ value, onChange, unit }: { value: number, onChange: (va
           e.currentTarget.blur();
         }
       }}
-      className="w-16 h-9 px-2 text-center text-sm rounded-lg"
+      className="w-14 h-9 px-1 text-center text-sm rounded-lg"
     />
   );
 };
@@ -630,15 +630,17 @@ export const ShoppingList = () => {
   return <div className="min-h-screen pb-32 animate-fade-in" dir={direction} lang={language}>
     {/* Header */}
     <div className="bg-primary text-primary-foreground shadow-lg sticky top-0 z-10">
-      <div className="max-w-3xl mx-auto px-6 py-5">
-        <div className="flex items-center justify-between mb-3 gap-4 flex-wrap">
-          <div className="flex flex-col gap-1">
-            <div className={`flex items-center gap-0.5 text-2xl sm:text-3xl font-bold drop-shadow-md leading-tight ${direction === "rtl" ? "flex-row-reverse" : "flex-row"}`}>
+      <div className="max-w-3xl mx-auto px-4 py-4">
+        <div className="flex justify-between items-center w-full mb-3">
+          <div className="flex flex-col gap-0.5">
+            <div className={`flex items-center gap-0.5 text-3xl sm:text-4xl font-black drop-shadow-md leading-tight ${direction === "rtl" ? "flex-row-reverse" : "flex-row"}`}>
               <span>{t.appTitle}</span>
-              <span className="text-3xl sm:text-4xl">🛒</span>
-              <span className="text-green-500 text-3xl sm:text-4xl font-bold leading-none">✓</span>
+              <div className={`flex items-center ${direction === "rtl" ? "mr-2" : "ml-2"}`}>
+                <span className="text-3xl sm:text-4xl">🛒</span>
+                <span className="text-green-500 text-3xl sm:text-4xl font-black leading-none">✓</span>
+              </div>
             </div>
-            <p className="text-sm sm:text-base text-primary-foreground/90 font-semibold">{t.tagline}</p>
+            <p className="text-sm sm:text-base text-primary-foreground/90 font-semibold mt-0.5">{t.tagline}</p>
           </div>
 
           <div className="flex items-center gap-2">
@@ -686,20 +688,22 @@ export const ShoppingList = () => {
                   </Button>
                 </nav>
               </SheetContent>
-            </Sheet>
+            </Sheet >
+          </div >
+        </div >
+        {
+          items.length > 0 && <div className="space-y-2">
+            <Progress value={progressPercentage} className="h-2.5 bg-primary-foreground/20" />
+            <p className="text-sm text-primary-foreground/90 text-center font-medium">
+              {t.progressText(completedCount, items.length)}
+            </p>
           </div>
-        </div>
-        {items.length > 0 && <div className="space-y-2">
-          <Progress value={progressPercentage} className="h-2.5 bg-primary-foreground/20" />
-          <p className="text-sm text-primary-foreground/90 text-center font-medium">
-            {t.progressText(completedCount, items.length)}
-          </p>
-        </div>}
-      </div>
-    </div>
+        }
+      </div >
+    </div >
 
     {/* Main Content */}
-    <div className="max-w-3xl mx-auto px-5 py-6">
+    < div className="max-w-3xl mx-auto px-5 py-6" >
       <div className="text-center mb-6">
         <h2 className="text-2xl font-bold text-foreground mb-1">
           {t.welcomeHeading}
@@ -742,197 +746,205 @@ export const ShoppingList = () => {
       </div>
 
       {/* Quick Start Templates - only show when no items */}
-      {items.length === 0 && (
-        <div className="mb-7">
-          <p className="text-sm font-medium text-muted-foreground mb-4 text-center">
-            {t.templatesHeading}
-          </p>
-          <div className="flex flex-wrap justify-center gap-2.5">
-            {currentTemplates.map((template) => (
-              <button
-                key={template.id}
-                onClick={() => handleTemplateClick(template.items)}
-                className="px-4 py-2.5 rounded-lg bg-secondary/40 hover:bg-secondary/60 text-secondary-foreground text-sm font-medium border border-border/40 touch-manipulation transition-colors shadow-sm"
-              >
-                {template.name}
-              </button>
-            ))}
+      {
+        items.length === 0 && (
+          <div className="mb-7">
+            <p className="text-sm font-medium text-muted-foreground mb-4 text-center">
+              {t.templatesHeading}
+            </p>
+            <div className="flex flex-wrap justify-center gap-2.5">
+              {currentTemplates.map((template) => (
+                <button
+                  key={template.id}
+                  onClick={() => handleTemplateClick(template.items)}
+                  className="px-4 py-2.5 rounded-lg bg-secondary/40 hover:bg-secondary/60 text-secondary-foreground text-sm font-medium border border-border/40 touch-manipulation transition-colors shadow-sm"
+                >
+                  {template.name}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       {/* Lists Dashboard (My Notebooks) */}
-      {savedLists.length > 0 && items.length === 0 && (
-        <div className="mb-8" id="my-notebooks">
-          <div className="flex items-center gap-2 mb-4">
-            <Book className="h-5 w-5 text-primary" />
-            <h3 className="text-lg font-bold text-foreground">{t.myListsTitle}</h3>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {savedLists.map((list) => (
-              <div
-                key={list.id}
-                onClick={() => handleLoadList(list)}
-                className="bg-yellow-50 dark:bg-card border border-gray-200 dark:border-border rounded-lg p-4 shadow-md hover:shadow-lg transition-all cursor-pointer group relative overflow-hidden"
-              >
-                {/* Notebook styling elements */}
-                <div className="flex justify-between items-start mb-3 border-b border-gray-200/60 pb-2">
-                  <div>
-                    <h4 className="font-bold text-lg text-gray-800 dark:text-foreground font-handwriting">{list.name}</h4>
-                    <p className="text-xs text-muted-foreground mt-0.5">{t.itemsCount(list.items.length)}</p>
-                  </div>
-                  <div className="flex gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity -mr-2 -mt-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={(e) => handleRenameList(list, e)}
-                      className="h-8 w-8 text-muted-foreground hover:text-primary"
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={(e) => handleDeleteList(list.id, e)}
-                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-x-4 gap-y-2 mb-2">
-                  {list.items.slice(0, 9).map((item, idx) => (
-                    <div key={idx} className="flex items-center gap-1.5 min-w-0">
-                      {item.checked ? (
-                        <CheckSquare className="h-3 w-3 text-black flex-shrink-0" />
-                      ) : (
-                        <Square className="h-3 w-3 text-muted-foreground/40 flex-shrink-0" />
-                      )}
-                      <span className={`truncate text-sm font-medium ${item.checked ? "text-muted-foreground" : "text-gray-700 dark:text-muted-foreground"}`}>
-                        {item.text}
-                      </span>
+      {
+        savedLists.length > 0 && items.length === 0 && (
+          <div className="mb-8" id="my-notebooks">
+            <div className="flex items-center gap-2 mb-4">
+              <Book className="h-5 w-5 text-primary" />
+              <h3 className="text-lg font-bold text-foreground">{t.myListsTitle}</h3>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {savedLists.map((list) => (
+                <div
+                  key={list.id}
+                  onClick={() => handleLoadList(list)}
+                  className="bg-yellow-50 dark:bg-card border border-gray-200 dark:border-border rounded-lg p-4 shadow-md hover:shadow-lg transition-all cursor-pointer group relative overflow-hidden"
+                >
+                  {/* Notebook styling elements */}
+                  <div className="flex justify-between items-start mb-3 border-b border-gray-200/60 pb-2">
+                    <div>
+                      <h4 className="font-bold text-lg text-gray-800 dark:text-foreground font-handwriting">{list.name}</h4>
+                      <p className="text-xs text-muted-foreground mt-0.5">{t.itemsCount(list.items.length)}</p>
                     </div>
-                  ))}
-                </div>
-
-                {list.items.length > 9 && (
-                  <div className="text-xs font-handwriting text-primary/80 mt-2 text-end italic">
-                    {t.moreItems(list.items.length - 9)}
+                    <div className="flex gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity -mr-2 -mt-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => handleRenameList(list, e)}
+                        className="h-8 w-8 text-muted-foreground hover:text-primary"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => handleDeleteList(list.id, e)}
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
-                )}
-              </div>
-            ))}
+
+                  <div className="grid grid-cols-3 gap-x-4 gap-y-2 mb-2">
+                    {list.items.slice(0, 9).map((item, idx) => (
+                      <div key={idx} className="flex items-center gap-1.5 min-w-0">
+                        {item.checked ? (
+                          <CheckSquare className="h-3 w-3 text-black flex-shrink-0" />
+                        ) : (
+                          <Square className="h-3 w-3 text-muted-foreground/40 flex-shrink-0" />
+                        )}
+                        <span className={`truncate text-sm font-medium ${item.checked ? "text-muted-foreground" : "text-gray-700 dark:text-muted-foreground"}`}>
+                          {item.text}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {list.items.length > 9 && (
+                    <div className="text-xs font-handwriting text-primary/80 mt-2 text-end italic">
+                      {t.moreItems(list.items.length - 9)}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       {/* Add Item input - only show when list has items */}
-      {items.length > 0 && (
-        <div className="bg-card rounded-xl shadow-sm border border-border p-4 mb-6 flex flex-col sm:flex-row gap-3">
-          <Input
-            placeholder={t.addItemPlaceholder}
-            value={singleItemInput}
-            onChange={e => setSingleItemInput(e.target.value)}
-            onKeyDown={e => e.key === "Enter" && handleAddSingleItem()}
-            className="flex-1 h-11 text-base rounded-lg"
-          />
-          <div className="flex gap-2">
+      {
+        items.length > 0 && (
+          <div className="bg-card rounded-xl shadow-sm border border-border p-4 mb-6 flex flex-col sm:flex-row gap-3">
             <Input
-              type="number"
-              min="0"
-              step={singleItemUnit === 'units' ? "1" : "0.1"}
-              value={singleItemQuantity}
-              onChange={(e) => setSingleItemQuantity(e.target.value)}
-              className="w-20 h-11 text-center text-base rounded-lg"
-              onBlur={() => {
-                let val = parseFloat(singleItemQuantity);
-                if (singleItemUnit === 'units' && !isNaN(val)) {
-                  setSingleItemQuantity(Math.round(val).toString());
-                }
-              }}
+              placeholder={t.addItemPlaceholder}
+              value={singleItemInput}
+              onChange={e => setSingleItemInput(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && handleAddSingleItem()}
+              className="flex-1 h-11 text-base rounded-lg"
             />
-            <Select
-              value={singleItemUnit}
-              onValueChange={(val: Unit) => {
-                setSingleItemUnit(val);
-                if (val === 'units') {
-                  const currentQty = parseFloat(singleItemQuantity);
-                  if (!isNaN(currentQty)) {
-                    setSingleItemQuantity(Math.round(currentQty).toString());
+            <div className="flex gap-2">
+              <Input
+                type="number"
+                min="0"
+                step={singleItemUnit === 'units' ? "1" : "0.1"}
+                value={singleItemQuantity}
+                onChange={(e) => setSingleItemQuantity(e.target.value)}
+                className="w-20 h-11 text-center text-base rounded-lg"
+                onBlur={() => {
+                  let val = parseFloat(singleItemQuantity);
+                  if (singleItemUnit === 'units' && !isNaN(val)) {
+                    setSingleItemQuantity(Math.round(val).toString());
                   }
-                }
-              }}
-            >
-              <SelectTrigger className="w-24 h-11 text-sm rounded-lg">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {UNITS.map(u => (
-                  <SelectItem key={u.value} value={u.value}>
-                    {language === 'he' ? u.labelHe : u.labelEn}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button onClick={handleAddSingleItem} disabled={!singleItemInput.trim()} className="h-11 px-5 font-medium rounded-lg shrink-0">
-              <Plus className="h-5 w-5" />
-              {t.addItemButton}
-            </Button>
+                }}
+              />
+              <Select
+                value={singleItemUnit}
+                onValueChange={(val: Unit) => {
+                  setSingleItemUnit(val);
+                  if (val === 'units') {
+                    const currentQty = parseFloat(singleItemQuantity);
+                    if (!isNaN(currentQty)) {
+                      setSingleItemQuantity(Math.round(currentQty).toString());
+                    }
+                  }
+                }}
+              >
+                <SelectTrigger className="w-24 h-11 text-sm rounded-lg">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {UNITS.map(u => (
+                    <SelectItem key={u.value} value={u.value}>
+                      {language === 'he' ? u.labelHe : u.labelEn}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button onClick={handleAddSingleItem} disabled={!singleItemInput.trim()} className="h-11 px-5 font-medium rounded-lg shrink-0">
+                <Plus className="h-5 w-5" />
+                {t.addItemButton}
+              </Button>
+            </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       {/* List Items */}
-      {items.length > 0 && (
-        <div className="space-y-2.5">
-          {items.map((item) => (
-            <div key={item.id} className="bg-card rounded-xl shadow-sm border border-border/60 p-4 flex items-center gap-4 group hover:shadow-md hover:border-border transition-all touch-manipulation">
-              <Checkbox checked={item.checked} onCheckedChange={() => toggleItem(item.id)} className="h-5 w-5 border-2 data-[state=checked]:bg-primary data-[state=checked]:border-primary transition-all rounded" />
-              <span className={`flex-1 text-base leading-relaxed transition-all ${item.checked ? "completed-item" : "text-foreground font-medium"}`}>
-                {item.text}
-              </span>
+      {
+        items.length > 0 && (
+          <div className="space-y-2.5">
+            {items.map((item) => (
+              <div key={item.id} className="bg-card rounded-xl shadow-sm border border-border/60 p-3 flex flex-row items-center justify-between flex-nowrap w-full gap-2 group hover:shadow-md hover:border-border transition-all touch-manipulation">
+                <Checkbox checked={item.checked} onCheckedChange={() => toggleItem(item.id)} className="h-5 w-5 border-2 flex-shrink-0 data-[state=checked]:bg-primary data-[state=checked]:border-primary transition-all rounded" />
+                <span className={`flex-grow text-base leading-relaxed transition-all text-right truncate min-w-0 ${item.checked ? "completed-item" : "text-foreground font-medium"}`}>
+                  {item.text}
+                </span>
 
-              <div className="flex items-center gap-2 border-l border-border/40 pl-3" onClick={(e) => e.stopPropagation()}>
-                <QuantityInput
-                  value={item.quantity || 1}
-                  onChange={(val) => updateItemQuantity(item.id, val)}
-                  unit={item.unit}
-                />
-                <Select
-                  value={item.unit || 'units'}
-                  onValueChange={(val: Unit) => updateItemUnit(item.id, val)}
-                >
-                  <SelectTrigger className="w-20 h-9 px-2 text-xs rounded-lg">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {UNITS.map(u => (
-                      <SelectItem key={u.value} value={u.value}>
-                        {language === 'he' ? u.labelHe : u.labelEn}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Button variant="ghost" size="icon" onClick={() => deleteItem(item.id)} className="h-9 w-9 hover:bg-destructive/10 hover:text-destructive touch-manipulation rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Trash2 className="h-4.5 w-4.5" />
-                </Button>
+                <div className="flex items-center gap-2 flex-shrink-0 border-l border-border/40 pl-2" onClick={(e) => e.stopPropagation()}>
+                  <QuantityInput
+                    value={item.quantity || 1}
+                    onChange={(val) => updateItemQuantity(item.id, val)}
+                    unit={item.unit}
+                  />
+                  <Select
+                    value={item.unit || 'units'}
+                    onValueChange={(val: Unit) => updateItemUnit(item.id, val)}
+                  >
+                    <SelectTrigger className="w-16 h-9 px-1 text-xs rounded-lg">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {UNITS.map(u => (
+                        <SelectItem key={u.value} value={u.value}>
+                          {language === 'he' ? u.labelHe : u.labelEn}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button variant="ghost" size="icon" onClick={() => deleteItem(item.id)} className="h-9 w-9 flex-shrink-0 hover:bg-destructive/10 hover:text-destructive touch-manipulation rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Trash2 className="h-4.5 w-4.5" />
+                  </Button>
+                </div>
               </div>
+            ))}
+            <div className="pt-5 flex flex-col sm:flex-row gap-3">
+              <Button variant="outline" onClick={handleSaveList} className="w-full sm:flex-1 h-11 font-medium text-base touch-manipulation rounded-lg border-primary/20 hover:bg-primary/5 hover:text-primary">
+                <Save className="ml-2 h-5 w-5" />
+                {t.saveListButton}
+              </Button>
+              <Button onClick={openFinishDialog} className="w-full sm:flex-1 h-11 font-semibold bg-primary hover:bg-primary/90 text-base touch-manipulation rounded-lg shadow-sm">
+                <ClipboardList className="ml-2 h-5 w-5" />
+                {t.summarizeButton}
+              </Button>
             </div>
-          ))}
-          <div className="pt-5 flex flex-col sm:flex-row gap-3">
-            <Button variant="outline" onClick={handleSaveList} className="w-full sm:flex-1 h-11 font-medium text-base touch-manipulation rounded-lg border-primary/20 hover:bg-primary/5 hover:text-primary">
-              <Save className="ml-2 h-5 w-5" />
-              {t.saveListButton}
-            </Button>
-            <Button onClick={openFinishDialog} className="w-full sm:flex-1 h-11 font-semibold bg-primary hover:bg-primary/90 text-base touch-manipulation rounded-lg shadow-sm">
-              <ClipboardList className="ml-2 h-5 w-5" />
-              {t.summarizeButton}
-            </Button>
           </div>
-        </div>
-      )}
-    </div>
+        )
+      }
+    </div >
 
     <Dialog open={isFinishDialogOpen} onOpenChange={setIsFinishDialogOpen}>
       <DialogContent className="sm:max-w-[500px]">
@@ -1077,5 +1089,5 @@ export const ShoppingList = () => {
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  </div>;
+  </div >;
 };

@@ -631,27 +631,29 @@ export const ShoppingList = () => {
     {/* Header */}
     <div className="bg-primary text-primary-foreground shadow-lg sticky top-0 z-10">
       <div className="max-w-3xl mx-auto px-4 py-4">
-        <div className="flex justify-between items-center w-full mb-3">
-          <div className="flex flex-col gap-0.5">
-            <div className={`flex items-center gap-0.5 text-3xl sm:text-4xl font-black drop-shadow-md leading-tight ${direction === "rtl" ? "flex-row-reverse" : "flex-row"}`}>
-              <span>{t.appTitle}</span>
-              <div className={`flex items-center ${direction === "rtl" ? "mr-2" : "ml-2"}`}>
-                <span className="text-3xl sm:text-4xl">🛒</span>
-                <span className="text-green-500 text-3xl sm:text-4xl font-black leading-none">✓</span>
+        <div className="flex justify-between items-center w-full mb-3 px-4">
+          {/* Title Section - Allow shrinking */}
+          <div className="flex flex-col gap-0.5 min-w-0 flex-shrink">
+            <div className={`flex items-center gap-0.5 text-2xl sm:text-3xl font-black drop-shadow-md leading-tight ${direction === "rtl" ? "flex-row-reverse" : "flex-row"}`}>
+              <span className="truncate">{t.appTitle}</span>
+              <div className={`flex items-center flex-shrink-0 ${direction === "rtl" ? "mr-1" : "ml-1"}`}>
+                <span className="text-2xl sm:text-3xl">🛒</span>
+                <span className="text-green-500 text-2xl sm:text-3xl font-black leading-none">✓</span>
               </div>
             </div>
-            <p className="text-sm sm:text-base text-primary-foreground/90 font-semibold mt-0.5">{t.tagline}</p>
+            <p className="text-xs sm:text-sm text-primary-foreground/90 font-semibold mt-0.5 truncate">{t.tagline}</p>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={toggleLanguage} aria-label={t.languageAria} className="h-10 w-10 text-primary-foreground hover:bg-primary-foreground/10 rounded-lg">
-              <Globe className="h-5 w-5" />
+          {/* Actions Section - Never shrink */}
+          <div className="flex items-center gap-3 flex-shrink-0">
+            <Button variant="ghost" size="icon" onClick={toggleLanguage} aria-label={t.languageAria} className="h-10 w-10 p-2 text-primary-foreground hover:bg-black/10 rounded-full">
+              <Globe className="h-6 w-6" />
             </Button>
             {/* Hamburger Menu */}
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-11 w-11 text-primary-foreground hover:bg-primary-foreground/10">
-                  <Menu className="h-6 w-6" />
+                <Button variant="ghost" size="icon" className="h-10 w-10 p-2 text-primary-foreground hover:bg-black/10 rounded-full">
+                  <Menu className="h-7 w-7" />
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="w-[280px] sm:w-[320px]">

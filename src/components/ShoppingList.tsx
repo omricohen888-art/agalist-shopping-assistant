@@ -144,8 +144,10 @@ const translations: Record<Language, {
     listLoaded: string;
     finishWarning: string;
     listRenamed: string;
+    listUpdated: string;
   };
   saveListButton: string;
+  saveChangesButton: string;
   summarizeButton: string;
   myListsTitle: string;
   emptyLists: string;
@@ -220,9 +222,11 @@ const translations: Record<Language, {
       listDeleted: "הרשימה נמחקה",
       listLoaded: "הרשימה נטענה בהצלחה",
       finishWarning: "שימו לב: כפתור זה נועד לתיעוד קנייה שהושלמה לצורך מעקב וסטטיסטיקה. אנא סמנו את הפריטים שנרכשו כדי להמשיך.",
-      listRenamed: "שם הרשימה עודכן בהצלחה"
+      listRenamed: "שם הרשימה עודכן בהצלחה",
+      listUpdated: "השינויים נשמרו ברשימה בהצלחה"
     },
     saveListButton: "שמור רשימה",
+    saveChangesButton: "שמור שינויים",
     summarizeButton: "סיום ותיעוד",
     myListsTitle: "הפנקס שלי",
     emptyLists: "אין רשימות שמורות עדיין",
@@ -297,9 +301,11 @@ const translations: Record<Language, {
       listDeleted: "List deleted",
       listLoaded: "List loaded successfully",
       finishWarning: "Attention: This button is for documenting a completed purchase for tracking statistics. Please mark purchased items to proceed.",
-      listRenamed: "List renamed successfully"
+      listRenamed: "List renamed successfully",
+      listUpdated: "Changes saved successfully"
     },
     saveListButton: "Save List",
+    saveChangesButton: "Save Changes",
     summarizeButton: "Summarize & Track",
     myListsTitle: "My Notebooks",
     emptyLists: "No saved lists yet",
@@ -359,6 +365,7 @@ export const ShoppingList = () => {
   const [singleItemInput, setSingleItemInput] = useState("");
   const [singleItemQuantity, setSingleItemQuantity] = useState("1");
   const [singleItemUnit, setSingleItemUnit] = useState<Unit>('units');
+  const [activeListId, setActiveListId] = useState<string | null>(null);
   const hasContent = inputText.trim().length > 0 || items.length > 0;
 
   useEffect(() => {
@@ -483,6 +490,7 @@ export const ShoppingList = () => {
   const clearAll = () => {
     setItems([]);
     setInputText("");
+    setActiveListId(null);
     toast.success(t.toasts.clearedAll);
   };
 
@@ -491,6 +499,24 @@ export const ShoppingList = () => {
       toast.error(t.toasts.noItems);
       return;
     }
+    
+    // If editing an existing list, update it directly
+    if (activeListId) {
+      const existingList = savedLists.find(list => list.id === activeListId);
+      if (existingList) {
+        const updatedList = {
+          ...existingList,
+          items: [...items]
+        };
+        if (updateSavedList(updatedList)) {
+          setSavedLists(getSavedLists());
+          toast.success(t.toasts.listUpdated);
+        }
+      }
+      return;
+    }
+    
+    // New list - open modal to ask for name
     setListName(new Date().toLocaleDateString(language === 'he' ? 'he-IL' : 'en-US', { weekday: 'long', day: 'numeric', month: 'long' }));
     setIsSaveDialogOpen(true);
   };
@@ -543,6 +569,7 @@ export const ShoppingList = () => {
 
   const handleLoadList = (list: SavedList) => {
     setItems([...list.items]);
+    setActiveListId(list.id);
     toast.success(t.toasts.listLoaded);
   };
 
@@ -937,7 +964,7 @@ export const ShoppingList = () => {
             <div className="pt-5 flex flex-col sm:flex-row gap-3">
               <Button variant="outline" onClick={handleSaveList} className="w-full sm:flex-1 h-11 font-medium text-base touch-manipulation rounded-lg border-primary/20 hover:bg-primary/5 hover:text-primary">
                 <Save className="ml-2 h-5 w-5" />
-                {t.saveListButton}
+                {activeListId ? t.saveChangesButton : t.saveListButton}
               </Button>
               <Button onClick={openFinishDialog} className="w-full sm:flex-1 h-11 font-semibold bg-primary hover:bg-primary/90 text-base touch-manipulation rounded-lg shadow-sm">
                 <ClipboardList className="ml-2 h-5 w-5" />

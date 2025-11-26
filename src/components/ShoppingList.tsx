@@ -9,7 +9,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Progress } from "@/components/ui/progress";
-import { Share2, Trash2, Plus, CheckCircle2, History, Menu, BarChart3, Globe, Save, ClipboardList, Book, Square, CheckSquare, Printer, Mail, FileSpreadsheet, MessageCircle, Copy, Pencil } from "lucide-react";
+import { Share2, Trash2, Plus, CheckCircle2, History, Menu, BarChart3, Globe, Save, ClipboardList, Book, Square, CheckSquare, Printer, Mail, FileSpreadsheet, Copy, Pencil } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa";
 import { toast } from "sonner";
 import { ShoppingItem, ISRAELI_STORES, UNITS, Unit, SavedList } from "@/types/shopping";
 import { saveShoppingHistory, saveList, getSavedLists, deleteSavedList, updateSavedList } from "@/utils/storage";
@@ -231,11 +232,11 @@ const translations: Record<Language, {
       title: "שמירה ושיתוף הרשימה",
       nameLabel: "שם הרשימה",
       namePlaceholder: "רשימה ליום...",
-      saveButton: "שמור לפנקס",
+      saveButton: "שמור ושתף רשימה",
       shareTitle: "או שתפו את הרשימה",
-      shareWhatsapp: "וואטסאפ",
+      shareWhatsapp: "ווטסאפ",
       shareCopy: "העתק",
-      shareCsv: "ייצוא CSV",
+      shareCsv: "אקסל",
       shareEmail: "אימייל",
       sharePrint: "הדפסה"
     },
@@ -1043,8 +1044,8 @@ export const ShoppingList = () => {
 
           {/* Share Grid */}
           <div className="grid grid-cols-5 gap-2">
-            <Button variant="outline" onClick={handleShareWhatsApp} className="flex flex-col items-center justify-center h-20 gap-2 hover:bg-green-50 hover:text-green-600 hover:border-green-200 transition-colors" title={t.saveDialog.shareWhatsapp}>
-              <MessageCircle className="h-6 w-6" />
+            <Button variant="outline" onClick={handleShareWhatsApp} className="flex flex-col items-center justify-center h-20 gap-2 hover:bg-green-50 hover:border-green-200 transition-colors" title={t.saveDialog.shareWhatsapp}>
+              <FaWhatsapp className="h-6 w-6 text-green-500" />
               <span className="text-xs font-medium hidden sm:inline">{t.saveDialog.shareWhatsapp}</span>
             </Button>
             <Button variant="outline" onClick={() => copyToClipboard(getListText())} className="flex flex-col items-center justify-center h-20 gap-2 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-colors" title={t.saveDialog.shareCopy}>

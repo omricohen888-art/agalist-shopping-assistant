@@ -24,6 +24,13 @@ export interface ShoppingHistory {
   totalItems: number;
 }
 
+export interface SavedList {
+  id: string;
+  name: string;
+  items: ShoppingItem[];
+  createdAt: string;
+}
+
 export const ISRAELI_STORES = [
   "שופרסל",
   "רמי לוי",

@@ -45,3 +45,53 @@ export const clearAllHistory = () => {
     return false;
   }
 };
+
+const LISTS_KEY = "saved_lists";
+
+export const getSavedLists = (): import("@/types/shopping").SavedList[] => {
+  try {
+    const data = localStorage.getItem(LISTS_KEY);
+    return data ? JSON.parse(data) : [];
+  } catch (error) {
+    console.error("Failed to load saved lists:", error);
+    return [];
+  }
+};
+
+export const saveList = (list: import("@/types/shopping").SavedList) => {
+  try {
+    const existing = getSavedLists();
+    const updated = [list, ...existing];
+    localStorage.setItem(LISTS_KEY, JSON.stringify(updated));
+    return true;
+  } catch (error) {
+    console.error("Failed to save list:", error);
+    return false;
+  }
+};
+
+export const deleteSavedList = (id: string) => {
+  try {
+    const existing = getSavedLists();
+    const updated = existing.filter((list) => list.id !== id);
+    localStorage.setItem(LISTS_KEY, JSON.stringify(updated));
+    return true;
+  } catch (error) {
+    console.error("Failed to delete saved list:", error);
+    return false;
+  }
+};
+
+export const updateSavedList = (updatedList: import("@/types/shopping").SavedList) => {
+  try {
+    const existing = getSavedLists();
+    const updated = existing.map((list) =>
+      list.id === updatedList.id ? updatedList : list
+    );
+    localStorage.setItem(LISTS_KEY, JSON.stringify(updated));
+    return true;
+  } catch (error) {
+    console.error("Failed to update saved list:", error);
+    return false;
+  }
+};

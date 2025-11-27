@@ -376,6 +376,7 @@ export const ShoppingList = () => {
   const [singleItemUnit, setSingleItemUnit] = useState<Unit>('units');
   const [activeListId, setActiveListId] = useState<string | null>(null);
   const [showBulkInput, setShowBulkInput] = useState(false); // NEW STATE
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const hasContent = inputText.trim().length > 0 || items.length > 0;
   const titleInputRef = useRef<HTMLInputElement>(null);
 
@@ -616,6 +617,10 @@ export const ShoppingList = () => {
       setIsSaveDialogOpen(false);
       toast.success(t.toasts.listSaved);
 
+      // Show confirmation animation
+      setShowConfirmation(true);
+      setTimeout(() => setShowConfirmation(false), 1200);
+
       // Smooth scroll to My Notebook section
       setTimeout(() => {
         const notebookSection = document.getElementById('my-notebooks');
@@ -753,6 +758,15 @@ export const ShoppingList = () => {
   const progressPercentage = items.length > 0 ? completedCount / items.length * 100 : 0;
 
   return <div className="min-h-screen pb-32 animate-fade-in" dir={direction} lang={language}>
+    {/* List Creation Confirmation Animation */}
+    {showConfirmation && (
+      <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-[fade-in_0.2s_ease-out,scale-in_0.3s_ease-out]">
+        <div className="bg-[#22c55e] text-white rounded-full p-4 shadow-[0_0_20px_rgba(34,197,94,0.5)] animate-pulse">
+          <CheckCircle2 className="h-12 w-12" strokeWidth={3} />
+        </div>
+      </div>
+    )}
+    
     {/* Header */}
     <div className="bg-primary text-primary-foreground shadow-lg sticky top-0 z-10">
       <div className="max-w-3xl mx-auto px-4 py-4">

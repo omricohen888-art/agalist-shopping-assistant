@@ -1,5 +1,5 @@
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ISRAELI_PRODUCTS } from "@/data/israeliProducts";
@@ -16,6 +16,8 @@ export interface SmartAutocompleteInputRef {
   focus: () => void;
 }
 
+const HEBREW_ALPHABET = "אבגדהוזחטיכלמנסעפצקרשת".split("");
+
 export const SmartAutocompleteInput = forwardRef<SmartAutocompleteInputRef, SmartAutocompleteInputProps>(({
   value,
   onChange,
@@ -25,6 +27,8 @@ export const SmartAutocompleteInput = forwardRef<SmartAutocompleteInputRef, Smar
 }, ref) => {
   const [open, setOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [randomSuggestions, setRandomSuggestions] = useState<string[]>([]);
+  const [activeLetter, setActiveLetter] = useState<string | null>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
   useImperativeHandle(ref, () => ({
@@ -33,17 +37,37 @@ export const SmartAutocompleteInput = forwardRef<SmartAutocompleteInputRef, Smar
     },
   }));
 
-  // Filter products based on current value
-  const filteredProducts = ISRAELI_PRODUCTS
-    .filter(product =>
-      product.toLowerCase().includes(value.toLowerCase()) &&
-      product.toLowerCase() !== value.toLowerCase() // Don't show exact matches
-    )
-    .slice(0, 4); // Limit to 4 suggestions for mobile optimization
+  // Initialize random suggestions
+  useEffect(() => {
+    const shuffled = [...ISRAELI_PRODUCTS].sort(() => 0.5 - Math.random());
+    setRandomSuggestions(shuffled.slice(0, 7));
+  }, []);
+
+  // Filter products based on current value or active letter
+  const getFilteredProducts = () => {
+    if (value.trim().length > 0) {
+      return ISRAELI_PRODUCTS
+        .filter(product =>
+          product.toLowerCase().includes(value.toLowerCase()) &&
+          product.toLowerCase() !== value.toLowerCase()
+        )
+        .slice(0, 5);
+    }
+
+    if (activeLetter) {
+      return ISRAELI_PRODUCTS
+        .filter(product => product.startsWith(activeLetter));
+    }
+
+    return randomSuggestions;
+  };
+
+  const filteredProducts = getFilteredProducts();
 
   const handleSelect = (selectedValue: string) => {
     onChange(selectedValue);
     setOpen(false);
+    setActiveLetter(null);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -54,11 +78,10 @@ export const SmartAutocompleteInput = forwardRef<SmartAutocompleteInputRef, Smar
     } else if (e.key === "Enter") {
       e.preventDefault();
       if (open && selectedIndex >= 0 && filteredProducts[selectedIndex]) {
-        // Select highlighted item
         handleSelect(filteredProducts[selectedIndex]);
       } else {
-        // Add current input value (free text)
         onKeyDown?.(e);
+        setOpen(false); // Close on enter if no selection
       }
     } else if (e.key === "ArrowDown" && open) {
       e.preventDefault();
@@ -67,7 +90,6 @@ export const SmartAutocompleteInput = forwardRef<SmartAutocompleteInputRef, Smar
       e.preventDefault();
       setSelectedIndex(prev => Math.max(prev - 1, -1));
     } else {
-      // Reset selection when typing
       setSelectedIndex(-1);
       onKeyDown?.(e);
     }
@@ -75,77 +97,96 @@ export const SmartAutocompleteInput = forwardRef<SmartAutocompleteInputRef, Smar
 
   const handleInputChange = (newValue: string) => {
     onChange(newValue);
-    setSelectedIndex(-1); // Reset selection when typing
-    setOpen(newValue.length > 0 && filteredProducts.length > 0);
+    setSelectedIndex(-1);
+    setActiveLetter(null); // Clear letter filter on typing
+    setOpen(true);
   };
 
   return (
     <div className={cn("relative", className)}>
-      <input
-        ref={inputRef}
-        type="text"
-        value={value}
-        onChange={(e) => handleInputChange(e.target.value)}
-        onKeyDown={handleKeyDown}
-        onFocus={() => {
-          if (filteredProducts.length > 0) {
-            setOpen(true);
-          }
-        }}
-        onBlur={() => {
-          // Delay closing to allow for selection
-          setTimeout(() => {
-            setOpen(false);
-            setSelectedIndex(-1);
-          }, 200);
-        }}
-        placeholder={placeholder}
-        className="flex h-9 w-full rounded-lg border border-input bg-background px-3 py-2 pr-10 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-      />
-      {filteredProducts.length > 0 && (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="absolute right-1 top-1 h-8 w-8 p-0"
-          onClick={() => setOpen(!open)}
-          type="button"
-        >
-          <ChevronsUpDown className="h-4 w-4" />
-        </Button>
-      )}
+      <div className="relative">
+        <input
+          ref={inputRef}
+          type="text"
+          value={value}
+          onChange={(e) => handleInputChange(e.target.value)}
+          onKeyDown={handleKeyDown}
+          onFocus={() => setOpen(true)}
+          onBlur={() => {
+            setTimeout(() => {
+              setOpen(false);
+              setSelectedIndex(-1);
+            }, 200);
+          }}
+          placeholder={placeholder}
+          className="flex h-11 w-full rounded-lg border border-input bg-background px-3 py-2 pr-10 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+        />
+        {value.length === 0 && (
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+        )}
+      </div>
 
       {open && (
-        <div className="absolute top-full z-[100] w-full mt-1" style={{ maxWidth: 'calc(100vw - 1rem)' }}>
-          <div className="rounded-md border bg-popover text-popover-foreground shadow-md max-h-[200px] overflow-y-auto">
-            <div className="p-2">
-              <div className="space-y-1">
-                {filteredProducts.length === 0 ? (
-                  <div className="px-2 py-1 text-sm text-muted-foreground">
-                    {value ? "לא נמצאו מוצרים. לחץ Enter להוספה." : "התחל להקליד..."}
-                  </div>
-                ) : (
-                  filteredProducts.map((product, index) => (
+        <div className="absolute top-full z-[100] w-full mt-1" style={{ maxWidth: 'calc(100vw - 2rem)' }}>
+          <div className="rounded-xl border-2 border-black bg-white text-popover-foreground shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
+
+            {/* Alphabet Filter (Only show when input is empty) */}
+            {value.length === 0 && (
+              <div className="p-2 border-b-2 border-black/10 bg-yellow-50 overflow-x-auto whitespace-nowrap no-scrollbar">
+                <div className="flex gap-1.5">
+                  {HEBREW_ALPHABET.map(letter => (
+                    <button
+                      key={letter}
+                      onMouseDown={(e) => {
+                        e.preventDefault(); // Prevent blur
+                        setActiveLetter(prev => prev === letter ? null : letter);
+                      }}
+                      className={cn(
+                        "w-8 h-8 rounded-lg text-sm font-bold border-2 transition-all flex items-center justify-center flex-shrink-0",
+                        activeLetter === letter
+                          ? "bg-black text-yellow-400 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                          : "bg-white text-black border-black/20 hover:border-black hover:bg-yellow-100"
+                      )}
+                    >
+                      {letter}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="max-h-[240px] overflow-y-auto p-1">
+              {filteredProducts.length === 0 ? (
+                <div className="px-4 py-3 text-sm text-muted-foreground text-center">
+                  {value ? "לא נמצאו מוצרים" : "בחר אות או הקלד לחיפוש"}
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  {filteredProducts.map((product, index) => (
                     <button
                       key={product}
+                      onMouseDown={(e) => {
+                        e.preventDefault(); // Prevent blur
+                        handleSelect(product);
+                      }}
                       className={cn(
-                        "flex w-full items-center px-2 py-1 text-sm rounded-sm",
+                        "flex w-full items-center px-3 py-2.5 text-sm rounded-lg transition-colors font-medium text-right",
                         index === selectedIndex
-                          ? "bg-accent text-accent-foreground"
-                          : "hover:bg-accent hover:text-accent-foreground"
+                          ? "bg-yellow-100 text-black"
+                          : "hover:bg-gray-100 text-gray-700"
                       )}
-                      onClick={() => handleSelect(product)}
                     >
                       <Check
                         className={cn(
-                          "mr-2 h-4 w-4",
-                          value === product || index === selectedIndex ? "opacity-100" : "opacity-0"
+                          "ml-2 h-4 w-4 text-green-600",
+                          value === product ? "opacity-100" : "opacity-0"
                         )}
                       />
                       {product}
                     </button>
-                  ))
-                )}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>

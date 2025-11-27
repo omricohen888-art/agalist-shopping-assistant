@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,13 +9,14 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Progress } from "@/components/ui/progress";
-import { Share2, Trash2, Plus, CheckCircle2, History, Menu, BarChart3, Globe, Save, ClipboardList, Book, Square, CheckSquare, Printer, Mail, FileSpreadsheet, Copy, Pencil, X, ClipboardPaste } from "lucide-react";
+import { Share2, Trash2, Plus, CheckCircle2, History, Menu, BarChart3, Globe, Save, ClipboardList, Book, Square, CheckSquare, Printer, Mail, FileSpreadsheet, Copy, Pencil, X, ClipboardPaste, Info } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import { SmartAutocompleteInput, SmartAutocompleteInputRef } from "@/components/SmartAutocompleteInput";
 import { toast } from "sonner";
 import { ShoppingItem, ISRAELI_STORES, UNITS, Unit, SavedList } from "@/types/shopping";
 import { saveShoppingHistory, saveList, getSavedLists, deleteSavedList, updateSavedList } from "@/utils/storage";
 import { useLanguage, Language } from "@/hooks/use-language";
+import { translations } from "@/utils/translations";
 
 const QuantityInput = ({ value, onChange, unit }: { value: number, onChange: (val: number) => void, unit: Unit }) => {
   const [localValue, setLocalValue] = useState(value.toString());
@@ -93,247 +94,7 @@ const templates = {
   ]
 };
 
-const translations: Record<Language, {
-  languageLabel: string;
-  languageAria: string;
-  appTitle: string;
-  tagline: string;
-  fabLabel: string;
-  menuTitle: string;
-  welcomeHeading: string;
-  welcomeSubtitle: string;
-  templatesHeading: string;
-  addItemButton: string;
-  addItemPlaceholder: string;
-  navigation: {
-    list: string;
-    history: string;
-    compare: string;
-    notebook: string;
-  };
-  shareTitle: string;
-  textareaPlaceholder: string;
-  shareButton: string;
-  clearAllButton: string;
-  emptyState: string;
-  clearCompletedButton: string;
-  finishButton: string;
-  finishDialogTitle: string;
-  finishDialogDescription: string;
-  amountLabel: string;
-  storeLabel: string;
-  selectPlaceholder: string;
-  customStoreLabel: string;
-  customStorePlaceholder: string;
-  summaryLabel: string;
-  cancel: string;
-  save: string;
-  progressText: (completed: number, total: number) => string;
-  toasts: {
-    itemsAdded: (count: number) => string;
-    shareSuccess: string;
-    copySuccess: string;
-    clearedCompleted: string;
-    clearedAll: string;
-    noItems: string;
-    invalidAmount: string;
-    selectStore: string;
-    saveSuccess: string;
-    saveError: string;
-    listSaved: string;
-    listDeleted: string;
-    listLoaded: string;
-    finishWarning: string;
-    listRenamed: string;
-    listUpdated: string;
-  };
-  saveListButton: string;
-  saveChangesButton: string;
-  exitEditMode: string;
-  summarizeButton: string;
-  myListsTitle: string;
-  emptyLists: string;
-  itemsCount: (count: number) => string;
-  moreItems: (count: number) => string;
-  saveDialog: {
-    title: string;
-    nameLabel: string;
-    namePlaceholder: string;
-    saveButton: string;
-    shareTitle: string;
-    shareWhatsapp: string;
-    shareCopy: string;
-    shareCsv: string;
-    shareEmail: string;
-    sharePrint: string;
-  };
-  renameDialog: {
-    title: string;
-    save: string;
-    cancel: string;
-  };
-}> = {
-  he: {
-    languageLabel: "English",
-    languageAria: "Switch to English",
-    appTitle: "עגליסט",
-    tagline: "רושמת, מארגנת וחוסכת!",
-    fabLabel: "להוספת הרשימה לחץ כאן",
-    menuTitle: "🛒 תפריט",
-    welcomeHeading: "שלחו לכם רשימת קניות?",
-    welcomeSubtitle: "הדביקו אותה כאן וקבלו חוויית קנייה מהנה, אינטראקטיבית וחסכונית.",
-    templatesHeading: "אין לכם רשימה? נסו אחת לדוגמה:",
-    addItemButton: "הוסף פריט",
-    addItemPlaceholder: "שם הפריט...",
-    navigation: {
-      list: "רשימת קניות",
-      history: "היסטוריה",
-      compare: "השוואת קניות",
-      notebook: "הפנקס שלי"
-    },
-    shareTitle: "רשימת קניות - עגליסט",
-    textareaPlaceholder: "אין פריטים עדיין. הדביקו רשימה כאן או הוסיפו פריטים כדי להתחיל...",
-    shareButton: "שתף",
-    clearAllButton: "נקה הכל",
-    emptyState: "אין פריטים עדיין. הדביקו רשימה או הוסיפו פריטים כדי להתחיל.",
-    clearCompletedButton: "נקה פריטים שסומנו",
-    finishButton: "סיום קנייה",
-    finishDialogTitle: "סיכום קנייה לסטטיסטיקה",
-    finishDialogDescription: "הזן את פרטי הקנייה כדי לשמור אותה בהיסטוריה",
-    amountLabel: "סכום הקנייה (₪)",
-    storeLabel: "רשת שיווק",
-    selectPlaceholder: "בחר רשת שיווק",
-    customStoreLabel: "שם הרשת",
-    customStorePlaceholder: "הזן שם רשת",
-    summaryLabel: "סיכום:",
-    cancel: "ביטול",
-    save: "שמור קנייה",
-    progressText: (completed: number, total: number) => `${completed} מתוך ${total} פריטים הושלמו`,
-    toasts: {
-      itemsAdded: (count: number) => `נוספו ${count} פריטים`,
-      shareSuccess: "הרשימה שותפה בהצלחה!",
-      copySuccess: "הרשימה הועתקה ללוח!",
-      clearedCompleted: "פריטים שסומנו נמחקו",
-      clearedAll: "הרשימה נוקתה",
-      noItems: "אין פריטים ברשימה",
-      invalidAmount: "אנא הזן סכום תקין",
-      selectStore: "אנא בחר רשת שיווק",
-      saveSuccess: "הקנייה נשמרה בהצלחה!",
-      saveError: "שגיאה בשמירת הקנייה",
-      listSaved: "הרשימה נשמרה בפנקס!",
-      listDeleted: "הרשימה נמחקה",
-      listLoaded: "הרשימה נטענה בהצלחה",
-      finishWarning: "שימו לב: כפתור זה נועד לתיעוד קנייה שהושלמה לצורך מעקב וסטטיסטיקה. אנא סמנו את הפריטים שנרכשו כדי להמשיך.",
-      listRenamed: "שם הרשימה עודכן בהצלחה",
-      listUpdated: "השינויים נשמרו ברשימה בהצלחה"
-    },
-    saveListButton: "שמור רשימה",
-    saveChangesButton: "שמור שינויים",
-    exitEditMode: "יציאה מעריכה",
-    summarizeButton: "סיום ותיעוד",
-    myListsTitle: "הפנקס שלי",
-    emptyLists: "אין רשימות שמורות עדיין",
-    itemsCount: (count: number) => `${count} פריטים`,
-    moreItems: (count: number) => `+${count} נוספים`,
-    saveDialog: {
-      title: "שמירה ושיתוף הרשימה",
-      nameLabel: "שם הרשימה",
-      namePlaceholder: "רשימה ליום...",
-      saveButton: "שמור לפנקס שלי",
-      shareTitle: "או שתפו את הרשימה",
-      shareWhatsapp: "ווטסאפ",
-      shareCopy: "העתק",
-      shareCsv: "אקסל",
-      shareEmail: "אימייל",
-      sharePrint: "הדפסה"
-    },
-    renameDialog: {
-      title: "שנה שם רשימה",
-      save: "שמור",
-      cancel: "ביטול"
-    }
-  },
-  en: {
-    languageLabel: "עברית",
-    languageAria: "Switch to Hebrew",
-    appTitle: "ShoppingList",
-    tagline: "Smart lists. Organized shopping.",
-    fabLabel: "Tap here to add your list",
-    menuTitle: "🛒 Menu",
-    welcomeHeading: "Got a list?",
-    welcomeSubtitle: "Paste it here. We'll handle the rest.",
-    templatesHeading: "No list? Try a sample:",
-    addItemButton: "Add Item",
-    addItemPlaceholder: "Item name...",
-    navigation: {
-      list: "Shopping list",
-      history: "History",
-      compare: "Compare prices",
-      notebook: "My Notebook"
-    },
-    shareTitle: "Shopping List - Agalist",
-    textareaPlaceholder: "No items yet. Paste a list here or add items to get started...",
-    shareButton: "Share",
-    clearAllButton: "Clear all",
-    emptyState: "No items yet. Paste a list or add items to get started.",
-    clearCompletedButton: "Remove checked items",
-    finishButton: "Finish shopping",
-    finishDialogTitle: "Trip Summary",
-    finishDialogDescription: "Enter the purchase details so we can save them to your history.",
-    amountLabel: "Purchase amount (₪)",
-    storeLabel: "Grocery chain",
-    selectPlaceholder: "Choose a grocery chain",
-    customStoreLabel: "Chain name",
-    customStorePlaceholder: "Enter a chain name",
-    summaryLabel: "Summary:",
-    cancel: "Cancel",
-    save: "Save purchase",
-    progressText: (completed: number, total: number) => `${completed} of ${total} items completed`,
-    toasts: {
-      itemsAdded: (count: number) => `Added ${count} items`,
-      shareSuccess: "List shared successfully!",
-      copySuccess: "List copied to clipboard!",
-      clearedCompleted: "Checked items removed",
-      clearedAll: "List cleared",
-      noItems: "No items in the list",
-      invalidAmount: "Please enter a valid amount",
-      selectStore: "Please choose a store",
-      saveSuccess: "Purchase saved successfully!",
-      saveError: "Failed to save purchase",
-      listSaved: "List saved to notebook!",
-      listDeleted: "List deleted",
-      listLoaded: "List loaded successfully",
-      finishWarning: "Attention: This button is for documenting a completed purchase for tracking statistics. Please mark purchased items to proceed.",
-      listRenamed: "List renamed successfully",
-      listUpdated: "Changes saved successfully"
-    },
-    saveListButton: "Save List",
-    saveChangesButton: "Save Changes",
-    exitEditMode: "Exit Edit Mode",
-    summarizeButton: "Summarize & Track",
-    myListsTitle: "My Notebooks",
-    emptyLists: "No saved lists yet",
-    itemsCount: (count: number) => `${count} items`,
-    moreItems: (count: number) => `+${count} more`,
-    saveDialog: {
-      title: "Save & Share List",
-      nameLabel: "List Name",
-      namePlaceholder: "List for...",
-      saveButton: "Save to Notebook",
-      shareTitle: "Or share the list",
-      shareWhatsapp: "WhatsApp",
-      shareCopy: "Copy",
-      shareCsv: "Export CSV",
-      shareEmail: "Email",
-      sharePrint: "Print"
-    },
-    renameDialog: {
-      title: "Rename List",
-      save: "Save",
-      cancel: "Cancel"
-    }
-  }
-};
+
 
 const heToEnStoreMap = ISRAELI_STORES.reduce((acc, store, index) => {
   acc[store] = ENGLISH_STORES[index];
@@ -347,6 +108,7 @@ const enToHeStoreMap = ENGLISH_STORES.reduce((acc, store, index) => {
 
 export const ShoppingList = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [items, setItems] = useState<ShoppingItem[]>([]);
   const [savedLists, setSavedLists] = useState<SavedList[]>([]);
   const [inputText, setInputText] = useState("");
@@ -359,7 +121,7 @@ export const ShoppingList = () => {
   const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
   const [renamingListId, setRenamingListId] = useState<string | null>(null);
   const [renamingListName, setRenamingListName] = useState("");
-  const [customTemplates, setCustomTemplates] = useState<Array<{id: string, name: string, items: string[]}>>([]);
+  const [customTemplates, setCustomTemplates] = useState<Array<{ id: string, name: string, items: string[] }>>([]);
   const [isCreateTemplateDialogOpen, setIsCreateTemplateDialogOpen] = useState(false);
   const [newTemplateName, setNewTemplateName] = useState("");
   const [newTemplateItems, setNewTemplateItems] = useState("");
@@ -378,6 +140,7 @@ export const ShoppingList = () => {
   const [showBulkInput, setShowBulkInput] = useState(false); // NEW STATE
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showAddAnimation, setShowAddAnimation] = useState(false);
+  const [showListSuccess, setShowListSuccess] = useState(false);
   const hasContent = inputText.trim().length > 0 || items.length > 0;
   const titleInputRef = useRef<HTMLInputElement>(null);
 
@@ -417,6 +180,14 @@ export const ShoppingList = () => {
     });
   }, [language]);
 
+  useEffect(() => {
+    if (location.state?.loadList) {
+      handleLoadList(location.state.loadList);
+      // Clear state to avoid reloading on refresh - optional, but good practice
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
+
   const handlePaste = (text: string) => {
     const lines = text.split("\n").map(line => line.trim()).filter(line => line.length > 0);
     const newItems: ShoppingItem[] = lines.map((line, index) => ({
@@ -429,9 +200,9 @@ export const ShoppingList = () => {
     setItems([...items, ...newItems]);
     setInputText("");
 
-    // Show add animation
-    setShowAddAnimation(true);
-    setTimeout(() => setShowAddAnimation(false), 600);
+    // Show success animation
+    setShowListSuccess(true);
+    setTimeout(() => setShowListSuccess(false), 1000);
 
     // Transition to Edit Mode
     const newListId = Date.now().toString();
@@ -502,7 +273,8 @@ export const ShoppingList = () => {
       quantity: quantity,
       unit: singleItemUnit
     };
-    setItems([...items, newItem]);
+
+    setItems([newItem, ...items]); // Prepend item
     setSingleItemInput("");
     setSingleItemQuantity("1");
     setSingleItemUnit('units');
@@ -699,6 +471,21 @@ export const ShoppingList = () => {
     setIsRenameDialogOpen(true);
   };
 
+  const handleToggleSavedItem = (listId: string, itemId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const list = savedLists.find(l => l.id === listId);
+    if (!list) return;
+
+    const updatedItems = list.items.map(item =>
+      item.id === itemId ? { ...item, checked: !item.checked } : item
+    );
+
+    const updatedList = { ...list, items: updatedItems };
+    if (updateSavedList(updatedList)) {
+      setSavedLists(getSavedLists());
+    }
+  };
+
   const confirmRenameList = () => {
     if (!renamingListId || !renamingListName.trim()) return;
 
@@ -766,254 +553,363 @@ export const ShoppingList = () => {
   const completedCount = items.filter(item => item.checked).length;
   const progressPercentage = items.length > 0 ? completedCount / items.length * 100 : 0;
 
-  return <div className="min-h-screen pb-32 animate-fade-in" dir={direction} lang={language}>
-    {/* List Creation Confirmation Animation */}
-    {showConfirmation && (
-      <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-[fade-in_0.2s_ease-out,scale-in_0.3s_ease-out]">
-        <div className="bg-[#22c55e] text-white rounded-full p-4 shadow-[0_0_20px_rgba(34,197,94,0.5)] animate-pulse">
-          <CheckCircle2 className="h-12 w-12" strokeWidth={3} />
-        </div>
-      </div>
-    )}
-
-    {/* Add Item Animation */}
-    {showAddAnimation && (
-      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-none">
-        <div 
-          className="text-6xl font-black animate-[fade-in_0.15s_ease-out,fade-out_0.3s_ease-out_0.3s]"
-          style={{
-            background: 'linear-gradient(135deg, #FACC15 0%, #22c55e 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-            filter: 'drop-shadow(0 2px 8px rgba(250, 204, 21, 0.4))',
-            animation: 'float-up 0.6s ease-out',
-          }}
-        >
-          +
-        </div>
-      </div>
-    )}
-    
-    {/* Header */}
-    <div className="bg-primary text-primary-foreground shadow-lg sticky top-0 z-10">
-      <div className="max-w-3xl mx-auto px-4 py-4">
-        <div className="flex justify-between items-center w-full mb-3 px-4">
-          {/* Title Section - Never truncate */}
-          <div className="flex flex-col gap-0.5 flex-shrink-0">
-            <div className={`flex items-center gap-0.5 text-xl sm:text-2xl md:text-3xl font-black drop-shadow-md leading-tight whitespace-nowrap ${direction === "rtl" ? "flex-row-reverse" : "flex-row"}`}>
-              <span className="flex-shrink-0">{t.appTitle}</span>
-              <div className={`flex items-center flex-shrink-0 ${direction === "rtl" ? "mr-1" : "ml-1"}`}>
-                <span className="text-green-500 text-xl sm:text-2xl md:text-3xl font-black leading-none">✓</span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="36"
-                  height="36"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-7 w-7 sm:h-8 sm:w-8 md:h-10 md:w-10 text-black flex-shrink-0"
-                >
-                  <circle cx="8" cy="21" r="1" />
-                  <circle cx="19" cy="21" r="1" />
-                  <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
-                  <path d="M16.5 7.5H5.9" />
-                  <path d="M16.5 10.5H6.7" />
-                  <path d="M16.5 13.5H7.5" />
-                </svg>
-              </div>
-            </div>
-            <p className="text-xs sm:text-sm text-primary-foreground/90 font-semibold mt-0.5 whitespace-nowrap">{t.tagline}</p>
+  return (
+    <div className="min-h-screen pb-32 animate-fade-in" dir={direction} lang={language}>
+      {/* List Creation Confirmation Animation */}
+      {showConfirmation && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-[fade-in_0.2s_ease-out,scale-in_0.3s_ease-out]">
+          <div className="bg-[#22c55e] text-white rounded-full p-4 shadow-[0_0_20px_rgba(34,197,94,0.5)] animate-pulse">
+            <CheckCircle2 className="h-12 w-12" strokeWidth={3} />
           </div>
-
-          {/* Actions Section - Never shrink */}
-          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-            <Button variant="ghost" size="icon" onClick={toggleLanguage} aria-label={t.languageAria} className="h-10 w-10 p-2 text-primary-foreground hover:bg-black/10 rounded-full">
-              <Globe className="h-6 w-6" />
-            </Button>
-            {/* Hamburger Menu */}
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-10 w-10 p-2 text-primary-foreground hover:bg-black/10 rounded-full">
-                  <Menu className="h-7 w-7" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-[280px] sm:w-[320px]">
-                <SheetHeader>
-                  <SheetTitle className="text-2xl">{t.menuTitle}</SheetTitle>
-                </SheetHeader>
-                <nav className="flex flex-col gap-3 mt-8">
-                  <Button
-                    onClick={() => {
-                      navigate("/");
-                      setTimeout(() => {
-                        const element = document.getElementById("my-notebooks");
-                        if (element) {
-                          element.scrollIntoView({ behavior: "smooth" });
-                        }
-                      }, 300);
-                    }}
-                    className="h-14 justify-start text-lg font-bold bg-primary text-primary-foreground hover:bg-primary/90 border-none shadow-md"
-                  >
-                    <Book className="ml-3 h-5 w-5" />
-                    {t.navigation.notebook}
-                  </Button>
-                  <Button variant="outline" onClick={() => navigate("/")} className="h-14 justify-start text-lg font-semibold">
-                    <Plus className="ml-3 h-5 w-5" />
-                    {t.navigation.list}
-                  </Button>
-                  <Button variant="outline" onClick={() => navigate("/history")} className="h-14 justify-start text-lg font-semibold">
-                    <History className="ml-3 h-5 w-5" />
-                    {t.navigation.history}
-                  </Button>
-                  <Button variant="outline" onClick={() => navigate("/compare")} className="h-14 justify-start text-lg font-semibold">
-                    <BarChart3 className="ml-3 h-5 w-5" />
-                    {t.navigation.compare}
-                  </Button>
-                </nav>
-              </SheetContent>
-            </Sheet >
-          </div >
-        </div >
-        {
-          items.length > 0 && <div className="space-y-2">
-            <Progress value={progressPercentage} className="h-2.5 bg-primary-foreground/20" />
-            <p className="text-sm text-primary-foreground/90 text-center font-medium">
-              {t.progressText(completedCount, items.length)}
-            </p>
-          </div>
-        }
-      </div >
-    </div >
-
-    {/* Main Content */}
-    <div className="max-w-3xl mx-auto px-2 md:px-8 py-6">
-      <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold text-foreground mb-1">
-          {activeListId
-            ? "מעולה! הרשימה מוכנה לעבודה 📝"
-            : t.welcomeHeading
-          }
-        </h2>
-        <p className="text-base font-medium text-muted-foreground">
-          {activeListId
-            ? "תנו לרשימה שם, עדכנו כמויות ושמרו אותה לפנקס."
-            : t.welcomeSubtitle
-          }
-        </p>
-      </div>
-
-      {activeListId && (
-        <div className="flex justify-between items-center w-full mb-4">
-          <input
-            ref={titleInputRef}
-            value={listName}
-            onChange={(e) => setListName(e.target.value)}
-            className="flex-1 bg-transparent text-xl md:text-3xl font-extrabold border-none outline-none px-1 py-1 select-text focus:cursor-text hover:cursor-text transition border-b-2 border-transparent focus:border-gray-400 hover:border-gray-300 focus:outline-none focus:ring-0 truncate"
-            placeholder={language === 'he' ? 'שם הרשימה...' : 'List name...'}
-            style={{ minWidth: 0 }}
-          />
-          <button
-            onClick={exitEditMode}
-            title={t.exitEditMode}
-            className="w-8 h-8 md:w-9 md:h-9 bg-gray-100 hover:bg-gray-200 rounded-full p-1.5 md:p-2 ml-2 flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400"
-            type="button"
-            aria-label={t.exitEditMode}
-          >
-            <X className="h-4 w-4 md:h-5 md:w-5 text-gray-900" />
-          </button>
         </div>
       )}
-      {/* Edit Mode Logic: Toggle Bulk Input, Single Item Row, and Bulk Input Conditional */}
-      {activeListId ? (
-        <>
-          <div className="flex items-baseline gap-2 mb-2">
-            <button
-              type="button"
-              className="flex items-center gap-1 text-black text-xs md:text-sm focus:outline-none hover:underline px-1 py-0.5 rounded transition"
-              onClick={() => setShowBulkInput(v => !v)}
-              aria-expanded={showBulkInput}
-              tabIndex={0}
-            >
-              <ClipboardPaste className="h-4 w-4 md:h-5 md:w-5 text-yellow-400" />
-              <span className="hidden sm:inline">
-                {language === "he"
-                  ? "רוצה להדביק רשימה ארוכה?"
-                  : "Want to paste a long list?"}
-              </span>
-              <span className="sm:hidden">
-                {language === "he" ? "הדבק רשימה" : "Paste List"}
-              </span>
-            </button>
+
+      {/* Add Item Animation */}
+      {showAddAnimation && (
+        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-none">
+          <div
+            className="text-6xl font-black animate-[fade-in_0.15s_ease-out,fade-out_0.3s_ease-out_0.3s]"
+            style={{
+              background: 'linear-gradient(135deg, #FACC15 0%, #22c55e 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              filter: 'drop-shadow(0 2px 8px rgba(250, 204, 21, 0.4))',
+              animation: 'float-up 0.6s ease-out',
+            }}
+          >
+            +
           </div>
-          {/* Single Item Row, Always visible in edit mode */}
-          <div className="bg-card rounded-xl shadow-sm border border-border p-2 md:p-4 mb-6 w-full">
-            <div className="flex w-full items-center gap-1 flex-nowrap">
-              <SmartAutocompleteInput
-                ref={autocompleteInputRef}
-                placeholder="שם המוצר..."
-                value={singleItemInput}
-                onChange={setSingleItemInput}
-                onKeyDown={e => e.key === "Enter" && handleAddSingleItem()}
-                className="flex-1 min-w-0 text-sm relative"
-              />
-              <Input
-                type="number"
-                min="0"
-                step={singleItemUnit === 'units' ? "1" : "0.1"}
-                value={singleItemQuantity}
-                onChange={(e) => setSingleItemQuantity(e.target.value)}
-                className="w-[3.2rem] text-center text-xs rounded-lg shrink-0 px-0"
-                onBlur={() => {
-                  let val = parseFloat(singleItemQuantity);
-                  if (singleItemUnit === 'units' && !isNaN(val)) {
-                    setSingleItemQuantity(Math.round(val).toString());
-                  }
-                }}
-              />
-              <Select
-                value={singleItemUnit}
-                onValueChange={(val: Unit) => {
-                  setSingleItemUnit(val);
-                  if (val === 'units') {
-                    const currentQty = parseFloat(singleItemQuantity);
-                    if (!isNaN(currentQty)) {
-                      setSingleItemQuantity(Math.round(currentQty).toString());
-                    }
-                  }
-                }}
-              >
-                <SelectTrigger className="w-[4rem] text-xs rounded-lg shrink-0 px-0">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {UNITS.map(u => (
-                    <SelectItem key={u.value} value={u.value}>
-                      {language === 'he' ? u.labelHe : u.labelEn}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button onClick={handleAddSingleItem} disabled={!singleItemInput.trim()} className="w-10 h-10 p-0 shrink-0 grid place-items-center bg-yellow-400 text-black rounded-md md:w-auto md:px-6 md:rounded-lg hover:bg-yellow-500">
-                <Plus className="h-4 w-4" />
-                <span className="hidden md:inline-block mr-2">{t.addItemButton}</span>
-              </Button>
+        </div>
+      )}
+      {/* List Created Success Animation */}
+      {showListSuccess && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px] animate-in fade-in duration-200" />
+
+          {/* Success Card */}
+          <div className="relative bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl p-8 flex flex-col items-center gap-4 animate-in zoom-in-90 slide-in-from-bottom-10 duration-300 ease-out">
+            {/* Icon Wrapper */}
+            <div className="relative">
+              <div className="absolute inset-0 bg-green-500/30 rounded-full animate-ping" />
+              <div className="bg-gradient-to-br from-green-400 to-green-600 text-white rounded-full p-4 shadow-lg shadow-green-500/30 relative z-10">
+                <CheckCircle2 className="h-10 w-10 md:h-12 md:w-12 animate-in zoom-in spin-in-12 duration-300" strokeWidth={3} />
+              </div>
+            </div>
+
+            {/* Text Content */}
+            <div className="text-center space-y-1 animate-in slide-in-from-bottom-4 fade-in duration-400 delay-100 fill-mode-both">
+              <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
+                {language === 'he' ? '!הרשימה מוכנה' : 'List Ready!'}
+              </h3>
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                {language === 'he' ? 'עוברים לעריכה...' : 'Moving to edit...'}
+              </p>
             </div>
           </div>
-          {/* The Bulk Input Card, only if toggled on */}
-          {showBulkInput && (
-            <div className="bg-card rounded-xl shadow-sm border border-border p-3 md:p-6 mb-6">
+        </div>
+      )}
+
+      {/* Header */}
+      <div className="bg-stone-200 text-black shadow-sm sticky top-0 z-10 border-b-2 border-black/10">
+        <div className="max-w-3xl mx-auto px-4 py-4">
+          <div className="flex justify-between items-center w-full mb-3 px-4">
+            {/* Title Section - Never truncate */}
+            <div className="flex flex-col gap-0.5 flex-shrink-0">
+              <div className={`flex items-center gap-0.5 text-xl sm:text-2xl md:text-3xl font-black drop-shadow-sm leading-tight whitespace-nowrap ${direction === "rtl" ? "flex-row-reverse" : "flex-row"}`}>
+                <span className="flex-shrink-0">{t.appTitle}</span>
+                <div className={`flex items-center flex-shrink-0 ${direction === "rtl" ? "mr-1" : "ml-1"}`}>
+                  <span className="text-black text-xl sm:text-2xl md:text-3xl font-black leading-none">✓</span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="36"
+                    height="36"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-7 w-7 sm:h-8 sm:w-8 md:h-10 md:w-10 text-black flex-shrink-0"
+                  >
+                    <circle cx="8" cy="21" r="1" />
+                    <circle cx="19" cy="21" r="1" />
+                    <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
+                    <path d="M16.5 7.5H5.9" />
+                    <path d="M16.5 10.5H6.7" />
+                    <path d="M16.5 13.5H7.5" />
+                  </svg>
+                </div>
+              </div>
+              <p className="text-xs sm:text-sm text-black/80 font-bold mt-0.5 whitespace-nowrap">{t.tagline}</p>
+            </div>
+
+            {/* Actions Section - Never shrink */}
+            <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+              <Button variant="ghost" size="icon" onClick={toggleLanguage} aria-label={t.languageAria} className="h-10 w-10 p-2 text-black hover:bg-black/10 rounded-full">
+                <Globe className="h-6 w-6" />
+              </Button>
+              {/* Hamburger Menu */}
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-10 w-10 p-2 text-black hover:bg-black/10 rounded-full">
+                    <Menu className="h-7 w-7" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-[280px] sm:w-[320px]">
+                  <SheetHeader>
+                    <SheetTitle className="text-2xl">{t.menuTitle}</SheetTitle>
+                  </SheetHeader>
+                  <nav className="flex flex-col gap-3 mt-8">
+                    <Button
+                      onClick={() => {
+                        navigate("/");
+                        exitEditMode();
+                      }}
+                      variant="ghost"
+                      className="justify-start text-lg font-bold h-14 px-4 bg-yellow-400/10 hover:bg-yellow-400/20 text-black border-l-4 border-yellow-400"
+                    >
+                      <Plus className="ml-2 h-5 w-5" />
+                      {t.navigation.list}
+                    </Button>
+                    <Button
+                      onClick={() => navigate("/notebook")}
+                      variant="ghost"
+                      className="justify-start text-lg font-medium h-14 px-4 hover:bg-stone-100 text-stone-600"
+                    >
+                      <Book className="ml-2 h-5 w-5" />
+                      {t.navigation.notebook}
+                    </Button>
+                    <Button
+                      onClick={() => navigate("/history")}
+                      variant="ghost"
+                      className="justify-start text-lg font-medium h-14 px-4 hover:bg-stone-100 text-stone-600"
+                    >
+                      <History className="ml-2 h-5 w-5" />
+                      {t.navigation.history}
+                    </Button>
+                    <Button
+                      onClick={() => navigate("/compare")}
+                      variant="ghost"
+                      className="justify-start text-lg font-medium h-14 px-4 hover:bg-stone-100 text-stone-600"
+                    >
+                      <BarChart3 className="ml-2 h-5 w-5" />
+                      {t.navigation.compare}
+                    </Button>
+                    <Button
+                      onClick={() => navigate("/about")}
+                      variant="ghost"
+                      className="justify-start text-lg font-medium h-14 px-4 hover:bg-stone-100 text-stone-600"
+                    >
+                      <Info className="ml-2 h-5 w-5" />
+                      {t.navigation.about}
+                    </Button>
+                  </nav>
+                </SheetContent>
+              </Sheet>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {
+        items.length > 0 && <div className="space-y-2">
+          <Progress value={progressPercentage} className="h-2.5 bg-primary-foreground/20" />
+          <p className="text-sm text-primary-foreground/90 text-center font-medium">
+            {t.progressText(completedCount, items.length)}
+          </p>
+        </div>
+      }
+
+      {/* Main Content */}
+      <div className="max-w-3xl mx-auto px-2 md:px-8 py-6">
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-bold text-foreground mb-1">
+            {activeListId
+              ? "מעולה! הרשימה מוכנה לעבודה 📝"
+              : t.welcomeHeading
+            }
+          </h2>
+          <p className="text-base font-medium text-muted-foreground">
+            {activeListId
+              ? "תנו לרשימה שם, עדכנו כמויות ושמרו אותה לפנקס."
+              : t.welcomeSubtitle
+            }
+          </p>
+        </div>
+
+        {
+          activeListId && (
+            <div className="flex justify-between items-center w-full mb-4">
+              <input
+                ref={titleInputRef}
+                value={listName}
+                onChange={(e) => setListName(e.target.value)}
+                className="flex-1 bg-transparent text-xl md:text-3xl font-extrabold border-none outline-none px-1 py-1 select-text focus:cursor-text hover:cursor-text transition border-b-2 border-transparent focus:border-gray-400 hover:border-gray-300 focus:outline-none focus:ring-0 truncate"
+                placeholder={language === 'he' ? 'שם הרשימה...' : 'List name...'}
+                style={{ minWidth: 0 }}
+              />
+              <button
+                onClick={exitEditMode}
+                title={t.exitEditMode}
+                className="w-8 h-8 md:w-9 md:h-9 bg-gray-100 hover:bg-gray-200 rounded-full p-1.5 md:p-2 ml-2 flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400"
+                type="button"
+                aria-label={t.exitEditMode}
+              >
+                <X className="h-4 w-4 md:h-5 md:w-5 text-gray-900" />
+              </button>
+            </div>
+          )
+        }
+
+        {/* Edit Mode Logic */}
+        {
+          activeListId ? (
+            <>
+              <div className="flex items-baseline gap-2 mb-2">
+                <button
+                  type="button"
+                  className="flex items-center gap-1 text-black text-xs md:text-sm focus:outline-none hover:underline px-1 py-0.5 rounded transition"
+                  onClick={() => setShowBulkInput(v => !v)}
+                  aria-expanded={showBulkInput}
+                  tabIndex={0}
+                >
+                  <ClipboardPaste className="h-4 w-4 md:h-5 md:w-5 text-yellow-400" />
+                  <span className="hidden sm:inline">
+                    {language === "he"
+                      ? "רוצה להדביק רשימה ארוכה?"
+                      : "Want to paste a long list?"}
+                  </span>
+                  <span className="sm:hidden">
+                    {language === "he" ? "הדבק רשימה" : "Paste List"}
+                  </span>
+                </button>
+              </div>
+
+              {/* Single Item Row */}
+              <div className="bg-[#FEFCE8] rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] border-2 border-black p-3 md:p-4 mb-6 w-full relative overflow-hidden">
+                {/* Decorative "Tape" */}
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-24 h-6 bg-white/30 rotate-[-2deg] border-l border-r border-white/40 backdrop-blur-[1px]" />
+
+                <div className="flex w-full items-center gap-2 flex-nowrap relative z-10">
+                  <SmartAutocompleteInput
+                    ref={autocompleteInputRef}
+                    placeholder={t.addItemPlaceholder}
+                    value={singleItemInput}
+                    onChange={setSingleItemInput}
+                    onKeyDown={e => e.key === "Enter" && handleAddSingleItem()}
+                    className="flex-1 min-w-0 text-sm relative border-2 border-black rounded-lg shadow-sm focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all bg-white"
+                  />
+                  <Input
+                    type="number"
+                    min="0"
+                    step={singleItemUnit === 'units' ? "1" : "0.1"}
+                    value={singleItemQuantity}
+                    onChange={(e) => setSingleItemQuantity(e.target.value)}
+                    className="w-[3.5rem] text-center text-xs rounded-lg shrink-0 px-0 border-2 border-black focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all bg-white"
+                    onBlur={() => {
+                      let val = parseFloat(singleItemQuantity);
+                      if (singleItemUnit === 'units' && !isNaN(val)) {
+                        setSingleItemQuantity(Math.round(val).toString());
+                      }
+                    }}
+                  />
+                  <Select
+                    value={singleItemUnit}
+                    onValueChange={(val: Unit) => {
+                      setSingleItemUnit(val);
+                      if (val === 'units') {
+                        const currentQty = parseFloat(singleItemQuantity);
+                        if (!isNaN(currentQty)) {
+                          setSingleItemQuantity(Math.round(currentQty).toString());
+                        }
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="w-[4.5rem] text-xs rounded-lg shrink-0 px-1 border-2 border-black focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all bg-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                      {UNITS.map(u => (
+                        <SelectItem key={u.value} value={u.value}>
+                          {language === 'he' ? u.labelHe : u.labelEn}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    onClick={handleAddSingleItem}
+                    disabled={!singleItemInput.trim()}
+                    className="w-10 h-10 p-0 shrink-0 grid place-items-center bg-black text-yellow-400 rounded-lg md:w-auto md:px-6 border-2 border-transparent hover:border-yellow-400 hover:bg-gray-900 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[1px] active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:bg-stone-600 disabled:text-stone-400"
+                  >
+                    <Plus className="h-5 w-5" />
+                    <span className="hidden md:inline-block mr-2 font-bold">{t.addItemButton}</span>
+                  </Button>
+                </div>
+              </div>
+
+              {/* Bulk Input Card */}
+              {showBulkInput && (
+                <div className="bg-card rounded-xl shadow-sm border border-border p-3 md:p-6 mb-6">
+                  <Textarea
+                    placeholder={t.textareaPlaceholder}
+                    value={inputText}
+                    onChange={e => setInputText(e.target.value)}
+                    className="min-h-[140px] resize-none bg-background border border-input focus:border-primary text-base touch-manipulation rounded-lg"
+                  />
+                  <div className="flex flex-col sm:flex-row gap-2 mt-4 w-full transition-all duration-300 ease-in-out">
+                    <div className={`flex gap-2 overflow-hidden transition-all duration-300 ease-in-out ${hasContent ? 'w-full sm:w-1/3 opacity-100' : 'w-0 opacity-0'}`}>
+                      <Button onClick={clearAll} variant="ghost" className="flex-1 text-muted-foreground hover:text-destructive h-11 text-base font-medium rounded-lg">
+                        <Trash2 className="mr-2 h-5 w-5" />
+                        {t.clearAllButton}
+                      </Button>
+                      <Button onClick={shareList} variant="ghost" className="flex-1 text-muted-foreground h-11 text-base font-medium rounded-lg">
+                        <Share2 className="mr-2 h-5 w-5" />
+                        {t.shareButton}
+                      </Button>
+                    </div>
+                    <Button
+                      onClick={() => handlePaste(inputText)}
+                      disabled={!inputText.trim()}
+                      className={`h-11 text-base font-bold bg-primary text-primary-foreground hover:bg-primary/90 px-8 rounded-lg shadow-md transition-all duration-300 ease-in-out ${hasContent ? 'w-full sm:w-2/3' : 'w-full'}`}
+                    >
+                      <Plus className="mr-2 h-5 w-5" />
+                      {language === "he" ? "הוסף רשימה" : "Add to List"}
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            // Notebook Style Input
+            <div className="relative bg-[#FEFCE8] border-2 border-black rounded-xl p-6 mb-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden"
+              style={{
+                backgroundImage: 'repeating-linear-gradient(transparent, transparent 31px, #e5e7eb 31px, #e5e7eb 32px)'
+              }}
+            >
+              {/* Spiral Binding Effect */}
+              <div className={`absolute top-0 bottom-4 ${language === 'he' ? '-right-3' : '-left-3'} w-8 flex flex-col justify-evenly py-2 z-20 pointer-events-none`}>
+                {[...Array(12)].map((_, i) => (
+                  <div key={i} className="relative h-4 w-full">
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-[#1a1a1a] rounded-full shadow-inner" />
+                    <div className={`absolute top-1/2 ${language === 'he' ? 'left-1/2' : 'right-1/2'} w-6 h-1.5 bg-zinc-400 rounded-full transform ${language === 'he' ? '-translate-x-1/2 rotate-12' : 'translate-x-1/2 -rotate-12'} shadow-sm`} />
+                  </div>
+                ))}
+              </div>
+
               <Textarea
                 placeholder={t.textareaPlaceholder}
                 value={inputText}
                 onChange={e => setInputText(e.target.value)}
-                className="min-h-[140px] resize-none bg-background border border-input focus:border-primary text-base touch-manipulation rounded-lg"
+                className="min-h-[140px] resize-none bg-transparent border-none focus:ring-0 text-base touch-manipulation rounded-lg leading-[31px] -mt-1 shadow-none focus-visible:ring-0"
+                style={{
+                  lineHeight: '31px',
+                  background: 'transparent'
+                }}
               />
-              <div className="flex flex-col sm:flex-row gap-2 mt-4 w-full transition-all duration-300 ease-in-out">
-                {/* Secondary buttons and Add button logic reused */}
+              <div className="flex flex-col sm:flex-row gap-2 mt-4 w-full transition-all duration-300 ease-in-out relative z-10">
+                {/* Secondary buttons */}
                 <div className={`flex gap-2 overflow-hidden transition-all duration-300 ease-in-out ${hasContent ? 'w-full sm:w-1/3 opacity-100' : 'w-0 opacity-0'}`}>
                   <Button onClick={clearAll} variant="ghost" className="flex-1 text-muted-foreground hover:text-destructive h-11 text-base font-medium rounded-lg">
                     <Trash2 className="mr-2 h-5 w-5" />
@@ -1024,416 +920,312 @@ export const ShoppingList = () => {
                     {t.shareButton}
                   </Button>
                 </div>
+                {/* Add button */}
                 <Button
                   onClick={() => handlePaste(inputText)}
                   disabled={!inputText.trim()}
-                  className={`h-11 text-base font-bold bg-primary text-primary-foreground hover:bg-primary/90 px-8 rounded-lg shadow-md transition-all duration-300 ease-in-out ${hasContent ? 'w-full sm:w-2/3' : 'w-full'}`}
+                  className={`h-11 text-base font-bold bg-black text-yellow-400 hover:bg-gray-900 px-8 rounded-lg shadow-md transition-all duration-300 ease-in-out border-2 border-transparent hover:border-yellow-400 ${hasContent ? 'w-full sm:w-2/3' : 'w-full'}`}
                 >
                   <Plus className="mr-2 h-5 w-5" />
-                  {language === "he" ? "הוסף רשימה" : "Add to List"}
+                  {language === "he" ? "הוסף רשימה" : "Add List"}
                 </Button>
               </div>
             </div>
-          )}
-        </>
-      ) : (
-        // New mode: render the original bulk input card
-        <div className="bg-card rounded-xl shadow-sm border border-border p-6 mb-6">
-          <Textarea
-            placeholder={t.textareaPlaceholder}
-            value={inputText}
-            onChange={e => setInputText(e.target.value)}
-            className="min-h-[140px] resize-none bg-background border border-input focus:border-primary text-base touch-manipulation rounded-lg"
-          />
-          <div className="flex flex-col sm:flex-row gap-2 mt-4 w-full transition-all duration-300 ease-in-out">
-            {/* Secondary buttons */}
-            <div className={`flex gap-2 overflow-hidden transition-all duration-300 ease-in-out ${hasContent ? 'w-full sm:w-1/3 opacity-100' : 'w-0 opacity-0'}`}>
-              <Button onClick={clearAll} variant="ghost" className="flex-1 text-muted-foreground hover:text-destructive h-11 text-base font-medium rounded-lg">
-                <Trash2 className="mr-2 h-5 w-5" />
-                {t.clearAllButton}
-              </Button>
-              <Button onClick={shareList} variant="ghost" className="flex-1 text-muted-foreground h-11 text-base font-medium rounded-lg">
-                <Share2 className="mr-2 h-5 w-5" />
-                {t.shareButton}
-              </Button>
-            </div>
-            {/* Add button */}
-            <Button
-              onClick={() => handlePaste(inputText)}
-              disabled={!inputText.trim()}
-              className={`h-11 text-base font-bold bg-primary text-primary-foreground hover:bg-primary/90 px-8 rounded-lg shadow-md transition-all duration-300 ease-in-out ${hasContent ? 'w-full sm:w-2/3' : 'w-full'}`}
-            >
-              <Plus className="mr-2 h-5 w-5" />
-              {language === "he" ? "הוסף רשימה" : "Add List"}
-            </Button>
-          </div>
-        </div>
-      )}
+          )
+        }
 
-      {/* Quick Start Templates - only show when no items */}
-      {
-        items.length === 0 && (
-          <div className="mb-7">
-            <p className="text-sm font-medium text-muted-foreground mb-4 text-center">
-              {t.templatesHeading}
-            </p>
-            <div className="flex flex-wrap justify-center gap-2.5">
-              {/* Custom Templates First */}
-              {customTemplates.map((template) => (
+        {/* Quick Start Templates */}
+        {
+          items.length === 0 && (
+            <div className="mb-7">
+              <p className="text-sm font-medium text-muted-foreground mb-4 text-center">
+                {t.templatesHeading}
+              </p>
+              <div className="flex flex-wrap justify-center gap-2.5">
+                {customTemplates.map((template) => (
+                  <button
+                    key={template.id}
+                    onClick={() => handleTemplateClick(template.items)}
+                    className="px-4 py-2.5 rounded-lg bg-white text-black text-sm font-bold border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all touch-manipulation"
+                  >
+                    {template.name}
+                  </button>
+                ))}
+
+                {currentTemplates.map((template) => (
+                  <button
+                    key={template.id}
+                    onClick={() => handleTemplateClick(template.items)}
+                    className="px-4 py-2.5 rounded-lg bg-white text-black text-sm font-bold border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all touch-manipulation"
+                  >
+                    {template.name}
+                  </button>
+                ))}
+
                 <button
-                  key={template.id}
-                  onClick={() => handleTemplateClick(template.items)}
-                  className="px-4 py-2.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary-foreground text-sm font-medium border border-primary/20 touch-manipulation transition-colors shadow-sm"
+                  onClick={() => setIsCreateTemplateDialogOpen(true)}
+                  className="px-4 py-2.5 rounded-lg bg-yellow-400 text-black text-sm font-bold border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all touch-manipulation flex items-center gap-2"
                 >
-                  {template.name}
+                  <Plus className="h-4 w-4" />
+                  {language === 'he' ? 'צור תבנית' : 'Create Template'}
                 </button>
-              ))}
-
-              {/* Default Templates */}
-              {currentTemplates.map((template) => (
-                <button
-                  key={template.id}
-                  onClick={() => handleTemplateClick(template.items)}
-                  className="px-4 py-2.5 rounded-lg bg-secondary/40 hover:bg-secondary/60 text-secondary-foreground text-sm font-medium border border-border/40 touch-manipulation transition-colors shadow-sm"
-                >
-                  {template.name}
-                </button>
-              ))}
-
-              {/* Create New Template Button */}
-              <button
-                onClick={() => setIsCreateTemplateDialogOpen(true)}
-                className="px-4 py-2.5 rounded-lg border-2 border-dashed border-muted-foreground/50 hover:border-muted-foreground hover:bg-muted/30 text-muted-foreground hover:text-foreground text-sm font-medium touch-manipulation transition-colors shadow-sm flex items-center gap-2"
-              >
-                <Plus className="h-4 w-4" />
-                {language === 'he' ? 'צור תבנית' : 'Create Template'}
-              </button>
+              </div>
             </div>
-          </div>
-        )
-      }
+          )
+        }
 
-      {/* Lists Dashboard (My Notebooks) */}
-      {
-        savedLists.length > 0 && items.length === 0 && (
-          <div className="mb-8" id="my-notebooks">
-            <div className="flex items-center gap-2 mb-4">
-              <Book className="h-5 w-5 text-primary" />
-              <h3 className="text-lg font-bold text-foreground">{t.myListsTitle}</h3>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {savedLists.map((list) => (
-                <div
-                  key={list.id}
-                  onClick={() => handleLoadList(list)}
-                  className="bg-yellow-50 dark:bg-card border border-gray-200 dark:border-border rounded-lg p-4 shadow-md hover:shadow-lg transition-all cursor-pointer group relative overflow-hidden"
-                >
-                  <div className="flex justify-between items-start mb-3 border-b border-gray-200/60 pb-2">
-                    <div>
-                      <h4 className="font-bold text-lg text-gray-800 dark:text-foreground font-handwriting">{list.name}</h4>
-                      <p className="text-xs text-muted-foreground mt-0.5">{t.itemsCount(list.items.length)}</p>
-                    </div>
-                    <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200 -mr-2 -mt-2">
-                      <span className="text-sm text-black font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                        {language === 'he' ? 'ערוך רשימה' : 'Edit List'}
-                      </span>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={e => { e.stopPropagation(); handleRenameList(list, e); }}
-                        className="h-8 w-8 text-muted-foreground hover:text-primary"
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={e => { e.stopPropagation(); handleDeleteList(list.id, e); }}
-                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+        {/* Items List */}
+        {
+          items.length > 0 && (
+            <div className="space-y-2.5">
+              {items.map((item) => (
+                <div key={item.id} className="bg-white rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] border-2 border-black p-3 flex flex-row items-center justify-between flex-nowrap w-full gap-3 group hover:translate-y-[-2px] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] transition-all touch-manipulation animate-in slide-in-from-top-4 fade-in duration-300">
+                  <Checkbox checked={item.checked} onCheckedChange={() => toggleItem(item.id)} className="h-6 w-6 border-2 border-black flex-shrink-0 data-[state=checked]:bg-black data-[state=checked]:text-yellow-400 transition-all rounded-md" />
+                  <span className={`flex-grow text-lg leading-relaxed transition-all text-right truncate min-w-0 font-bold ${item.checked ? "line-through text-gray-400 decoration-2" : "text-black"}`}>
+                    {item.text}
+                  </span>
+
+                  <div className="flex items-center gap-2 flex-shrink-0 border-l-2 border-black/10 pl-2" onClick={(e) => e.stopPropagation()}>
+                    <QuantityInput
+                      value={item.quantity || 1}
+                      onChange={(val) => updateItemQuantity(item.id, val)}
+                      unit={item.unit}
+                    />
+                    <Select
+                      value={item.unit || 'units'}
+                      onValueChange={(val: Unit) => updateItemUnit(item.id, val)}
+                    >
+                      <SelectTrigger className="w-16 h-9 px-1 text-xs rounded-lg border-2 border-black/20 hover:border-black focus:border-black transition-colors">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                        {UNITS.map(u => (
+                          <SelectItem key={u.value} value={u.value}>
+                            {language === 'he' ? u.labelHe : u.labelEn}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Button variant="ghost" size="icon" onClick={() => deleteItem(item.id)} className="h-9 w-9 flex-shrink-0 hover:bg-red-100 text-red-500 hover:text-red-600 touch-manipulation rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Trash2 className="h-5 w-5" />
+                    </Button>
                   </div>
-
-                  <div className="grid grid-cols-3 gap-x-4 gap-y-2 mb-2">
-                    {list.items.slice(0, 9).map((item, idx) => (
-                      <div key={idx} className="flex items-center gap-1.5 min-w-0">
-                        {item.checked ? (
-                          <CheckSquare className="h-3 w-3 text-black flex-shrink-0" />
-                        ) : (
-                          <Square className="h-3 w-3 text-muted-foreground/40 flex-shrink-0" />
-                        )}
-                        <span className={`truncate text-sm font-medium ${item.checked ? "text-muted-foreground" : "text-gray-700 dark:text-muted-foreground"}`}>
-                          {item.text}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-
-                  {list.items.length > 9 && (
-                    <div className="text-xs font-handwriting text-primary/80 mt-2 text-end italic">
-                      {t.moreItems(list.items.length - 9)}
-                    </div>
-                  )}
                 </div>
               ))}
+              <div className="pt-6 flex flex-col sm:flex-row gap-4">
+                {(() => {
+                  const isSavedList = activeListId && savedLists.some(list => list.id === activeListId);
+                  return (
+                    <Button variant="outline" onClick={handleSaveList} className="w-full sm:flex-1 h-12 font-bold text-base touch-manipulation rounded-xl border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-2px] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] active:translate-y-[0px] active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all bg-green-500 text-white hover:bg-green-600 hover:text-white border-green-700">
+                      <Save className="ml-2 h-5 w-5" />
+                      {isSavedList ? t.saveChangesButton : t.saveListButton}
+                    </Button>
+                  );
+                })()}
+                <Button onClick={openFinishDialog} className="w-full sm:flex-1 h-12 font-bold bg-yellow-400 text-black hover:bg-yellow-500 text-base touch-manipulation rounded-xl border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-2px] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] active:translate-y-[0px] active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all">
+                  <ClipboardList className="ml-2 h-5 w-5" />
+                  {t.summarizeButton}
+                </Button>
+              </div>
             </div>
-          </div>
-        )
-      }
+          )
+        }
 
-      {/* Add Item input - only show when list has items */}
-      {
-        items.length > 0 && (
-          <div className="space-y-2.5">
-            {items.map((item) => (
-              <div key={item.id} className="bg-card rounded-xl shadow-sm border border-border/60 p-3 flex flex-row items-center justify-between flex-nowrap w-full gap-2 group hover:shadow-md hover:border-border transition-all touch-manipulation">
-                <Checkbox checked={item.checked} onCheckedChange={() => toggleItem(item.id)} className="h-5 w-5 border-2 flex-shrink-0 data-[state=checked]:bg-primary data-[state=checked]:border-primary transition-all rounded" />
-                <span className={`flex-grow text-base leading-relaxed transition-all text-right truncate min-w-0 ${item.checked ? "completed-item" : "text-foreground font-medium"}`}>
-                  {item.text}
-                </span>
+        <Dialog open={isFinishDialogOpen} onOpenChange={setIsFinishDialogOpen}>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle className="text-2xl">{t.finishDialogTitle}</DialogTitle>
+              <DialogDescription className="text-base">
+                {t.finishDialogDescription}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-6 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="amount" className="text-base font-semibold">
+                  {t.amountLabel}
+                </Label>
+                <Input id="amount" type="number" placeholder="0.00" value={totalAmount} onChange={e => setTotalAmount(e.target.value)} className="h-12 text-lg" min="0" step="0.01" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="store" className="text-base font-semibold">
+                  {t.storeLabel}
+                </Label>
+                <Select value={selectedStore} onValueChange={setSelectedStore}>
+                  <SelectTrigger className="h-12 text-lg">
+                    <SelectValue placeholder={t.selectPlaceholder} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {storeOptions.map(store => <SelectItem key={store} value={store} className="text-lg">
+                      {store}
+                    </SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              {selectedStore === otherLabel && <div className="space-y-2">
+                <Label htmlFor="customStore" className="text-base font-semibold">
+                  {t.customStoreLabel}
+                </Label>
+                <Input id="customStore" type="text" placeholder={t.customStorePlaceholder} value={customStore} onChange={e => setCustomStore(e.target.value)} className="h-12 text-lg" />
+              </div>}
+              <div className="bg-muted/50 rounded-lg p-4 space-y-1">
+                <p className="text-sm text-muted-foreground">{t.summaryLabel}</p>
+                <p className="text-lg font-semibold">
+                  {t.progressText(items.filter(item => item.checked).length, items.length)}
+                </p>
+              </div>
+            </div>
+            <DialogFooter className="gap-2">
+              <Button variant="outline" onClick={() => setIsFinishDialogOpen(false)} className="h-11 px-6">
+                {t.cancel}
+              </Button>
+              <Button onClick={handleFinishShopping} className="h-11 px-6 bg-success hover:bg-success/90">
+                <CheckCircle2 className="ml-2 h-4 w-4" />
+                {t.save}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
-                <div className="flex items-center gap-2 flex-shrink-0 border-l border-border/40 pl-2" onClick={(e) => e.stopPropagation()}>
-                  <QuantityInput
-                    value={item.quantity || 1}
-                    onChange={(val) => updateItemQuantity(item.id, val)}
-                    unit={item.unit}
+        <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold">{t.saveDialog.title}</DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-6 py-4">
+              {/* Save Section */}
+              <div className="space-y-3">
+                <Label htmlFor="listName" className="text-base font-semibold">
+                  {t.saveDialog.nameLabel}
+                </Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="listName"
+                    value={listName}
+                    onChange={e => setListName(e.target.value)}
+                    placeholder={t.saveDialog.namePlaceholder}
+                    className="h-11 text-lg"
                   />
-                  <Select
-                    value={item.unit || 'units'}
-                    onValueChange={(val: Unit) => updateItemUnit(item.id, val)}
-                  >
-                    <SelectTrigger className="w-16 h-9 px-1 text-xs rounded-lg">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {UNITS.map(u => (
-                        <SelectItem key={u.value} value={u.value}>
-                          {language === 'he' ? u.labelHe : u.labelEn}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Button variant="ghost" size="icon" onClick={() => deleteItem(item.id)} className="h-9 w-9 flex-shrink-0 hover:bg-destructive/10 hover:text-destructive touch-manipulation rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Trash2 className="h-4.5 w-4.5" />
+                  <Button onClick={confirmSaveList} className="h-11 px-6 bg-primary hover:bg-primary/90 font-bold shrink-0">
+                    <Save className="mr-2 h-4 w-4" />
+                    {t.saveDialog.saveButton}
                   </Button>
                 </div>
               </div>
-            ))}
-            <div className="pt-5 flex flex-col sm:flex-row gap-3">
-              {(() => {
-                const isSavedList = activeListId && savedLists.some(list => list.id === activeListId);
-                return (
-                  <Button variant="outline" onClick={handleSaveList} className="w-full sm:flex-1 h-11 font-medium text-base touch-manipulation rounded-lg border-primary/20 hover:bg-primary/5 hover:text-primary">
-                    <Save className="ml-2 h-5 w-5" />
-                    {isSavedList ? t.saveChangesButton : t.saveListButton}
-                  </Button>
-                );
-              })()}
-              <Button onClick={openFinishDialog} className="w-full sm:flex-1 h-11 font-semibold bg-primary hover:bg-primary/90 text-base touch-manipulation rounded-lg shadow-sm">
-                <ClipboardList className="ml-2 h-5 w-5" />
-                {t.summarizeButton}
-              </Button>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">
+                    {t.saveDialog.shareTitle}
+                  </span>
+                </div>
+              </div>
+
+              {/* Share Grid */}
+              <div className="grid grid-cols-5 gap-2">
+                <Button variant="outline" onClick={handleShareWhatsApp} className="flex flex-col items-center justify-center h-20 gap-2 hover:bg-green-50 hover:border-green-200 transition-colors" title={t.saveDialog.shareWhatsapp}>
+                  <FaWhatsapp className="h-6 w-6 text-green-500" />
+                  <span className="text-xs font-medium hidden sm:inline">{t.saveDialog.shareWhatsapp}</span>
+                </Button>
+                <Button variant="outline" onClick={() => copyToClipboard(getListText())} className="flex flex-col items-center justify-center h-20 gap-2 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-colors" title={t.saveDialog.shareCopy}>
+                  <Copy className="h-6 w-6" />
+                  <span className="text-xs font-medium hidden sm:inline">{t.saveDialog.shareCopy}</span>
+                </Button>
+                <Button variant="outline" onClick={handleExportCSV} className="flex flex-col items-center justify-center h-20 gap-2 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 transition-colors" title={t.saveDialog.shareCsv}>
+                  <FileSpreadsheet className="h-6 w-6" />
+                  <span className="text-xs font-medium hidden sm:inline">{t.saveDialog.shareCsv}</span>
+                </Button>
+                <Button variant="outline" onClick={handleShareEmail} className="flex flex-col items-center justify-center h-20 gap-2 hover:bg-purple-50 hover:text-purple-600 hover:border-purple-200 transition-colors" title={t.saveDialog.shareEmail}>
+                  <Mail className="h-6 w-6" />
+                  <span className="text-xs font-medium hidden sm:inline">{t.saveDialog.shareEmail}</span>
+                </Button>
+                <Button variant="outline" onClick={handlePrint} className="flex flex-col items-center justify-center h-20 gap-2 hover:bg-gray-100 hover:text-gray-900 hover:border-gray-300 transition-colors" title={t.saveDialog.sharePrint}>
+                  <Printer className="h-6 w-6" />
+                  <span className="text-xs font-medium hidden sm:inline">{t.saveDialog.sharePrint}</span>
+                </Button>
+              </div>
             </div>
-          </div>
-        )
-      }
-    </div >
+          </DialogContent>
+        </Dialog>
 
-    <Dialog open={isFinishDialogOpen} onOpenChange={setIsFinishDialogOpen}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle className="text-2xl">{t.finishDialogTitle}</DialogTitle>
-          <DialogDescription className="text-base">
-            {t.finishDialogDescription}
-          </DialogDescription>
-        </DialogHeader>
-        <div className="space-y-6 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="amount" className="text-base font-semibold">
-              {t.amountLabel}
-            </Label>
-            <Input id="amount" type="number" placeholder="0.00" value={totalAmount} onChange={e => setTotalAmount(e.target.value)} className="h-12 text-lg" min="0" step="0.01" />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="store" className="text-base font-semibold">
-              {t.storeLabel}
-            </Label>
-            <Select value={selectedStore} onValueChange={setSelectedStore}>
-              <SelectTrigger className="h-12 text-lg">
-                <SelectValue placeholder={t.selectPlaceholder} />
-              </SelectTrigger>
-              <SelectContent>
-                {storeOptions.map(store => <SelectItem key={store} value={store} className="text-lg">
-                  {store}
-                </SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-          {selectedStore === otherLabel && <div className="space-y-2">
-            <Label htmlFor="customStore" className="text-base font-semibold">
-              {t.customStoreLabel}
-            </Label>
-            <Input id="customStore" type="text" placeholder={t.customStorePlaceholder} value={customStore} onChange={e => setCustomStore(e.target.value)} className="h-12 text-lg" />
-          </div>}
-          <div className="bg-muted/50 rounded-lg p-4 space-y-1">
-            <p className="text-sm text-muted-foreground">{t.summaryLabel}</p>
-            <p className="text-lg font-semibold">
-              {t.progressText(items.filter(item => item.checked).length, items.length)}
-            </p>
-          </div>
-        </div>
-        <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={() => setIsFinishDialogOpen(false)} className="h-11 px-6">
-            {t.cancel}
-          </Button>
-          <Button onClick={handleFinishShopping} className="h-11 px-6 bg-success hover:bg-success/90">
-            <CheckCircle2 className="ml-2 h-4 w-4" />
-            {t.save}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-
-    <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">{t.saveDialog.title}</DialogTitle>
-        </DialogHeader>
-
-        <div className="space-y-6 py-4">
-          {/* Save Section */}
-          <div className="space-y-3">
-            <Label htmlFor="listName" className="text-base font-semibold">
-              {t.saveDialog.nameLabel}
-            </Label>
-            <div className="flex gap-2">
+        <Dialog open={isRenameDialogOpen} onOpenChange={setIsRenameDialogOpen}>
+          <DialogContent className="sm:max-w-[400px]">
+            <DialogHeader>
+              <DialogTitle>{t.renameDialog.title}</DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
               <Input
-                id="listName"
-                value={listName}
-                onChange={e => setListName(e.target.value)}
-                placeholder={t.saveDialog.namePlaceholder}
+                value={renamingListName}
+                onChange={(e) => setRenamingListName(e.target.value)}
                 className="h-11 text-lg"
+                onKeyDown={(e) => e.key === "Enter" && confirmRenameList()}
               />
-              <Button onClick={confirmSaveList} className="h-11 px-6 bg-primary hover:bg-primary/90 font-bold shrink-0">
-                <Save className="mr-2 h-4 w-4" />
-                {t.saveDialog.saveButton}
+            </div>
+            <DialogFooter className="gap-2">
+              <Button variant="outline" onClick={() => setIsRenameDialogOpen(false)}>
+                {t.renameDialog.cancel}
               </Button>
+              <Button onClick={confirmRenameList}>
+                {t.renameDialog.save}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Template Dialog */}
+        <Dialog open={isCreateTemplateDialogOpen} onOpenChange={setIsCreateTemplateDialogOpen}>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold">
+                {language === 'he' ? 'יצירת תבנית חדשה' : 'Create New Template'}
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-6 py-4">
+              {/* Template Name */}
+              <div className="space-y-3">
+                <Label htmlFor="templateName" className="text-base font-semibold">
+                  {language === 'he' ? 'שם התבנית' : 'Template Name'}
+                </Label>
+                <Input
+                  id="templateName"
+                  value={newTemplateName}
+                  onChange={(e) => setNewTemplateName(e.target.value)}
+                  placeholder={language === 'he' ? 'למשל: הקנייה הקבועה שלי' : 'e.g., My Regular Shopping'}
+                  className="h-11 text-lg"
+                />
+              </div>
+
+              {/* Template Items */}
+              <div className="space-y-3">
+                <Label htmlFor="templateItems" className="text-base font-semibold">
+                  {language === 'he' ? 'פריטי התבנית' : 'Template Items'}
+                </Label>
+                <Textarea
+                  id="templateItems"
+                  value={newTemplateItems}
+                  onChange={(e) => setNewTemplateItems(e.target.value)}
+                  placeholder={language === 'he' ? 'הדבק או הקלד את רשימת הקניות שלך, כל פריט בשורה נפרדת' : 'Paste or type your shopping list, one item per line'}
+                  className="min-h-[120px] text-base resize-none"
+                />
+              </div>
             </div>
-          </div>
 
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                {t.saveDialog.shareTitle}
-              </span>
-            </div>
-          </div>
-
-          {/* Share Grid */}
-          <div className="grid grid-cols-5 gap-2">
-            <Button variant="outline" onClick={handleShareWhatsApp} className="flex flex-col items-center justify-center h-20 gap-2 hover:bg-green-50 hover:border-green-200 transition-colors" title={t.saveDialog.shareWhatsapp}>
-              <FaWhatsapp className="h-6 w-6 text-green-500" />
-              <span className="text-xs font-medium hidden sm:inline">{t.saveDialog.shareWhatsapp}</span>
-            </Button>
-            <Button variant="outline" onClick={() => copyToClipboard(getListText())} className="flex flex-col items-center justify-center h-20 gap-2 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-colors" title={t.saveDialog.shareCopy}>
-              <Copy className="h-6 w-6" />
-              <span className="text-xs font-medium hidden sm:inline">{t.saveDialog.shareCopy}</span>
-            </Button>
-            <Button variant="outline" onClick={handleExportCSV} className="flex flex-col items-center justify-center h-20 gap-2 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 transition-colors" title={t.saveDialog.shareCsv}>
-              <FileSpreadsheet className="h-6 w-6" />
-              <span className="text-xs font-medium hidden sm:inline">{t.saveDialog.shareCsv}</span>
-            </Button>
-            <Button variant="outline" onClick={handleShareEmail} className="flex flex-col items-center justify-center h-20 gap-2 hover:bg-purple-50 hover:text-purple-600 hover:border-purple-200 transition-colors" title={t.saveDialog.shareEmail}>
-              <Mail className="h-6 w-6" />
-              <span className="text-xs font-medium hidden sm:inline">{t.saveDialog.shareEmail}</span>
-            </Button>
-            <Button variant="outline" onClick={handlePrint} className="flex flex-col items-center justify-center h-20 gap-2 hover:bg-gray-100 hover:text-gray-900 hover:border-gray-300 transition-colors" title={t.saveDialog.sharePrint}>
-              <Printer className="h-6 w-6" />
-              <span className="text-xs font-medium hidden sm:inline">{t.saveDialog.sharePrint}</span>
-            </Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-
-    <Dialog open={isRenameDialogOpen} onOpenChange={setIsRenameDialogOpen}>
-      <DialogContent className="sm:max-w-[400px]">
-        <DialogHeader>
-          <DialogTitle>{t.renameDialog.title}</DialogTitle>
-        </DialogHeader>
-        <div className="py-4">
-          <Input
-            value={renamingListName}
-            onChange={(e) => setRenamingListName(e.target.value)}
-            className="h-11 text-lg"
-            onKeyDown={(e) => e.key === "Enter" && confirmRenameList()}
-          />
-        </div>
-        <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={() => setIsRenameDialogOpen(false)}>
-            {t.renameDialog.cancel}
-          </Button>
-          <Button onClick={confirmRenameList}>
-            {t.renameDialog.save}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-
-    {/* Create Template Dialog */}
-    <Dialog open={isCreateTemplateDialogOpen} onOpenChange={setIsCreateTemplateDialogOpen}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">
-            {language === 'he' ? 'יצירת תבנית חדשה' : 'Create New Template'}
-          </DialogTitle>
-        </DialogHeader>
-
-        <div className="space-y-6 py-4">
-          {/* Template Name */}
-          <div className="space-y-3">
-            <Label htmlFor="templateName" className="text-base font-semibold">
-              {language === 'he' ? 'שם התבנית' : 'Template Name'}
-            </Label>
-            <Input
-              id="templateName"
-              value={newTemplateName}
-              onChange={(e) => setNewTemplateName(e.target.value)}
-              placeholder={language === 'he' ? 'למשל: הקנייה הקבועה שלי' : 'e.g., My Regular Shopping'}
-              className="h-11 text-lg"
-            />
-          </div>
-
-          {/* Template Items */}
-          <div className="space-y-3">
-            <Label htmlFor="templateItems" className="text-base font-semibold">
-              {language === 'he' ? 'פריטי התבנית' : 'Template Items'}
-            </Label>
-            <Textarea
-              id="templateItems"
-              value={newTemplateItems}
-              onChange={(e) => setNewTemplateItems(e.target.value)}
-              placeholder={language === 'he' ? 'הדבק או הקלד את רשימת הקניות שלך, כל פריט בשורה נפרדת' : 'Paste or type your shopping list, one item per line'}
-              className="min-h-[120px] text-base resize-none"
-            />
-          </div>
-        </div>
-
-        <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={() => setIsCreateTemplateDialogOpen(false)}>
-            {t.cancel}
-          </Button>
-          <Button onClick={handleCreateTemplate} className="bg-primary hover:bg-primary/90 font-bold">
-            <Save className="mr-2 h-4 w-4" />
-            {language === 'he' ? 'שמור תבנית' : 'Save Template'}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  </div >;
+            <DialogFooter className="gap-2">
+              <Button variant="outline" onClick={() => setIsCreateTemplateDialogOpen(false)}>
+                {t.cancel}
+              </Button>
+              <Button onClick={handleCreateTemplate} className="bg-primary hover:bg-primary/90 font-bold">
+                <Save className="mr-2 h-4 w-4" />
+                {language === 'he' ? 'שמור תבנית' : 'Save Template'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </div>
+  );
 };

@@ -7,9 +7,14 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import Index from "./pages/Index";
 import History from "./pages/History";
 import Compare from "./pages/Compare";
+import MyNotebook from "./pages/MyNotebook";
+import About from "./pages/About";
 import NotFound from "./pages/NotFound";
+
 const queryClient = new QueryClient();
-const App = () => <QueryClientProvider client={queryClient}>
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
     <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
       <TooltipProvider>
         <Toaster />
@@ -19,11 +24,15 @@ const App = () => <QueryClientProvider client={queryClient}>
             <Route path="/" element={<Index />} />
             <Route path="/history" element={<History />} />
             <Route path="/compare" element={<Compare />} />
+            <Route path="/notebook" element={<MyNotebook />} />
+            <Route path="/about" element={<About />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
     </ThemeProvider>
-  </QueryClientProvider>;
+  </QueryClientProvider>
+);
+
 export default App;

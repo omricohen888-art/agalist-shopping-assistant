@@ -39,7 +39,7 @@ export const SmartAutocompleteInput = forwardRef<SmartAutocompleteInputRef, Smar
       product.toLowerCase().includes(value.toLowerCase()) &&
       product.toLowerCase() !== value.toLowerCase() // Don't show exact matches
     )
-    .slice(0, 10); // Limit to 10 suggestions for performance
+    .slice(0, 4); // Limit to 4 suggestions for mobile optimization
 
   const handleSelect = (selectedValue: string) => {
     onChange(selectedValue);
@@ -100,7 +100,7 @@ export const SmartAutocompleteInput = forwardRef<SmartAutocompleteInputRef, Smar
           }, 200);
         }}
         placeholder={placeholder}
-        className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 pr-10 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex h-9 w-full rounded-lg border border-input bg-background px-3 py-2 pr-10 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
       />
       {filteredProducts.length > 0 && (
         <Button
@@ -115,8 +115,8 @@ export const SmartAutocompleteInput = forwardRef<SmartAutocompleteInputRef, Smar
       )}
 
       {open && (
-        <div className="absolute top-full z-50 w-full mt-1">
-          <div className="rounded-md border bg-popover text-popover-foreground shadow-md">
+        <div className="absolute top-full z-[100] w-full mt-1" style={{ maxWidth: 'calc(100vw - 1rem)' }}>
+          <div className="rounded-md border bg-popover text-popover-foreground shadow-md max-h-[200px] overflow-y-auto">
             <div className="p-2">
               <div className="space-y-1">
                 {filteredProducts.length === 0 ? (

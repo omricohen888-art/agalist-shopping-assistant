@@ -848,7 +848,7 @@ export const ShoppingList = () => {
     </div >
 
     {/* Main Content */}
-    <div className="max-w-3xl mx-auto px-5 py-6">
+    <div className="max-w-3xl mx-auto px-2 md:px-8 py-6">
       <div className="text-center mb-6">
         <h2 className="text-2xl font-bold text-foreground mb-1">
           {activeListId
@@ -865,51 +865,24 @@ export const ShoppingList = () => {
       </div>
 
       {activeListId && (
-        <div className="flex justify-between items-center w-full mb-6">
-          {/* Redesigned Close/Exit Button */}
+        <div className="flex justify-between items-center w-full mb-4">
+          <input
+            ref={titleInputRef}
+            value={listName}
+            onChange={(e) => setListName(e.target.value)}
+            className="flex-1 bg-transparent text-xl md:text-3xl font-extrabold border-none outline-none px-1 py-1 select-text focus:cursor-text hover:cursor-text transition border-b-2 border-transparent focus:border-gray-400 hover:border-gray-300 focus:outline-none focus:ring-0 truncate"
+            placeholder={language === 'he' ? 'שם הרשימה...' : 'List name...'}
+            style={{ minWidth: 0 }}
+          />
           <button
             onClick={exitEditMode}
             title={t.exitEditMode}
-            className="bg-gray-100 hover:bg-gray-200 rounded-full p-3 mr-4 flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400"
+            className="w-8 h-8 md:w-9 md:h-9 bg-gray-100 hover:bg-gray-200 rounded-full p-1.5 md:p-2 ml-2 flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400"
             type="button"
-            style={{ order: direction === 'rtl' ? 2 : 0 }}
             aria-label={t.exitEditMode}
           >
-            <X className="h-6 w-6 text-gray-900" />
+            <X className="h-4 w-4 md:h-5 md:w-5 text-gray-900" />
           </button>
-
-          {/* Editable title, page heading style */}
-          <div className="flex-1 flex items-center">
-            {/* RTL: Pencil left, LTR: Pencil right of input  */}
-            {direction === "rtl" && (
-              <button
-                type="button"
-                className="ml-2 focus:outline-none"
-                tabIndex={-1}
-                onClick={() => titleInputRef.current?.focus?.()}
-              >
-                <Pencil className="h-5 w-5 text-gray-400" />
-              </button>
-            )}
-            <input
-              ref={titleInputRef}
-              value={listName}
-              onChange={(e) => setListName(e.target.value)}
-              className="flex-1 bg-transparent text-2xl md:text-3xl font-extrabold border-none outline-none px-1 py-1 select-text focus:cursor-text hover:cursor-text transition border-b-2 border-transparent focus:border-gray-400 hover:border-gray-300 focus:outline-none focus:ring-0"
-              placeholder={language === 'he' ? 'שם הרשימה...' : 'List name...'}
-              style={{ minWidth: 0 }}
-            />
-            {direction !== "rtl" && (
-              <button
-                type="button"
-                className="ml-2 focus:outline-none"
-                tabIndex={-1}
-                onClick={() => titleInputRef.current?.focus?.()}
-              >
-                <Pencil className="h-5 w-5 text-gray-400" />
-              </button>
-            )}
-          </div>
         </div>
       )}
       {/* Edit Mode Logic: Toggle Bulk Input, Single Item Row, and Bulk Input Conditional */}
@@ -918,27 +891,32 @@ export const ShoppingList = () => {
           <div className="flex items-baseline gap-2 mb-2">
             <button
               type="button"
-              className="flex items-center gap-1 text-black text-sm focus:outline-none hover:underline px-1 py-0.5 rounded transition"
+              className="flex items-center gap-1 text-black text-xs md:text-sm focus:outline-none hover:underline px-1 py-0.5 rounded transition"
               onClick={() => setShowBulkInput(v => !v)}
               aria-expanded={showBulkInput}
               tabIndex={0}
             >
-              <ClipboardPaste className="h-5 w-5 text-yellow-400" />
-              {language === "he"
-                ? "רוצה להדביק רשימה ארוכה?"
-                : "Want to paste a long list?"}
+              <ClipboardPaste className="h-4 w-4 md:h-5 md:w-5 text-yellow-400" />
+              <span className="hidden sm:inline">
+                {language === "he"
+                  ? "רוצה להדביק רשימה ארוכה?"
+                  : "Want to paste a long list?"}
+              </span>
+              <span className="sm:hidden">
+                {language === "he" ? "הדבק רשימה" : "Paste List"}
+              </span>
             </button>
           </div>
           {/* Single Item Row, Always visible in edit mode */}
-          <div className="bg-card rounded-xl shadow-sm border border-border p-3 sm:p-4 mb-6 w-full">
-            <div className="flex items-center gap-1.5 sm:gap-2 w-full flex-nowrap overflow-x-hidden">
+          <div className="bg-card rounded-xl shadow-sm border border-border p-2 md:p-4 mb-6 w-full">
+            <div className="flex w-full items-center gap-1 flex-nowrap">
               <SmartAutocompleteInput
                 ref={autocompleteInputRef}
                 placeholder="שם המוצר..."
                 value={singleItemInput}
                 onChange={setSingleItemInput}
                 onKeyDown={e => e.key === "Enter" && handleAddSingleItem()}
-                className="flex-1 min-w-[120px] h-10"
+                className="flex-1 min-w-0 text-sm relative"
               />
               <Input
                 type="number"
@@ -946,7 +924,7 @@ export const ShoppingList = () => {
                 step={singleItemUnit === 'units' ? "1" : "0.1"}
                 value={singleItemQuantity}
                 onChange={(e) => setSingleItemQuantity(e.target.value)}
-                className="w-14 sm:w-16 h-10 text-center text-sm rounded-lg shrink-0 px-1 sm:px-2"
+                className="w-[3.2rem] text-center text-xs rounded-lg shrink-0 px-0"
                 onBlur={() => {
                   let val = parseFloat(singleItemQuantity);
                   if (singleItemUnit === 'units' && !isNaN(val)) {
@@ -966,7 +944,7 @@ export const ShoppingList = () => {
                   }
                 }}
               >
-                <SelectTrigger className="w-20 sm:w-22 h-10 px-1 sm:px-2 text-sm rounded-lg shrink-0">
+                <SelectTrigger className="w-[4rem] text-xs rounded-lg shrink-0 px-0">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -977,16 +955,15 @@ export const ShoppingList = () => {
                   ))}
                 </SelectContent>
               </Select>
-              <Button onClick={handleAddSingleItem} disabled={!singleItemInput.trim()} className="h-10 w-24 sm:w-28 bg-yellow-400 text-black font-bold rounded-lg shrink-0 hover:bg-yellow-500 px-2 sm:px-3">
-                <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="hidden xs:inline ml-1">{t.addItemButton}</span>
-                <span className="xs:hidden">הוסף</span>
+              <Button onClick={handleAddSingleItem} disabled={!singleItemInput.trim()} className="w-10 h-10 p-0 shrink-0 grid place-items-center bg-yellow-400 text-black rounded-md md:w-auto md:px-6 md:rounded-lg hover:bg-yellow-500">
+                <Plus className="h-4 w-4" />
+                <span className="hidden md:inline-block mr-2">{t.addItemButton}</span>
               </Button>
             </div>
           </div>
           {/* The Bulk Input Card, only if toggled on */}
           {showBulkInput && (
-            <div className="bg-card rounded-xl shadow-sm border border-border p-6 mb-6">
+            <div className="bg-card rounded-xl shadow-sm border border-border p-3 md:p-6 mb-6">
               <Textarea
                 placeholder={t.textareaPlaceholder}
                 value={inputText}

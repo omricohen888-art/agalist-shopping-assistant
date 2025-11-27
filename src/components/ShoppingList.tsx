@@ -757,12 +757,12 @@ export const ShoppingList = () => {
     <div className="bg-primary text-primary-foreground shadow-lg sticky top-0 z-10">
       <div className="max-w-3xl mx-auto px-4 py-4">
         <div className="flex justify-between items-center w-full mb-3 px-4">
-          {/* Title Section - Allow shrinking */}
-          <div className="flex flex-col gap-0.5 min-w-0 flex-shrink">
-            <div className={`flex items-center gap-0.5 text-2xl sm:text-3xl font-black drop-shadow-md leading-tight ${direction === "rtl" ? "flex-row-reverse" : "flex-row"}`}>
-              <span className="truncate">{t.appTitle}</span>
+          {/* Title Section - Never truncate */}
+          <div className="flex flex-col gap-0.5 flex-shrink-0">
+            <div className={`flex items-center gap-0.5 text-xl sm:text-2xl md:text-3xl font-black drop-shadow-md leading-tight whitespace-nowrap ${direction === "rtl" ? "flex-row-reverse" : "flex-row"}`}>
+              <span className="flex-shrink-0">{t.appTitle}</span>
               <div className={`flex items-center flex-shrink-0 ${direction === "rtl" ? "mr-1" : "ml-1"}`}>
-                <span className="text-green-500 text-2xl sm:text-3xl font-black leading-none">✓</span>
+                <span className="text-green-500 text-xl sm:text-2xl md:text-3xl font-black leading-none">✓</span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="36"
@@ -773,7 +773,7 @@ export const ShoppingList = () => {
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="h-8 w-8 sm:h-10 sm:w-10 text-black"
+                  className="h-7 w-7 sm:h-8 sm:w-8 md:h-10 md:w-10 text-black flex-shrink-0"
                 >
                   <circle cx="8" cy="21" r="1" />
                   <circle cx="19" cy="21" r="1" />
@@ -784,11 +784,11 @@ export const ShoppingList = () => {
                 </svg>
               </div>
             </div>
-            <p className="text-xs sm:text-sm text-primary-foreground/90 font-semibold mt-0.5 truncate">{t.tagline}</p>
+            <p className="text-xs sm:text-sm text-primary-foreground/90 font-semibold mt-0.5 whitespace-nowrap">{t.tagline}</p>
           </div>
 
           {/* Actions Section - Never shrink */}
-          <div className="flex items-center gap-3 flex-shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
             <Button variant="ghost" size="icon" onClick={toggleLanguage} aria-label={t.languageAria} className="h-10 w-10 p-2 text-primary-foreground hover:bg-black/10 rounded-full">
               <Globe className="h-6 w-6" />
             </Button>

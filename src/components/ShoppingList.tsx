@@ -377,6 +377,7 @@ export const ShoppingList = () => {
   const [activeListId, setActiveListId] = useState<string | null>(null);
   const [showBulkInput, setShowBulkInput] = useState(false); // NEW STATE
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [showAddAnimation, setShowAddAnimation] = useState(false);
   const hasContent = inputText.trim().length > 0 || items.length > 0;
   const titleInputRef = useRef<HTMLInputElement>(null);
 
@@ -427,6 +428,10 @@ export const ShoppingList = () => {
     }));
     setItems([...items, ...newItems]);
     setInputText("");
+
+    // Show add animation
+    setShowAddAnimation(true);
+    setTimeout(() => setShowAddAnimation(false), 600);
 
     // Transition to Edit Mode
     const newListId = Date.now().toString();
@@ -501,6 +506,10 @@ export const ShoppingList = () => {
     setSingleItemInput("");
     setSingleItemQuantity("1");
     setSingleItemUnit('units');
+
+    // Show add animation
+    setShowAddAnimation(true);
+    setTimeout(() => setShowAddAnimation(false), 600);
 
     // Keep focus on input for rapid fire entry
     setTimeout(() => {
@@ -763,6 +772,25 @@ export const ShoppingList = () => {
       <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-[fade-in_0.2s_ease-out,scale-in_0.3s_ease-out]">
         <div className="bg-[#22c55e] text-white rounded-full p-4 shadow-[0_0_20px_rgba(34,197,94,0.5)] animate-pulse">
           <CheckCircle2 className="h-12 w-12" strokeWidth={3} />
+        </div>
+      </div>
+    )}
+
+    {/* Add Item Animation */}
+    {showAddAnimation && (
+      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-none">
+        <div 
+          className="text-6xl font-black animate-[fade-in_0.15s_ease-out,fade-out_0.3s_ease-out_0.3s]"
+          style={{
+            background: 'linear-gradient(135deg, #FACC15 0%, #22c55e 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            filter: 'drop-shadow(0 2px 8px rgba(250, 204, 21, 0.4))',
+            animation: 'float-up 0.6s ease-out',
+          }}
+        >
+          +
         </div>
       </div>
     )}

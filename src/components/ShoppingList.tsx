@@ -930,15 +930,15 @@ export const ShoppingList = () => {
             </button>
           </div>
           {/* Single Item Row, Always visible in edit mode */}
-          <div className="bg-card rounded-xl shadow-sm border border-border p-4 mb-6 w-full">
-            <div className="flex items-center gap-2 w-full">
+          <div className="bg-card rounded-xl shadow-sm border border-border p-3 sm:p-4 mb-6 w-full">
+            <div className="flex items-center gap-1.5 sm:gap-2 w-full flex-nowrap overflow-x-hidden">
               <SmartAutocompleteInput
                 ref={autocompleteInputRef}
                 placeholder="שם המוצר..."
                 value={singleItemInput}
                 onChange={setSingleItemInput}
                 onKeyDown={e => e.key === "Enter" && handleAddSingleItem()}
-                className="flex-1 w-full h-11"
+                className="flex-1 min-w-[120px] h-10"
               />
               <Input
                 type="number"
@@ -946,7 +946,7 @@ export const ShoppingList = () => {
                 step={singleItemUnit === 'units' ? "1" : "0.1"}
                 value={singleItemQuantity}
                 onChange={(e) => setSingleItemQuantity(e.target.value)}
-                className="w-20 h-11 text-center text-base rounded-lg shrink-0"
+                className="w-14 sm:w-16 h-10 text-center text-sm rounded-lg shrink-0 px-1 sm:px-2"
                 onBlur={() => {
                   let val = parseFloat(singleItemQuantity);
                   if (singleItemUnit === 'units' && !isNaN(val)) {
@@ -966,7 +966,7 @@ export const ShoppingList = () => {
                   }
                 }}
               >
-                <SelectTrigger className="w-24 h-11 px-2 text-base rounded-lg shrink-0">
+                <SelectTrigger className="w-20 sm:w-22 h-10 px-1 sm:px-2 text-sm rounded-lg shrink-0">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -977,9 +977,10 @@ export const ShoppingList = () => {
                   ))}
                 </SelectContent>
               </Select>
-              <Button onClick={handleAddSingleItem} disabled={!singleItemInput.trim()} className="h-11 min-w-[100px] bg-yellow-400 text-black font-bold rounded-lg shrink-0 hover:bg-yellow-500">
-                <Plus className="h-4 w-4" />
-                {t.addItemButton}
+              <Button onClick={handleAddSingleItem} disabled={!singleItemInput.trim()} className="h-10 w-24 sm:w-28 bg-yellow-400 text-black font-bold rounded-lg shrink-0 hover:bg-yellow-500 px-2 sm:px-3">
+                <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden xs:inline ml-1">{t.addItemButton}</span>
+                <span className="xs:hidden">הוסף</span>
               </Button>
             </div>
           </div>

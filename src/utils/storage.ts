@@ -95,3 +95,27 @@ export const updateSavedList = (updatedList: import("@/types/shopping").SavedLis
     return false;
   }
 };
+
+export const getFrequentItems = (limit: number = 7): string[] => {
+  try {
+    const history = getShoppingHistory();
+    const itemCounts: Record<string, number> = {};
+
+    history.forEach(trip => {
+      trip.items.forEach(item => {
+        const name = item.text.trim();
+        if (name) {
+          itemCounts[name] = (itemCounts[name] || 0) + 1;
+        }
+      });
+    });
+
+    return Object.entries(itemCounts)
+      .sort(([, countA], [, countB]) => countB - countA)
+      .slice(0, limit)
+      .map(([name]) => name);
+  } catch (error) {
+    console.error("Failed to get frequent items:", error);
+    return [];
+  }
+};

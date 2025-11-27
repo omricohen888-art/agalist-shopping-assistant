@@ -10,6 +10,8 @@ export const translations: Record<Language, {
     welcomeHeading: string;
     welcomeSubtitle: string;
     templatesHeading: string;
+    recentListsHeading: string;
+    viewAllListsButton: string;
     addItemButton: string;
     addItemPlaceholder: string;
     navigation: {
@@ -96,6 +98,8 @@ export const translations: Record<Language, {
         welcomeHeading: "שלחו לכם רשימת קניות?",
         welcomeSubtitle: "הדביקו אותה כאן וקבלו חוויית קנייה מהנה, אינטראקטיבית וחסכונית.",
         templatesHeading: "אין לכם רשימה? נסו אחת לדוגמה:",
+        recentListsHeading: "רשימות אחרונות",
+        viewAllListsButton: "לכל הרשימות בפנקס",
         addItemButton: "הוסף פריט",
         addItemPlaceholder: "שם הפריט...",
         navigation: {
@@ -182,6 +186,8 @@ export const translations: Record<Language, {
         welcomeHeading: "Got a list?",
         welcomeSubtitle: "Paste it here. We'll handle the rest.",
         templatesHeading: "No list? Try a sample:",
+        recentListsHeading: "Recent Lists",
+        viewAllListsButton: "Go to My Notebook",
         addItemButton: "Add Item",
         addItemPlaceholder: "Item name...",
         navigation: {

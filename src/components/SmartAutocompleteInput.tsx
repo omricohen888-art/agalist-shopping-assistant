@@ -1,8 +1,10 @@
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from "react";
+import { createPortal } from "react-dom";
 import { Check, ChevronsUpDown, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ISRAELI_PRODUCTS } from "@/data/israeliProducts";
+import { getFrequentItems } from "@/utils/storage";
 
 interface SmartAutocompleteInputProps {
   value: string;
@@ -31,16 +33,15 @@ export const SmartAutocompleteInput = forwardRef<SmartAutocompleteInputRef, Smar
   const [activeLetter, setActiveLetter] = useState<string | null>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
-  useImperativeHandle(ref, () => ({
-    focus: () => {
-      inputRef.current?.focus();
-    },
-  }));
-
-  // Initialize random suggestions
+  // Initialize suggestions
   useEffect(() => {
-    const shuffled = [...ISRAELI_PRODUCTS].sort(() => 0.5 - Math.random());
-    setRandomSuggestions(shuffled.slice(0, 7));
+    const frequent = getFrequentItems(7);
+    if (frequent.length > 0) {
+      setRandomSuggestions(frequent);
+    } else {
+      const shuffled = [...ISRAELI_PRODUCTS].sort(() => 0.5 - Math.random());
+      setRandomSuggestions(shuffled.slice(0, 7));
+    }
   }, []);
 
   // Filter products based on current value or active letter
@@ -95,12 +96,36 @@ export const SmartAutocompleteInput = forwardRef<SmartAutocompleteInputRef, Smar
     }
   };
 
-  const handleInputChange = (newValue: string) => {
-    onChange(newValue);
-    setSelectedIndex(-1);
-    setActiveLetter(null); // Clear letter filter on typing
-    setOpen(true);
-  };
+  // ... existing code ...
+
+  const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
+
+  // Update dropdown position
+  useEffect(() => {
+    if (open && inputRef.current) {
+      const updatePosition = () => {
+        if (!inputRef.current) return;
+        const rect = inputRef.current.getBoundingClientRect();
+        setDropdownStyle({
+          position: 'fixed',
+          top: `${rect.bottom + 4}px`,
+          left: `${rect.left}px`,
+          width: `${rect.width}px`,
+          zIndex: 9999, // High z-index
+        });
+      };
+
+      updatePosition();
+      // Update on scroll and resize to keep it attached
+      window.addEventListener('scroll', updatePosition, true);
+      window.addEventListener('resize', updatePosition);
+
+      return () => {
+        window.removeEventListener('scroll', updatePosition, true);
+        window.removeEventListener('resize', updatePosition);
+      };
+    }
+  }, [open]);
 
   return (
     <div className={cn("relative", className)}>
@@ -126,8 +151,8 @@ export const SmartAutocompleteInput = forwardRef<SmartAutocompleteInputRef, Smar
         )}
       </div>
 
-      {open && (
-        <div className="absolute top-full z-[100] w-full mt-1" style={{ maxWidth: 'calc(100vw - 2rem)' }}>
+      {open && typeof document !== 'undefined' && createPortal(
+        <div style={dropdownStyle}>
           <div className="rounded-xl border-2 border-black bg-white text-popover-foreground shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
 
             {/* Alphabet Filter (Only show when input is empty) */}
@@ -189,7 +214,8 @@ export const SmartAutocompleteInput = forwardRef<SmartAutocompleteInputRef, Smar
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

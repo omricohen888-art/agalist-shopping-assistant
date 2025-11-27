@@ -12,6 +12,7 @@ import { Progress } from "@/components/ui/progress";
 import { Share2, Trash2, Plus, CheckCircle2, History, Menu, BarChart3, Globe, Save, ClipboardList, Book, Square, CheckSquare, Printer, Mail, FileSpreadsheet, Copy, Pencil, X, ClipboardPaste, Info } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import { SmartAutocompleteInput, SmartAutocompleteInputRef } from "@/components/SmartAutocompleteInput";
+import { SavedListCard } from "@/components/SavedListCard";
 import { toast } from "sonner";
 import { ShoppingItem, ISRAELI_STORES, UNITS, Unit, SavedList } from "@/types/shopping";
 import { saveShoppingHistory, saveList, getSavedLists, deleteSavedList, updateSavedList } from "@/utils/storage";
@@ -612,7 +613,7 @@ export const ShoppingList = () => {
       )}
 
       {/* Header */}
-      <div className="bg-stone-200 text-black shadow-sm sticky top-0 z-10 border-b-2 border-black/10">
+      <div className="bg-stone-200 dark:bg-zinc-900 text-black dark:text-white shadow-sm sticky top-0 z-10 border-b-2 border-black/10 dark:border-white/10">
         <div className="max-w-3xl mx-auto px-4 py-4">
           <div className="flex justify-between items-center w-full mb-3 px-4">
             {/* Title Section - Never truncate */}
@@ -620,7 +621,7 @@ export const ShoppingList = () => {
               <div className={`flex items-center gap-0.5 text-xl sm:text-2xl md:text-3xl font-black drop-shadow-sm leading-tight whitespace-nowrap ${direction === "rtl" ? "flex-row-reverse" : "flex-row"}`}>
                 <span className="flex-shrink-0">{t.appTitle}</span>
                 <div className={`flex items-center flex-shrink-0 ${direction === "rtl" ? "mr-1" : "ml-1"}`}>
-                  <span className="text-black text-xl sm:text-2xl md:text-3xl font-black leading-none">✓</span>
+                  <span className="text-black dark:text-white text-xl sm:text-2xl md:text-3xl font-black leading-none">✓</span>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="36"
@@ -631,7 +632,7 @@ export const ShoppingList = () => {
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="h-7 w-7 sm:h-8 sm:w-8 md:h-10 md:w-10 text-black flex-shrink-0"
+                    className="h-7 w-7 sm:h-8 sm:w-8 md:h-10 md:w-10 text-black dark:text-white flex-shrink-0"
                   >
                     <circle cx="8" cy="21" r="1" />
                     <circle cx="19" cy="21" r="1" />
@@ -642,18 +643,18 @@ export const ShoppingList = () => {
                   </svg>
                 </div>
               </div>
-              <p className="text-xs sm:text-sm text-black/80 font-bold mt-0.5 whitespace-nowrap">{t.tagline}</p>
+              <p className="text-xs sm:text-sm text-black/80 dark:text-white/80 font-bold mt-0.5 whitespace-nowrap">{t.tagline}</p>
             </div>
 
             {/* Actions Section - Never shrink */}
             <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-              <Button variant="ghost" size="icon" onClick={toggleLanguage} aria-label={t.languageAria} className="h-10 w-10 p-2 text-black hover:bg-black/10 rounded-full">
+              <Button variant="ghost" size="icon" onClick={toggleLanguage} aria-label={t.languageAria} className="h-10 w-10 p-2 text-black dark:text-white hover:bg-black/10 dark:hover:bg-white/10 rounded-full">
                 <Globe className="h-6 w-6" />
               </Button>
               {/* Hamburger Menu */}
               <Sheet>
                 <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-10 w-10 p-2 text-black hover:bg-black/10 rounded-full">
+                  <Button variant="ghost" size="icon" className="h-10 w-10 p-2 text-black dark:text-white hover:bg-black/10 dark:hover:bg-white/10 rounded-full">
                     <Menu className="h-7 w-7" />
                   </Button>
                 </SheetTrigger>
@@ -753,11 +754,11 @@ export const ShoppingList = () => {
               <button
                 onClick={exitEditMode}
                 title={t.exitEditMode}
-                className="w-8 h-8 md:w-9 md:h-9 bg-gray-100 hover:bg-gray-200 rounded-full p-1.5 md:p-2 ml-2 flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400"
+                className="w-8 h-8 md:w-9 md:h-9 bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-full p-1.5 md:p-2 ml-2 flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400"
                 type="button"
                 aria-label={t.exitEditMode}
               >
-                <X className="h-4 w-4 md:h-5 md:w-5 text-gray-900" />
+                <X className="h-4 w-4 md:h-5 md:w-5 text-gray-900 dark:text-white" />
               </button>
             </div>
           )
@@ -770,7 +771,7 @@ export const ShoppingList = () => {
               <div className="flex items-baseline gap-2 mb-2">
                 <button
                   type="button"
-                  className="flex items-center gap-1 text-black text-xs md:text-sm focus:outline-none hover:underline px-1 py-0.5 rounded transition"
+                  className="flex items-center gap-1 text-black dark:text-white text-xs md:text-sm focus:outline-none hover:underline px-1 py-0.5 rounded transition"
                   onClick={() => setShowBulkInput(v => !v)}
                   aria-expanded={showBulkInput}
                   tabIndex={0}
@@ -788,9 +789,9 @@ export const ShoppingList = () => {
               </div>
 
               {/* Single Item Row */}
-              <div className="bg-[#FEFCE8] rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] border-2 border-black p-3 md:p-4 mb-6 w-full relative overflow-hidden">
+              <div className="bg-[#FEFCE8] dark:bg-zinc-900 rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] border-2 border-black dark:border-zinc-700 p-3 md:p-4 mb-6 w-full relative z-50 overflow-visible">
                 {/* Decorative "Tape" */}
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-24 h-6 bg-white/30 rotate-[-2deg] border-l border-r border-white/40 backdrop-blur-[1px]" />
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-24 h-6 bg-white/30 dark:bg-white/10 rotate-[-2deg] border-l border-r border-white/40 dark:border-white/20 backdrop-blur-[1px]" />
 
                 <div className="flex w-full items-center gap-2 flex-nowrap relative z-10">
                   <SmartAutocompleteInput
@@ -827,8 +828,13 @@ export const ShoppingList = () => {
                       }
                     }}
                   >
-                    <SelectTrigger className="w-[4.5rem] text-xs rounded-lg shrink-0 px-1 border-2 border-black focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all bg-white">
-                      <SelectValue />
+                    <SelectTrigger className="w-[4.5rem] text-xs rounded-lg shrink-0 px-1 border-2 border-black focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all bg-white text-center justify-center [&>span]:w-full [&>span]:text-center [&>svg]:hidden">
+                      <span className="truncate w-full text-center">
+                        {(() => {
+                          const u = UNITS.find(u => u.value === (singleItemUnit || 'units'));
+                          return u ? (language === 'he' ? u.labelHe : u.labelEn) : '';
+                        })()}
+                      </span>
                     </SelectTrigger>
                     <SelectContent className="border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                       {UNITS.map(u => (
@@ -838,14 +844,15 @@ export const ShoppingList = () => {
                       ))}
                     </SelectContent>
                   </Select>
-                  <Button
-                    onClick={handleAddSingleItem}
-                    disabled={!singleItemInput.trim()}
-                    className="w-10 h-10 p-0 shrink-0 grid place-items-center bg-black text-yellow-400 rounded-lg md:w-auto md:px-6 border-2 border-transparent hover:border-yellow-400 hover:bg-gray-900 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[1px] active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:bg-stone-600 disabled:text-stone-400"
-                  >
-                    <Plus className="h-5 w-5" />
-                    <span className="hidden md:inline-block mr-2 font-bold">{t.addItemButton}</span>
-                  </Button>
+                  <div title={t.addItemButton}>
+                    <Button
+                      onClick={handleAddSingleItem}
+                      disabled={!singleItemInput.trim()}
+                      className="w-10 h-10 p-0 shrink-0 grid place-items-center bg-black text-yellow-400 rounded-lg border-2 border-transparent hover:border-yellow-400 hover:bg-gray-900 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[1px] active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:bg-stone-600 disabled:text-stone-400"
+                    >
+                      <Plus className="h-6 w-6" />
+                    </Button>
+                  </div>
                 </div>
               </div>
 
@@ -883,7 +890,7 @@ export const ShoppingList = () => {
             </>
           ) : (
             // Notebook Style Input
-            <div className="relative bg-[#FEFCE8] border-2 border-black rounded-xl p-6 mb-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden"
+            <div className="relative bg-[#FEFCE8] border-2 border-black rounded-xl p-6 mb-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
               style={{
                 backgroundImage: 'repeating-linear-gradient(transparent, transparent 31px, #e5e7eb 31px, #e5e7eb 32px)'
               }}
@@ -902,7 +909,7 @@ export const ShoppingList = () => {
                 placeholder={t.textareaPlaceholder}
                 value={inputText}
                 onChange={e => setInputText(e.target.value)}
-                className="min-h-[140px] resize-none bg-transparent border-none focus:ring-0 text-base touch-manipulation rounded-lg leading-[31px] -mt-1 shadow-none focus-visible:ring-0"
+                className="min-h-[140px] resize-none bg-transparent border-none focus:ring-0 text-base text-black touch-manipulation rounded-lg leading-[31px] -mt-1 shadow-none focus-visible:ring-0"
                 style={{
                   lineHeight: '31px',
                   background: 'transparent'
@@ -910,12 +917,12 @@ export const ShoppingList = () => {
               />
               <div className="flex flex-col sm:flex-row gap-2 mt-4 w-full transition-all duration-300 ease-in-out relative z-10">
                 {/* Secondary buttons */}
-                <div className={`flex gap-2 overflow-hidden transition-all duration-300 ease-in-out ${hasContent ? 'w-full sm:w-1/3 opacity-100' : 'w-0 opacity-0'}`}>
-                  <Button onClick={clearAll} variant="ghost" className="flex-1 text-muted-foreground hover:text-destructive h-11 text-base font-medium rounded-lg">
+                <div className={`flex gap-2 overflow-hidden p-1 transition-all duration-300 ease-in-out ${hasContent ? 'w-full sm:w-1/3 opacity-100' : 'w-0 opacity-0'}`}>
+                  <Button onClick={clearAll} variant="ghost" className="flex-1 text-gray-900 hover:bg-gray-200 hover:text-red-700 h-11 text-base font-medium rounded-full">
                     <Trash2 className="mr-2 h-5 w-5" />
                     {t.clearAllButton}
                   </Button>
-                  <Button onClick={shareList} variant="ghost" className="flex-1 text-muted-foreground h-11 text-base font-medium rounded-lg">
+                  <Button onClick={shareList} variant="ghost" className="flex-1 text-gray-900 hover:bg-gray-200 hover:text-black h-11 text-base font-medium rounded-full">
                     <Share2 className="mr-2 h-5 w-5" />
                     {t.shareButton}
                   </Button>
@@ -974,6 +981,62 @@ export const ShoppingList = () => {
           )
         }
 
+        {/* Recent Lists Preview */}
+        {
+          items.length === 0 && savedLists.length > 0 && (
+            <div className="mb-12 border-t-2 border-black/5 pt-8">
+              <div className="flex justify-between items-center mb-6 px-2">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                  <History className="h-5 w-5 text-yellow-500" />
+                  {t.recentListsHeading}
+                </h3>
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate("/notebook")}
+                  className="text-sm font-bold text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/20"
+                >
+                  {t.viewAllListsButton}
+                  {language === 'he' ? <div className="mr-1 rotate-180">➜</div> : <div className="ml-1">➜</div>}
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {savedLists
+                  .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                  .slice(0, 6)
+                  .map((list, index) => (
+                    <div key={list.id} className="h-[280px]">
+                      <SavedListCard
+                        list={list}
+                        index={index}
+                        language={language}
+                        t={t}
+                        onLoad={handleLoadList}
+                        onDelete={(id) => {
+                          if (deleteSavedList(id)) {
+                            setSavedLists(getSavedLists());
+                            toast.success(t.toasts.listDeleted);
+                          }
+                        }}
+                        onToggleItem={(listId, itemId) => {
+                          const list = savedLists.find(l => l.id === listId);
+                          if (!list) return;
+                          const updatedItems = list.items.map(item =>
+                            item.id === itemId ? { ...item, checked: !item.checked } : item
+                          );
+                          const updatedList = { ...list, items: updatedItems };
+                          if (updateSavedList(updatedList)) {
+                            setSavedLists(getSavedLists());
+                          }
+                        }}
+                      />
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )
+        }
+
         {/* Items List */}
         {
           items.length > 0 && (
@@ -995,8 +1058,13 @@ export const ShoppingList = () => {
                       value={item.unit || 'units'}
                       onValueChange={(val: Unit) => updateItemUnit(item.id, val)}
                     >
-                      <SelectTrigger className="w-16 h-9 px-1 text-xs rounded-lg border-2 border-black/20 hover:border-black focus:border-black transition-colors">
-                        <SelectValue />
+                      <SelectTrigger className="w-16 h-9 px-1 text-xs rounded-lg border-2 border-black/20 hover:border-black focus:border-black transition-colors text-center justify-center [&>span]:w-full [&>span]:text-center [&>svg]:hidden">
+                        <span className="truncate w-full text-center">
+                          {(() => {
+                            const u = UNITS.find(u => u.value === (item.unit || 'units'));
+                            return u ? (language === 'he' ? u.labelHe : u.labelEn) : '';
+                          })()}
+                        </span>
                       </SelectTrigger>
                       <SelectContent className="border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                         {UNITS.map(u => (
@@ -1225,7 +1293,7 @@ export const ShoppingList = () => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 };

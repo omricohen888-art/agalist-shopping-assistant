@@ -1030,7 +1030,7 @@ export const ShoppingList = () => {
                   className={`h-11 text-base font-bold bg-primary text-primary-foreground hover:bg-primary/90 px-8 rounded-lg shadow-md transition-all duration-300 ease-in-out ${hasContent ? 'w-full sm:w-2/3' : 'w-full'}`}
                 >
                   <Plus className="mr-2 h-5 w-5" />
-                  {language === "he" ? "הוסף לרשימה" : "Add to List"}
+                  {language === "he" ? "הוסף רשימה" : "Add to List"}
                 </Button>
               </div>
             </div>

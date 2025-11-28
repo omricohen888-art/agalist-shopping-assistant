@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Progress } from "@/components/ui/progress";
-import { Share2, Trash2, Plus, CheckCircle2, History, Menu, BarChart3, Globe, Save, ClipboardList, Book, Square, CheckSquare, Printer, Mail, FileSpreadsheet, Copy, Pencil, X, ClipboardPaste, Info, ShoppingCart, Check } from "lucide-react";
+import { Share2, Trash2, Plus, CheckCircle2, History, Menu, BarChart3, Globe, Save, ClipboardList, Book, Square, CheckSquare, Printer, Mail, FileSpreadsheet, Copy, Pencil, X, ClipboardPaste, Info, ShoppingCart, Check, Volume2 } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import { SmartAutocompleteInput, SmartAutocompleteInputRef } from "@/components/SmartAutocompleteInput";
 import { SavedListCard } from "@/components/SavedListCard";
@@ -142,6 +142,7 @@ export const ShoppingList = () => {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showAddAnimation, setShowAddAnimation] = useState(false);
   const [showListSuccess, setShowListSuccess] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const hasContent = inputText.trim().length > 0 || items.length > 0;
   const titleInputRef = useRef<HTMLInputElement>(null);
 
@@ -465,10 +466,69 @@ export const ShoppingList = () => {
   };
 
   const exitEditMode = () => {
+    // Stop TTS if active
+    if (isSpeaking) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+    }
     setActiveListId(null);
     setItems([]);
     setInputText("");
     setListName("");
+  };
+
+  const handleReadListAloud = () => {
+    // If already speaking, stop
+    if (isSpeaking) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+      return;
+    }
+
+    // Get unchecked items
+    const uncheckedItems = items.filter(item => !item.checked);
+
+    // Check if there are items to read
+    if (uncheckedItems.length === 0) {
+      toast.error(language === 'he' ? "אין פריטים להקראה" : "No items to read");
+      return;
+    }
+
+    // Construct the text to read
+    let textToRead = listName ? `${listName}. ` : '';
+    
+    uncheckedItems.forEach((item) => {
+      const unitText = item.unit === 'units' 
+        ? (language === 'he' ? 'יחידות' : 'units')
+        : item.unit;
+      
+      if (item.quantity > 1) {
+        textToRead += `${item.quantity} ${unitText} ${item.text}. `;
+      } else {
+        textToRead += `${item.text}. `;
+      }
+    });
+
+    // Create speech utterance
+    const utterance = new SpeechSynthesisUtterance(textToRead);
+    utterance.lang = language === 'he' ? 'he-IL' : 'en-US';
+    
+    // Set speaking state
+    setIsSpeaking(true);
+
+    // Reset state when finished
+    utterance.onend = () => {
+      setIsSpeaking(false);
+    };
+
+    // Handle errors
+    utterance.onerror = () => {
+      setIsSpeaking(false);
+      toast.error(language === 'he' ? "שגיאה בהפעלת הקראה" : "Error reading list");
+    };
+
+    // Start speaking
+    window.speechSynthesis.speak(utterance);
   };
 
   const handleDeleteList = (id: string, e: React.MouseEvent) => {
@@ -775,15 +835,30 @@ export const ShoppingList = () => {
                 placeholder={language === 'he' ? 'שם הרשימה...' : 'List name...'}
                 style={{ minWidth: 0 }}
               />
-              <button
-                onClick={exitEditMode}
-                title={t.exitEditMode}
-                className="w-8 h-8 md:w-9 md:h-9 bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-full p-1.5 md:p-2 ml-2 flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400"
-                type="button"
-                aria-label={t.exitEditMode}
-              >
-                <X className="h-4 w-4 md:h-5 md:w-5 text-gray-900 dark:text-white" />
-              </button>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <button
+                  onClick={handleReadListAloud}
+                  title={isSpeaking ? (language === 'he' ? 'עצור הקראה' : 'Stop reading') : (language === 'he' ? 'הקרא רשימה' : 'Read list aloud')}
+                  className="w-8 h-8 md:w-9 md:h-9 bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-full p-1.5 md:p-2 flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition-colors"
+                  type="button"
+                  aria-label={isSpeaking ? (language === 'he' ? 'עצור הקראה' : 'Stop reading') : (language === 'he' ? 'הקרא רשימה' : 'Read list aloud')}
+                >
+                  {isSpeaking ? (
+                    <Square className="h-4 w-4 md:h-5 md:w-5 text-gray-900 dark:text-white" />
+                  ) : (
+                    <Volume2 className="h-4 w-4 md:h-5 md:w-5 text-gray-900 dark:text-white" />
+                  )}
+                </button>
+                <button
+                  onClick={exitEditMode}
+                  title={t.exitEditMode}
+                  className="w-8 h-8 md:w-9 md:h-9 bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-full p-1.5 md:p-2 flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400"
+                  type="button"
+                  aria-label={t.exitEditMode}
+                >
+                  <X className="h-4 w-4 md:h-5 md:w-5 text-gray-900 dark:text-white" />
+                </button>
+              </div>
             </div>
           )
         }

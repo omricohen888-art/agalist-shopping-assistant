@@ -19,6 +19,14 @@ export default {
   				'system-ui',
   				'sans-serif'
   			],
+  			handwriting: [
+  				'Kalam',
+  				'cursive'
+  			],
+  			hand: [
+  				'Varela Round',
+  				'sans-serif'
+  			],
   			sans: [
   				'Source Sans Pro',
   				'ui-sans-serif',

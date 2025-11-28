@@ -110,7 +110,7 @@ export const translations: Record<Language, {
             about: "אודות"
         },
         shareTitle: "רשימת קניות - עגליסט",
-        textareaPlaceholder: "אין פריטים עדיין. הדביקו רשימה כאן או הוסיפו פריטים כדי להתחיל...",
+        textareaPlaceholder: "יש לכם רשימה מוכנה? 📋\n\nלחצו על 'הדבק', או פשוט התחילו לכתוב פריטים...",
         shareButton: "שתף",
         clearAllButton: "נקה הכל",
         emptyState: "אין פריטים עדיין. הדביקו רשימה או הוסיפו פריטים כדי להתחיל.",
@@ -198,7 +198,7 @@ export const translations: Record<Language, {
             about: "About"
         },
         shareTitle: "Shopping List - Agalist",
-        textareaPlaceholder: "No items yet. Paste a list here or add items to get started...",
+        textareaPlaceholder: "Paste a WhatsApp list here, or write items (one per line)...",
         shareButton: "Share",
         clearAllButton: "Clear all",
         emptyState: "No items yet. Paste a list or add items to get started.",

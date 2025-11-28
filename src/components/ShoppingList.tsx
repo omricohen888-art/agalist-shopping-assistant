@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Progress } from "@/components/ui/progress";
-import { Share2, Trash2, Plus, CheckCircle2, History, Menu, BarChart3, Globe, Save, ClipboardList, Book, Square, CheckSquare, Printer, Mail, FileSpreadsheet, Copy, Pencil, X, ClipboardPaste, Info } from "lucide-react";
+import { Share2, Trash2, Plus, CheckCircle2, History, Menu, BarChart3, Globe, Save, ClipboardList, Book, Square, CheckSquare, Printer, Mail, FileSpreadsheet, Copy, Pencil, X, ClipboardPaste, Info, ShoppingCart, Check } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import { SmartAutocompleteInput, SmartAutocompleteInputRef } from "@/components/SmartAutocompleteInput";
 import { SavedListCard } from "@/components/SavedListCard";
@@ -198,32 +198,43 @@ export const ShoppingList = () => {
       quantity: 1,
       unit: 'units'
     }));
-    setItems([...items, ...newItems]);
-    setInputText("");
 
-    // Show success animation
-    setShowListSuccess(true);
-    setTimeout(() => setShowListSuccess(false), 1000);
+    if (activeListId) {
+      // Edit Mode: Prepend items, clear input, NO success animation
+      setItems(prev => [...newItems, ...prev]);
+      setInputText("");
+      // Optional: Scroll to top to see new items
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Show success toast
+      toast.success(language === 'he' ? "נוסף בהצלחה לרשימה!" : "Added successfully!");
+    } else {
+      // Home Page Mode: Create new list, show success animation
+      setItems([...items, ...newItems]);
+      setInputText("");
 
-    // Transition to Edit Mode
-    const newListId = Date.now().toString();
-    const currentDate = new Date().toLocaleDateString(language === 'he' ? 'he-IL' : 'en-US', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
-    const defaultListName = language === 'he'
-      ? `רשימה חדשה - ${currentDate}`
-      : `New List - ${currentDate}`;
+      // Show success animation
+      setShowListSuccess(true);
+      setTimeout(() => setShowListSuccess(false), 1000);
 
-    setActiveListId(newListId);
-    setListName(defaultListName);
+      // Transition to Edit Mode
+      const newListId = Date.now().toString();
+      const currentDate = new Date().toLocaleDateString(language === 'he' ? 'he-IL' : 'en-US', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+      const defaultListName = language === 'he'
+        ? `רשימה חדשה - ${currentDate}`
+        : `New List - ${currentDate}`;
 
+      setActiveListId(newListId);
+      setListName(defaultListName);
 
-    // Auto-focus the title input after a short delay to allow state update
-    setTimeout(() => {
-      titleInputRef.current?.focus?.();
-    }, 100);
+      // Auto-focus the title input after a short delay to allow state update
+      setTimeout(() => {
+        titleInputRef.current?.focus?.();
+      }, 100);
+    }
   };
 
   const handleTemplateClick = (templateItems: string[]) => {
@@ -283,6 +294,9 @@ export const ShoppingList = () => {
     // Show add animation
     setShowAddAnimation(true);
     setTimeout(() => setShowAddAnimation(false), 600);
+
+    // Show success toast
+    toast.success(language === 'he' ? "נוסף בהצלחה לרשימה!" : "Added successfully!");
 
     // Keep focus on input for rapid fire entry
     setTimeout(() => {
@@ -658,52 +672,62 @@ export const ShoppingList = () => {
                     <Menu className="h-7 w-7" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="right" className="w-[280px] sm:w-[320px]">
-                  <SheetHeader>
-                    <SheetTitle className="text-2xl">{t.menuTitle}</SheetTitle>
-                  </SheetHeader>
-                  <nav className="flex flex-col gap-3 mt-8">
+                <SheetContent side="right" className="w-[300px] sm:w-[340px] bg-white border-l-2 border-black text-black p-6">
+                  <div className="flex flex-row items-center gap-2 mb-6 mt-2">
+                    <h2 className="text-3xl font-black text-black tracking-tight">
+                      {t.menuTitle}
+                    </h2>
+                    <div className="relative flex items-center justify-center">
+                      <ShoppingCart className="h-6 w-6 text-black" />
+                      <Check className="absolute -top-1 -right-1 h-3 w-3 text-black font-bold" />
+                    </div>
+                  </div>
+                  <nav className="flex flex-col mt-4">
                     <Button
                       onClick={() => {
                         navigate("/");
                         exitEditMode();
                       }}
-                      variant="ghost"
-                      className="justify-start text-lg font-bold h-14 px-4 bg-yellow-400/10 hover:bg-yellow-400/20 text-black border-l-4 border-yellow-400"
+                      className="w-full py-4 h-auto bg-white text-black font-black text-2xl uppercase border-2 border-black hover:bg-yellow-400 hover:scale-[1.02] transition-transform mb-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
                     >
-                      <Plus className="ml-2 h-5 w-5" />
+                      <Plus className="mr-2 h-8 w-8 stroke-[3]" />
                       {t.navigation.list}
                     </Button>
+
+                    {/* Menu Items (Sticker Buttons) */}
                     <Button
                       onClick={() => navigate("/notebook")}
                       variant="ghost"
-                      className="justify-start text-lg font-medium h-14 px-4 hover:bg-stone-100 text-stone-600"
+                      className="w-full justify-start p-4 mb-3 h-auto rounded-lg border-2 border-transparent transition-all duration-200 text-xl font-black tracking-tight text-black hover:bg-white hover:text-black hover:border-black hover:-translate-y-1 hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
                     >
-                      <Book className="ml-2 h-5 w-5" />
+                      <Book className="mr-3 h-6 w-6" />
                       {t.navigation.notebook}
                     </Button>
+
                     <Button
                       onClick={() => navigate("/history")}
                       variant="ghost"
-                      className="justify-start text-lg font-medium h-14 px-4 hover:bg-stone-100 text-stone-600"
+                      className="w-full justify-start p-4 mb-3 h-auto rounded-lg border-2 border-transparent transition-all duration-200 text-xl font-black tracking-tight text-black hover:bg-white hover:text-black hover:border-black hover:-translate-y-1 hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
                     >
-                      <History className="ml-2 h-5 w-5" />
+                      <History className="mr-3 h-6 w-6" />
                       {t.navigation.history}
                     </Button>
+
                     <Button
                       onClick={() => navigate("/compare")}
                       variant="ghost"
-                      className="justify-start text-lg font-medium h-14 px-4 hover:bg-stone-100 text-stone-600"
+                      className="w-full justify-start p-4 mb-3 h-auto rounded-lg border-2 border-transparent transition-all duration-200 text-xl font-black tracking-tight text-black hover:bg-white hover:text-black hover:border-black hover:-translate-y-1 hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
                     >
-                      <BarChart3 className="ml-2 h-5 w-5" />
+                      <BarChart3 className="mr-3 h-6 w-6" />
                       {t.navigation.compare}
                     </Button>
+
                     <Button
                       onClick={() => navigate("/about")}
                       variant="ghost"
-                      className="justify-start text-lg font-medium h-14 px-4 hover:bg-stone-100 text-stone-600"
+                      className="w-full justify-start p-4 mb-3 h-auto rounded-lg border-2 border-transparent transition-all duration-200 text-xl font-black tracking-tight text-black hover:bg-white hover:text-black hover:border-black hover:-translate-y-1 hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
                     >
-                      <Info className="ml-2 h-5 w-5" />
+                      <Info className="mr-3 h-6 w-6" />
                       {t.navigation.about}
                     </Button>
                   </nav>
@@ -712,7 +736,7 @@ export const ShoppingList = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div >
 
       {
         items.length > 0 && <div className="space-y-2">
@@ -768,28 +792,76 @@ export const ShoppingList = () => {
         {
           activeListId ? (
             <>
-              <div className="flex items-baseline gap-2 mb-2">
+              {/* Trigger Button */}
+              <div className="flex items-baseline gap-2 mb-4">
                 <button
                   type="button"
-                  className="flex items-center gap-1 text-black dark:text-white text-xs md:text-sm focus:outline-none hover:underline px-1 py-0.5 rounded transition"
+                  className="flex items-center gap-2 text-yellow-600 hover:text-yellow-700 text-base md:text-lg font-bold focus:outline-none hover:underline px-1 py-0.5 rounded transition"
                   onClick={() => setShowBulkInput(v => !v)}
                   aria-expanded={showBulkInput}
                   tabIndex={0}
                 >
-                  <ClipboardPaste className="h-4 w-4 md:h-5 md:w-5 text-yellow-400" />
-                  <span className="hidden sm:inline">
+                  <ClipboardPaste className="h-5 w-5 md:h-6 md:w-6" />
+                  <span>
                     {language === "he"
                       ? "רוצה להדביק רשימה ארוכה?"
                       : "Want to paste a long list?"}
                   </span>
-                  <span className="sm:hidden">
-                    {language === "he" ? "הדבק רשימה" : "Paste List"}
-                  </span>
                 </button>
               </div>
 
+              {/* Bulk Input Card (Notebook Style) - Now ABOVE Single Item Row */}
+              {showBulkInput && (
+                <div className="relative bg-[#FEFCE8] border-2 border-black rounded-xl p-6 mb-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
+                  style={{
+                    backgroundImage: 'repeating-linear-gradient(transparent, transparent 31px, #e5e7eb 31px, #e5e7eb 32px)'
+                  }}
+                >
+                  {/* Spiral Binding Effect */}
+                  <div className={`absolute top-0 bottom-4 ${language === 'he' ? '-right-3' : '-left-3'} w-8 flex flex-col justify-evenly py-2 z-20 pointer-events-none`}>
+                    {[...Array(12)].map((_, i) => (
+                      <div key={i} className="relative h-4 w-full">
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-[#1a1a1a] rounded-full shadow-inner" />
+                        <div className={`absolute top-1/2 ${language === 'he' ? 'left-1/2' : 'right-1/2'} w-6 h-1.5 bg-zinc-400 rounded-full transform ${language === 'he' ? '-translate-x-1/2 rotate-12' : 'translate-x-1/2 -rotate-12'} shadow-sm`} />
+                      </div>
+                    ))}
+                  </div>
+
+                  <Textarea
+                    placeholder={t.textareaPlaceholder}
+                    value={inputText}
+                    onChange={e => setInputText(e.target.value)}
+                    className="min-h-[140px] resize-none bg-transparent border-none focus:ring-0 text-base !text-black !dark:text-black touch-manipulation rounded-lg leading-[31px] -mt-1 shadow-none focus-visible:ring-0 !placeholder:text-gray-500 !dark:placeholder:text-gray-500"
+                    style={{
+                      lineHeight: '31px',
+                      background: 'transparent'
+                    }}
+                  />
+                  <div className="flex flex-col sm:flex-row gap-2 mt-4 w-full transition-all duration-300 ease-in-out relative z-10">
+                    <div className={`flex gap-2 overflow-hidden p-1 transition-all duration-300 ease-in-out ${hasContent ? 'w-full sm:w-1/3 opacity-100' : 'w-0 opacity-0'}`}>
+                      <Button onClick={clearAll} variant="ghost" className="flex-1 text-gray-900 hover:bg-gray-200 hover:text-red-700 h-11 text-base font-medium rounded-full">
+                        <Trash2 className="mr-2 h-5 w-5" />
+                        {t.clearAllButton}
+                      </Button>
+                      <Button onClick={shareList} variant="ghost" className="flex-1 text-gray-900 hover:bg-gray-200 hover:text-black h-11 text-base font-medium rounded-full">
+                        <Share2 className="mr-2 h-5 w-5" />
+                        {t.shareButton}
+                      </Button>
+                    </div>
+                    <Button
+                      onClick={() => handlePaste(inputText)}
+                      disabled={!inputText.trim()}
+                      className={`h-11 text-base font-bold bg-black text-yellow-400 hover:bg-gray-900 px-8 rounded-lg shadow-md transition-all duration-300 ease-in-out border-2 border-transparent hover:border-yellow-400 ${hasContent ? 'w-full sm:w-2/3' : 'w-full'}`}
+                    >
+                      <Plus className="mr-2 h-5 w-5" />
+                      {language === "he" ? "הוסף פריטים" : "Add Items"}
+                    </Button>
+                  </div>
+                </div>
+              )}
+
               {/* Single Item Row */}
-              <div className="bg-[#FEFCE8] dark:bg-zinc-900 rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] border-2 border-black dark:border-zinc-700 p-3 md:p-4 mb-6 w-full relative z-50 overflow-visible">
+              <div className="bg-[#FEFCE8] rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] border-2 border-black p-3 md:p-4 mb-6 w-full relative z-50 overflow-visible">
                 {/* Decorative "Tape" */}
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-24 h-6 bg-white/30 dark:bg-white/10 rotate-[-2deg] border-l border-r border-white/40 dark:border-white/20 backdrop-blur-[1px]" />
 
@@ -800,7 +872,7 @@ export const ShoppingList = () => {
                     value={singleItemInput}
                     onChange={setSingleItemInput}
                     onKeyDown={e => e.key === "Enter" && handleAddSingleItem()}
-                    className="flex-1 min-w-0 text-sm relative border-2 border-black rounded-lg shadow-sm focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all bg-white"
+                    className="flex-1 min-w-0 text-sm relative border-2 border-black rounded-lg shadow-sm focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all bg-white !text-black !dark:text-black"
                   />
                   <Input
                     type="number"
@@ -808,7 +880,7 @@ export const ShoppingList = () => {
                     step={singleItemUnit === 'units' ? "1" : "0.1"}
                     value={singleItemQuantity}
                     onChange={(e) => setSingleItemQuantity(e.target.value)}
-                    className="w-[3.5rem] text-center text-xs rounded-lg shrink-0 px-0 border-2 border-black focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all bg-white"
+                    className="w-[3.5rem] text-center text-xs rounded-lg shrink-0 px-0 border-2 border-black focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all bg-white !text-black !dark:text-black"
                     onBlur={() => {
                       let val = parseFloat(singleItemQuantity);
                       if (singleItemUnit === 'units' && !isNaN(val)) {
@@ -828,7 +900,7 @@ export const ShoppingList = () => {
                       }
                     }}
                   >
-                    <SelectTrigger className="w-[4.5rem] text-xs rounded-lg shrink-0 px-1 border-2 border-black focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all bg-white text-center justify-center [&>span]:w-full [&>span]:text-center [&>svg]:hidden">
+                    <SelectTrigger className="w-[4.5rem] text-xs rounded-lg shrink-0 px-1 border-2 border-black focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all bg-white text-center justify-center [&>span]:w-full [&>span]:text-center [&>svg]:hidden !text-black !dark:text-black">
                       <span className="truncate w-full text-center">
                         {(() => {
                           const u = UNITS.find(u => u.value === (singleItemUnit || 'units'));
@@ -848,45 +920,15 @@ export const ShoppingList = () => {
                     <Button
                       onClick={handleAddSingleItem}
                       disabled={!singleItemInput.trim()}
-                      className="w-10 h-10 p-0 shrink-0 grid place-items-center bg-black text-yellow-400 rounded-lg border-2 border-transparent hover:border-yellow-400 hover:bg-gray-900 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[1px] active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:bg-stone-600 disabled:text-stone-400"
+                      className="w-10 h-10 p-0 shrink-0 grid place-items-center bg-yellow-500 text-white rounded-lg border-2 border-transparent hover:bg-yellow-600 hover:scale-105 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[1px] active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:bg-stone-300 disabled:text-stone-500"
                     >
-                      <Plus className="h-6 w-6" />
+                      <Plus className="h-6 w-6" strokeWidth={3} />
                     </Button>
                   </div>
                 </div>
               </div>
 
-              {/* Bulk Input Card */}
-              {showBulkInput && (
-                <div className="bg-card rounded-xl shadow-sm border border-border p-3 md:p-6 mb-6">
-                  <Textarea
-                    placeholder={t.textareaPlaceholder}
-                    value={inputText}
-                    onChange={e => setInputText(e.target.value)}
-                    className="min-h-[140px] resize-none bg-background border border-input focus:border-primary text-base touch-manipulation rounded-lg"
-                  />
-                  <div className="flex flex-col sm:flex-row gap-2 mt-4 w-full transition-all duration-300 ease-in-out">
-                    <div className={`flex gap-2 overflow-hidden transition-all duration-300 ease-in-out ${hasContent ? 'w-full sm:w-1/3 opacity-100' : 'w-0 opacity-0'}`}>
-                      <Button onClick={clearAll} variant="ghost" className="flex-1 text-muted-foreground hover:text-destructive h-11 text-base font-medium rounded-lg">
-                        <Trash2 className="mr-2 h-5 w-5" />
-                        {t.clearAllButton}
-                      </Button>
-                      <Button onClick={shareList} variant="ghost" className="flex-1 text-muted-foreground h-11 text-base font-medium rounded-lg">
-                        <Share2 className="mr-2 h-5 w-5" />
-                        {t.shareButton}
-                      </Button>
-                    </div>
-                    <Button
-                      onClick={() => handlePaste(inputText)}
-                      disabled={!inputText.trim()}
-                      className={`h-11 text-base font-bold bg-primary text-primary-foreground hover:bg-primary/90 px-8 rounded-lg shadow-md transition-all duration-300 ease-in-out ${hasContent ? 'w-full sm:w-2/3' : 'w-full'}`}
-                    >
-                      <Plus className="mr-2 h-5 w-5" />
-                      {language === "he" ? "הוסף רשימה" : "Add to List"}
-                    </Button>
-                  </div>
-                </div>
-              )}
+
             </>
           ) : (
             // Notebook Style Input
@@ -909,7 +951,7 @@ export const ShoppingList = () => {
                 placeholder={t.textareaPlaceholder}
                 value={inputText}
                 onChange={e => setInputText(e.target.value)}
-                className="min-h-[140px] resize-none bg-transparent border-none focus:ring-0 text-base text-black touch-manipulation rounded-lg leading-[31px] -mt-1 shadow-none focus-visible:ring-0"
+                className="min-h-[140px] resize-none bg-transparent border-none focus:ring-0 text-base !text-black !dark:text-black touch-manipulation rounded-lg leading-[31px] -mt-1 shadow-none focus-visible:ring-0 !placeholder:text-gray-500 !dark:placeholder:text-gray-500"
                 style={{
                   lineHeight: '31px',
                   background: 'transparent'
@@ -984,7 +1026,7 @@ export const ShoppingList = () => {
         {/* Recent Lists Preview */}
         {
           items.length === 0 && savedLists.length > 0 && (
-            <div className="mb-12 border-t-2 border-black/5 pt-8">
+            <div className="mb-12 border-t-2 border-black/5 pt-8 max-w-5xl mx-auto px-4">
               <div className="flex justify-between items-center mb-6 px-2">
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                   <History className="h-5 w-5 text-yellow-500" />

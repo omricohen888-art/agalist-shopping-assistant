@@ -97,6 +97,12 @@ export const SmartAutocompleteInput = forwardRef<SmartAutocompleteInputRef, Smar
   };
 
   // ... existing code ...
+  const handleInputChange = (newValue: string) => {
+    onChange(newValue);
+    setSelectedIndex(-1);
+    setActiveLetter(null); // Clear letter filter on typing
+    setOpen(true);
+  };
 
   const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
 

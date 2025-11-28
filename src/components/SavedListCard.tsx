@@ -28,12 +28,12 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
 
     // Modern multi-color palette
     const cardColors = [
-        'bg-[#FEFCE8] dark:bg-zinc-900', // Yellow
-        'bg-[#FFF7ED] dark:bg-zinc-900', // Orange/Peach
-        'bg-[#F0FDF4] dark:bg-zinc-900', // Green/Mint
-        'bg-[#FAF5FF] dark:bg-zinc-900', // Purple/Lavender
-        'bg-[#F0F9FF] dark:bg-zinc-900', // Blue/Sky
-        'bg-[#FFF1F2] dark:bg-zinc-900', // Rose
+        'bg-[#FEFCE8]', // Yellow
+        'bg-[#FFF7ED]', // Orange/Peach
+        'bg-[#F0FDF4]', // Green/Mint
+        'bg-[#FAF5FF]', // Purple/Lavender
+        'bg-[#F0F9FF]', // Blue/Sky
+        'bg-[#FFF1F2]', // Rose
     ];
     const colorClass = cardColors[index % cardColors.length];
 
@@ -57,7 +57,7 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
             {/* Card Header */}
             <div className="flex justify-between items-start mb-4 border-b-2 border-black/10 dark:border-white/10 pb-3 mt-2">
                 <div>
-                    <h4 className="font-black text-xl text-gray-900 dark:text-foreground tracking-tight">{list.name}</h4>
+                    <h4 className="font-black text-xl text-gray-900 tracking-tight">{list.name}</h4>
                     <p className="text-xs font-bold text-gray-500 mt-1">{t.itemsCount(list.items.length)}</p>
                 </div>
 
@@ -95,7 +95,7 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
                 <ul className="space-y-0">
                     {list.items.slice(0, 5).map((item, i) => {
                         return (
-                            <li key={item.id || i} className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 h-[31px] px-2 hover:bg-black/5 rounded transition-colors group/item cursor-pointer"
+                            <li key={item.id || i} className="flex items-center gap-2 text-sm text-gray-700 h-[31px] px-2 hover:bg-black/5 rounded transition-colors group/item cursor-pointer"
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     onToggleItem(list.id, item.id);

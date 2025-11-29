@@ -9,12 +9,15 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Progress } from "@/components/ui/progress";
-import { Share2, Trash2, Plus, CheckCircle2, History, Menu, BarChart3, Globe, Save, ClipboardList, Book, Square, CheckSquare, Printer, Mail, FileSpreadsheet, Copy, Pencil, X, ClipboardPaste, Info, ShoppingCart, Check, Volume2, RotateCcw, Moon, Sun } from "lucide-react";
+import { Share2, Trash2, Plus, CheckCircle2, History, Menu, BarChart3, Globe, Save, ClipboardList, Book, Square, CheckSquare, Printer, Mail, FileSpreadsheet, Copy, Pencil, X, ClipboardPaste, Info, ShoppingCart, Check, Volume2, RotateCcw, Settings, Moon, Sun, Mic, Camera, PenLine } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import { SmartAutocompleteInput, SmartAutocompleteInputRef } from "@/components/SmartAutocompleteInput";
 import { SavedListCard } from "@/components/SavedListCard";
 import { toast } from "sonner";
 import { ShoppingItem, ISRAELI_STORES, UNITS, Unit, SavedList } from "@/types/shopping";
+import { ShoppingListItem } from "@/components/ShoppingListItem";
+import { SettingsModal } from "@/components/SettingsModal";
+import { processInput, RateLimiter } from "@/utils/security";
 
 interface NotepadItem {
   id: string;
@@ -25,45 +28,8 @@ import { saveShoppingHistory, saveList, getSavedLists, deleteSavedList, updateSa
 import { useLanguage, Language } from "@/hooks/use-language";
 import { translations } from "@/utils/translations";
 import { useTheme } from "next-themes";
+import { createWorker } from 'tesseract.js';
 
-const QuantityInput = ({ value, onChange, unit }: { value: number, onChange: (val: number) => void, unit: Unit }) => {
-  const [localValue, setLocalValue] = useState(value.toString());
-
-  useEffect(() => {
-    setLocalValue(value.toString());
-  }, [value]);
-
-  const handleBlur = () => {
-    let parsed = parseFloat(localValue);
-    if (!isNaN(parsed) && parsed >= 0) {
-      if (unit === 'units') {
-        parsed = Math.round(parsed);
-        if (parsed === 0) parsed = 1;
-      }
-      onChange(parsed);
-      setLocalValue(parsed.toString());
-    } else {
-      setLocalValue(value.toString());
-    }
-  };
-
-  return (
-    <Input
-      type="number"
-      step={unit === 'units' ? "1" : "any"}
-      min="0"
-      value={localValue}
-      onChange={(e) => setLocalValue(e.target.value)}
-      onBlur={handleBlur}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter') {
-          e.currentTarget.blur();
-        }
-      }}
-      className="w-14 h-9 px-1 text-center text-sm rounded-lg"
-    />
-  );
-};
 
 const ENGLISH_STORES = [
   "Shufersal",
@@ -133,8 +99,10 @@ export const ShoppingList = () => {
   const [isCreateTemplateDialogOpen, setIsCreateTemplateDialogOpen] = useState(false);
   const [newTemplateName, setNewTemplateName] = useState("");
   const [newTemplateItems, setNewTemplateItems] = useState("");
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const autocompleteInputRef = useRef<SmartAutocompleteInputRef>(null);
   const notepadInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const rateLimiter = useRef(new RateLimiter());
   const { language, toggleLanguage } = useLanguage();
   const { theme, setTheme } = useTheme();
   const t = translations[language];
@@ -154,6 +122,11 @@ export const ShoppingList = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [showPasteFeedback, setShowPasteFeedback] = useState(false);
   const [notepadItems, setNotepadItems] = useState<NotepadItem[]>([]);
+
+  // Smart Input States
+  const [isVoiceRecording, setIsVoiceRecording] = useState(false);
+  const [isProcessingImage, setIsProcessingImage] = useState(false);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   // Update refs array when notepadItems changes
   useEffect(() => {
@@ -280,14 +253,37 @@ export const ShoppingList = () => {
           }
         });
 
+        // Process items with security checks
+        const processedItems: string[] = [];
+        let hasErrors = false;
+
+        for (const item of allItems) {
+          const result = processInput(item, notepadItems, rateLimiter.current);
+          if (result.canAdd && result.isValid) {
+            processedItems.push(result.processedText);
+          } else if (result.error && !hasErrors) {
+            // Only show the first error to avoid spam
+            toast.error(result.error);
+            hasErrors = true;
+          }
+        }
+
+        if (processedItems.length === 0) {
+          toast.error(language === 'he' ? "לא נמצאו פריטים תקינים" : "No valid items found");
+          return;
+        }
+
         // Create notepad items with unchecked status
-        const newNotepadItems: NotepadItem[] = allItems.map((item, index) => ({
+        const newNotepadItems: NotepadItem[] = processedItems.map((item, index) => ({
           id: `notepad-${Date.now()}-${index}`,
           text: item,
           isChecked: false
         }));
 
         setNotepadItems(prev => [...prev, ...newNotepadItems]);
+
+        // Record the add for rate limiting (only once per paste operation)
+        rateLimiter.current.recordAdd();
         setShowPasteFeedback(true);
         setTimeout(() => setShowPasteFeedback(false), 1500);
         toast.success(language === 'he' ? "הודבק בהצלחה!" : "Pasted successfully!");
@@ -334,6 +330,19 @@ export const ShoppingList = () => {
   const handleAddSingleItem = () => {
     if (!singleItemInput.trim()) return;
 
+    // Process input with security checks
+    const result = processInput(singleItemInput, items, rateLimiter.current);
+
+    if (!result.canAdd) {
+      toast.error(result.error || 'Failed to add item');
+      return;
+    }
+
+    if (!result.isValid) {
+      toast.error(result.error || 'Invalid input');
+      return;
+    }
+
     let quantity = parseFloat(singleItemQuantity);
     if (isNaN(quantity) || quantity < 0) quantity = 1;
 
@@ -344,7 +353,7 @@ export const ShoppingList = () => {
 
     const newItem: ShoppingItem = {
       id: `${Date.now()}`,
-      text: singleItemInput.trim(),
+      text: result.processedText,
       checked: false,
       quantity: quantity,
       unit: singleItemUnit
@@ -354,6 +363,9 @@ export const ShoppingList = () => {
     setSingleItemInput("");
     setSingleItemQuantity("1");
     setSingleItemUnit('units');
+
+    // Record the add for rate limiting
+    rateLimiter.current.recordAdd();
 
     // Show add animation
     setShowAddAnimation(true);
@@ -590,8 +602,10 @@ export const ShoppingList = () => {
   };
 
   const resetChecks = () => {
-    setItems(items.map(item => ({ ...item, checked: false })));
-    toast.success(language === 'he' ? 'הרשימה אופסה מחדש' : 'List reset');
+    if (items && items.length > 0) {
+      setItems(items.map(item => ({ ...item, checked: false })));
+      toast.success(language === 'he' ? 'הרשימה אופסה מחדש' : 'List reset');
+    }
   };
 
   const handleReadListAloud = () => {
@@ -613,12 +627,12 @@ export const ShoppingList = () => {
 
     // Construct the text to read
     let textToRead = listName ? `${listName}. ` : '';
-    
+
     uncheckedItems.forEach((item) => {
-      const unitText = item.unit === 'units' 
+      const unitText = item.unit === 'units'
         ? (language === 'he' ? 'יחידות' : 'units')
         : item.unit;
-      
+
       if (item.quantity > 1) {
         textToRead += `${item.quantity} ${unitText} ${item.text}. `;
       } else {
@@ -629,7 +643,7 @@ export const ShoppingList = () => {
     // Create speech utterance
     const utterance = new SpeechSynthesisUtterance(textToRead);
     utterance.lang = language === 'he' ? 'he-IL' : 'en-US';
-    
+
     // Set speaking state
     setIsSpeaking(true);
 
@@ -646,6 +660,110 @@ export const ShoppingList = () => {
 
     // Start speaking
     window.speechSynthesis.speak(utterance);
+  };
+
+  // Voice Dictation Function
+  const handleVoiceDictation = () => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      toast.error(language === 'he' ? 'הדפדפן שלך לא תומך בהקלטת קול' : 'Your browser does not support voice recording');
+      return;
+    }
+
+    if (isVoiceRecording) {
+      // Stop recording
+      setIsVoiceRecording(false);
+      return;
+    }
+
+    // Start recording
+    setIsVoiceRecording(true);
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+
+    recognition.lang = language === 'he' ? 'he-IL' : 'en-US';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      const items = transcript.split(/\s*(?:and|,|\s)\s*/).filter(item => item.trim().length > 0);
+
+      if (items.length > 0) {
+        const newNotepadItems: NotepadItem[] = items.map((item, index) => ({
+          id: `voice-${Date.now()}-${index}`,
+          text: item.trim(),
+          isChecked: false
+        }));
+
+        setNotepadItems(prev => [...prev, ...newNotepadItems]);
+
+        toast.success(language === 'he'
+          ? `התווספו ${items.length} פריטים מהקול`
+          : `Added ${items.length} items from voice`
+        );
+      }
+    };
+
+    recognition.onerror = (event) => {
+      console.error('Speech recognition error:', event.error);
+      toast.error(language === 'he' ? 'שגיאה בהקלטת קול' : 'Voice recording error');
+    };
+
+    recognition.onend = () => {
+      setIsVoiceRecording(false);
+    };
+
+    recognition.start();
+  };
+
+  // Camera OCR Function
+  const handleCameraOCR = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsProcessingImage(true);
+    toast.info(language === 'he' ? 'מפענח רשימה...' : 'Processing list...');
+
+    try {
+      const worker = await createWorker();
+      await worker.loadLanguage('heb+eng');
+      await worker.initialize('heb+eng');
+
+      const { data: { text } } = await worker.recognize(file);
+      await worker.terminate();
+
+      // Split text by newlines and filter empty lines
+      const lines = text.split('\n')
+        .map(line => line.trim())
+        .filter(line => line.length > 0);
+
+      if (lines.length > 0) {
+        const newNotepadItems: NotepadItem[] = lines.map((line, index) => ({
+          id: `ocr-${Date.now()}-${index}`,
+          text: line,
+          isChecked: false
+        }));
+
+        setNotepadItems(prev => [...prev, ...newNotepadItems]);
+
+        toast.success(language === 'he'
+          ? `התווספו ${lines.length} פריטים מהתמונה`
+          : `Added ${lines.length} items from image`
+        );
+      } else {
+        toast.warning(language === 'he' ? 'לא נמצא טקסט בתמונה' : 'No text found in image');
+      }
+    } catch (error) {
+      console.error('OCR Error:', error);
+      toast.error(language === 'he' ? 'שגיאה בעיבוד התמונה' : 'Error processing image');
+    } finally {
+      setIsProcessingImage(false);
+      // Reset file input
+      if (cameraInputRef.current) {
+        cameraInputRef.current.value = '';
+      }
+    }
   };
 
   const handleDeleteList = (id: string, e: React.MouseEvent) => {
@@ -803,8 +921,8 @@ export const ShoppingList = () => {
         </div>
       )}
 
-      {/* Header */}
-      <div className="bg-gray-100/80 dark:bg-slate-950/80 backdrop-blur-md text-black dark:text-slate-100 shadow-sm sticky top-0 z-50 border-b border-gray-200/50 dark:border-slate-800/50">
+      {/* Sticky Header Group */}
+      <div className="bg-gray-50/95 dark:bg-slate-950/95 backdrop-blur-md text-black dark:text-slate-100 shadow-sm sticky top-0 z-50 border-b border-gray-200/50 dark:border-slate-800/50">
         <div className="max-w-3xl mx-auto px-4 py-4">
           <div className="flex justify-between items-center w-full mb-3 px-4">
             {/* Title Section - Never truncate */}
@@ -839,13 +957,6 @@ export const ShoppingList = () => {
 
             {/* Actions Section - Never shrink */}
             <div className="flex items-center gap-3 flex-shrink-0">
-              <button
-                onClick={toggleLanguage}
-                aria-label={t.languageAria}
-                className="w-11 h-11 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-full flex items-center justify-center hover:bg-gray-50 dark:hover:bg-slate-700 hover:text-black dark:hover:text-slate-100 active:scale-95 transition-all duration-200 shadow"
-              >
-                <Globe className="w-5 h-5 text-gray-700 dark:text-slate-400" strokeWidth={2} />
-              </button>
               {/* Hamburger Menu */}
               <Sheet>
                 <SheetTrigger asChild>
@@ -911,30 +1022,34 @@ export const ShoppingList = () => {
                       <Info className="mr-3 h-6 w-6 text-black dark:text-slate-400" />
                       {t.navigation.about}
                     </Button>
+
+                    <Button
+                      onClick={() => setIsSettingsModalOpen(true)}
+                      variant="ghost"
+                      className="w-full justify-start p-4 mb-3 h-auto rounded-lg border-2 border-transparent transition-all duration-200 text-xl font-black tracking-tight text-black dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 hover:text-black dark:hover:text-white hover:border-black dark:hover:border-slate-600 hover:-translate-y-1 hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
+                    >
+                      <Settings className="mr-3 h-6 w-6 text-black dark:text-slate-400" />
+                      {language === 'he' ? 'הגדרות' : 'Settings'}
+                    </Button>
                   </nav>
                 </SheetContent>
               </Sheet>
-              <button
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="w-11 h-11 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-full flex items-center justify-center hover:bg-gray-50 dark:hover:bg-slate-700 hover:text-black dark:hover:text-slate-100 active:scale-95 transition-all duration-200 shadow"
-                aria-label="Toggle theme"
-              >
-                <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-              </button>
             </div>
           </div>
         </div>
-      </div >
 
-      {
-        items.length > 0 && <div className="space-y-2">
-          <Progress value={progressPercentage} className="h-2.5 bg-primary-foreground/20" />
-          <p className="text-sm text-primary-foreground/90 dark:text-slate-300 text-center font-medium">
-            {t.progressText(completedCount, items.length)}
-          </p>
-        </div>
-      }
+        {/* Progress Bar - Part of sticky header */}
+        {
+          items.length > 0 && <div className="px-4 pb-4">
+            <div className="space-y-2">
+              <Progress value={progressPercentage} className="h-2.5 bg-primary-foreground/20" />
+              <p className="text-sm text-primary-foreground/90 dark:text-slate-300 text-center font-medium">
+                {t.progressText(completedCount, items.length)}
+              </p>
+            </div>
+          </div>
+        }
+      </div >
 
       {/* Main Content */}
       <div className="max-w-3xl mx-auto px-2 md:px-8 py-6 pb-40">
@@ -956,14 +1071,17 @@ export const ShoppingList = () => {
         {
           activeListId && (
             <div className="flex justify-between items-center w-full mb-4">
-              <input
-                ref={titleInputRef}
-                value={listName}
-                onChange={(e) => setListName(e.target.value)}
-                className="flex-1 bg-transparent text-xl md:text-3xl font-extrabold border-none outline-none px-1 py-1 select-text focus:cursor-text hover:cursor-text transition border-b-2 border-transparent focus:border-gray-400 hover:border-gray-300 focus:outline-none focus:ring-0 truncate"
-                placeholder={language === 'he' ? 'שם הרשימה...' : 'List name...'}
-                style={{ minWidth: 0 }}
-              />
+              <div className="flex items-center gap-2 cursor-pointer hover:text-gray-600 dark:hover:text-gray-300 transition-colors flex-1 min-w-0">
+                <Pencil className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                <input
+                  ref={titleInputRef}
+                  value={listName}
+                  onChange={(e) => setListName(e.target.value)}
+                  className="flex-1 bg-transparent text-xl md:text-2xl font-extrabold border-none outline-none px-1 py-1 select-text focus:cursor-text hover:cursor-text transition border-b-2 border-transparent focus:border-gray-400 hover:border-gray-300 focus:outline-none focus:ring-0 truncate"
+                  placeholder={language === 'he' ? 'שם הרשימה...' : 'List name...'}
+                  style={{ minWidth: 0 }}
+                />
+              </div>
               <div className="flex items-center gap-2 flex-shrink-0">
                 <button
                   onClick={handleReadListAloud}
@@ -979,22 +1097,13 @@ export const ShoppingList = () => {
                   )}
                 </button>
                 <button
-                  onClick={resetChecks}
-                  title={language === 'he' ? 'איפוס סימונים' : 'Reset checks'}
-                  className="w-8 h-8 md:w-9 md:h-9 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-full p-1.5 md:p-2 flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition-colors"
-                  type="button"
-                  aria-label={language === 'he' ? 'איפוס סימונים' : 'Reset checks'}
-                >
-                  <RotateCcw className="h-4 w-4 md:h-5 md:w-5 text-gray-900 dark:text-slate-100" />
-                </button>
-                <button
                   onClick={exitEditMode}
                   title={t.exitEditMode}
-                  className="w-8 h-8 md:w-9 md:h-9 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-full p-1.5 md:p-2 flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400"
+                  className="w-12 h-12 bg-white shadow-md rounded-full flex items-center justify-center flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 hover:bg-gray-50 transition-colors"
                   type="button"
                   aria-label={t.exitEditMode}
                 >
-                  <X className="h-4 w-4 md:h-5 md:w-5 text-gray-900 dark:text-slate-100" />
+                  <X className="h-5 w-5 text-gray-900" />
                 </button>
               </div>
             </div>
@@ -1060,6 +1169,52 @@ export const ShoppingList = () => {
                       {language === 'he' ? 'הודבק!' : 'Pasted!'}
                     </div>
                   )}
+
+                  {/* Smart Input Toolbar */}
+                  <div className="flex gap-4 text-gray-500 mb-2 px-2">
+                    {/* Voice Dictation Button */}
+                    <button
+                      onClick={handleVoiceDictation}
+                      className={`p-2 rounded-lg hover:text-black dark:hover:text-white transition-colors hover:bg-gray-100 dark:hover:bg-slate-700 ${
+                        isVoiceRecording ? 'text-red-500 animate-pulse' : ''
+                      }`}
+                      title={language === 'he' ? 'הקלטת קול' : 'Voice Dictation'}
+                      disabled={isProcessingImage}
+                    >
+                      <Mic className="h-5 w-5" />
+                    </button>
+
+                    {/* Camera OCR Button */}
+                    <button
+                      onClick={() => cameraInputRef.current?.click()}
+                      className={`p-2 rounded-lg hover:text-black dark:hover:text-white transition-colors hover:bg-gray-100 dark:hover:bg-slate-700 ${
+                        isProcessingImage ? 'text-blue-500 animate-pulse' : ''
+                      }`}
+                      title={language === 'he' ? 'סריקת רשימה' : 'Scan List'}
+                      disabled={isVoiceRecording}
+                    >
+                      <Camera className="h-5 w-5" />
+                    </button>
+
+                    {/* Handwriting Placeholder Button */}
+                    <button
+                      className="p-2 rounded-lg hover:text-black dark:hover:text-white transition-colors hover:bg-gray-100 dark:hover:bg-slate-700 opacity-50 cursor-not-allowed"
+                      title={language === 'he' ? 'כתב יד (בקרוב)' : 'Handwriting (Coming Soon)'}
+                      disabled
+                    >
+                      <PenLine className="h-5 w-5" />
+                    </button>
+
+                    {/* Hidden File Input for Camera */}
+                    <input
+                      ref={cameraInputRef}
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      onChange={handleCameraOCR}
+                      className="hidden"
+                    />
+                  </div>
 
                   {/* Notepad Items List */}
                   <div className="min-h-[140px] space-y-2">
@@ -1516,67 +1671,89 @@ export const ShoppingList = () => {
           )
         }
 
+        {/* Secondary Action Bar */}
+        {
+          items && items.length > 0 && (
+            <div className="flex justify-start mb-4">
+              <button
+                onClick={() => {
+                  if (items && items.length > 0) {
+                    setItems(items.map(item => ({ ...item, checked: false })));
+                    toast.success(language === 'he' ? 'כל הסימונים אופסו' : 'All checks reset');
+                  }
+                }}
+                className="text-sm text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              >
+                <RotateCcw className="w-4 h-4" />
+                <span>{language === 'he' ? 'אפס סימונים' : 'Reset Checks'}</span>
+              </button>
+            </div>
+          )
+        }
+
         {/* Items List */}
         {
-          items.length > 0 && (
-            <div className="space-y-2.5">
-              {items.map((item) => (
-                <div key={item.id} className="bg-white dark:bg-slate-800 rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] border-2 border-black dark:border-slate-700 p-3 flex flex-row items-center justify-between flex-nowrap w-full gap-3 group hover:translate-y-[-2px] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] transition-all touch-manipulation animate-in slide-in-from-top-4 fade-in duration-300">
-                  <Checkbox checked={item.checked} onCheckedChange={() => toggleItem(item.id)} className="h-6 w-6 border-2 border-black dark:border-slate-600 flex-shrink-0 data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500 data-[state=checked]:text-white transition-all duration-200 active:scale-110 rounded-md" />
-                  <span className={`flex-grow text-lg leading-relaxed transition-all text-right truncate min-w-0 font-bold ${item.checked ? "line-through text-gray-400 dark:text-slate-500 decoration-2" : "text-black dark:text-slate-100"}`}>
-                    {item.text}
-                  </span>
+          items && items.length > 0 && (
+            <div className="space-y-4">
+              {/* Pending Items */}
+              <div className="space-y-2.5">
+                {items.filter(item => !item.checked).map((item) => (
+                  <ShoppingListItem
+                    key={item.id}
+                    item={item}
+                    onToggle={toggleItem}
+                    onDelete={deleteItem}
+                    onQuantityChange={updateItemQuantity}
+                    onUnitChange={updateItemUnit}
+                  />
+                ))}
+              </div>
 
-                  <div className="flex items-center gap-2 flex-shrink-0 border-l-2 border-black/10 pl-2" onClick={(e) => e.stopPropagation()}>
-                    <QuantityInput
-                      value={item.quantity || 1}
-                      onChange={(val) => updateItemQuantity(item.id, val)}
-                      unit={item.unit}
-                    />
-                    <Select
-                      value={item.unit || 'units'}
-                      onValueChange={(val: Unit) => updateItemUnit(item.id, val)}
-                    >
-                      <SelectTrigger className="w-16 h-9 px-1 text-xs rounded-lg border-2 border-black/20 hover:border-black focus:border-black transition-colors text-center justify-center [&>span]:w-full [&>span]:text-center [&>svg]:hidden">
-                        <span className="truncate w-full text-center">
-                          {(() => {
-                            const u = UNITS.find(u => u.value === (item.unit || 'units'));
-                            return u ? (language === 'he' ? u.labelHe : u.labelEn) : '';
-                          })()}
-                        </span>
-                      </SelectTrigger>
-                      <SelectContent className="border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                        {UNITS.map(u => (
-                          <SelectItem key={u.value} value={u.value}>
-                            {language === 'he' ? u.labelHe : u.labelEn}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <Button variant="ghost" size="icon" onClick={() => deleteItem(item.id)} className="h-9 w-9 flex-shrink-0 hover:bg-red-100 text-red-500 hover:text-red-600 touch-manipulation rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Trash2 className="h-5 w-5" />
-                    </Button>
-                  </div>
+              {/* Completed Items Separator */}
+              {items.filter(item => item.checked).length > 0 && (
+                <div className="text-gray-500 dark:text-slate-500 text-sm font-medium py-4 flex items-center gap-4 before:h-px before:flex-1 before:bg-gray-300 dark:before:bg-slate-600 after:h-px after:flex-1 after:bg-gray-300 dark:after:bg-slate-600">
+                  <span className="whitespace-nowrap">
+                    {language === 'he' ? `בוצע (${items.filter(item => item.checked).length})` : `Completed (${items.filter(item => item.checked).length})`}
+                  </span>
                 </div>
-              ))}
-              {/* Floating Sticky Footer */}
-              <div className="fixed bottom-0 left-0 right-0 z-[60] bg-white/90 dark:bg-slate-950/90 backdrop-blur-md border-t border-gray-200 dark:border-slate-800 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] p-4">
-                <div className="max-w-3xl mx-auto">
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    {(() => {
-                      const isSavedList = activeListId && savedLists.some(list => list.id === activeListId);
-                      return (
-                        <Button variant="outline" onClick={handleSaveList} className="w-full sm:flex-1 h-12 font-bold text-base touch-manipulation rounded-xl border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-2px] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] active:translate-y-[0px] active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all bg-green-500 text-white hover:bg-green-600 hover:text-white border-green-700">
-                          <Save className="ml-2 h-5 w-5" />
-                          {isSavedList ? t.saveChangesButton : t.saveListButton}
-                        </Button>
-                      );
-                    })()}
-                    <Button onClick={openFinishDialog} className="w-full sm:flex-1 h-12 font-bold bg-yellow-400 text-black hover:bg-yellow-500 text-base touch-manipulation rounded-xl border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-2px] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] active:translate-y-[0px] active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all">
-                      <ClipboardList className="ml-2 h-5 w-5" />
-                      {t.summarizeButton}
-                    </Button>
-                  </div>
+              )}
+
+              {/* Completed Items (Always Visible) */}
+              {items.filter(item => item.checked).length > 0 && (
+                <div className="space-y-2.5">
+                  {items.filter(item => item.checked).map((item) => (
+                    <ShoppingListItem
+                      key={item.id}
+                      item={item}
+                      onToggle={toggleItem}
+                      onDelete={deleteItem}
+                      onQuantityChange={updateItemQuantity}
+                      onUnitChange={updateItemUnit}
+                      isCompleted={true}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        {
+          items && items.length > 0 && (
+            <div className="fixed bottom-0 left-0 right-0 z-[60] bg-white/90 dark:bg-slate-950/90 backdrop-blur-md border-t border-gray-200 dark:border-slate-800 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] p-4">
+              <div className="max-w-3xl mx-auto">
+                <div className="flex flex-col sm:flex-row gap-4">
+                  {(() => {
+                    const isSavedList = activeListId && savedLists.some(list => list.id === activeListId);
+                    return (
+                      <Button variant="outline" onClick={handleSaveList} className="w-full sm:flex-1 h-10 font-bold text-base touch-manipulation rounded-xl bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-700">
+                        <Save className="ml-2 h-5 w-5" />
+                        {isSavedList ? t.saveChangesButton : t.saveListButton}
+                      </Button>
+                    );
+                  })()}
+                  <Button onClick={openFinishDialog} className="w-full sm:flex-1 h-10 font-bold bg-slate-900 text-white hover:bg-slate-800 text-base touch-manipulation rounded-xl border-2 border-slate-700 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-2px] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] active:translate-y-[0px] active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all">
+                    <ClipboardList className="ml-2 h-5 w-5" />
+                    {t.summarizeButton}
+                  </Button>
                 </div>
               </div>
             </div>
@@ -1777,6 +1954,11 @@ export const ShoppingList = () => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        <SettingsModal
+          open={isSettingsModalOpen}
+          onOpenChange={setIsSettingsModalOpen}
+        />
       </div >
     </div >
   );

@@ -55,7 +55,7 @@ const Compare = () => {
   })() : [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+    <div className="bg-gradient-to-br from-background via-background to-muted/20">
       <div className="w-full max-w-4xl mx-auto px-4 py-8 animate-fade-in">
         <div className="mb-8 flex items-center gap-4">
           <Button

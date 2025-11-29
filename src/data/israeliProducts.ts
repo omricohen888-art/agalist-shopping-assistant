@@ -133,3 +133,4 @@ export const ISRAELI_PRODUCTS = [
 ] as const;
 
 export type IsraeliProduct = typeof ISRAELI_PRODUCTS[number];
+

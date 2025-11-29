@@ -11,7 +11,7 @@ const About = () => {
     const direction = language === 'he' ? 'rtl' : 'ltr';
 
     return (
-        <div className="min-h-screen bg-stone-100 pb-20" dir={direction}>
+        <div className="min-h-screen bg-stone-100" dir={direction}>
             {/* Header */}
             <div className="bg-stone-200 text-black shadow-sm sticky top-0 z-10 border-b-2 border-black/10">
                 <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">

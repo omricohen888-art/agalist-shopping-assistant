@@ -169,7 +169,7 @@ const History = () => {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20" dir={direction} lang={language}>
+    <div className="bg-gradient-to-br from-background via-background to-muted/20" dir={direction} lang={language}>
       <div className="w-full max-w-4xl mx-auto px-4 py-6 sm:py-8 animate-fade-in space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3 flex-1 min-w-[220px]">

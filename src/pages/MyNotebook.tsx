@@ -44,7 +44,7 @@ const MyNotebook = () => {
     };
 
     return (
-        <div className="min-h-screen bg-stone-100 dark:bg-slate-950 pb-20" dir={direction}>
+        <div className="bg-stone-100 dark:bg-slate-950" dir={direction}>
             {/* Header */}
             <div className="bg-stone-200 dark:bg-slate-900 text-black dark:text-slate-100 shadow-sm sticky top-0 z-10 border-b-2 border-black/10 dark:border-slate-700/50">
                 <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">

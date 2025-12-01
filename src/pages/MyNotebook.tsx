@@ -44,30 +44,30 @@ const MyNotebook = () => {
     };
 
     return (
-        <div className="bg-stone-100 dark:bg-slate-950" dir={direction}>
+        <div className="min-h-screen bg-stone-50 dark:bg-slate-950" dir={direction}>
             {/* Header */}
-            <div className="bg-stone-200 dark:bg-slate-900 text-black dark:text-slate-100 shadow-sm sticky top-0 z-10 border-b-2 border-black/10 dark:border-slate-700/50">
-                <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div className="sticky top-0 z-10 border-b border-border shadow-sm">
+                <div className="max-w-5xl mx-auto px-4 py-4 sm:py-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-3">
-                        <Button variant="ghost" size="icon" onClick={() => navigate('/')} className="text-black dark:text-white hover:bg-black/10 dark:hover:bg-white/10 rounded-full">
+                        <Button variant="ghost" size="icon" onClick={() => navigate('/')} className="hover:bg-muted rounded-lg h-10 w-10">
                             {direction === 'rtl' ? <ArrowRight className="h-6 w-6" /> : <ArrowLeft className="h-6 w-6" />}
                         </Button>
                         <div className="flex items-center gap-2">
-                            <Book className="h-6 w-6" />
-                            <h1 className="text-xl sm:text-2xl font-black tracking-tight">{t.myListsTitle}</h1>
+                            <Book className="h-6 w-6 text-primary" />
+                            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{t.myListsTitle}</h1>
                         </div>
                     </div>
-                    <Button onClick={() => navigate('/')} className="bg-yellow-400 text-black hover:bg-yellow-500 font-bold border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-                        <Plus className="mr-2 h-4 w-4" />
+                    <Button onClick={() => navigate('/')} className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold h-11 px-6 rounded-lg">
+                        <Plus className="mr-2 h-5 w-5" />
                         {language === 'he' ? 'רשימה חדשה' : 'New List'}
                     </Button>
                 </div>
             </div>
 
-            <div className="max-w-5xl mx-auto px-4 py-8">
+            <div className="max-w-5xl mx-auto px-4 py-8 sm:py-12">
                 {/* Urban Decorations */}
                 <div className="mb-8 text-center">
-                    <p className="text-stone-500 dark:text-stone-400 font-medium text-lg">
+                    <p className="text-muted-foreground font-medium text-lg">
                         {language === 'he'
                             ? 'כל הרשימות שלך במקום אחד. מסודרות, שמורות ומוכנות לקנייה הבאה.'
                             : 'All your lists in one place. Organized, saved, and ready for your next shop.'}
@@ -75,24 +75,24 @@ const MyNotebook = () => {
                 </div>
 
                 {savedLists.length === 0 ? (
-                    <div className="text-center py-20">
-                        <div className="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm border-2 border-dashed border-stone-300 dark:border-slate-600 inline-block max-w-md mx-auto">
-                            <Book className="h-16 w-16 text-stone-300 dark:text-stone-600 mx-auto mb-4" />
-                            <h3 className="text-xl font-bold text-stone-700 dark:text-stone-200 mb-2">
+                    <div className="text-center py-16 sm:py-24">
+                        <div className="bg-card p-8 sm:p-12 rounded-3xl shadow-lg border border-border inline-block max-w-md mx-auto">
+                            <Book className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                            <h3 className="text-2xl font-bold text-foreground mb-2">
                                 {language === 'he' ? 'הפנקס שלך ריק' : 'Your notebook is empty'}
                             </h3>
-                            <p className="text-stone-500 mb-6">
+                            <p className="text-muted-foreground mb-6 text-base">
                                 {language === 'he'
                                     ? 'עדיין לא שמרת רשימות. צור רשימה חדשה ושמור אותה כדי לראות אותה כאן.'
                                     : 'You haven\'t saved any lists yet. Create a new list and save it to see it here.'}
                             </p>
-                            <Button onClick={() => navigate('/')} className="bg-black text-yellow-400 hover:bg-stone-800 font-bold">
+                            <Button onClick={() => navigate('/')} className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold h-11 px-8">
                                 {language === 'he' ? 'צור רשימה ראשונה' : 'Create First List'}
                             </Button>
                         </div>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
                         {savedLists.map((list, index) => (
                             <SavedListCard
                                 key={list.id}

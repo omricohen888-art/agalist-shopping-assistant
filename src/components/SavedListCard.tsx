@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Trash2, Pencil } from "lucide-react";
+import { Trash2, Pencil, ShoppingCart } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { SavedList } from "@/types/shopping";
 import { useTheme } from "next-themes";
@@ -13,6 +13,7 @@ interface SavedListCardProps {
     onLoad: (list: SavedList) => void;
     onDelete: (id: string) => void;
     onToggleItem: (listId: string, itemId: string) => void;
+    onGoShopping?: (list: SavedList) => void;
 }
 
 export const SavedListCard: React.FC<SavedListCardProps> = ({
@@ -22,7 +23,8 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
     t,
     onLoad,
     onDelete,
-    onToggleItem
+    onToggleItem,
+    onGoShopping
 }) => {
     const { theme } = useTheme();
 
@@ -160,10 +162,21 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
             </div>
 
             {/* Date Footer */}
-            <div className="mt-auto pt-3 border-t-2 border-black/5 dark:border-slate-700/30 flex justify-between items-center">
+            <div className="mt-auto pt-3 border-t-2 border-black/5 dark:border-slate-700/30 flex justify-between items-center gap-2">
                 <span className="text-[10px] font-bold text-gray-400 dark:text-slate-400 uppercase tracking-wider">
                     {new Date(list.createdAt || new Date().toISOString()).toLocaleDateString(language === 'he' ? 'he-IL' : 'en-US')}
                 </span>
+                {onGoShopping && (
+                    <Button
+                        size="sm"
+                        onClick={(e) => { e.stopPropagation(); onGoShopping(list); }}
+                        className="h-7 px-3 bg-green-500 hover:bg-green-600 text-white font-bold text-xs rounded flex items-center gap-1"
+                        title={language === 'he' ? 'צא לקנייה' : 'Go Shopping'}
+                    >
+                        <ShoppingCart className="h-3 w-3" />
+                        {language === 'he' ? 'קנייה' : 'Shop'}
+                    </Button>
+                )}
             </div>
         </div>
     );

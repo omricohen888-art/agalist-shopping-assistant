@@ -2,7 +2,6 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -12,23 +11,29 @@ import { Share2, Trash2, Plus, CheckCircle2, History, Menu, BarChart3, Globe, Sa
 import { FaWhatsapp } from "react-icons/fa";
 import { SmartAutocompleteInput, SmartAutocompleteInputRef } from "@/components/SmartAutocompleteInput";
 import { SavedListCard } from "@/components/SavedListCard";
+import { StandardizedInput } from "@/components/ui/standardized-input";
+import { StandardizedTextarea } from "@/components/ui/standardized-textarea";
+import { HandwritingCanvas } from "@/components/HandwritingCanvas";
 import { toast } from "sonner";
 import { ShoppingItem, ISRAELI_STORES, UNITS, Unit, SavedList } from "@/types/shopping";
 import { ShoppingListItem } from "@/components/ShoppingListItem";
 import { SettingsModal } from "@/components/SettingsModal";
 import { SortableTemplates } from "@/components/SortableTemplates";
 import { processInput, RateLimiter } from "@/utils/security";
+import { createWorker } from 'tesseract.js';
 
 interface NotepadItem {
   id: string;
   text: string;
   isChecked: boolean;
+  quantity?: number;
+  unit?: Unit;
 }
 import { saveShoppingHistory, saveList, getSavedLists, deleteSavedList, updateSavedList } from "@/utils/storage";
 import { useLanguage, Language } from "@/hooks/use-language";
 import { translations } from "@/utils/translations";
+import { parseItemWithUnit, formatItemDisplay } from "@/utils/itemParser";
 import { useTheme } from "next-themes";
-import { createWorker } from 'tesseract.js';
 
 
 const ENGLISH_STORES = [
@@ -101,9 +106,10 @@ export const ShoppingList = () => {
   const [newTemplateItems, setNewTemplateItems] = useState("");
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const autocompleteInputRef = useRef<SmartAutocompleteInputRef>(null);
+  const singleItemInputRef = useRef<HTMLInputElement>(null);
   const notepadInputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const rateLimiter = useRef(new RateLimiter());
-  const { language, toggleLanguage } = useLanguage();
+  const { language, setLanguage, toggleLanguage } = useLanguage();
   const { theme, setTheme } = useTheme();
   const t = translations[language];
   const storeOptions = language === "he" ? ISRAELI_STORES : ENGLISH_STORES;
@@ -127,6 +133,7 @@ export const ShoppingList = () => {
   // Smart Input States
   const [isVoiceRecording, setIsVoiceRecording] = useState(false);
   const [isProcessingImage, setIsProcessingImage] = useState(false);
+  const [isHandwritingOpen, setIsHandwritingOpen] = useState(false);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
   // Update refs array when notepadItems changes
@@ -783,6 +790,49 @@ export const ShoppingList = () => {
     }
   };
 
+  // Handwriting Recognition Function
+  const handleHandwritingSubmit = async (imageData: string) => {
+    setIsProcessingImage(true);
+    toast.info(language === 'he' ? 'מזהה כתב יד...' : 'Recognizing handwriting...');
+
+    try {
+      const worker = await createWorker();
+      await (worker as any).loadLanguage('heb+eng');
+      await (worker as any).initialize('heb+eng');
+
+      const { data: { text } } = await (worker as any).recognize(imageData);
+      await (worker as any).terminate();
+
+      // Split text by newlines and filter empty lines
+      const lines = text.split('\n')
+        .map(line => line.trim())
+        .filter(line => line.length > 0);
+
+      if (lines.length > 0) {
+        const newNotepadItems: NotepadItem[] = lines.map((line, index) => ({
+          id: `handwriting-${Date.now()}-${index}`,
+          text: line,
+          isChecked: false
+        }));
+
+        setNotepadItems(prev => [...prev, ...newNotepadItems]);
+
+        toast.success(language === 'he'
+          ? `התווספו ${lines.length} פריטים מהכתב`
+          : `Added ${lines.length} items from handwriting`
+        );
+      } else {
+        toast.warning(language === 'he' ? 'לא נמצא טקסט' : 'No text found');
+      }
+    } catch (error) {
+      console.error('Handwriting error:', error);
+      toast.error(language === 'he' ? 'שגיאה בעיבוד כתב יד' : 'Error processing handwriting');
+    } finally {
+      setIsProcessingImage(false);
+      setIsHandwritingOpen(false);
+    }
+  };
+
   const handleDeleteList = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (deleteSavedList(id)) {
@@ -881,7 +931,7 @@ export const ShoppingList = () => {
   const progressPercentage = items.length > 0 ? completedCount / items.length * 100 : 0;
 
   return (
-    <div className="min-h-screen pb-32 animate-fade-in" dir={direction} lang={language}>
+    <div className="min-h-screen bg-stone-50 dark:bg-slate-950 pb-32 animate-fade-in" dir={direction} lang={language}>
       {/* List Creation Confirmation Animation */}
       {showConfirmation && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-[fade-in_0.2s_ease-out,scale-in_0.3s_ease-out]">
@@ -993,27 +1043,38 @@ export const ShoppingList = () => {
 
                   {/* Menu Overlay */}
                   <div
-                    className="mobile-menu-overlay fixed inset-0 w-full h-full bg-white dark:bg-slate-900 z-[100] flex flex-col items-center justify-center transition-opacity duration-300 opacity-100"
-                    style={{
-                      backgroundColor: '#ffffff !important',
-                      background: '#ffffff !important',
-                      backgroundImage: 'none !important'
-                    }}
+                    className="mobile-menu-overlay fixed inset-0 w-full h-full bg-card dark:bg-slate-950 z-[100] flex flex-col items-center justify-center transition-opacity duration-300 opacity-100 overflow-y-auto px-4"
                   >
 
                 {/* Close Button */}
                 <button
                   onClick={() => setIsMenuOpen(false)}
-                  className="absolute top-6 right-6 w-12 h-12 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-full flex items-center justify-center transition-colors z-10"
+                  className="absolute top-4 right-4 h-10 w-10 bg-muted hover:bg-muted/80 rounded-lg flex items-center justify-center transition-colors z-10"
                 >
-                  <X className="w-6 h-6 text-gray-600 dark:text-slate-300" />
+                  <X className="w-5 h-5" />
                 </button>
 
                 {/* Menu Content */}
-                <div className="flex flex-col items-center gap-8 text-center">
+                <div className="flex flex-col items-center gap-6 text-center py-12">
 
                   {/* Menu Title */}
-                  <h2 className="text-3xl font-black text-black dark:text-white mb-4">תפריט</h2>
+                  <h2 className="text-3xl font-bold text-foreground mb-2">{language === 'he' ? 'תפריט' : 'Menu'}</h2>
+
+                  {/* Language Toggle */}
+                  <div className="flex items-center gap-2 p-1 bg-muted rounded-lg border border-border">
+                    <button
+                      onClick={() => setLanguage('he')}
+                      className={language === 'he' ? 'px-4 py-2 rounded-md font-semibold bg-primary text-primary-foreground' : 'px-4 py-2 rounded-md font-semibold text-muted-foreground hover:text-foreground'}
+                    >
+                      עברית
+                    </button>
+                    <button
+                      onClick={() => setLanguage('en')}
+                      className={language === 'en' ? 'px-4 py-2 rounded-md font-semibold bg-primary text-primary-foreground' : 'px-4 py-2 rounded-md font-semibold text-muted-foreground hover:text-foreground'}
+                    >
+                      English
+                    </button>
+                  </div>
 
                   {/* New List Button - Primary Action */}
                   <Button
@@ -1022,9 +1083,9 @@ export const ShoppingList = () => {
                       exitEditMode();
                       setIsMenuOpen(false);
                     }}
-                    className="w-64 h-16 bg-yellow-400 text-black font-bold hover:bg-yellow-500 transition-colors border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] text-xl"
+                    className="w-full sm:w-64 h-14 bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-colors text-lg rounded-lg"
                   >
-                    <Plus className="mr-3 h-6 w-6" />
+                    <Plus className="mr-2 h-5 w-5" />
                     {t.navigation.list}
                   </Button>
 
@@ -1034,10 +1095,10 @@ export const ShoppingList = () => {
                       navigate("/notebook");
                       setIsMenuOpen(false);
                     }}
-                    variant="ghost"
-                    className="w-64 h-14 flex items-center justify-center gap-4 text-black dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-black dark:hover:text-white transition-colors text-xl font-bold"
+                    variant="outline"
+                    className="w-full sm:w-64 h-14 flex items-center justify-center gap-3 hover:bg-muted transition-colors text-lg font-semibold rounded-lg"
                   >
-                    <Book className="h-6 w-6 text-black dark:text-slate-400" />
+                    <Book className="h-5 w-5" />
                     {t.navigation.notebook}
                   </Button>
 
@@ -1046,10 +1107,10 @@ export const ShoppingList = () => {
                       navigate("/history");
                       setIsMenuOpen(false);
                     }}
-                    variant="ghost"
-                    className="w-64 h-14 flex items-center justify-center gap-4 text-black dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-black dark:hover:text-white transition-colors text-xl font-bold"
+                    variant="outline"
+                    className="w-full sm:w-64 h-14 flex items-center justify-center gap-3 hover:bg-muted transition-colors text-lg font-semibold rounded-lg"
                   >
-                    <History className="h-6 w-6 text-black dark:text-slate-400" />
+                    <History className="h-5 w-5" />
                     {t.navigation.history}
                   </Button>
 
@@ -1058,10 +1119,10 @@ export const ShoppingList = () => {
                       navigate("/compare");
                       setIsMenuOpen(false);
                     }}
-                    variant="ghost"
-                    className="w-64 h-14 flex items-center justify-center gap-4 text-black dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-black dark:hover:text-white transition-colors text-xl font-bold"
+                    variant="outline"
+                    className="w-full sm:w-64 h-14 flex items-center justify-center gap-3 hover:bg-muted transition-colors text-lg font-semibold rounded-lg"
                   >
-                    <BarChart3 className="h-6 w-6 text-black dark:text-slate-400" />
+                    <BarChart3 className="h-5 w-5" />
                     {t.navigation.compare}
                   </Button>
 
@@ -1070,10 +1131,10 @@ export const ShoppingList = () => {
                       navigate("/about");
                       setIsMenuOpen(false);
                     }}
-                    variant="ghost"
-                    className="w-64 h-14 flex items-center justify-center gap-4 text-black dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-black dark:hover:text-white transition-colors text-xl font-bold"
+                    variant="outline"
+                    className="w-full sm:w-64 h-14 flex items-center justify-center gap-3 hover:bg-muted transition-colors text-lg font-semibold rounded-lg"
                   >
-                    <Info className="h-6 w-6 text-black dark:text-slate-400" />
+                    <Info className="h-5 w-5" />
                     {t.navigation.about}
                   </Button>
 
@@ -1255,11 +1316,14 @@ export const ShoppingList = () => {
                       <Camera className="h-5 w-5" />
                     </button>
 
-                    {/* Handwriting Placeholder Button */}
+                    {/* Handwriting Button */}
                     <button
-                      className="p-2 rounded-lg hover:text-black dark:hover:text-white transition-colors hover:bg-gray-100 dark:hover:bg-slate-700 opacity-50 cursor-not-allowed"
-                      title={language === 'he' ? 'כתב יד (בקרוב)' : 'Handwriting (Coming Soon)'}
-                      disabled
+                      onClick={() => setIsHandwritingOpen(true)}
+                      className={`p-2 rounded-lg hover:text-black dark:hover:text-white transition-colors hover:bg-gray-100 dark:hover:bg-slate-700 ${
+                        isProcessingImage ? 'text-blue-500 animate-pulse' : ''
+                      }`}
+                      title={language === 'he' ? 'כתב יד' : 'Handwriting'}
+                      disabled={isVoiceRecording}
                     >
                       <PenLine className="h-5 w-5" />
                     </button>
@@ -1305,7 +1369,9 @@ export const ShoppingList = () => {
                             onCheckedChange={() => toggleNotepadItem(item.id)}
                             className="h-4 w-4 border-2 border-black dark:border-slate-600 data-[state=checked]:bg-black dark:data-[state=checked]:bg-slate-600 data-[state=checked]:text-yellow-400 flex-shrink-0"
                           />
-                          <input
+                          <StandardizedInput
+                            variant="notepad"
+                            isChecked={item.isChecked}
                             ref={(el) => {
                               notepadInputRefs.current[index] = el;
                             }}
@@ -1368,7 +1434,6 @@ export const ShoppingList = () => {
                                 }
                               }
                             }}
-                            className={`flex-1 text-lg font-normal font-hand bg-transparent outline-none caret-yellow-500 dark:caret-white ${item.isChecked ? 'line-through text-gray-500 dark:text-slate-500' : 'text-black dark:text-slate-200'} placeholder:text-gray-400 dark:placeholder:text-slate-500`}
                             placeholder={index === 0 && notepadItems.length === 1 ? "הקלד פריט..." : ""}
                           />
                         </div>
@@ -1405,13 +1470,13 @@ export const ShoppingList = () => {
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-24 h-6 bg-white/30 dark:bg-white/10 rotate-[-2deg] border-l border-r border-white/40 dark:border-white/20 backdrop-blur-[1px]" />
 
                 <div className="flex w-full items-center gap-2 flex-nowrap relative z-10">
-                  <SmartAutocompleteInput
-                    ref={autocompleteInputRef}
+                  <StandardizedInput
+                    variant="single-item"
+                    ref={singleItemInputRef}
                     placeholder={t.addItemPlaceholder}
                     value={singleItemInput}
-                    onChange={setSingleItemInput}
+                    onChange={(e) => setSingleItemInput(e.target.value)}
                     onKeyDown={e => e.key === "Enter" && handleAddSingleItem()}
-                    className="flex-1 min-w-0 text-sm relative border-2 border-black dark:border-slate-700 rounded-lg shadow-sm focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all bg-white dark:bg-slate-900 !text-black dark:!text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
                   />
                   <Input
                     type="number"
@@ -1506,6 +1571,55 @@ export const ShoppingList = () => {
                   {language === 'he' ? 'הודבק!' : 'Pasted!'}
                 </div>
               )}
+
+              {/* Smart Input Toolbar */}
+              <div className="flex gap-4 text-gray-500 mb-4 px-2">
+                {/* Voice Dictation Button */}
+                <button
+                  onClick={handleVoiceDictation}
+                  className={`p-2 rounded-lg hover:text-black dark:hover:text-white transition-colors hover:bg-gray-100 dark:hover:bg-slate-700 ${
+                    isVoiceRecording ? 'text-red-500 animate-pulse' : ''
+                  }`}
+                  title={language === 'he' ? 'הקלטת קול' : 'Voice Dictation'}
+                  disabled={isProcessingImage}
+                >
+                  <Mic className="h-5 w-5" />
+                </button>
+
+                {/* Camera OCR Button */}
+                <button
+                  onClick={() => cameraInputRef.current?.click()}
+                  className={`p-2 rounded-lg hover:text-black dark:hover:text-white transition-colors hover:bg-gray-100 dark:hover:bg-slate-700 ${
+                    isProcessingImage ? 'text-blue-500 animate-pulse' : ''
+                  }`}
+                  title={language === 'he' ? 'סריקת רשימה' : 'Scan List'}
+                  disabled={isVoiceRecording}
+                >
+                  <Camera className="h-5 w-5" />
+                </button>
+
+                {/* Handwriting Button */}
+                <button
+                  onClick={() => setIsHandwritingOpen(true)}
+                  className={`p-2 rounded-lg hover:text-black dark:hover:text-white transition-colors hover:bg-gray-100 dark:hover:bg-slate-700 ${
+                    isProcessingImage ? 'text-blue-500 animate-pulse' : ''
+                  }`}
+                  title={language === 'he' ? 'כתב יד' : 'Handwriting'}
+                  disabled={isVoiceRecording}
+                >
+                  <PenLine className="h-5 w-5" />
+                </button>
+
+                {/* Hidden File Input for Camera */}
+                <input
+                  ref={cameraInputRef}
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  onChange={handleCameraOCR}
+                  className="hidden"
+                />
+              </div>
 
               {/* Notepad Items List */}
               <div className="min-h-[140px] space-y-2">
@@ -1962,12 +2076,12 @@ export const ShoppingList = () => {
                 <Label htmlFor="templateItems" className="text-base font-semibold">
                   {language === 'he' ? 'פריטי התבנית' : 'Template Items'}
                 </Label>
-                <Textarea
+                <StandardizedTextarea
                   id="templateItems"
                   value={newTemplateItems}
                   onChange={(e) => setNewTemplateItems(e.target.value)}
                   placeholder={language === 'he' ? 'הדבק או הקלד את רשימת הקניות שלך, כל פריט בשורה נפרדת' : 'Paste or type your shopping list, one item per line'}
-                  className="min-h-[120px] text-base resize-none"
+                  className="min-h-[120px] text-base"
                 />
               </div>
             </div>
@@ -1988,6 +2102,14 @@ export const ShoppingList = () => {
           open={isSettingsModalOpen}
           onOpenChange={setIsSettingsModalOpen}
         />
+
+        {isHandwritingOpen && (
+          <HandwritingCanvas
+            onSubmit={handleHandwritingSubmit}
+            onCancel={() => setIsHandwritingOpen(false)}
+            language={language}
+          />
+        )}
       </div >
     </div >
   );

@@ -1,6 +1,5 @@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -57,30 +56,6 @@ export const SettingsModal = ({ open, onOpenChange }: SettingsModalProps) => {
                 checked={theme === "dark"}
                 onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
               />
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* Language Section */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">
-              {language === 'he' ? 'שפה' : 'Language'}
-            </h3>
-
-            <div className="flex items-center justify-between">
-              <Label htmlFor="language" className="text-sm font-medium">
-                {language === 'he' ? 'בחר שפה' : 'Select Language'}
-              </Label>
-              <Select value={language} onValueChange={(value) => setLanguage(value as 'he' | 'en')}>
-                <SelectTrigger className="w-[120px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="he">עברית</SelectItem>
-                  <SelectItem value="en">English</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
           </div>
 

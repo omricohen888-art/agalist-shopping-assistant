@@ -1,9 +1,10 @@
-export type Unit = 'units' | 'kg' | 'g';
+export type Unit = 'units' | 'kg' | 'g' | 'package';
 
 export const UNITS = [
   { value: 'units', labelHe: "יח'", labelEn: 'units' },
-  { value: 'kg', labelHe: 'ק"ג', labelEn: 'kg' },
   { value: 'g', labelHe: 'גרם', labelEn: 'g' },
+  { value: 'kg', labelHe: 'ק"ג', labelEn: 'kg' },
+  { value: 'package', labelHe: 'חבילה', labelEn: 'package' },
 ] as const;
 
 export interface ShoppingItem {

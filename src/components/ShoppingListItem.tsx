@@ -43,7 +43,7 @@ const QuantityInput = ({ value, onChange, unit }: QuantityInputProps) => {
           e.currentTarget.blur();
         }
       }}
-      className="w-[3.5rem] text-center text-xs rounded-lg shrink-0 px-0 border-2 border-black/20 hover:border-black focus:border-black transition-colors bg-white dark:bg-slate-900 !text-black dark:!text-slate-100"
+      className="w-[2.5rem] sm:w-[3.5rem] h-8 sm:h-9 text-center text-[10px] sm:text-xs rounded-lg shrink-0 px-0 border-2 border-black/20 hover:border-black focus:border-black transition-colors bg-white dark:bg-slate-900 !text-black dark:!text-slate-100"
     />
   );
 };
@@ -89,29 +89,25 @@ export const ShoppingListItem = ({
   const isDimmed = isCompleted && !isAnimating;
 
   return (
-    <div className={`bg-white dark:bg-slate-800 rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] border-2 border-black dark:border-slate-700 py-1.5 md:py-3 px-3 flex flex-row items-center justify-between flex-nowrap w-full gap-3 group hover:translate-y-[-2px] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] transition-all touch-manipulation animate-in slide-in-from-top-4 fade-in duration-300 min-h-[2.5rem] md:min-h-[3rem] ${
-      isDimmed ? 'bg-gray-50 dark:bg-slate-700/50 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.5)] border-gray-200 dark:border-slate-600 opacity-60' : ''
-    } ${
-      visualChecked ? 'bg-green-50 dark:bg-green-900/20' : ''
-    }`}>
+    <div className={`bg-white dark:bg-slate-800 rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] border-2 border-black dark:border-slate-700 py-2 px-2 sm:px-3 flex flex-row items-center justify-between flex-nowrap w-full gap-2 sm:gap-3 group hover:translate-y-[-2px] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] transition-all touch-manipulation animate-in slide-in-from-top-4 fade-in duration-300 min-h-[3.5rem] sm:min-h-[3rem] ${isDimmed ? 'bg-gray-50 dark:bg-slate-700/50 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.5)] border-gray-200 dark:border-slate-600 opacity-60' : ''
+      } ${visualChecked ? 'bg-green-50 dark:bg-green-900/20' : ''
+      }`}>
       <Checkbox
         checked={visualChecked}
         onCheckedChange={handleCheck}
-        className={`h-6 w-6 border-2 flex-shrink-0 transition-all duration-200 active:scale-110 rounded-md ${
-          visualChecked
-            ? 'border-green-500 bg-green-500 text-white'
-            : isDimmed
-              ? 'border-gray-400 dark:border-slate-500'
-              : 'border-black dark:border-slate-600 data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500 data-[state=checked]:text-white'
-        }`}
+        className={`h-5 w-5 sm:h-6 sm:w-6 border-2 flex-shrink-0 transition-all duration-200 active:scale-110 rounded-md ${visualChecked
+          ? 'border-green-500 bg-green-500 text-white'
+          : isDimmed
+            ? 'border-gray-400 dark:border-slate-500'
+            : 'border-black dark:border-slate-600 data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500 data-[state=checked]:text-white'
+          }`}
       />
-      <span className={`flex-grow text-base md:text-lg leading-relaxed transition-all text-right truncate min-w-0 font-bold ${
-        visualChecked ? "line-through text-gray-500 dark:text-slate-400 decoration-2" : "text-black dark:text-slate-100"
-      }`}>
+      <span className={`flex-grow text-sm sm:text-base md:text-lg leading-tight sm:leading-relaxed transition-all text-right break-words min-w-0 font-bold ${visualChecked ? "line-through text-gray-500 dark:text-slate-400 decoration-2" : "text-black dark:text-slate-100"
+        }`}>
         {item.text}
       </span>
 
-      <div className="flex items-center gap-2 flex-shrink-0 border-l-2 border-black/10 dark:border-slate-700/50 pl-2" onClick={(e) => e.stopPropagation()}>
+      <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0 border-l-2 border-black/10 dark:border-slate-700/50 pl-1 sm:pl-2" onClick={(e) => e.stopPropagation()}>
         <QuantityInput
           value={item.quantity || 1}
           onChange={(val) => onQuantityChange(item.id, val)}
@@ -121,7 +117,7 @@ export const ShoppingListItem = ({
           value={item.unit || 'units'}
           onValueChange={(val: Unit) => onUnitChange(item.id, val)}
         >
-          <SelectTrigger className="w-16 h-9 px-1 text-xs rounded-lg border-2 border-black/20 hover:border-black focus:border-black transition-colors text-center justify-center [&>span]:w-full [&>span]:text-center [&>svg]:hidden">
+          <SelectTrigger className="w-14 sm:w-16 h-8 sm:h-9 px-0 sm:px-1 text-[10px] sm:text-xs rounded-lg border-2 border-black/20 hover:border-black focus:border-black transition-colors text-center justify-center [&>span]:w-full [&>span]:text-center [&>svg]:hidden">
             <span className="truncate w-full text-center">
               {(() => {
                 const u = UNITS.find(u => u.value === (item.unit || 'units'));
@@ -141,9 +137,9 @@ export const ShoppingListItem = ({
           variant="ghost"
           size="icon"
           onClick={() => onDelete(item.id)}
-          className="h-9 w-9 flex-shrink-0 hover:bg-red-100 text-red-500 hover:text-red-600 touch-manipulation rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+          className="h-8 w-8 sm:h-9 sm:w-9 flex-shrink-0 hover:bg-red-100 text-red-500 hover:text-red-600 touch-manipulation rounded-lg opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
         >
-          <Trash2 className="h-5 w-5" />
+          <Trash2 className="h-4 w-4 sm:h-5 sm:w-5" />
         </Button>
       </div>
     </div>

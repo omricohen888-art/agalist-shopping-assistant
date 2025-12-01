@@ -25,24 +25,24 @@ const About = () => {
                 </div>
             </div>
 
-            <div className="max-w-2xl mx-auto px-4 py-12 sm:py-16">
-                <div className="bg-white dark:bg-slate-900 p-8 sm:p-12 rounded-3xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] border-2 border-black dark:border-slate-700 relative overflow-hidden">
+            <div className="max-w-2xl mx-auto px-4 py-8 sm:py-16">
+                <div className="bg-white dark:bg-slate-900 p-6 sm:p-12 rounded-3xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] border-2 border-black dark:border-slate-700 relative overflow-hidden">
                     {/* Background pattern */}
                     <div className="absolute inset-0 opacity-5 pointer-events-none"
                         style={{ backgroundImage: 'radial-gradient(circle, hsl(var(--foreground)) 1px, transparent 1px)', backgroundSize: '20px 20px' }}
                     />
 
-                    <div className="relative z-10 text-center space-y-8">
-                        <div className="inline-flex items-center justify-center w-20 h-20 bg-primary rounded-2xl border-2 border-black dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] mb-6">
-                            <ShoppingCart className="h-10 w-10 text-primary-foreground" />
+                    <div className="relative z-10 text-center space-y-6 sm:space-y-8">
+                        <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-primary rounded-2xl border-2 border-black dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] mb-4 sm:mb-6">
+                            <ShoppingCart className="h-8 w-8 sm:h-10 sm:w-10 text-primary-foreground" />
                         </div>
 
                         <div>
-                            <h2 className="text-3xl sm:text-4xl font-black text-foreground mb-2">{t.appTitle}</h2>
-                            <p className="text-lg sm:text-xl font-bold text-muted-foreground">{t.tagline}</p>
+                            <h2 className="text-2xl sm:text-4xl font-black text-foreground mb-2">{t.appTitle}</h2>
+                            <p className="text-base sm:text-xl font-bold text-muted-foreground">{t.tagline}</p>
                         </div>
 
-                        <div className="space-y-6 text-base sm:text-lg leading-relaxed text-foreground font-medium">
+                        <div className="space-y-4 sm:space-y-6 text-sm sm:text-lg leading-relaxed text-foreground font-medium">
                             <p>
                                 {t.about.description}
                             </p>
@@ -53,11 +53,11 @@ const About = () => {
                             </p>
                         </div>
 
-                        <div className="mt-10 pt-8 border-t-2 border-black/10 dark:border-white/10">
-                            <span className="inline-block px-4 py-2 bg-muted text-muted-foreground font-bold rounded-full text-sm border-2 border-black/5 dark:border-white/5">
+                        <div className="mt-8 sm:mt-10 pt-6 sm:pt-8 border-t-2 border-black/10 dark:border-white/10">
+                            <span className="inline-block px-4 py-2 bg-muted text-muted-foreground font-bold rounded-full text-xs sm:text-sm border-2 border-black/5 dark:border-white/5">
                                 {t.about.betaNotice}
                             </span>
-                            <p className="text-sm text-muted-foreground mt-4 font-mono font-bold">
+                            <p className="text-xs sm:text-sm text-muted-foreground mt-4 font-mono font-bold">
                                 v1.0.0 • Made with ❤️
                             </p>
                         </div>

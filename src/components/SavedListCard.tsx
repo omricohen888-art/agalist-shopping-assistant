@@ -66,7 +66,7 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
 
     return (
         <div
-            className={`${colorClass} dark:bg-slate-800 border-2 border-black dark:border-slate-600 rounded-xl p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all duration-200 group relative flex flex-col h-full min-h-[240px] overflow-hidden ${rotation}`}
+            className={`${colorClass} dark:bg-slate-800 border-2 border-black dark:border-slate-600 rounded-xl p-4 sm:p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all duration-200 group relative flex flex-col h-full min-h-[220px] sm:min-h-[240px] overflow-hidden ${rotation}`}
             style={theme !== 'dark' ? {
                 backgroundImage: 'repeating-linear-gradient(transparent, transparent 31px, #e5e7eb 31px, #e5e7eb 32px)'
             } : {}}
@@ -82,26 +82,26 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
             </div>
 
             {/* Card Header */}
-            <div className="flex justify-between items-start mb-4 border-b-2 border-black/10 dark:border-slate-700/50 pb-3 mt-2">
+            <div className="flex justify-between items-start mb-3 sm:mb-4 border-b-2 border-black/10 dark:border-slate-700/50 pb-2 sm:pb-3 mt-1 sm:mt-2">
                 <div className="flex items-center gap-2">
-                    <h4 className="font-black text-xl text-gray-900 dark:text-white tracking-tight">{list.name}</h4>
-                    <div className={`w-3 h-3 rounded-full ${indicatorColor} shadow-lg flex-shrink-0`} style={{
+                    <h4 className="font-black text-lg sm:text-xl text-gray-900 dark:text-white tracking-tight truncate max-w-[120px] sm:max-w-[150px]">{list.name}</h4>
+                    <div className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full ${indicatorColor} shadow-lg flex-shrink-0`} style={{
                         boxShadow: theme === 'dark'
                             ? `0 0 8px ${indicatorColor.includes('yellow') ? 'rgba(250, 204, 21, 0.6)' :
-                                          indicatorColor.includes('emerald') ? 'rgba(52, 211, 153, 0.6)' :
-                                          indicatorColor.includes('blue') ? 'rgba(59, 130, 246, 0.6)' :
-                                          indicatorColor.includes('purple') ? 'rgba(147, 51, 234, 0.6)' :
-                                          indicatorColor.includes('pink') ? 'rgba(236, 72, 153, 0.6)' :
-                                          'rgba(249, 115, 22, 0.6)'}`
+                                indicatorColor.includes('emerald') ? 'rgba(52, 211, 153, 0.6)' :
+                                    indicatorColor.includes('blue') ? 'rgba(59, 130, 246, 0.6)' :
+                                        indicatorColor.includes('purple') ? 'rgba(147, 51, 234, 0.6)' :
+                                            indicatorColor.includes('pink') ? 'rgba(236, 72, 153, 0.6)' :
+                                                'rgba(249, 115, 22, 0.6)'}`
                             : '0 2px 4px rgba(0, 0, 0, 0.1)'
                     }} />
-                    <p className="text-xs font-bold text-gray-500 dark:text-slate-400">{t.itemsCount(list.items.length)}</p>
+                    <p className="text-[10px] sm:text-xs font-bold text-gray-500 dark:text-slate-400">{t.itemsCount(list.items.length)}</p>
                 </div>
 
                 {/* Actions */}
                 <div className="flex items-center gap-1">
                     <div className="flex items-center group/edit relative">
-                        <span className="text-[10px] font-bold text-black dark:text-slate-100 bg-yellow-400 px-2 py-1 rounded border border-black dark:border-slate-600 transition-all duration-200 opacity-0 group-hover/edit:opacity-100 hover:scale-105 absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap z-30 shadow-sm cursor-pointer"
+                        <span className="text-[10px] font-bold text-black dark:text-slate-100 bg-yellow-400 px-2 py-1 rounded border border-black dark:border-slate-600 transition-all duration-200 opacity-0 group-hover/edit:opacity-100 hover:scale-105 absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap z-30 shadow-sm cursor-pointer hidden sm:block"
                             onClick={(e) => { e.stopPropagation(); onLoad(list); }}>
                             {language === 'he' ? 'למצב עריכה מלא' : 'To full edit mode'}
                         </span>
@@ -109,20 +109,20 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
                             variant="ghost"
                             size="icon"
                             onClick={(e) => { e.stopPropagation(); onLoad(list); }}
-                            className="h-8 w-8 text-gray-700 dark:text-slate-400 hover:text-black dark:hover:text-slate-100 hover:bg-black/5 dark:hover:bg-slate-700 rounded-full"
+                            className="h-7 w-7 sm:h-8 sm:w-8 text-gray-700 dark:text-slate-400 hover:text-black dark:hover:text-slate-100 hover:bg-black/5 dark:hover:bg-slate-700 rounded-full"
                             title={language === 'he' ? 'ערוך רשימה' : 'Edit List'}
                         >
-                            <Pencil className="h-4 w-4" />
+                            <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                         </Button>
                     </div>
                     <Button
                         variant="ghost"
                         size="icon"
                         onClick={(e) => { e.stopPropagation(); onDelete(list.id); }}
-                        className="h-8 w-8 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full"
+                        className="h-7 w-7 sm:h-8 sm:w-8 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full"
                         title={language === 'he' ? 'מחק רשימה' : 'Delete List'}
                     >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     </Button>
                 </div>
             </div>
@@ -132,7 +132,7 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
                 <ul className="space-y-0">
                     {list.items.slice(0, 5).map((item, i) => {
                         return (
-                            <li key={item.id || i} className="flex items-center gap-2 text-sm text-gray-700 dark:text-slate-200 h-[31px] px-2 hover:bg-black/5 dark:hover:bg-slate-700 dark:border-b dark:border-slate-700/50 dark:last:border-b-0 rounded transition-colors group/item cursor-pointer"
+                            <li key={item.id || i} className="flex items-center gap-2 text-xs sm:text-sm text-gray-700 dark:text-slate-200 h-[28px] sm:h-[31px] px-1 sm:px-2 hover:bg-black/5 dark:hover:bg-slate-700 dark:border-b dark:border-slate-700/50 dark:last:border-b-0 rounded transition-colors group/item cursor-pointer"
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     onToggleItem(list.id, item.id);
@@ -141,7 +141,7 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
                                 <Checkbox
                                     checked={item.checked}
                                     onCheckedChange={() => onToggleItem(list.id, item.id)}
-                                    className="h-4 w-4 border-2 border-gray-400 data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500 rounded-sm transition-all"
+                                    className="h-3.5 w-3.5 sm:h-4 sm:w-4 border-2 border-gray-400 data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500 rounded-sm transition-all"
                                 />
                                 <span className={`truncate w-full font-medium ${item.checked ? 'line-through text-gray-400 dark:text-slate-500 decoration-2 decoration-gray-400 dark:decoration-slate-500' : ''}`}>
                                     {item.text}
@@ -150,7 +150,7 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
                         );
                     })}
                     {list.items.length > 5 && (
-                        <li className="text-xs font-bold text-gray-400 dark:text-slate-400 mt-2 px-2 italic">
+                        <li className="text-[10px] sm:text-xs font-bold text-gray-400 dark:text-slate-400 mt-2 px-2 italic">
                             {language === 'he'
                                 ? `...ועוד ${list.items.length - 5} פריטים`
                                 : `...and ${list.items.length - 5} more items`}
@@ -158,19 +158,19 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
                     )}
                 </ul>
                 {/* Fade out effect at bottom */}
-                <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white/90 dark:from-slate-800/90 to-transparent pointer-events-none" />
+                <div className="absolute bottom-0 left-0 right-0 h-6 sm:h-8 bg-gradient-to-t from-white/90 dark:from-slate-800/90 to-transparent pointer-events-none" />
             </div>
 
             {/* Date Footer */}
-            <div className="mt-auto pt-3 border-t-2 border-black/5 dark:border-slate-700/30 flex justify-between items-center gap-2">
-                <span className="text-[10px] font-bold text-gray-400 dark:text-slate-400 uppercase tracking-wider">
+            <div className="mt-auto pt-2 sm:pt-3 border-t-2 border-black/5 dark:border-slate-700/30 flex justify-between items-center gap-2">
+                <span className="text-[9px] sm:text-[10px] font-bold text-gray-400 dark:text-slate-400 uppercase tracking-wider">
                     {new Date(list.createdAt || new Date().toISOString()).toLocaleDateString(language === 'he' ? 'he-IL' : 'en-US')}
                 </span>
                 {onGoShopping && (
                     <Button
                         size="sm"
                         onClick={(e) => { e.stopPropagation(); onGoShopping(list); }}
-                        className="h-7 px-3 bg-green-500 hover:bg-green-600 text-white font-bold text-xs rounded flex items-center gap-1"
+                        className="h-6 sm:h-7 px-2 sm:px-3 bg-green-500 hover:bg-green-600 text-white font-bold text-[10px] sm:text-xs rounded flex items-center gap-1"
                         title={language === 'he' ? 'צא לקנייה' : 'Go Shopping'}
                     >
                         <ShoppingCart className="h-3 w-3" />

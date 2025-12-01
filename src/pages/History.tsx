@@ -173,83 +173,83 @@ const History = () => {
       {/* Header */}
       <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b-2 border-black dark:border-slate-700">
         <div className="w-full max-w-4xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-                <Button
-                variant="ghost"
-                onClick={() => navigate("/")}
-                aria-label={t.backAria}
-                className="h-10 w-10 p-0 rounded-full hover:bg-black/5 dark:hover:bg-white/10"
-                >
-                <ArrowRight className={`h-6 w-6 ${language === "en" ? "rotate-180" : ""}`} />
-                </Button>
-                <div>
-                <h1 className="text-xl sm:text-2xl font-black text-foreground leading-none">{t.title}</h1>
-                <p className="text-xs sm:text-sm text-muted-foreground font-bold">{t.subtitle}</p>
-                </div>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              onClick={() => navigate("/")}
+              aria-label={t.backAria}
+              className="h-10 w-10 p-0 rounded-full hover:bg-black/5 dark:hover:bg-white/10"
+            >
+              <ArrowRight className={`h-6 w-6 ${language === "en" ? "rotate-180" : ""}`} />
+            </Button>
+            <div>
+              <h1 className="text-lg sm:text-2xl font-black text-foreground leading-none">{t.title}</h1>
+              <p className="text-[10px] sm:text-sm text-muted-foreground font-bold">{t.subtitle}</p>
             </div>
-            <div className="flex items-center gap-2">
-                <Button
-                variant="outline"
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={toggleLanguage}
+              className="hidden sm:flex h-9 border-2 border-black dark:border-slate-700 font-bold hover:bg-black/5 dark:hover:bg-white/10"
+            >
+              {t.languageLabel}
+            </Button>
+            {history.length > 0 && (
+              <Button
+                variant="default"
                 size="sm"
-                onClick={toggleLanguage}
-                className="hidden sm:flex h-9 border-2 border-black dark:border-slate-700 font-bold hover:bg-black/5 dark:hover:bg-white/10"
-                >
-                {t.languageLabel}
-                </Button>
-                {history.length > 0 && (
-                <Button
-                    variant="default"
-                    size="sm"
-                    onClick={() => navigate("/compare")}
-                    className="h-9 bg-primary text-primary-foreground border-2 border-black dark:border-slate-700 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all font-bold"
-                >
-                    <TrendingUp className="ml-2 h-4 w-4" />
-                    {t.compare}
-                </Button>
-                )}
-            </div>
+                onClick={() => navigate("/compare")}
+                className="h-9 bg-primary text-primary-foreground border-2 border-black dark:border-slate-700 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all font-bold"
+              >
+                <TrendingUp className="ml-2 h-4 w-4" />
+                {t.compare}
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
-      <div className="w-full max-w-4xl mx-auto px-4 py-8 space-y-8 animate-fade-in">
+      <div className="w-full max-w-4xl mx-auto px-4 py-6 sm:py-8 space-y-6 sm:space-y-8 animate-fade-in">
         {history.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="p-5 bg-[#FEFCE8] dark:bg-slate-800 border-2 border-black dark:border-slate-700 rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+            <div className="p-4 sm:p-5 bg-[#FEFCE8] dark:bg-slate-800 border-2 border-black dark:border-slate-700 rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
               <div className="flex items-center gap-3 mb-2">
                 <div className="p-2 bg-yellow-400 rounded-lg border-2 border-black dark:border-slate-900">
-                    <ShoppingCart className="h-4 w-4 text-black" />
+                  <ShoppingCart className="h-4 w-4 text-black" />
                 </div>
-                <p className="text-sm font-bold text-muted-foreground">{t.stats.totalPurchases}</p>
+                <p className="text-xs sm:text-sm font-bold text-muted-foreground">{t.stats.totalPurchases}</p>
               </div>
-              <p className="text-3xl font-black text-foreground">{history.length}</p>
+              <p className="text-2xl sm:text-3xl font-black text-foreground">{history.length}</p>
             </div>
-            <div className="p-5 bg-[#F0FDF4] dark:bg-slate-800 border-2 border-black dark:border-slate-700 rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+            <div className="p-4 sm:p-5 bg-[#F0FDF4] dark:bg-slate-800 border-2 border-black dark:border-slate-700 rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
               <div className="flex items-center gap-3 mb-2">
                 <div className="p-2 bg-green-400 rounded-lg border-2 border-black dark:border-slate-900">
-                    <DollarSign className="h-4 w-4 text-black" />
+                  <DollarSign className="h-4 w-4 text-black" />
                 </div>
-                <p className="text-sm font-bold text-muted-foreground">{t.stats.totalSpend}</p>
+                <p className="text-xs sm:text-sm font-bold text-muted-foreground">{t.stats.totalSpend}</p>
               </div>
-              <p className="text-3xl font-black text-foreground">{currencyFormatter.format(totalSpent)}</p>
+              <p className="text-2xl sm:text-3xl font-black text-foreground">{currencyFormatter.format(totalSpent)}</p>
             </div>
-            <div className="p-5 bg-[#FFF7ED] dark:bg-slate-800 border-2 border-black dark:border-slate-700 rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+            <div className="p-4 sm:p-5 bg-[#FFF7ED] dark:bg-slate-800 border-2 border-black dark:border-slate-700 rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
               <div className="flex items-center gap-3 mb-2">
                 <div className="p-2 bg-orange-400 rounded-lg border-2 border-black dark:border-slate-900">
-                    <TrendingUp className="h-4 w-4 text-black" />
+                  <TrendingUp className="h-4 w-4 text-black" />
                 </div>
-                <p className="text-sm font-bold text-muted-foreground">{t.stats.averageSpend}</p>
+                <p className="text-xs sm:text-sm font-bold text-muted-foreground">{t.stats.averageSpend}</p>
               </div>
-              <p className="text-3xl font-black text-foreground">{currencyFormatter.format(averageSpent)}</p>
+              <p className="text-2xl sm:text-3xl font-black text-foreground">{currencyFormatter.format(averageSpent)}</p>
             </div>
           </div>
         )}
 
         {history.length === 0 ? (
-          <div className="p-10 text-center rounded-3xl border-2 border-dashed border-black/20 dark:border-white/20">
-            <div className="text-6xl mb-4 grayscale opacity-50">🛒</div>
-            <h3 className="text-2xl font-black mb-2">{t.emptyState.title}</h3>
-            <p className="text-muted-foreground mb-6 font-medium">{t.emptyState.description}</p>
-            <Button onClick={() => navigate("/")} className="h-12 px-8 text-base font-bold border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all">
+          <div className="p-6 sm:p-10 text-center rounded-3xl border-2 border-dashed border-black/20 dark:border-white/20">
+            <div className="text-5xl sm:text-6xl mb-4 grayscale opacity-50">🛒</div>
+            <h3 className="text-xl sm:text-2xl font-black mb-2">{t.emptyState.title}</h3>
+            <p className="text-sm sm:text-base text-muted-foreground mb-6 font-medium">{t.emptyState.description}</p>
+            <Button onClick={() => navigate("/")} className="h-10 sm:h-12 px-6 sm:px-8 text-sm sm:text-base font-bold border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all">
               {t.emptyState.cta}
             </Button>
           </div>
@@ -285,11 +285,10 @@ const History = () => {
                         {item.items.slice(0, 5).map(shopItem => (
                           <span
                             key={shopItem.id}
-                            className={`text-xs font-bold px-2 py-1 rounded-md border ${
-                              shopItem.checked
+                            className={`text-xs font-bold px-2 py-1 rounded-md border ${shopItem.checked
                                 ? "bg-success/10 text-success border-success/20"
                                 : "bg-muted text-muted-foreground border-black/5 dark:border-white/5"
-                            }`}
+                              }`}
                           >
                             {shopItem.checked && "✓ "}
                             {shopItem.text}

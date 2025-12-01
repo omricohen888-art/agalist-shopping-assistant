@@ -1046,114 +1046,114 @@ export const ShoppingList = () => {
                     className="mobile-menu-overlay fixed inset-0 w-full h-full bg-card dark:bg-slate-950 z-[100] flex flex-col items-center justify-center transition-opacity duration-300 opacity-100 overflow-y-auto px-4"
                   >
 
-                {/* Close Button */}
-                <button
-                  onClick={() => setIsMenuOpen(false)}
-                  className="absolute top-4 right-4 h-10 w-10 bg-muted hover:bg-muted/80 rounded-lg flex items-center justify-center transition-colors z-10"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-
-                {/* Menu Content */}
-                <div className="flex flex-col items-center gap-6 text-center py-12">
-
-                  {/* Menu Title */}
-                  <h2 className="text-3xl font-bold text-foreground mb-2">{language === 'he' ? 'תפריט' : 'Menu'}</h2>
-
-                  {/* Language Toggle */}
-                  <div className="flex items-center gap-2 p-1 bg-muted rounded-lg border border-border">
+                    {/* Close Button */}
                     <button
-                      onClick={() => setLanguage('he')}
-                      className={language === 'he' ? 'px-4 py-2 rounded-md font-semibold bg-primary text-primary-foreground' : 'px-4 py-2 rounded-md font-semibold text-muted-foreground hover:text-foreground'}
+                      onClick={() => setIsMenuOpen(false)}
+                      className="absolute top-4 right-4 h-10 w-10 bg-muted hover:bg-muted/80 rounded-lg flex items-center justify-center transition-colors z-10"
                     >
-                      עברית
+                      <X className="w-5 h-5" />
                     </button>
-                    <button
-                      onClick={() => setLanguage('en')}
-                      className={language === 'en' ? 'px-4 py-2 rounded-md font-semibold bg-primary text-primary-foreground' : 'px-4 py-2 rounded-md font-semibold text-muted-foreground hover:text-foreground'}
-                    >
-                      English
-                    </button>
+
+                    {/* Menu Content */}
+                    <div className="flex flex-col items-center gap-6 text-center py-12">
+
+                      {/* Menu Title */}
+                      <h2 className="text-3xl font-bold text-foreground mb-2">{language === 'he' ? 'תפריט' : 'Menu'}</h2>
+
+                      {/* Language Toggle */}
+                      <div className="flex items-center gap-2 p-1 bg-muted rounded-lg border border-border">
+                        <button
+                          onClick={() => setLanguage('he')}
+                          className={language === 'he' ? 'px-4 py-2 rounded-md font-semibold bg-primary text-primary-foreground' : 'px-4 py-2 rounded-md font-semibold text-muted-foreground hover:text-foreground'}
+                        >
+                          עברית
+                        </button>
+                        <button
+                          onClick={() => setLanguage('en')}
+                          className={language === 'en' ? 'px-4 py-2 rounded-md font-semibold bg-primary text-primary-foreground' : 'px-4 py-2 rounded-md font-semibold text-muted-foreground hover:text-foreground'}
+                        >
+                          English
+                        </button>
+                      </div>
+
+                      {/* New List Button - Primary Action */}
+                      <Button
+                        onClick={() => {
+                          navigate("/");
+                          exitEditMode();
+                          setIsMenuOpen(false);
+                        }}
+                        className="w-full sm:w-64 h-14 bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-colors text-lg rounded-lg"
+                      >
+                        <Plus className="mr-2 h-5 w-5" />
+                        {t.navigation.list}
+                      </Button>
+
+                      {/* Navigation Buttons */}
+                      <Button
+                        onClick={() => {
+                          navigate("/notebook");
+                          setIsMenuOpen(false);
+                        }}
+                        variant="outline"
+                        className="w-full sm:w-64 h-14 flex items-center justify-center gap-3 hover:bg-muted transition-colors text-lg font-semibold rounded-lg"
+                      >
+                        <Book className="h-5 w-5" />
+                        {t.navigation.notebook}
+                      </Button>
+
+                      <Button
+                        onClick={() => {
+                          navigate("/history");
+                          setIsMenuOpen(false);
+                        }}
+                        variant="outline"
+                        className="w-full sm:w-64 h-14 flex items-center justify-center gap-3 hover:bg-muted transition-colors text-lg font-semibold rounded-lg"
+                      >
+                        <History className="h-5 w-5" />
+                        {t.navigation.history}
+                      </Button>
+
+                      <Button
+                        onClick={() => {
+                          navigate("/compare");
+                          setIsMenuOpen(false);
+                        }}
+                        variant="outline"
+                        className="w-full sm:w-64 h-14 flex items-center justify-center gap-3 hover:bg-muted transition-colors text-lg font-semibold rounded-lg"
+                      >
+                        <BarChart3 className="h-5 w-5" />
+                        {t.navigation.compare}
+                      </Button>
+
+                      <Button
+                        onClick={() => {
+                          navigate("/about");
+                          setIsMenuOpen(false);
+                        }}
+                        variant="outline"
+                        className="w-full sm:w-64 h-14 flex items-center justify-center gap-3 hover:bg-muted transition-colors text-lg font-semibold rounded-lg"
+                      >
+                        <Info className="h-5 w-5" />
+                        {t.navigation.about}
+                      </Button>
+
+                      <Button
+                        onClick={() => {
+                          setIsSettingsModalOpen(true);
+                          setIsMenuOpen(false);
+                        }}
+                        variant="ghost"
+                        className="w-64 h-14 flex items-center justify-center gap-4 text-black dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-black dark:hover:text-white transition-colors text-xl font-bold"
+                      >
+                        <Settings className="h-6 w-6 text-black dark:text-slate-400" />
+                        {language === 'he' ? 'הגדרות' : 'Settings'}
+                      </Button>
+
+                    </div>
                   </div>
-
-                  {/* New List Button - Primary Action */}
-                  <Button
-                    onClick={() => {
-                      navigate("/");
-                      exitEditMode();
-                      setIsMenuOpen(false);
-                    }}
-                    className="w-full sm:w-64 h-14 bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-colors text-lg rounded-lg"
-                  >
-                    <Plus className="mr-2 h-5 w-5" />
-                    {t.navigation.list}
-                  </Button>
-
-                  {/* Navigation Buttons */}
-                  <Button
-                    onClick={() => {
-                      navigate("/notebook");
-                      setIsMenuOpen(false);
-                    }}
-                    variant="outline"
-                    className="w-full sm:w-64 h-14 flex items-center justify-center gap-3 hover:bg-muted transition-colors text-lg font-semibold rounded-lg"
-                  >
-                    <Book className="h-5 w-5" />
-                    {t.navigation.notebook}
-                  </Button>
-
-                  <Button
-                    onClick={() => {
-                      navigate("/history");
-                      setIsMenuOpen(false);
-                    }}
-                    variant="outline"
-                    className="w-full sm:w-64 h-14 flex items-center justify-center gap-3 hover:bg-muted transition-colors text-lg font-semibold rounded-lg"
-                  >
-                    <History className="h-5 w-5" />
-                    {t.navigation.history}
-                  </Button>
-
-                  <Button
-                    onClick={() => {
-                      navigate("/compare");
-                      setIsMenuOpen(false);
-                    }}
-                    variant="outline"
-                    className="w-full sm:w-64 h-14 flex items-center justify-center gap-3 hover:bg-muted transition-colors text-lg font-semibold rounded-lg"
-                  >
-                    <BarChart3 className="h-5 w-5" />
-                    {t.navigation.compare}
-                  </Button>
-
-                  <Button
-                    onClick={() => {
-                      navigate("/about");
-                      setIsMenuOpen(false);
-                    }}
-                    variant="outline"
-                    className="w-full sm:w-64 h-14 flex items-center justify-center gap-3 hover:bg-muted transition-colors text-lg font-semibold rounded-lg"
-                  >
-                    <Info className="h-5 w-5" />
-                    {t.navigation.about}
-                  </Button>
-
-                  <Button
-                    onClick={() => {
-                      setIsSettingsModalOpen(true);
-                      setIsMenuOpen(false);
-                    }}
-                    variant="ghost"
-                    className="w-64 h-14 flex items-center justify-center gap-4 text-black dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-black dark:hover:text-white transition-colors text-xl font-bold"
-                  >
-                    <Settings className="h-6 w-6 text-black dark:text-slate-400" />
-                    {language === 'he' ? 'הגדרות' : 'Settings'}
-                  </Button>
-
-                  </div>
-                </div>
-              </>
-            )}
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -1172,15 +1172,15 @@ export const ShoppingList = () => {
       </div >
 
       {/* Main Content */}
-      <div className="max-w-3xl mx-auto p-3 md:p-8 pb-40">
-        <div className="text-center mb-6">
-          <h2 className="text-base font-bold text-foreground mb-1">
+      <div className="max-w-3xl mx-auto p-3 sm:p-6 md:p-8 pb-32 sm:pb-40">
+        <div className="text-center mb-4 sm:mb-6">
+          <h2 className="text-sm sm:text-base font-bold text-foreground mb-1">
             {activeListId
               ? "מעולה! הרשימה מוכנה לעבודה 📝"
               : t.welcomeHeading
             }
           </h2>
-          <p className="text-base font-medium text-muted-foreground">
+          <p className="text-sm sm:text-base font-medium text-muted-foreground">
             {activeListId
               ? "תנו לרשימה שם, עדכנו כמויות ושמרו אותה לפנקס."
               : t.welcomeSubtitle
@@ -1197,7 +1197,7 @@ export const ShoppingList = () => {
                   ref={titleInputRef}
                   value={listName}
                   onChange={(e) => setListName(e.target.value)}
-                  className="flex-1 bg-transparent text-xl md:text-2xl font-extrabold border-none outline-none px-1 py-1 select-text focus:cursor-text hover:cursor-text transition border-b-2 border-transparent focus:border-gray-400 hover:border-gray-300 focus:outline-none focus:ring-0 truncate"
+                  className="flex-1 bg-transparent text-lg sm:text-xl md:text-2xl font-extrabold border-none outline-none px-1 py-1 select-text focus:cursor-text hover:cursor-text transition border-b-2 border-transparent focus:border-gray-400 hover:border-gray-300 focus:outline-none focus:ring-0 truncate"
                   placeholder={language === 'he' ? 'שם הרשימה...' : 'List name...'}
                   style={{ minWidth: 0 }}
                 />
@@ -1254,7 +1254,7 @@ export const ShoppingList = () => {
 
               {/* Bulk Input Card (Notebook Style) - Now ABOVE Single Item Row */}
               {showBulkInput && (
-                <div className="relative bg-[#FEFCE8] dark:bg-slate-800 border-2 border-black dark:border-slate-700 rounded-xl p-4 md:p-6 mb-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] focus-within:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] hover:border-yellow-400 focus-within:border-yellow-400 transition-all duration-200 hover:-translate-y-1 focus-within:-translate-y-1"
+                <div className="relative bg-[#FEFCE8] dark:bg-slate-800 border-2 border-black dark:border-slate-700 rounded-xl p-3 sm:p-4 md:p-6 mb-4 sm:mb-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] focus-within:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:focus-within:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] hover:border-yellow-400 focus-within:border-yellow-400 transition-all duration-200 hover:-translate-y-0.5 sm:hover:-translate-y-1 focus-within:-translate-y-0.5 sm:focus-within:-translate-y-1"
                   style={theme !== 'dark' ? {
                     backgroundImage: 'repeating-linear-gradient(transparent, transparent 31px, #e5e7eb 31px, #e5e7eb 32px)'
                   } : {}}
@@ -1295,9 +1295,8 @@ export const ShoppingList = () => {
                     {/* Voice Dictation Button */}
                     <button
                       onClick={handleVoiceDictation}
-                      className={`p-2 rounded-lg hover:text-black dark:hover:text-white transition-colors hover:bg-gray-100 dark:hover:bg-slate-700 ${
-                        isVoiceRecording ? 'text-red-500 animate-pulse' : ''
-                      }`}
+                      className={`p-2 rounded-lg hover:text-black dark:hover:text-white transition-colors hover:bg-gray-100 dark:hover:bg-slate-700 ${isVoiceRecording ? 'text-red-500 animate-pulse' : ''
+                        }`}
                       title={language === 'he' ? 'הקלטת קול' : 'Voice Dictation'}
                       disabled={isProcessingImage}
                     >
@@ -1307,9 +1306,8 @@ export const ShoppingList = () => {
                     {/* Camera OCR Button */}
                     <button
                       onClick={() => cameraInputRef.current?.click()}
-                      className={`p-2 rounded-lg hover:text-black dark:hover:text-white transition-colors hover:bg-gray-100 dark:hover:bg-slate-700 ${
-                        isProcessingImage ? 'text-blue-500 animate-pulse' : ''
-                      }`}
+                      className={`p-2 rounded-lg hover:text-black dark:hover:text-white transition-colors hover:bg-gray-100 dark:hover:bg-slate-700 ${isProcessingImage ? 'text-blue-500 animate-pulse' : ''
+                        }`}
                       title={language === 'he' ? 'סריקת רשימה' : 'Scan List'}
                       disabled={isVoiceRecording}
                     >
@@ -1319,9 +1317,8 @@ export const ShoppingList = () => {
                     {/* Handwriting Button */}
                     <button
                       onClick={() => setIsHandwritingOpen(true)}
-                      className={`p-2 rounded-lg hover:text-black dark:hover:text-white transition-colors hover:bg-gray-100 dark:hover:bg-slate-700 ${
-                        isProcessingImage ? 'text-blue-500 animate-pulse' : ''
-                      }`}
+                      className={`p-2 rounded-lg hover:text-black dark:hover:text-white transition-colors hover:bg-gray-100 dark:hover:bg-slate-700 ${isProcessingImage ? 'text-blue-500 animate-pulse' : ''
+                        }`}
                       title={language === 'he' ? 'כתב יד' : 'Handwriting'}
                       disabled={isVoiceRecording}
                     >
@@ -1465,11 +1462,11 @@ export const ShoppingList = () => {
               )}
 
               {/* Single Item Row */}
-              <div className="bg-[#FEFCE8] dark:bg-slate-800 rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] border-2 border-black dark:border-slate-700 p-3 md:p-4 mb-6 w-full relative overflow-visible">
+              <div className="bg-[#FEFCE8] dark:bg-slate-800 rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] border-2 border-black dark:border-slate-700 p-2 sm:p-3 md:p-4 mb-6 w-full relative overflow-visible">
                 {/* Decorative "Tape" */}
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-24 h-6 bg-white/30 dark:bg-white/10 rotate-[-2deg] border-l border-r border-white/40 dark:border-white/20 backdrop-blur-[1px]" />
 
-                <div className="flex w-full items-center gap-2 flex-nowrap relative z-10">
+                <div className="flex w-full items-center gap-1 sm:gap-2 flex-nowrap relative z-10">
                   <StandardizedInput
                     variant="single-item"
                     ref={singleItemInputRef}
@@ -1484,7 +1481,7 @@ export const ShoppingList = () => {
                     step={singleItemUnit === 'units' ? "1" : "0.1"}
                     value={singleItemQuantity}
                     onChange={(e) => setSingleItemQuantity(e.target.value)}
-                    className="w-[3.5rem] text-center text-xs rounded-lg shrink-0 px-0 border-2 border-black dark:border-slate-700 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all bg-white dark:bg-slate-900 !text-black dark:!text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
+                    className="w-[2.5rem] sm:w-[3.5rem] h-9 sm:h-10 text-center text-[10px] sm:text-xs rounded-lg shrink-0 px-0 border-2 border-black dark:border-slate-700 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all bg-white dark:bg-slate-900 !text-black dark:!text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
                     onBlur={() => {
                       let val = parseFloat(singleItemQuantity);
                       if (singleItemUnit === 'units' && !isNaN(val)) {
@@ -1504,7 +1501,7 @@ export const ShoppingList = () => {
                       }
                     }}
                   >
-                    <SelectTrigger className="w-[4.5rem] text-xs rounded-lg shrink-0 px-1 border-2 border-black dark:border-slate-700 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all bg-white dark:bg-slate-900 text-center justify-center [&>span]:w-full [&>span]:text-center [&>svg]:hidden !text-black dark:!text-slate-100">
+                    <SelectTrigger className="w-[3.5rem] sm:w-[4.5rem] h-9 sm:h-10 text-[10px] sm:text-xs rounded-lg shrink-0 px-0 sm:px-1 border-2 border-black dark:border-slate-700 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all bg-white dark:bg-slate-900 text-center justify-center [&>span]:w-full [&>span]:text-center [&>svg]:hidden !text-black dark:!text-slate-100">
                       <span className="truncate w-full text-center">
                         {(() => {
                           const u = UNITS.find(u => u.value === (singleItemUnit || 'units'));
@@ -1524,9 +1521,9 @@ export const ShoppingList = () => {
                     <Button
                       onClick={handleAddSingleItem}
                       disabled={!singleItemInput.trim()}
-                      className="w-10 h-10 p-0 shrink-0 grid place-items-center bg-yellow-400 text-black rounded-lg border-2 border-transparent hover:bg-yellow-500 hover:scale-105 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[1px] active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:bg-stone-300 disabled:text-stone-500"
+                      className="w-9 h-9 sm:w-10 sm:h-10 p-0 shrink-0 grid place-items-center bg-yellow-400 text-black rounded-lg border-2 border-transparent hover:bg-yellow-500 hover:scale-105 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[1px] active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:bg-stone-300 disabled:text-stone-500"
                     >
-                      <Plus className="h-6 w-6" strokeWidth={3} />
+                      <Plus className="h-5 w-5 sm:h-6 sm:w-6" strokeWidth={3} />
                     </Button>
                   </div>
                 </div>
@@ -1577,9 +1574,8 @@ export const ShoppingList = () => {
                 {/* Voice Dictation Button */}
                 <button
                   onClick={handleVoiceDictation}
-                  className={`p-2 rounded-lg hover:text-black dark:hover:text-white transition-colors hover:bg-gray-100 dark:hover:bg-slate-700 ${
-                    isVoiceRecording ? 'text-red-500 animate-pulse' : ''
-                  }`}
+                  className={`p-2 rounded-lg hover:text-black dark:hover:text-white transition-colors hover:bg-gray-100 dark:hover:bg-slate-700 ${isVoiceRecording ? 'text-red-500 animate-pulse' : ''
+                    }`}
                   title={language === 'he' ? 'הקלטת קול' : 'Voice Dictation'}
                   disabled={isProcessingImage}
                 >
@@ -1589,9 +1585,8 @@ export const ShoppingList = () => {
                 {/* Camera OCR Button */}
                 <button
                   onClick={() => cameraInputRef.current?.click()}
-                  className={`p-2 rounded-lg hover:text-black dark:hover:text-white transition-colors hover:bg-gray-100 dark:hover:bg-slate-700 ${
-                    isProcessingImage ? 'text-blue-500 animate-pulse' : ''
-                  }`}
+                  className={`p-2 rounded-lg hover:text-black dark:hover:text-white transition-colors hover:bg-gray-100 dark:hover:bg-slate-700 ${isProcessingImage ? 'text-blue-500 animate-pulse' : ''
+                    }`}
                   title={language === 'he' ? 'סריקת רשימה' : 'Scan List'}
                   disabled={isVoiceRecording}
                 >
@@ -1601,9 +1596,8 @@ export const ShoppingList = () => {
                 {/* Handwriting Button */}
                 <button
                   onClick={() => setIsHandwritingOpen(true)}
-                  className={`p-2 rounded-lg hover:text-black dark:hover:text-white transition-colors hover:bg-gray-100 dark:hover:bg-slate-700 ${
-                    isProcessingImage ? 'text-blue-500 animate-pulse' : ''
-                  }`}
+                  className={`p-2 rounded-lg hover:text-black dark:hover:text-white transition-colors hover:bg-gray-100 dark:hover:bg-slate-700 ${isProcessingImage ? 'text-blue-500 animate-pulse' : ''
+                    }`}
                   title={language === 'he' ? 'כתב יד' : 'Handwriting'}
                   disabled={isVoiceRecording}
                 >
@@ -1624,100 +1618,100 @@ export const ShoppingList = () => {
               {/* Notepad Items List */}
               <div className="min-h-[140px] space-y-2">
                 {notepadItems.length === 0 ? (
-                      <div
-                        className="text-center py-8 text-gray-600 dark:text-slate-400 font-hand text-lg font-normal leading-relaxed whitespace-pre-line cursor-pointer"
-                        onClick={() => {
-                          const newItem: NotepadItem = {
-                            id: `notepad-${Date.now()}`,
-                            text: '',
-                            isChecked: false
-                          };
-                          setNotepadItems([newItem]);
-                          // Focus the first input
-                          setTimeout(() => {
-                            if (notepadInputRefs.current[0]) {
-                              notepadInputRefs.current[0]!.focus();
-                            }
-                          }, 0);
-                        }}
-                      >
-                        {t.textareaPlaceholder}
-                      </div>
+                  <div
+                    className="text-center py-8 text-gray-600 dark:text-slate-400 font-hand text-lg font-normal leading-relaxed whitespace-pre-line cursor-pointer"
+                    onClick={() => {
+                      const newItem: NotepadItem = {
+                        id: `notepad-${Date.now()}`,
+                        text: '',
+                        isChecked: false
+                      };
+                      setNotepadItems([newItem]);
+                      // Focus the first input
+                      setTimeout(() => {
+                        if (notepadInputRefs.current[0]) {
+                          notepadInputRefs.current[0]!.focus();
+                        }
+                      }, 0);
+                    }}
+                  >
+                    {t.textareaPlaceholder}
+                  </div>
                 ) : (
                   notepadItems.map((item, index) => (
-                      <div key={item.id} className="flex items-center gap-3 py-1">
-                        <Checkbox
-                          checked={item.isChecked}
-                          onCheckedChange={() => toggleNotepadItem(item.id)}
-                          className="h-4 w-4 border-2 border-black dark:border-slate-600 data-[state=checked]:bg-black dark:data-[state=checked]:bg-slate-600 data-[state=checked]:text-yellow-400 flex-shrink-0"
-                        />
-                        <input
-                          ref={(el) => {
-                            notepadInputRefs.current[index] = el;
-                          }}
-                          type="text"
-                          value={item.text}
-                          onChange={(e) => {
-                            const newText = e.target.value;
-                            setNotepadItems(prev => prev.map(i =>
-                              i.id === item.id ? { ...i, text: newText } : i
-                            ));
-                          }}
-                          onKeyDown={(e) => {
-                            const currentIndex = notepadItems.findIndex(i => i.id === item.id);
+                    <div key={item.id} className="flex items-center gap-3 py-1">
+                      <Checkbox
+                        checked={item.isChecked}
+                        onCheckedChange={() => toggleNotepadItem(item.id)}
+                        className="h-4 w-4 border-2 border-black dark:border-slate-600 data-[state=checked]:bg-black dark:data-[state=checked]:bg-slate-600 data-[state=checked]:text-yellow-400 flex-shrink-0"
+                      />
+                      <input
+                        ref={(el) => {
+                          notepadInputRefs.current[index] = el;
+                        }}
+                        type="text"
+                        value={item.text}
+                        onChange={(e) => {
+                          const newText = e.target.value;
+                          setNotepadItems(prev => prev.map(i =>
+                            i.id === item.id ? { ...i, text: newText } : i
+                          ));
+                        }}
+                        onKeyDown={(e) => {
+                          const currentIndex = notepadItems.findIndex(i => i.id === item.id);
 
-                            if (e.key === 'Enter') {
-                              e.preventDefault();
-                              // Create new item at next position
-                              const newItem: NotepadItem = {
-                                id: `notepad-${Date.now()}`,
-                                text: '',
-                                isChecked: false
-                              };
-                              setNotepadItems(prev => {
-                                const newItems = [...prev];
-                                newItems.splice(currentIndex + 1, 0, newItem);
-                                return newItems;
-                              });
-                              // Focus the new input after state update
-                              setTimeout(() => {
-                                if (notepadInputRefs.current[currentIndex + 1]) {
-                                  notepadInputRefs.current[currentIndex + 1]!.focus();
-                                }
-                              }, 0);
-
-                            } else if (e.key === 'Backspace') {
-                              if (item.text === '' && currentIndex > 0) {
-                                e.preventDefault();
-                                // Delete current item and focus previous
-                                setNotepadItems(prev => prev.filter(i => i.id !== item.id));
-                                setTimeout(() => {
-                                  if (notepadInputRefs.current[currentIndex - 1]) {
-                                    notepadInputRefs.current[currentIndex - 1]!.focus();
-                                    // Move cursor to end of text
-                                    const input = notepadInputRefs.current[currentIndex - 1]!;
-                                    input.setSelectionRange(input.value.length, input.value.length);
-                                  }
-                                }, 0);
-                              }
-
-                            } else if (e.key === 'ArrowUp') {
-                              e.preventDefault();
-                              if (currentIndex > 0 && notepadInputRefs.current[currentIndex - 1]) {
-                                notepadInputRefs.current[currentIndex - 1]!.focus();
-                              }
-
-                            } else if (e.key === 'ArrowDown') {
-                              e.preventDefault();
-                              if (currentIndex < notepadItems.length - 1 && notepadInputRefs.current[currentIndex + 1]) {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            // Create new item at next position
+                            const newItem: NotepadItem = {
+                              id: `notepad-${Date.now()}`,
+                              text: '',
+                              isChecked: false
+                            };
+                            setNotepadItems(prev => {
+                              const newItems = [...prev];
+                              newItems.splice(currentIndex + 1, 0, newItem);
+                              return newItems;
+                            });
+                            // Focus the new input after state update
+                            setTimeout(() => {
+                              if (notepadInputRefs.current[currentIndex + 1]) {
                                 notepadInputRefs.current[currentIndex + 1]!.focus();
                               }
+                            }, 0);
+
+                          } else if (e.key === 'Backspace') {
+                            if (item.text === '' && currentIndex > 0) {
+                              e.preventDefault();
+                              // Delete current item and focus previous
+                              setNotepadItems(prev => prev.filter(i => i.id !== item.id));
+                              setTimeout(() => {
+                                if (notepadInputRefs.current[currentIndex - 1]) {
+                                  notepadInputRefs.current[currentIndex - 1]!.focus();
+                                  // Move cursor to end of text
+                                  const input = notepadInputRefs.current[currentIndex - 1]!;
+                                  input.setSelectionRange(input.value.length, input.value.length);
+                                }
+                              }, 0);
                             }
-                          }}
-                          className={`flex-1 text-lg font-normal font-hand bg-transparent outline-none caret-yellow-500 dark:caret-white ${item.isChecked ? 'line-through text-gray-500 dark:text-slate-500' : 'text-black dark:text-slate-200'} placeholder:text-gray-400 dark:placeholder:text-slate-500`}
-                          placeholder={index === 0 && notepadItems.length === 1 ? "הקלד פריט..." : ""}
-                        />
-                      </div>
+
+                          } else if (e.key === 'ArrowUp') {
+                            e.preventDefault();
+                            if (currentIndex > 0 && notepadInputRefs.current[currentIndex - 1]) {
+                              notepadInputRefs.current[currentIndex - 1]!.focus();
+                            }
+
+                          } else if (e.key === 'ArrowDown') {
+                            e.preventDefault();
+                            if (currentIndex < notepadItems.length - 1 && notepadInputRefs.current[currentIndex + 1]) {
+                              notepadInputRefs.current[currentIndex + 1]!.focus();
+                            }
+                          }
+                        }}
+                        className={`flex-1 text-lg font-normal font-hand bg-transparent outline-none caret-yellow-500 dark:caret-white ${item.isChecked ? 'line-through text-gray-500 dark:text-slate-500' : 'text-black dark:text-slate-200'} placeholder:text-gray-400 dark:placeholder:text-slate-500`}
+                        placeholder={index === 0 && notepadItems.length === 1 ? "הקלד פריט..." : ""}
+                      />
+                    </div>
                   ))
                 )}
               </div>

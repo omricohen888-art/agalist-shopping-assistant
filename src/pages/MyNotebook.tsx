@@ -75,18 +75,18 @@ const MyNotebook = () => {
                 </div>
 
                 {savedLists.length === 0 ? (
-                    <div className="text-center py-16 sm:py-24">
-                        <div className="bg-white dark:bg-slate-900 p-8 sm:p-12 rounded-3xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] border-2 border-black dark:border-slate-700 inline-block max-w-md mx-auto">
-                            <Book className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                            <h3 className="text-2xl font-black text-foreground mb-2">
+                    <div className="text-center py-12 sm:py-24">
+                        <div className="bg-white dark:bg-slate-900 p-6 sm:p-12 rounded-3xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] border-2 border-black dark:border-slate-700 inline-block max-w-md mx-auto w-full">
+                            <Book className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground mx-auto mb-4" />
+                            <h3 className="text-xl sm:text-2xl font-black text-foreground mb-2">
                                 {language === 'he' ? 'הפנקס שלך ריק' : 'Your notebook is empty'}
                             </h3>
-                            <p className="text-muted-foreground mb-6 text-base font-medium">
+                            <p className="text-muted-foreground mb-6 text-sm sm:text-base font-medium">
                                 {language === 'he'
                                     ? 'עדיין לא שמרת רשימות. צור רשימה חדשה ושמור אותה כדי לראות אותה כאן.'
                                     : 'You haven\'t saved any lists yet. Create a new list and save it to see it here.'}
                             </p>
-                            <Button onClick={() => navigate('/')} className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold h-11 px-8 border-2 border-black dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all">
+                            <Button onClick={() => navigate('/')} className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold h-10 sm:h-11 px-6 sm:px-8 border-2 border-black dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all w-full sm:w-auto">
                                 {language === 'he' ? 'צור רשימה ראשונה' : 'Create First List'}
                             </Button>
                         </div>

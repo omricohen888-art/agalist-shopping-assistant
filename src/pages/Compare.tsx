@@ -67,21 +67,21 @@ const Compare = () => {
             <ArrowRight className="h-6 w-6" />
           </Button>
           <div>
-            <h1 className="text-xl sm:text-2xl font-black text-foreground leading-none">📈 השוואת קניות</h1>
-            <p className="text-xs sm:text-sm text-muted-foreground font-bold">נתח את הרגלי הקנייה שלך</p>
+            <h1 className="text-lg sm:text-2xl font-black text-foreground leading-none">📈 השוואת קניות</h1>
+            <p className="text-[10px] sm:text-sm text-muted-foreground font-bold">נתח את הרגלי הקנייה שלך</p>
           </div>
         </div>
       </div>
 
-      <div className="w-full max-w-4xl mx-auto px-4 py-8 space-y-8 animate-fade-in">
+      <div className="w-full max-w-4xl mx-auto px-4 py-6 sm:py-8 space-y-6 sm:space-y-8 animate-fade-in">
         {history.length < 2 ? (
-          <div className="p-10 text-center rounded-3xl border-2 border-dashed border-black/20 dark:border-white/20">
-            <div className="text-6xl mb-4 grayscale opacity-50">📊</div>
-            <h3 className="text-2xl font-black mb-2 text-foreground">לא מספיק נתונים להשוואה</h3>
-            <p className="text-muted-foreground mb-6 font-medium">
+          <div className="p-6 sm:p-10 text-center rounded-3xl border-2 border-dashed border-black/20 dark:border-white/20">
+            <div className="text-5xl sm:text-6xl mb-4 grayscale opacity-50">📊</div>
+            <h3 className="text-xl sm:text-2xl font-black mb-2 text-foreground">לא מספיק נתונים להשוואה</h3>
+            <p className="text-sm sm:text-base text-muted-foreground mb-6 font-medium">
               בצע לפחות 2 קניות כדי לראות השוואות ותובנות
             </p>
-            <Button onClick={() => navigate("/")} className="h-12 px-8 text-base font-bold border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all">
+            <Button onClick={() => navigate("/")} className="h-10 sm:h-12 px-6 sm:px-8 text-sm sm:text-base font-bold border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all">
               חזרה לרשימת קניות
             </Button>
           </div>

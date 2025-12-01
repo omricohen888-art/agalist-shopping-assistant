@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Progress } from "@/components/ui/progress";
 import { Share2, Trash2, Plus, CheckCircle2, History, Menu, BarChart3, Globe, Save, ClipboardList, Book, Square, CheckSquare, Printer, Mail, FileSpreadsheet, Copy, Pencil, X, ClipboardPaste, Info, ShoppingCart, Check, Volume2, RotateCcw, Settings, Moon, Sun, Mic, Camera, PenLine } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
@@ -940,7 +939,7 @@ export const ShoppingList = () => {
       )}
 
       {/* Sticky Header Group */}
-      <div className="bg-gray-50/95 dark:bg-slate-950/95 backdrop-blur-md text-black dark:text-slate-100 shadow-sm sticky top-0 z-50 border-b border-gray-200/50 dark:border-slate-800/50">
+      <div className="bg-gray-50 dark:bg-slate-950 text-black dark:text-slate-100 shadow-sm sticky top-0 z-50 border-b border-gray-200/50 dark:border-slate-800/50">
         <div className="max-w-3xl mx-auto px-4 py-2 md:py-4">
           <div className="flex justify-between items-center w-full mb-3 px-4">
             {/* Title Section - Never truncate */}
@@ -976,98 +975,124 @@ export const ShoppingList = () => {
             {/* Actions Section - Never shrink */}
             <div className="flex items-center gap-3 flex-shrink-0">
               {/* Hamburger Menu */}
-              <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-                <SheetTrigger asChild>
-                  <button className="w-11 h-11 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-full flex items-center justify-center hover:bg-gray-50 dark:hover:bg-slate-700 hover:text-black dark:hover:text-slate-100 active:scale-95 transition-all duration-200 shadow">
-                    <Menu className="w-5 h-5 text-gray-700 dark:text-slate-400" strokeWidth={2} />
-                  </button>
-                </SheetTrigger>
-                <SheetContent side="right" className="w-[70%] max-w-[280px] bg-white dark:bg-slate-900 border-l-2 border-black dark:border-slate-800 text-black dark:text-white p-6">
-                  <div className="flex flex-row items-center gap-2 mb-6 mt-2">
-                    <h2 className="text-lg md:text-3xl font-black text-black dark:text-white tracking-tight">
-                      {t.menuTitle}
-                    </h2>
-                    <div className="relative flex items-center justify-center">
-                      <ShoppingCart className="h-6 w-6 text-black dark:text-slate-400" />
-                      <Check className="absolute -top-1 -right-1 h-3 w-3 text-black dark:text-slate-200 font-bold" />
-                    </div>
+              <button
+                onClick={() => setIsMenuOpen(true)}
+                className="w-11 h-11 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-full flex items-center justify-center hover:bg-gray-50 dark:hover:bg-slate-700 hover:text-black dark:hover:text-slate-100 active:scale-95 transition-all duration-200 shadow"
+              >
+                <Menu className="w-5 h-5 text-gray-700 dark:text-slate-400" strokeWidth={2} />
+              </button>
+
+              {/* Mobile Full Screen Overlay Menu */}
+              {isMenuOpen && (
+                <>
+                  {/* Backdrop */}
+                  <div
+                    className="fixed inset-0 bg-black/50 z-[99]"
+                    onClick={() => setIsMenuOpen(false)}
+                  />
+
+                  {/* Menu Overlay */}
+                  <div
+                    className="mobile-menu-overlay fixed inset-0 w-full h-full bg-white dark:bg-slate-900 z-[100] flex flex-col items-center justify-center transition-opacity duration-300 opacity-100"
+                    style={{
+                      backgroundColor: '#ffffff !important',
+                      background: '#ffffff !important',
+                      backgroundImage: 'none !important'
+                    }}
+                  >
+
+                {/* Close Button */}
+                <button
+                  onClick={() => setIsMenuOpen(false)}
+                  className="absolute top-6 right-6 w-12 h-12 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-full flex items-center justify-center transition-colors z-10"
+                >
+                  <X className="w-6 h-6 text-gray-600 dark:text-slate-300" />
+                </button>
+
+                {/* Menu Content */}
+                <div className="flex flex-col items-center gap-8 text-center">
+
+                  {/* Menu Title */}
+                  <h2 className="text-3xl font-black text-black dark:text-white mb-4">תפריט</h2>
+
+                  {/* New List Button - Primary Action */}
+                  <Button
+                    onClick={() => {
+                      navigate("/");
+                      exitEditMode();
+                      setIsMenuOpen(false);
+                    }}
+                    className="w-64 h-16 bg-yellow-400 text-black font-bold hover:bg-yellow-500 transition-colors border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] text-xl"
+                  >
+                    <Plus className="mr-3 h-6 w-6" />
+                    {t.navigation.list}
+                  </Button>
+
+                  {/* Navigation Buttons */}
+                  <Button
+                    onClick={() => {
+                      navigate("/notebook");
+                      setIsMenuOpen(false);
+                    }}
+                    variant="ghost"
+                    className="w-64 h-14 flex items-center justify-center gap-4 text-black dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-black dark:hover:text-white transition-colors text-xl font-bold"
+                  >
+                    <Book className="h-6 w-6 text-black dark:text-slate-400" />
+                    {t.navigation.notebook}
+                  </Button>
+
+                  <Button
+                    onClick={() => {
+                      navigate("/history");
+                      setIsMenuOpen(false);
+                    }}
+                    variant="ghost"
+                    className="w-64 h-14 flex items-center justify-center gap-4 text-black dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-black dark:hover:text-white transition-colors text-xl font-bold"
+                  >
+                    <History className="h-6 w-6 text-black dark:text-slate-400" />
+                    {t.navigation.history}
+                  </Button>
+
+                  <Button
+                    onClick={() => {
+                      navigate("/compare");
+                      setIsMenuOpen(false);
+                    }}
+                    variant="ghost"
+                    className="w-64 h-14 flex items-center justify-center gap-4 text-black dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-black dark:hover:text-white transition-colors text-xl font-bold"
+                  >
+                    <BarChart3 className="h-6 w-6 text-black dark:text-slate-400" />
+                    {t.navigation.compare}
+                  </Button>
+
+                  <Button
+                    onClick={() => {
+                      navigate("/about");
+                      setIsMenuOpen(false);
+                    }}
+                    variant="ghost"
+                    className="w-64 h-14 flex items-center justify-center gap-4 text-black dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-black dark:hover:text-white transition-colors text-xl font-bold"
+                  >
+                    <Info className="h-6 w-6 text-black dark:text-slate-400" />
+                    {t.navigation.about}
+                  </Button>
+
+                  <Button
+                    onClick={() => {
+                      setIsSettingsModalOpen(true);
+                      setIsMenuOpen(false);
+                    }}
+                    variant="ghost"
+                    className="w-64 h-14 flex items-center justify-center gap-4 text-black dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-black dark:hover:text-white transition-colors text-xl font-bold"
+                  >
+                    <Settings className="h-6 w-6 text-black dark:text-slate-400" />
+                    {language === 'he' ? 'הגדרות' : 'Settings'}
+                  </Button>
+
                   </div>
-                  <nav className="flex flex-col mt-4">
-                    <Button
-                      onClick={() => {
-                        navigate("/");
-                        exitEditMode();
-                        setIsMenuOpen(false);
-                      }}
-                      className="w-full py-4 h-auto bg-white dark:bg-slate-800 text-black dark:text-white font-black text-2xl uppercase border-2 border-black dark:border-slate-600 hover:bg-yellow-400 dark:hover:bg-yellow-400 hover:scale-[1.02] transition-transform mb-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
-                    >
-                      <Plus className="mr-2 h-8 w-8 stroke-[3]" />
-                      {t.navigation.list}
-                    </Button>
-
-                    {/* Menu Items (Sticker Buttons) */}
-                    <Button
-                      onClick={() => {
-                        navigate("/notebook");
-                        setIsMenuOpen(false);
-                      }}
-                      variant="ghost"
-                      className="w-full justify-start p-4 mb-3 h-auto rounded-lg border-2 border-transparent transition-all duration-200 text-xl font-black tracking-tight text-black dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 hover:text-black dark:hover:text-white hover:border-black dark:hover:border-slate-600 hover:-translate-y-1 hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
-                    >
-                      <Book className="mr-3 h-6 w-6 text-black dark:text-slate-400" />
-                      {t.navigation.notebook}
-                    </Button>
-
-                    <Button
-                      onClick={() => {
-                        navigate("/history");
-                        setIsMenuOpen(false);
-                      }}
-                      variant="ghost"
-                      className="w-full justify-start p-4 mb-3 h-auto rounded-lg border-2 border-transparent transition-all duration-200 text-xl font-black tracking-tight text-black dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 hover:text-black dark:hover:text-white hover:border-black dark:hover:border-slate-600 hover:-translate-y-1 hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
-                    >
-                      <History className="mr-3 h-6 w-6 text-black dark:text-slate-400" />
-                      {t.navigation.history}
-                    </Button>
-
-                    <Button
-                      onClick={() => {
-                        navigate("/compare");
-                        setIsMenuOpen(false);
-                      }}
-                      variant="ghost"
-                      className="w-full justify-start p-4 mb-3 h-auto rounded-lg border-2 border-transparent transition-all duration-200 text-xl font-black tracking-tight text-black dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 hover:text-black dark:hover:text-white hover:border-black dark:hover:border-slate-600 hover:-translate-y-1 hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
-                    >
-                      <BarChart3 className="mr-3 h-6 w-6 text-black dark:text-slate-400" />
-                      {t.navigation.compare}
-                    </Button>
-
-                    <Button
-                      onClick={() => {
-                        navigate("/about");
-                        setIsMenuOpen(false);
-                      }}
-                      variant="ghost"
-                      className="w-full justify-start p-4 mb-3 h-auto rounded-lg border-2 border-transparent transition-all duration-200 text-xl font-black tracking-tight text-black dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 hover:text-black dark:hover:text-white hover:border-black dark:hover:border-slate-600 hover:-translate-y-1 hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
-                    >
-                      <Info className="mr-3 h-6 w-6 text-black dark:text-slate-400" />
-                      {t.navigation.about}
-                    </Button>
-
-                    <Button
-                      onClick={() => {
-                        setIsSettingsModalOpen(true);
-                        setIsMenuOpen(false);
-                      }}
-                      variant="ghost"
-                      className="w-full justify-start p-4 mb-3 h-auto rounded-lg border-2 border-transparent transition-all duration-200 text-xl font-black tracking-tight text-black dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 hover:text-black dark:hover:text-white hover:border-black dark:hover:border-slate-600 hover:-translate-y-1 hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
-                    >
-                      <Settings className="mr-3 h-6 w-6 text-black dark:text-slate-400" />
-                      {language === 'he' ? 'הגדרות' : 'Settings'}
-                    </Button>
-                  </nav>
-                </SheetContent>
-              </Sheet>
+                </div>
+              </>
+            )}
             </div>
           </div>
         </div>

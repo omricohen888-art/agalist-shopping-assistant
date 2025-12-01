@@ -169,5 +169,15 @@ All colors MUST be HSL.
       transform: translateY(-60px) scale(0.9);
       opacity: 0;
     }
+
+
   }
+}
+
+/* Force solid background for mobile menu overlay */
+.mobile-menu-overlay {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  background-image: none !important;
+  opacity: 1 !important;
 }

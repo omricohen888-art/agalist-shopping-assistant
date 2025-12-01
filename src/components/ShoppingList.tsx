@@ -122,6 +122,7 @@ export const ShoppingList = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [showPasteFeedback, setShowPasteFeedback] = useState(false);
   const [notepadItems, setNotepadItems] = useState<NotepadItem[]>([]);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // Smart Input States
   const [isVoiceRecording, setIsVoiceRecording] = useState(false);
@@ -678,7 +679,7 @@ export const ShoppingList = () => {
     // Start recording
     setIsVoiceRecording(true);
 
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
 
     recognition.lang = language === 'he' ? 'he-IL' : 'en-US';
@@ -727,11 +728,11 @@ export const ShoppingList = () => {
 
     try {
       const worker = await createWorker();
-      await worker.loadLanguage('heb+eng');
-      await worker.initialize('heb+eng');
+      await (worker as any).loadLanguage('heb+eng');
+      await (worker as any).initialize('heb+eng');
 
-      const { data: { text } } = await worker.recognize(file);
-      await worker.terminate();
+      const { data: { text } } = await (worker as any).recognize(file);
+      await (worker as any).terminate();
 
       // Split text by newlines and filter empty lines
       const lines = text.split('\n')
@@ -958,13 +959,13 @@ export const ShoppingList = () => {
             {/* Actions Section - Never shrink */}
             <div className="flex items-center gap-3 flex-shrink-0">
               {/* Hamburger Menu */}
-              <Sheet>
+              <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
                 <SheetTrigger asChild>
                   <button className="w-11 h-11 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-full flex items-center justify-center hover:bg-gray-50 dark:hover:bg-slate-700 hover:text-black dark:hover:text-slate-100 active:scale-95 transition-all duration-200 shadow">
                     <Menu className="w-5 h-5 text-gray-700 dark:text-slate-400" strokeWidth={2} />
                   </button>
                 </SheetTrigger>
-                <SheetContent side="right" className="w-[300px] sm:w-[340px] bg-white dark:bg-slate-900 border-l-2 border-black dark:border-slate-800 text-black dark:text-white p-6">
+                <SheetContent side="right" className="w-[70%] max-w-[280px] bg-white dark:bg-slate-900 border-l-2 border-black dark:border-slate-800 text-black dark:text-white p-6">
                   <div className="flex flex-row items-center gap-2 mb-6 mt-2">
                     <h2 className="text-3xl font-black text-black dark:text-white tracking-tight">
                       {t.menuTitle}
@@ -979,6 +980,7 @@ export const ShoppingList = () => {
                       onClick={() => {
                         navigate("/");
                         exitEditMode();
+                        setIsMenuOpen(false);
                       }}
                       className="w-full py-4 h-auto bg-white dark:bg-slate-800 text-black dark:text-white font-black text-2xl uppercase border-2 border-black dark:border-slate-600 hover:bg-yellow-400 dark:hover:bg-yellow-400 hover:scale-[1.02] transition-transform mb-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
                     >
@@ -988,7 +990,10 @@ export const ShoppingList = () => {
 
                     {/* Menu Items (Sticker Buttons) */}
                     <Button
-                      onClick={() => navigate("/notebook")}
+                      onClick={() => {
+                        navigate("/notebook");
+                        setIsMenuOpen(false);
+                      }}
                       variant="ghost"
                       className="w-full justify-start p-4 mb-3 h-auto rounded-lg border-2 border-transparent transition-all duration-200 text-xl font-black tracking-tight text-black dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 hover:text-black dark:hover:text-white hover:border-black dark:hover:border-slate-600 hover:-translate-y-1 hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
                     >
@@ -997,7 +1002,10 @@ export const ShoppingList = () => {
                     </Button>
 
                     <Button
-                      onClick={() => navigate("/history")}
+                      onClick={() => {
+                        navigate("/history");
+                        setIsMenuOpen(false);
+                      }}
                       variant="ghost"
                       className="w-full justify-start p-4 mb-3 h-auto rounded-lg border-2 border-transparent transition-all duration-200 text-xl font-black tracking-tight text-black dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 hover:text-black dark:hover:text-white hover:border-black dark:hover:border-slate-600 hover:-translate-y-1 hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
                     >
@@ -1006,7 +1014,10 @@ export const ShoppingList = () => {
                     </Button>
 
                     <Button
-                      onClick={() => navigate("/compare")}
+                      onClick={() => {
+                        navigate("/compare");
+                        setIsMenuOpen(false);
+                      }}
                       variant="ghost"
                       className="w-full justify-start p-4 mb-3 h-auto rounded-lg border-2 border-transparent transition-all duration-200 text-xl font-black tracking-tight text-black dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 hover:text-black dark:hover:text-white hover:border-black dark:hover:border-slate-600 hover:-translate-y-1 hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
                     >
@@ -1015,7 +1026,10 @@ export const ShoppingList = () => {
                     </Button>
 
                     <Button
-                      onClick={() => navigate("/about")}
+                      onClick={() => {
+                        navigate("/about");
+                        setIsMenuOpen(false);
+                      }}
                       variant="ghost"
                       className="w-full justify-start p-4 mb-3 h-auto rounded-lg border-2 border-transparent transition-all duration-200 text-xl font-black tracking-tight text-black dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 hover:text-black dark:hover:text-white hover:border-black dark:hover:border-slate-600 hover:-translate-y-1 hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
                     >
@@ -1024,7 +1038,10 @@ export const ShoppingList = () => {
                     </Button>
 
                     <Button
-                      onClick={() => setIsSettingsModalOpen(true)}
+                      onClick={() => {
+                        setIsSettingsModalOpen(true);
+                        setIsMenuOpen(false);
+                      }}
                       variant="ghost"
                       className="w-full justify-start p-4 mb-3 h-auto rounded-lg border-2 border-transparent transition-all duration-200 text-xl font-black tracking-tight text-black dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 hover:text-black dark:hover:text-white hover:border-black dark:hover:border-slate-600 hover:-translate-y-1 hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
                     >

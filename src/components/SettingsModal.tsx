@@ -72,7 +72,7 @@ export const SettingsModal = ({ open, onOpenChange }: SettingsModalProps) => {
               <Label htmlFor="language" className="text-sm font-medium">
                 {language === 'he' ? 'בחר שפה' : 'Select Language'}
               </Label>
-              <Select value={language} onValueChange={setLanguage}>
+              <Select value={language} onValueChange={(value) => setLanguage(value as 'he' | 'en')}>
                 <SelectTrigger className="w-[120px]">
                   <SelectValue />
                 </SelectTrigger>

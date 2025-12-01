@@ -89,7 +89,7 @@ export const ShoppingListItem = ({
   const isDimmed = isCompleted && !isAnimating;
 
   return (
-    <div className={`bg-white dark:bg-slate-800 rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] border-2 border-black dark:border-slate-700 py-2 md:py-3 px-3 flex flex-row items-center justify-between flex-nowrap w-full gap-3 group hover:translate-y-[-2px] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] transition-all touch-manipulation animate-in slide-in-from-top-4 fade-in duration-300 min-h-[3rem] ${
+    <div className={`bg-white dark:bg-slate-800 rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] border-2 border-black dark:border-slate-700 py-1.5 md:py-3 px-3 flex flex-row items-center justify-between flex-nowrap w-full gap-3 group hover:translate-y-[-2px] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] transition-all touch-manipulation animate-in slide-in-from-top-4 fade-in duration-300 min-h-[2.5rem] md:min-h-[3rem] ${
       isDimmed ? 'bg-gray-50 dark:bg-slate-700/50 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.5)] border-gray-200 dark:border-slate-600 opacity-60' : ''
     } ${
       visualChecked ? 'bg-green-50 dark:bg-green-900/20' : ''

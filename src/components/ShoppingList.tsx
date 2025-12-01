@@ -941,11 +941,11 @@ export const ShoppingList = () => {
 
       {/* Sticky Header Group */}
       <div className="bg-gray-50/95 dark:bg-slate-950/95 backdrop-blur-md text-black dark:text-slate-100 shadow-sm sticky top-0 z-50 border-b border-gray-200/50 dark:border-slate-800/50">
-        <div className="max-w-3xl mx-auto px-4 py-4">
+        <div className="max-w-3xl mx-auto px-4 py-2 md:py-4">
           <div className="flex justify-between items-center w-full mb-3 px-4">
             {/* Title Section - Never truncate */}
             <div className="flex flex-col gap-0.5 flex-shrink-0">
-              <div className={`flex items-center gap-0.5 text-xl sm:text-2xl md:text-3xl font-black drop-shadow-sm leading-tight whitespace-nowrap ${direction === "rtl" ? "flex-row-reverse" : "flex-row"}`}>
+              <div className={`flex items-center gap-0.5 text-xl sm:text-2xl md:text-3xl font-black drop-shadow-sm leading-tight truncate ${direction === "rtl" ? "flex-row-reverse" : "flex-row"}`}>
                 <span className="flex-shrink-0">{t.appTitle}</span>
                 <div className={`flex items-center flex-shrink-0 ${direction === "rtl" ? "mr-1" : "ml-1"}`}>
                   <span className="text-black dark:text-slate-100 text-xl sm:text-2xl md:text-3xl font-black leading-none">✓</span>
@@ -984,7 +984,7 @@ export const ShoppingList = () => {
                 </SheetTrigger>
                 <SheetContent side="right" className="w-[70%] max-w-[280px] bg-white dark:bg-slate-900 border-l-2 border-black dark:border-slate-800 text-black dark:text-white p-6">
                   <div className="flex flex-row items-center gap-2 mb-6 mt-2">
-                    <h2 className="text-3xl font-black text-black dark:text-white tracking-tight">
+                    <h2 className="text-lg md:text-3xl font-black text-black dark:text-white tracking-tight">
                       {t.menuTitle}
                     </h2>
                     <div className="relative flex items-center justify-center">
@@ -1086,9 +1086,9 @@ export const ShoppingList = () => {
       </div >
 
       {/* Main Content */}
-      <div className="max-w-3xl mx-auto px-2 md:px-8 py-6 pb-40">
+      <div className="max-w-3xl mx-auto p-3 md:p-8 pb-40">
         <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold text-foreground mb-1">
+          <h2 className="text-base font-bold text-foreground mb-1">
             {activeListId
               ? "מעולה! הרשימה מוכנה לעבודה 📝"
               : t.welcomeHeading
@@ -1168,7 +1168,7 @@ export const ShoppingList = () => {
 
               {/* Bulk Input Card (Notebook Style) - Now ABOVE Single Item Row */}
               {showBulkInput && (
-                <div className="relative bg-[#FEFCE8] dark:bg-slate-800 border-2 border-black dark:border-slate-700 rounded-xl p-6 mb-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] focus-within:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] hover:border-yellow-400 focus-within:border-yellow-400 transition-all duration-200 hover:-translate-y-1 focus-within:-translate-y-1"
+                <div className="relative bg-[#FEFCE8] dark:bg-slate-800 border-2 border-black dark:border-slate-700 rounded-xl p-4 md:p-6 mb-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] focus-within:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] hover:border-yellow-400 focus-within:border-yellow-400 transition-all duration-200 hover:-translate-y-1 focus-within:-translate-y-1"
                   style={theme !== 'dark' ? {
                     backgroundImage: 'repeating-linear-gradient(transparent, transparent 31px, #e5e7eb 31px, #e5e7eb 32px)'
                   } : {}}
@@ -1446,7 +1446,7 @@ export const ShoppingList = () => {
             </>
           ) : (
             // Notebook Style Input
-            <div className="relative bg-[#FEFCE8] dark:bg-slate-800 border-2 border-black dark:border-slate-700 rounded-xl p-6 mb-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] focus-within:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] hover:border-yellow-400 focus-within:border-yellow-400 transition-all duration-200 hover:-translate-y-1 focus-within:-translate-y-1"
+            <div className="relative bg-[#FEFCE8] dark:bg-slate-800 border-2 border-black dark:border-slate-700 rounded-xl p-4 md:p-6 mb-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] focus-within:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] hover:border-yellow-400 focus-within:border-yellow-400 transition-all duration-200 hover:-translate-y-1 focus-within:-translate-y-1"
               style={theme !== 'dark' ? {
                 backgroundImage: 'repeating-linear-gradient(transparent, transparent 31px, #e5e7eb 31px, #e5e7eb 32px)'
               } : {}}

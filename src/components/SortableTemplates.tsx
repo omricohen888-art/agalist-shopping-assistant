@@ -190,7 +190,7 @@ export const SortableTemplates = ({
   const createLabel = language === 'he' ? 'צור תבנית' : 'Create Template';
 
   return (
-    <div className="mb-7">
+    <div className="mb-2 md:mb-7">
       {/* Header */}
       <div className="flex items-center justify-between mb-4 px-2">
         <div className="flex items-center gap-2">

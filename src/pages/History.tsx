@@ -169,106 +169,115 @@ const History = () => {
   });
 
   return (
-    <div className="min-h-screen bg-stone-50 dark:bg-slate-950" dir={direction} lang={language}>
-      <div className="w-full max-w-4xl mx-auto px-4 py-6 sm:py-8 animate-fade-in space-y-6">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-3 flex-1 min-w-[220px]">
-            <Button
-              variant="ghost"
-              onClick={() => navigate("/")}
-              aria-label={t.backAria}
-              className="h-11 w-11 p-0 flex-shrink-0"
-            >
-              <ArrowRight className={`h-6 w-6 ${language === "en" ? "rotate-180" : ""}`} />
-            </Button>
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-primary leading-tight">{t.title}</h1>
-              <p className="text-muted-foreground text-sm sm:text-base">{t.subtitle}</p>
+    <div className="min-h-screen bg-background pb-20" dir={direction} lang={language}>
+      {/* Header */}
+      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b-2 border-black dark:border-slate-700">
+        <div className="w-full max-w-4xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+                <Button
+                variant="ghost"
+                onClick={() => navigate("/")}
+                aria-label={t.backAria}
+                className="h-10 w-10 p-0 rounded-full hover:bg-black/5 dark:hover:bg-white/10"
+                >
+                <ArrowRight className={`h-6 w-6 ${language === "en" ? "rotate-180" : ""}`} />
+                </Button>
+                <div>
+                <h1 className="text-xl sm:text-2xl font-black text-foreground leading-none">{t.title}</h1>
+                <p className="text-xs sm:text-sm text-muted-foreground font-bold">{t.subtitle}</p>
+                </div>
             </div>
-          </div>
-          <div className="flex items-center gap-2 flex-wrap justify-end">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={toggleLanguage}
-              aria-label={t.languageAria}
-              className="h-10 px-4 font-semibold bg-primary text-primary-foreground hover:bg-primary/90"
-            >
-              {t.languageLabel}
-            </Button>
-            {history.length > 0 && (
-              <Button
+            <div className="flex items-center gap-2">
+                <Button
                 variant="outline"
-                onClick={() => navigate("/compare")}
-                className="h-11 px-4 sm:px-6 font-semibold shadow-sm hover:shadow-md"
-              >
-                <TrendingUp className="ml-2 h-5 w-5" />
-                {t.compare}
-              </Button>
-            )}
-          </div>
+                size="sm"
+                onClick={toggleLanguage}
+                className="hidden sm:flex h-9 border-2 border-black dark:border-slate-700 font-bold hover:bg-black/5 dark:hover:bg-white/10"
+                >
+                {t.languageLabel}
+                </Button>
+                {history.length > 0 && (
+                <Button
+                    variant="default"
+                    size="sm"
+                    onClick={() => navigate("/compare")}
+                    className="h-9 bg-primary text-primary-foreground border-2 border-black dark:border-slate-700 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all font-bold"
+                >
+                    <TrendingUp className="ml-2 h-4 w-4" />
+                    {t.compare}
+                </Button>
+                )}
+            </div>
         </div>
+      </div>
 
+      <div className="w-full max-w-4xl mx-auto px-4 py-8 space-y-8 animate-fade-in">
         {history.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Card className="p-5 sm:p-6 bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20 rounded-2xl">
+            <div className="p-5 bg-[#FEFCE8] dark:bg-slate-800 border-2 border-black dark:border-slate-700 rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
               <div className="flex items-center gap-3 mb-2">
-                <ShoppingCart className="h-5 w-5 text-primary" />
-                <p className="text-sm font-medium text-muted-foreground">{t.stats.totalPurchases}</p>
+                <div className="p-2 bg-yellow-400 rounded-lg border-2 border-black dark:border-slate-900">
+                    <ShoppingCart className="h-4 w-4 text-black" />
+                </div>
+                <p className="text-sm font-bold text-muted-foreground">{t.stats.totalPurchases}</p>
               </div>
-              <p className="text-3xl font-bold text-primary">{history.length}</p>
-            </Card>
-            <Card className="p-5 sm:p-6 bg-gradient-to-br from-success/10 to-success/5 border-success/20 rounded-2xl">
+              <p className="text-3xl font-black text-foreground">{history.length}</p>
+            </div>
+            <div className="p-5 bg-[#F0FDF4] dark:bg-slate-800 border-2 border-black dark:border-slate-700 rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
               <div className="flex items-center gap-3 mb-2">
-                <DollarSign className="h-5 w-5 text-success" />
-                <p className="text-sm font-medium text-muted-foreground">{t.stats.totalSpend}</p>
+                <div className="p-2 bg-green-400 rounded-lg border-2 border-black dark:border-slate-900">
+                    <DollarSign className="h-4 w-4 text-black" />
+                </div>
+                <p className="text-sm font-bold text-muted-foreground">{t.stats.totalSpend}</p>
               </div>
-              <p className="text-3xl font-bold text-success">{currencyFormatter.format(totalSpent)}</p>
-            </Card>
-            <Card className="p-5 sm:p-6 bg-gradient-to-br from-warning/10 to-warning/5 border-warning/20 rounded-2xl">
+              <p className="text-3xl font-black text-foreground">{currencyFormatter.format(totalSpent)}</p>
+            </div>
+            <div className="p-5 bg-[#FFF7ED] dark:bg-slate-800 border-2 border-black dark:border-slate-700 rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
               <div className="flex items-center gap-3 mb-2">
-                <TrendingUp className="h-5 w-5 text-warning" />
-                <p className="text-sm font-medium text-muted-foreground">{t.stats.averageSpend}</p>
+                <div className="p-2 bg-orange-400 rounded-lg border-2 border-black dark:border-slate-900">
+                    <TrendingUp className="h-4 w-4 text-black" />
+                </div>
+                <p className="text-sm font-bold text-muted-foreground">{t.stats.averageSpend}</p>
               </div>
-              <p className="text-3xl font-bold text-warning">{currencyFormatter.format(averageSpent)}</p>
-            </Card>
+              <p className="text-3xl font-black text-foreground">{currencyFormatter.format(averageSpent)}</p>
+            </div>
           </div>
         )}
 
         {history.length === 0 ? (
-          <Card className="p-10 text-center rounded-3xl shadow-lg">
-            <div className="text-6xl mb-4">🛒</div>
-            <h3 className="text-2xl font-bold mb-2">{t.emptyState.title}</h3>
-            <p className="text-muted-foreground mb-6">{t.emptyState.description}</p>
-            <Button onClick={() => navigate("/")} className="h-12 px-8 text-base">
+          <div className="p-10 text-center rounded-3xl border-2 border-dashed border-black/20 dark:border-white/20">
+            <div className="text-6xl mb-4 grayscale opacity-50">🛒</div>
+            <h3 className="text-2xl font-black mb-2">{t.emptyState.title}</h3>
+            <p className="text-muted-foreground mb-6 font-medium">{t.emptyState.description}</p>
+            <Button onClick={() => navigate("/")} className="h-12 px-8 text-base font-bold border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all">
               {t.emptyState.cta}
             </Button>
-          </Card>
+          </div>
         ) : (
           <>
             <div className="space-y-4">
               {history.map(item => (
-                <Card key={item.id} className="p-5 sm:p-6 hover:shadow-lg transition-all rounded-3xl">
+                <div key={item.id} className="group p-5 sm:p-6 bg-white dark:bg-slate-900 border-2 border-black dark:border-slate-700 rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all">
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div className="flex-1 space-y-3">
                       <div className="flex items-center gap-3">
-                        <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
-                          <ShoppingCart className="h-6 w-6 text-primary" />
+                        <div className="h-12 w-12 rounded-xl bg-primary border-2 border-black dark:border-slate-700 flex items-center justify-center shrink-0 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                          <ShoppingCart className="h-6 w-6 text-primary-foreground" />
                         </div>
                         <div>
-                          <h3 className="text-lg sm:text-xl font-bold">{item.store || t.noHistory}</h3>
-                          <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground flex-wrap">
+                          <h3 className="text-xl font-black text-foreground">{item.store || t.noHistory}</h3>
+                          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground flex-wrap">
                             <Calendar className="h-4 w-4" />
                             {formatDate(item.date)}
                           </div>
                         </div>
                       </div>
                       <div className="flex flex-wrap items-center gap-3 text-sm">
-                        <div className="flex items-center gap-2 text-muted-foreground">
+                        <div className="flex items-center gap-2 font-medium text-muted-foreground bg-muted px-2 py-1 rounded-md border border-black/5 dark:border-white/5">
                           <div className="h-2 w-2 rounded-full bg-success" />
                           <span>{t.itemsProgress(item.completedItems, item.totalItems)}</span>
                         </div>
-                        <div className="font-bold text-lg text-primary">
+                        <div className="font-black text-lg text-primary bg-primary/10 px-2 py-1 rounded-md border border-primary/20">
                           {currencyFormatter.format(item.totalAmount)}
                         </div>
                       </div>
@@ -276,10 +285,10 @@ const History = () => {
                         {item.items.slice(0, 5).map(shopItem => (
                           <span
                             key={shopItem.id}
-                            className={`text-xs px-3 py-1 rounded-full ${
+                            className={`text-xs font-bold px-2 py-1 rounded-md border ${
                               shopItem.checked
-                                ? "bg-success/10 text-success"
-                                : "bg-muted text-muted-foreground"
+                                ? "bg-success/10 text-success border-success/20"
+                                : "bg-muted text-muted-foreground border-black/5 dark:border-white/5"
                             }`}
                           >
                             {shopItem.checked && "✓ "}
@@ -287,7 +296,7 @@ const History = () => {
                           </span>
                         ))}
                         {item.items.length > 5 && (
-                          <span className="text-xs px-3 py-1 rounded-full bg-muted text-muted-foreground">
+                          <span className="text-xs font-bold px-2 py-1 rounded-md bg-muted text-muted-foreground border border-black/5 dark:border-white/5">
                             {t.itemsExtra(item.items.length - 5)}
                           </span>
                         )}
@@ -298,19 +307,19 @@ const History = () => {
                       size="icon"
                       onClick={() => handleDelete(item.id)}
                       aria-label={t.deleteItem}
-                      className="h-10 w-10 self-end sm:self-start hover:bg-destructive/10 hover:text-destructive"
+                      className="h-10 w-10 self-end sm:self-start text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg"
                     >
                       <Trash2 className="h-5 w-5" />
                     </Button>
                   </div>
-                </Card>
+                </div>
               ))}
             </div>
-            <div className="mt-6">
+            <div className="mt-8 flex justify-center">
               <Button
                 variant="outline"
                 onClick={handleClearAll}
-                className="w-full sm:w-auto h-11 px-6 font-semibold hover:bg-destructive/10 hover:text-destructive hover:border-destructive rounded-full"
+                className="h-11 px-6 font-bold text-destructive border-2 border-destructive/20 hover:bg-destructive/10 hover:border-destructive rounded-xl transition-all"
               >
                 <Trash2 className="ml-2 h-4 w-4" />
                 {t.clearAll}

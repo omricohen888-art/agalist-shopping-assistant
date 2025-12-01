@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { ShoppingItem, ISRAELI_STORES, UNITS, Unit, SavedList } from "@/types/shopping";
 import { ShoppingListItem } from "@/components/ShoppingListItem";
 import { SettingsModal } from "@/components/SettingsModal";
+import { SortableTemplates } from "@/components/SortableTemplates";
 import { processInput, RateLimiter } from "@/utils/security";
 
 interface NotepadItem {
@@ -152,6 +153,11 @@ export const ShoppingList = () => {
       }
     }
   }, []);
+
+  // Save custom templates to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('customTemplates', JSON.stringify(customTemplates));
+  }, [customTemplates]);
 
   // Save custom templates to localStorage whenever they change
   useEffect(() => {
@@ -321,6 +327,17 @@ export const ShoppingList = () => {
       items: items
     };
 
+    // Add to activeTemplates in localStorage (used by SortableTemplates)
+    try {
+      const saved = localStorage.getItem('activeTemplates');
+      const activeTemplates = saved ? JSON.parse(saved) : currentTemplates;
+      const updatedTemplates = [...activeTemplates, newTemplate];
+      localStorage.setItem('activeTemplates', JSON.stringify(updatedTemplates));
+    } catch (error) {
+      console.error('Error saving template:', error);
+    }
+
+    // Also save to customTemplates for backward compatibility
     setCustomTemplates(prev => [...prev, newTemplate]);
     setNewTemplateName("");
     setNewTemplateItems("");
@@ -1593,44 +1610,14 @@ export const ShoppingList = () => {
         }
 
         {/* Quick Start Templates */}
-        {
-          items.length === 0 && (
-            <div className="mb-7">
-              <p className="text-sm font-medium text-muted-foreground mb-4 text-center">
-                {t.templatesHeading}
-              </p>
-              <div className="flex flex-wrap justify-center gap-2.5">
-                {customTemplates.map((template) => (
-                  <button
-                    key={template.id}
-                    onClick={() => handleTemplateClick(template.items)}
-                    className="px-4 py-2.5 rounded-lg bg-white dark:bg-slate-700 text-black dark:text-slate-200 text-sm font-bold border-2 border-black dark:border-slate-600 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:hover:bg-slate-600 transition-all touch-manipulation"
-                  >
-                    {template.name}
-                  </button>
-                ))}
-
-                {currentTemplates.map((template) => (
-                  <button
-                    key={template.id}
-                    onClick={() => handleTemplateClick(template.items)}
-                    className="px-4 py-2.5 rounded-lg bg-white dark:bg-slate-700 text-black dark:text-slate-200 text-sm font-bold border-2 border-black dark:border-slate-600 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:hover:bg-slate-600 transition-all touch-manipulation"
-                  >
-                    {template.name}
-                  </button>
-                ))}
-
-                <button
-                  onClick={() => setIsCreateTemplateDialogOpen(true)}
-                  className="px-4 py-2.5 rounded-lg bg-yellow-400 text-black text-sm font-bold border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all touch-manipulation flex items-center gap-2"
-                >
-                  <Plus className="h-4 w-4" />
-                  {language === 'he' ? 'צור תבנית' : 'Create Template'}
-                </button>
-              </div>
-            </div>
-          )
-        }
+        {items.length === 0 && (
+          <SortableTemplates
+            systemTemplates={currentTemplates}
+            language={language}
+            onTemplateClick={handleTemplateClick}
+            onCreateNew={() => setIsCreateTemplateDialogOpen(true)}
+          />
+        )}
 
         {/* Recent Lists Preview */}
         {

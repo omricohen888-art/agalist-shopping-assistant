@@ -183,3 +183,63 @@ All colors MUST be HSL.
   background-image: none !important;
   opacity: 1 !important;
 }
+
+/* Mobile menu slide animation */
+@keyframes slide-in-from-right {
+  0% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-out-to-right {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-from-right 0.25s ease-out forwards;
+}
+
+.animate-slide-out-right {
+  animation: slide-out-to-right 0.2s ease-in forwards;
+}
+
+/* Touch-friendly tap targets */
+@layer utilities {
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+  
+  .touch-target-sm {
+    @apply min-h-[36px] min-w-[36px];
+  }
+}
+
+/* Smooth transitions for interactive elements */
+.transition-smooth {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Responsive text scaling */
+@media (max-width: 374px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+/* Prevent horizontal overflow on mobile */
+.overflow-x-safe {
+  overflow-x: hidden;
+  max-width: 100vw;
+}

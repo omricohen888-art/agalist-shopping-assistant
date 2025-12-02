@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useHandwriting } from '@/hooks/use-handwriting';
 import { Button } from '@/components/ui/button';
 import { Trash2, Send, X } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface HandwritingCanvasProps {
   onSubmit: (imageData: string) => void;
@@ -14,16 +15,30 @@ export const HandwritingCanvas: React.FC<HandwritingCanvasProps> = ({
   onCancel,
   language
 }) => {
-  const { canvasRef, initializeCanvas, startDrawing, draw, stopDrawing, clearCanvas, getCanvasImage } = useHandwriting();
+  const { canvasRef, initializeCanvas, startDrawing, draw, stopDrawing, clearCanvas, getCanvasImage, isDrawing } = useHandwriting();
+  const [hasDrawing, setHasDrawing] = React.useState(false);
 
   useEffect(() => {
     initializeCanvas();
   }, [initializeCanvas]);
 
+  // Track if user has drawn anything
+  const handleStartDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    setHasDrawing(true);
+    startDrawing(e);
+  };
+
   const handleSubmit = async () => {
+    if (!hasDrawing) {
+      toast.warning(language === 'he' ? 'צייר או כתוב משהו לפני השליחה' : 'Draw or write something before submitting');
+      return;
+    }
+
     const imageData = getCanvasImage();
     if (imageData) {
       onSubmit(imageData);
+    } else {
+      toast.error(language === 'he' ? 'שגיאה ביצירת תמונה מהציור' : 'Error creating image from drawing');
     }
   };
 
@@ -52,14 +67,14 @@ export const HandwritingCanvas: React.FC<HandwritingCanvasProps> = ({
         <div className="flex-1 overflow-hidden bg-gray-50 dark:bg-slate-800 flex items-center justify-center min-h-[300px]">
           <canvas
             ref={canvasRef}
-            onMouseDown={startDrawing}
+            onMouseDown={handleStartDrawing}
             onMouseMove={draw}
             onMouseUp={stopDrawing}
             onMouseLeave={stopDrawing}
-            onTouchStart={startDrawing}
+            onTouchStart={handleStartDrawing}
             onTouchMove={draw}
             onTouchEnd={stopDrawing}
-            className="w-full h-full cursor-crosshair touch-none bg-white dark:bg-white"
+            className="w-full h-full cursor-crosshair touch-none bg-white dark:bg-white border border-gray-200 dark:border-gray-700 rounded-lg"
             style={{ maxWidth: '100%', maxHeight: '400px' }}
           />
         </div>

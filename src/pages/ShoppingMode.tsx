@@ -1,11 +1,20 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ShoppingItem } from "@/types/shopping";
+import { ShoppingItem, Unit } from "@/types/shopping";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { useLanguage } from "@/hooks/use-language";
+import { NotebookArea } from "@/components/NotebookArea";
 import { toast } from "sonner";
+
+interface NotepadItem {
+  id: string;
+  text: string;
+  isChecked: boolean;
+  quantity?: number;
+  unit?: Unit;
+}
 
 export const ShoppingMode = () => {
     const { id } = useParams<{ id: string }>();
@@ -13,6 +22,8 @@ export const ShoppingMode = () => {
     const { language } = useLanguage();
     const [items, setItems] = useState<ShoppingItem[]>([]);
     const [listName, setListName] = useState("");
+    const [showEditMode, setShowEditMode] = useState(false);
+    const [notepadItems, setNotepadItems] = useState<NotepadItem[]>([]);
 
     useEffect(() => {
         if (!id) {
@@ -36,6 +47,41 @@ export const ShoppingMode = () => {
         setItems(items.map(item =>
             item.id === itemId ? { ...item, checked: !item.checked } : item
         ));
+    };
+
+    const handleConvertToList = () => {
+        // Convert notepad items to shopping items
+        const newItems: ShoppingItem[] = notepadItems.map((notepadItem, index) => ({
+            id: `${Date.now()}-${index}`,
+            text: notepadItem.text,
+            checked: notepadItem.isChecked,
+            quantity: notepadItem.quantity || 1,
+            unit: (notepadItem.unit || 'units') as Unit
+        }));
+
+        setItems(prev => [...prev, ...newItems]);
+        setNotepadItems([]);
+        setShowEditMode(false);
+        toast.success(language === 'he' ? 'פריטים נוספו בהצלחה!' : 'Items added successfully!');
+    };
+
+    const handleQuickAdd = (name: string, quantity: number, unit: Unit) => {
+        // Validate and add to notepad items
+        if (!name.trim()) {
+            toast.error(language === 'he' ? 'שם פריט חובה' : 'Item name required');
+            return;
+        }
+
+        const newItem: NotepadItem = {
+            id: `quick-add-${Date.now()}`,
+            text: name.trim(),
+            isChecked: false,
+            quantity: quantity,
+            unit: unit
+        };
+
+        setNotepadItems(prev => [...prev, newItem]);
+        toast.success(language === 'he' ? 'הוסף בהצלחה!' : 'Added successfully!');
     };
 
     const handleFinishShopping = () => {
@@ -90,10 +136,32 @@ export const ShoppingMode = () => {
                             </p>
                         </div>
                     </div>
+                    <Button
+                        onClick={() => setShowEditMode(!showEditMode)}
+                        variant="outline"
+                        className="text-sm font-semibold"
+                    >
+                        {showEditMode ? (language === 'he' ? 'סיום עריכה' : 'Done Editing') : (language === 'he' ? 'הוסף פריטים' : 'Add Items')}
+                    </Button>
                 </div>
             </div>
 
             <div className="max-w-3xl mx-auto px-4 py-6">
+                {/* Edit Mode - Add new items */}
+                {showEditMode && (
+                    <div className="mb-8">
+                        <NotebookArea
+                            notepadItems={notepadItems}
+                            setNotepadItems={setNotepadItems}
+                            onQuickAdd={handleQuickAdd}
+                            onConvertToList={handleConvertToList}
+                            showPaste={false}
+                            isVoiceRecording={false}
+                            isProcessingImage={false}
+                        />
+                    </div>
+                )}
+
                 {/* Active Items */}
                 {activeItems.length > 0 && (
                     <div className="mb-8">
@@ -152,7 +220,7 @@ export const ShoppingMode = () => {
                     </div>
                 )}
 
-                {items.length === 0 && (
+                {items.length === 0 && !showEditMode && (
                     <div className="text-center py-12">
                         <p className="text-muted-foreground">
                             {language === 'he' ? 'אין פריטים ברשימה' : 'No items in list'}

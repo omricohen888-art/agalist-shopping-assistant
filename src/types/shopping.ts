@@ -15,6 +15,14 @@ export interface ShoppingItem {
   unit: Unit;
 }
 
+export interface SmartItem {
+  id: string;
+  text: string;
+  isChecked: boolean;
+  quantity: number;
+  unit: Unit;
+}
+
 export interface ShoppingHistory {
   id: string;
   date: string;

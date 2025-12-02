@@ -90,7 +90,7 @@ const SortableTemplateItem = ({
       <button
         onClick={() => !isEditMode && onClick(template.items)}
         disabled={isEditMode}
-        className={`w-full px-4 py-2.5 rounded-lg bg-white dark:bg-slate-700 text-black dark:text-slate-200 text-sm font-bold border-2 border-black dark:border-slate-600 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all touch-manipulation ${
+        className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg bg-white dark:bg-slate-700 text-black dark:text-slate-200 text-xs sm:text-sm font-bold border-2 border-black dark:border-slate-600 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all touch-manipulation active:scale-95 ${
           isEditMode
             ? 'cursor-default border-yellow-500 dark:border-yellow-500'
             : 'hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:hover:bg-slate-600'
@@ -250,13 +250,13 @@ export const SortableTemplates = ({
               <button
                 onClick={onCreateNew}
                 disabled={isEditMode}
-                className={`px-4 py-2.5 rounded-lg bg-yellow-400 text-black text-sm font-bold border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all touch-manipulation flex items-center gap-2 ${
+                className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg bg-yellow-400 text-black text-xs sm:text-sm font-bold border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all touch-manipulation flex items-center gap-1.5 sm:gap-2 active:scale-95 ${
                   isEditMode
                     ? 'opacity-50 cursor-not-allowed'
                     : 'hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]'
                 }`}
               >
-                <Plus className="h-4 w-4" />
+                <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 {createLabel}
               </button>
             </div>

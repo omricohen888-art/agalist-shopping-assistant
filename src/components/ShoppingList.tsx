@@ -990,14 +990,14 @@ export const ShoppingList = () => {
 
       {/* Sticky Header Group */}
       <div className="bg-gray-50 dark:bg-slate-950 text-black dark:text-slate-100 shadow-sm sticky top-0 z-50 border-b border-gray-200/50 dark:border-slate-800/50">
-        <div className="max-w-3xl mx-auto px-4 py-2 md:py-4">
-          <div className="flex justify-between items-center w-full mb-3 px-4">
+        <div className="max-w-3xl mx-auto px-3 sm:px-4 py-2 md:py-4">
+          <div className="flex justify-between items-center w-full mb-2 sm:mb-3 px-2 sm:px-4">
             {/* Title Section - Never truncate */}
-            <div className="flex flex-col gap-0.5 flex-shrink-0">
-              <div className={`flex items-center gap-0.5 text-xl sm:text-2xl md:text-3xl font-black drop-shadow-sm leading-tight truncate ${direction === "rtl" ? "flex-row-reverse" : "flex-row"}`}>
-                <span className="flex-shrink-0">{t.appTitle}</span>
-                <div className={`flex items-center flex-shrink-0 ${direction === "rtl" ? "mr-1" : "ml-1"}`}>
-                  <span className="text-black dark:text-slate-100 text-xl sm:text-2xl md:text-3xl font-black leading-none">✓</span>
+            <div className="flex flex-col gap-0.5 flex-shrink-0 min-w-0">
+              <div className={`flex items-center gap-0.5 text-lg sm:text-xl md:text-2xl lg:text-3xl font-black drop-shadow-sm leading-tight ${direction === "rtl" ? "flex-row-reverse" : "flex-row"}`}>
+                <span className="flex-shrink-0 truncate">{t.appTitle}</span>
+                <div className={`flex items-center flex-shrink-0 ${direction === "rtl" ? "mr-0.5 sm:mr-1" : "ml-0.5 sm:ml-1"}`}>
+                  <span className="text-black dark:text-slate-100 text-lg sm:text-xl md:text-2xl lg:text-3xl font-black leading-none">✓</span>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="36"
@@ -1008,7 +1008,7 @@ export const ShoppingList = () => {
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="h-7 w-7 sm:h-8 sm:w-8 md:h-10 md:w-10 text-black dark:text-slate-100 flex-shrink-0"
+                    className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 lg:h-10 lg:w-10 text-black dark:text-slate-100 flex-shrink-0"
                   >
                     <circle cx="8" cy="21" r="1" />
                     <circle cx="19" cy="21" r="1" />
@@ -1019,58 +1019,56 @@ export const ShoppingList = () => {
                   </svg>
                 </div>
               </div>
-              <p className="text-xs sm:text-sm text-black/80 dark:text-slate-400 font-bold mt-0.5 whitespace-nowrap">{t.tagline}</p>
+              <p className="text-[10px] sm:text-xs md:text-sm text-black/80 dark:text-slate-400 font-bold mt-0.5 whitespace-nowrap">{t.tagline}</p>
             </div>
 
             {/* Actions Section - Never shrink */}
-            <div className="flex items-center gap-3 flex-shrink-0">
+            <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
               {/* Hamburger Menu */}
               <button
                 onClick={() => setIsMenuOpen(true)}
-                className="w-11 h-11 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-full flex items-center justify-center hover:bg-gray-50 dark:hover:bg-slate-700 hover:text-black dark:hover:text-slate-100 active:scale-95 transition-all duration-200 shadow"
+                className="w-10 h-10 sm:w-11 sm:h-11 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-full flex items-center justify-center hover:bg-gray-50 dark:hover:bg-slate-700 hover:text-black dark:hover:text-slate-100 active:scale-95 transition-all duration-200 shadow touch-manipulation"
               >
-                <Menu className="w-5 h-5 text-gray-700 dark:text-slate-400" strokeWidth={2} />
+                <Menu className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700 dark:text-slate-400" strokeWidth={2} />
               </button>
 
-              {/* Mobile Full Screen Overlay Menu */}
+              {/* Mobile Sidebar Menu */}
               {isMenuOpen && (
                 <>
-                  {/* Backdrop */}
+                  {/* Backdrop with fade animation */}
                   <div
-                    className="fixed inset-0 bg-black/50 z-[99]"
+                    className="fixed inset-0 bg-black/50 z-[99] animate-fade-in"
                     onClick={() => setIsMenuOpen(false)}
                   />
 
-                  {/* Menu Overlay */}
+                  {/* Sidebar Drawer */}
                   <div
-                    className="mobile-menu-overlay fixed inset-0 w-full h-full bg-card dark:bg-slate-950 z-[100] flex flex-col items-center justify-center transition-opacity duration-300 opacity-100 overflow-y-auto px-4"
+                    className={`fixed top-0 ${language === 'he' ? 'right-0' : 'left-0'} h-full w-[75%] max-w-[280px] bg-card dark:bg-slate-950 z-[100] flex flex-col overflow-y-auto shadow-2xl animate-slide-in-right`}
                   >
-
-                    {/* Close Button */}
-                    <button
-                      onClick={() => setIsMenuOpen(false)}
-                      className="absolute top-4 right-4 h-10 w-10 bg-muted hover:bg-muted/80 rounded-lg flex items-center justify-center transition-colors z-10"
-                    >
-                      <X className="w-5 h-5" />
-                    </button>
+                    {/* Menu Header */}
+                    <div className="flex items-center justify-between p-4 border-b border-border">
+                      <h2 className="text-xl font-bold text-foreground">{language === 'he' ? 'תפריט' : 'Menu'}</h2>
+                      <button
+                        onClick={() => setIsMenuOpen(false)}
+                        className="h-10 w-10 bg-muted hover:bg-muted/80 rounded-lg flex items-center justify-center transition-colors active:scale-95"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
 
                     {/* Menu Content */}
-                    <div className="flex flex-col items-center gap-6 text-center py-12">
-
-                      {/* Menu Title */}
-                      <h2 className="text-3xl font-bold text-foreground mb-2">{language === 'he' ? 'תפריט' : 'Menu'}</h2>
-
+                    <div className="flex flex-col gap-2 p-4 flex-1">
                       {/* Language Toggle */}
-                      <div className="flex items-center gap-2 p-1 bg-muted rounded-lg border border-border">
+                      <div className="flex items-center gap-1 p-1 bg-muted rounded-lg border border-border mb-4">
                         <button
                           onClick={() => setLanguage('he')}
-                          className={language === 'he' ? 'px-4 py-2 rounded-md font-semibold bg-primary text-primary-foreground' : 'px-4 py-2 rounded-md font-semibold text-muted-foreground hover:text-foreground'}
+                          className={`flex-1 px-3 py-2.5 rounded-md font-semibold text-sm transition-all active:scale-95 ${language === 'he' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
                         >
                           עברית
                         </button>
                         <button
                           onClick={() => setLanguage('en')}
-                          className={language === 'en' ? 'px-4 py-2 rounded-md font-semibold bg-primary text-primary-foreground' : 'px-4 py-2 rounded-md font-semibold text-muted-foreground hover:text-foreground'}
+                          className={`flex-1 px-3 py-2.5 rounded-md font-semibold text-sm transition-all active:scale-95 ${language === 'en' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
                         >
                           English
                         </button>
@@ -1083,9 +1081,9 @@ export const ShoppingList = () => {
                           exitEditMode();
                           setIsMenuOpen(false);
                         }}
-                        className="w-full sm:w-64 h-14 bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-colors text-lg rounded-lg"
+                        className="w-full h-12 bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-all text-base rounded-lg active:scale-95"
                       >
-                        <Plus className="mr-2 h-5 w-5" />
+                        <Plus className={`h-5 w-5 ${language === 'he' ? 'ml-2' : 'mr-2'}`} />
                         {t.navigation.list}
                       </Button>
 
@@ -1096,7 +1094,7 @@ export const ShoppingList = () => {
                           setIsMenuOpen(false);
                         }}
                         variant="outline"
-                        className="w-full sm:w-64 h-14 flex items-center justify-center gap-3 hover:bg-muted transition-colors text-lg font-semibold rounded-lg"
+                        className="w-full h-12 flex items-center justify-start gap-3 hover:bg-muted transition-all text-base font-semibold rounded-lg active:scale-95"
                       >
                         <Book className="h-5 w-5" />
                         {t.navigation.notebook}
@@ -1108,7 +1106,7 @@ export const ShoppingList = () => {
                           setIsMenuOpen(false);
                         }}
                         variant="outline"
-                        className="w-full sm:w-64 h-14 flex items-center justify-center gap-3 hover:bg-muted transition-colors text-lg font-semibold rounded-lg"
+                        className="w-full h-12 flex items-center justify-start gap-3 hover:bg-muted transition-all text-base font-semibold rounded-lg active:scale-95"
                       >
                         <History className="h-5 w-5" />
                         {t.navigation.history}
@@ -1120,7 +1118,7 @@ export const ShoppingList = () => {
                           setIsMenuOpen(false);
                         }}
                         variant="outline"
-                        className="w-full sm:w-64 h-14 flex items-center justify-center gap-3 hover:bg-muted transition-colors text-lg font-semibold rounded-lg"
+                        className="w-full h-12 flex items-center justify-start gap-3 hover:bg-muted transition-all text-base font-semibold rounded-lg active:scale-95"
                       >
                         <BarChart3 className="h-5 w-5" />
                         {t.navigation.compare}
@@ -1132,24 +1130,27 @@ export const ShoppingList = () => {
                           setIsMenuOpen(false);
                         }}
                         variant="outline"
-                        className="w-full sm:w-64 h-14 flex items-center justify-center gap-3 hover:bg-muted transition-colors text-lg font-semibold rounded-lg"
+                        className="w-full h-12 flex items-center justify-start gap-3 hover:bg-muted transition-all text-base font-semibold rounded-lg active:scale-95"
                       >
                         <Info className="h-5 w-5" />
                         {t.navigation.about}
                       </Button>
 
+                      {/* Spacer */}
+                      <div className="flex-1" />
+
+                      {/* Settings at bottom */}
                       <Button
                         onClick={() => {
                           setIsSettingsModalOpen(true);
                           setIsMenuOpen(false);
                         }}
                         variant="ghost"
-                        className="w-64 h-14 flex items-center justify-center gap-4 text-black dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-black dark:hover:text-white transition-colors text-xl font-bold"
+                        className="w-full h-12 flex items-center justify-start gap-3 text-muted-foreground hover:text-foreground hover:bg-muted transition-all text-base font-semibold rounded-lg active:scale-95"
                       >
-                        <Settings className="h-6 w-6 text-black dark:text-slate-400" />
+                        <Settings className="h-5 w-5" />
                         {language === 'he' ? 'הגדרות' : 'Settings'}
                       </Button>
-
                     </div>
                   </div>
                 </>
@@ -1160,10 +1161,10 @@ export const ShoppingList = () => {
 
         {/* Progress Bar - Part of sticky header */}
         {
-          items.length > 0 && <div className="px-4 pb-4">
-            <div className="space-y-2">
-              <Progress value={progressPercentage} className="h-2.5 bg-primary-foreground/20" />
-              <p className="text-sm text-primary-foreground/90 dark:text-slate-300 text-center font-medium">
+          items.length > 0 && <div className="px-3 sm:px-4 pb-3 sm:pb-4">
+            <div className="space-y-1.5 sm:space-y-2">
+              <Progress value={progressPercentage} className="h-2 sm:h-2.5 bg-primary-foreground/20" />
+              <p className="text-xs sm:text-sm text-primary-foreground/90 dark:text-slate-300 text-center font-medium">
                 {t.progressText(completedCount, items.length)}
               </p>
             </div>
@@ -1172,15 +1173,15 @@ export const ShoppingList = () => {
       </div >
 
       {/* Main Content */}
-      <div className="max-w-3xl mx-auto p-3 sm:p-6 md:p-8 pb-32 sm:pb-40">
-        <div className="text-center mb-4 sm:mb-6">
-          <h2 className="text-sm sm:text-base font-bold text-foreground mb-1">
+      <div className="max-w-3xl mx-auto p-3 sm:p-4 md:p-6 lg:p-8 pb-28 sm:pb-32 md:pb-40 overflow-x-hidden">
+        <div className="text-center mb-3 sm:mb-4 md:mb-6">
+          <h2 className="text-xs sm:text-sm md:text-base font-bold text-foreground mb-0.5 sm:mb-1">
             {activeListId
               ? "מעולה! הרשימה מוכנה לעבודה 📝"
               : t.welcomeHeading
             }
           </h2>
-          <p className="text-sm sm:text-base font-medium text-muted-foreground">
+          <p className="text-xs sm:text-sm md:text-base font-medium text-muted-foreground">
             {activeListId
               ? "תנו לרשימה שם, עדכנו כמויות ושמרו אותה לפנקס."
               : t.welcomeSubtitle
@@ -1190,40 +1191,40 @@ export const ShoppingList = () => {
 
         {
           activeListId && (
-            <div className="flex justify-between items-center w-full mb-4">
-              <div className="flex items-center gap-2 cursor-pointer hover:text-gray-600 dark:hover:text-gray-300 transition-colors flex-1 min-w-0">
-                <Pencil className="w-4 h-4 text-gray-400 flex-shrink-0" />
+            <div className="flex justify-between items-center w-full mb-3 sm:mb-4 gap-2">
+              <div className="flex items-center gap-1.5 sm:gap-2 cursor-pointer hover:text-gray-600 dark:hover:text-gray-300 transition-colors flex-1 min-w-0">
+                <Pencil className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-400 flex-shrink-0" />
                 <input
                   ref={titleInputRef}
                   value={listName}
                   onChange={(e) => setListName(e.target.value)}
-                  className="flex-1 bg-transparent text-lg sm:text-xl md:text-2xl font-extrabold border-none outline-none px-1 py-1 select-text focus:cursor-text hover:cursor-text transition border-b-2 border-transparent focus:border-gray-400 hover:border-gray-300 focus:outline-none focus:ring-0 truncate"
+                  className="flex-1 bg-transparent text-base sm:text-lg md:text-xl lg:text-2xl font-extrabold border-none outline-none px-1 py-1 select-text focus:cursor-text hover:cursor-text transition border-b-2 border-transparent focus:border-gray-400 hover:border-gray-300 focus:outline-none focus:ring-0 truncate"
                   placeholder={language === 'he' ? 'שם הרשימה...' : 'List name...'}
                   style={{ minWidth: 0 }}
                 />
               </div>
-              <div className="flex items-center gap-2 flex-shrink-0">
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
                 <button
                   onClick={handleReadListAloud}
                   title={isSpeaking ? (language === 'he' ? 'עצור הקראה' : 'Stop reading') : (language === 'he' ? 'הקרא רשימה' : 'Read list aloud')}
-                  className="w-8 h-8 md:w-9 md:h-9 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-full p-1.5 md:p-2 flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition-colors"
+                  className="w-8 h-8 sm:w-9 sm:h-9 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-full p-1.5 sm:p-2 flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition-colors active:scale-95 touch-manipulation"
                   type="button"
                   aria-label={isSpeaking ? (language === 'he' ? 'עצור הקראה' : 'Stop reading') : (language === 'he' ? 'הקרא רשימה' : 'Read list aloud')}
                 >
                   {isSpeaking ? (
-                    <Square className="h-4 w-4 md:h-5 md:w-5 text-gray-900 dark:text-slate-100" />
+                    <Square className="h-4 w-4 sm:h-5 sm:w-5 text-gray-900 dark:text-slate-100" />
                   ) : (
-                    <Volume2 className="h-4 w-4 md:h-5 md:w-5 text-gray-900 dark:text-slate-100" />
+                    <Volume2 className="h-4 w-4 sm:h-5 sm:w-5 text-gray-900 dark:text-slate-100" />
                   )}
                 </button>
                 <button
                   onClick={exitEditMode}
                   title={t.exitEditMode}
-                  className="w-12 h-12 bg-white shadow-md rounded-full flex items-center justify-center flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 hover:bg-gray-50 transition-colors"
+                  className="w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 bg-white shadow-md rounded-full flex items-center justify-center flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 hover:bg-gray-50 transition-colors active:scale-95 touch-manipulation"
                   type="button"
                   aria-label={t.exitEditMode}
                 >
-                  <X className="h-5 w-5 text-gray-900" />
+                  <X className="h-4 w-4 sm:h-5 sm:w-5 text-gray-900" />
                 </button>
               </div>
             </div>
@@ -1235,15 +1236,15 @@ export const ShoppingList = () => {
           activeListId ? (
             <>
               {/* Trigger Button */}
-              <div className="flex items-baseline gap-2 mb-4">
+              <div className="flex items-baseline gap-2 mb-3 sm:mb-4">
                 <button
                   type="button"
-                  className="flex items-center gap-2 text-yellow-600 hover:text-yellow-700 text-base md:text-lg font-bold focus:outline-none hover:underline px-1 py-0.5 rounded transition"
+                  className="flex items-center gap-1.5 sm:gap-2 text-yellow-600 hover:text-yellow-700 text-sm sm:text-base md:text-lg font-bold focus:outline-none hover:underline px-1 py-0.5 rounded transition active:scale-95 touch-manipulation"
                   onClick={() => setShowBulkInput(v => !v)}
                   aria-expanded={showBulkInput}
                   tabIndex={0}
                 >
-                  <ClipboardPaste className="h-5 w-5 md:h-6 md:w-6" />
+                  <ClipboardPaste className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" />
                   <span>
                     {language === "he"
                       ? "רוצה להדביק רשימה ארוכה?"
@@ -1875,21 +1876,21 @@ export const ShoppingList = () => {
           )}
         {
           items && items.length > 0 && (
-            <div className="fixed bottom-0 left-0 right-0 z-[60] bg-white/90 dark:bg-slate-950/90 backdrop-blur-md border-t border-gray-200 dark:border-slate-800 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] p-4">
+            <div className="fixed bottom-0 left-0 right-0 z-[60] bg-white/95 dark:bg-slate-950/95 backdrop-blur-md border-t border-gray-200 dark:border-slate-800 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] p-3 sm:p-4 safe-area-inset-bottom">
               <div className="max-w-3xl mx-auto">
-                <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex flex-row gap-2 sm:gap-4">
                   {(() => {
                     const isSavedList = activeListId && savedLists.some(list => list.id === activeListId);
                     return (
-                      <Button variant="outline" onClick={handleSaveList} className="w-full sm:flex-1 h-10 font-bold text-base touch-manipulation rounded-xl bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-700">
-                        <Save className="ml-2 h-5 w-5" />
-                        {isSavedList ? t.saveChangesButton : t.saveListButton}
+                      <Button variant="outline" onClick={handleSaveList} className="flex-1 h-11 sm:h-12 font-bold text-sm sm:text-base touch-manipulation rounded-xl bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-700 active:scale-95 transition-all">
+                        <Save className={`h-4 w-4 sm:h-5 sm:w-5 ${language === 'he' ? 'ml-1 sm:ml-2' : 'mr-1 sm:mr-2'}`} />
+                        <span className="truncate">{isSavedList ? t.saveChangesButton : t.saveListButton}</span>
                       </Button>
                     );
                   })()}
-                  <Button onClick={openFinishDialog} className="w-full sm:flex-1 h-10 font-bold bg-slate-900 text-white hover:bg-slate-800 text-base touch-manipulation rounded-xl border-2 border-slate-700 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-2px] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] active:translate-y-[0px] active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all">
-                    <ClipboardList className="ml-2 h-5 w-5" />
-                    {t.summarizeButton}
+                  <Button onClick={openFinishDialog} className="flex-1 h-11 sm:h-12 font-bold bg-slate-900 text-white hover:bg-slate-800 text-sm sm:text-base touch-manipulation rounded-xl border-2 border-slate-700 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] sm:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] sm:hover:translate-y-[-2px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] sm:hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] active:translate-y-[0px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:scale-95 transition-all">
+                    <ClipboardList className={`h-4 w-4 sm:h-5 sm:w-5 ${language === 'he' ? 'ml-1 sm:ml-2' : 'mr-1 sm:mr-2'}`} />
+                    <span className="truncate">{t.summarizeButton}</span>
                   </Button>
                 </div>
               </div>

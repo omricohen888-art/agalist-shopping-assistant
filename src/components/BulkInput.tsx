@@ -1,6 +1,6 @@
 import React from 'react';
 import { Plus, ShoppingCart, Save } from 'lucide-react';
-import ShoppingItemRow from './ShoppingItemRow';
+import { ShoppingItemRow } from './ShoppingItemRow';
 
 interface ShoppingItem {
   id: string;

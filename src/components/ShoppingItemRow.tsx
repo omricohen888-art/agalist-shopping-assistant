@@ -1,13 +1,21 @@
-import { SmartItem, Unit, UNITS } from "@/types/shopping";
+import { Unit, UNITS } from "@/types/shopping";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Trash2 } from "lucide-react";
 import { useLanguage } from "@/hooks/use-language";
 
+interface ShoppingItemRowItem {
+    id: string;
+    text: string;
+    quantity: number;
+    unit: string;
+    isChecked: boolean;
+}
+
 interface ShoppingItemRowProps {
-    item: SmartItem;
-    onUpdate: (field: keyof SmartItem, value: any) => void;
+    item: ShoppingItemRowItem;
+    onUpdate: (id: string, field: string, value: any) => void;
     onDelete: (id: string) => void;
 }
 
@@ -31,13 +39,13 @@ export const ShoppingItemRow = ({ item, onUpdate, onDelete }: ShoppingItemRowPro
                 type="number"
                 min="1"
                 value={item.quantity}
-                onChange={(e) => onUpdate('quantity', parseInt(e.target.value) || 1)}
-                className="w-16 h-8 text-center"
+                onChange={(e) => onUpdate(item.id, 'quantity', parseInt(e.target.value) || 1)}
+                className="w-14 sm:w-16 h-8 text-center text-sm"
             />
 
             {/* Unit Select */}
-            <Select value={item.unit} onValueChange={(value) => onUpdate('unit', value as Unit)}>
-                <SelectTrigger className="w-20 h-8">
+            <Select value={item.unit} onValueChange={(value) => onUpdate(item.id, 'unit', value as Unit)}>
+                <SelectTrigger className="w-16 sm:w-20 h-8 text-xs sm:text-sm">
                     <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -53,10 +61,12 @@ export const ShoppingItemRow = ({ item, onUpdate, onDelete }: ShoppingItemRowPro
             <Input
                 type="text"
                 value={item.text}
-                onChange={(e) => onUpdate('text', e.target.value)}
+                onChange={(e) => onUpdate(item.id, 'text', e.target.value)}
                 placeholder={language === 'he' ? 'שם הפריט' : 'Item name'}
-                className="flex-1 h-8"
+                className="flex-1 h-8 text-sm"
             />
         </div>
     );
 };
+
+export default ShoppingItemRow;

@@ -176,108 +176,43 @@ All colors MUST be HSL.
   }
 }
 
-/* Mobile menu overlay uses card color from design system (supports dark mode)
-   and keeps background-image from other elements off. Avoid !important so it follows theme variables. */
+/* Force solid background for mobile menu overlay */
 .mobile-menu-overlay {
-  background-color: hsl(var(--card));
-  background: hsl(var(--card));
-  background-image: none;
-  opacity: 1;
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  background-image: none !important;
+  opacity: 1 !important;
 }
 
-/* Enhanced mobile menu slide animation with spring physics */
+/* Mobile menu slide animation */
 @keyframes slide-in-from-right {
   0% {
-    transform: translateX(100%) scale(0.95);
+    transform: translateX(100%);
     opacity: 0;
-    filter: blur(2px);
-  }
-  60% {
-    transform: translateX(-2%) scale(1.01);
-    opacity: 0.9;
-    filter: blur(0px);
   }
   100% {
-    transform: translateX(0) scale(1);
+    transform: translateX(0);
     opacity: 1;
-    filter: blur(0px);
   }
 }
 
 @keyframes slide-out-to-right {
   0% {
-    transform: translateX(0) scale(1);
+    transform: translateX(0);
     opacity: 1;
-    filter: blur(0px);
-  }
-  40% {
-    transform: translateX(2%) scale(0.99);
-    opacity: 0.8;
-    filter: blur(0.5px);
   }
   100% {
-    transform: translateX(100%) scale(0.95);
+    transform: translateX(100%);
     opacity: 0;
-    filter: blur(1px);
   }
 }
 
 .animate-slide-in-right {
-  animation: slide-in-from-right 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation: slide-in-from-right 0.25s ease-out forwards;
 }
 
 .animate-slide-out-right {
-  animation: slide-out-to-right 0.3s cubic-bezier(0.4, 0, 0.6, 1) forwards;
-}
-
-/* Language transition animations */
-@keyframes language-fade-in {
-  0% {
-    opacity: 0;
-    transform: translateY(8px) scale(0.98);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes language-button-switch {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(0.95);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-.language-transition {
-  animation: language-fade-in 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-
-.language-button-active {
-  animation: language-button-switch 0.2s cubic-bezier(0.4, 0, 0.6, 1) forwards;
-}
-
-/* Smooth backdrop transition */
-.backdrop-fade-in {
-  animation: backdrop-fade-in 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-
-@keyframes backdrop-fade-in {
-  0% {
-    opacity: 0;
-    backdrop-filter: blur(0px);
-  }
-  100% {
-    opacity: 1;
-    backdrop-filter: blur(2px);
-  }
+  animation: slide-out-to-right 0.2s ease-in forwards;
 }
 
 /* Touch-friendly tap targets */
@@ -294,34 +229,6 @@ All colors MUST be HSL.
 /* Smooth transitions for interactive elements */
 .transition-smooth {
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Enhanced language transition utilities */
-.language-content-transition {
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.language-text-transition {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.language-layout-transition {
-  transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-/* Reduced motion support for accessibility */
-@media (prefers-reduced-motion: reduce) {
-  .animate-slide-in-right,
-  .animate-slide-out-right,
-  .language-transition,
-  .language-button-active,
-  .backdrop-fade-in,
-  .language-content-transition,
-  .language-text-transition,
-  .language-layout-transition {
-    animation: none !important;
-    transition: none !important;
-  }
 }
 
 /* Responsive text scaling */

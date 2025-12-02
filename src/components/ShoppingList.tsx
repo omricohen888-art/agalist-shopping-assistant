@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
@@ -134,13 +134,6 @@ export const ShoppingList = () => {
   const [isVoiceRecording, setIsVoiceRecording] = useState(false);
   const [isProcessingImage, setIsProcessingImage] = useState(false);
   const [isHandwritingOpen, setIsHandwritingOpen] = useState(false);
-  const [lastAddTime, setLastAddTime] = useState(0);
-  const [isLanguageTransitioning, setIsLanguageTransitioning] = useState(false);
-
-  // Quick add state for bulk input
-  const [quickAddText, setQuickAddText] = useState('');
-  const [quickAddQuantity, setQuickAddQuantity] = useState(1);
-  const [quickAddUnit, setQuickAddUnit] = useState<Unit>('units');
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
   // Update refs array when notepadItems changes
@@ -361,27 +354,18 @@ export const ShoppingList = () => {
   const handleAddSingleItem = () => {
     if (!singleItemInput.trim()) return;
 
-    // More permissive input processing for main input field
-    let processedText = singleItemInput.trim();
+    // Process input with security checks
+    const result = processInput(singleItemInput, items, rateLimiter.current);
 
-    // Basic security checks only
-    if (processedText.length > 100) {
-      processedText = processedText.substring(0, 100); // Reasonable limit
-    }
-
-    // Remove only the most dangerous HTML/script content
-    if (/<script|javascript:|on\w+=/i.test(processedText)) {
-      toast.error(language === 'he' ? 'תוכן לא תקין זוהה' : 'Invalid content detected');
+    if (!result.canAdd) {
+      toast.error(result.error || 'Failed to add item');
       return;
     }
 
-    // Rate limiting check (reduced cooldown for better UX)
-    const now = Date.now();
-    const timeSinceLastAdd = now - lastAddTime;
-    if (timeSinceLastAdd < 100) { // Reduced to 100ms for better responsiveness
-      return; // Silently ignore rapid-fire adds
+    if (!result.isValid) {
+      toast.error(result.error || 'Invalid input');
+      return;
     }
-    setLastAddTime(now);
 
     let quantity = parseFloat(singleItemQuantity);
     if (isNaN(quantity) || quantity < 0) quantity = 1;
@@ -393,7 +377,7 @@ export const ShoppingList = () => {
 
     const newItem: ShoppingItem = {
       id: `${Date.now()}`,
-      text: processedText,
+      text: result.processedText,
       checked: false,
       quantity: quantity,
       unit: singleItemUnit
@@ -703,307 +687,58 @@ export const ShoppingList = () => {
   };
 
   // Voice Dictation Function
-  // Voice recognition state management
-  const recognitionRef = useRef<any>(null);
-  const [hasMicrophonePermission, setHasMicrophonePermission] = useState<boolean | null>(null);
-
-  // Debounced notepad update to prevent excessive re-renders
-  const debounceTimeoutRef = useRef<NodeJS.Timeout>();
-  const debouncedUpdateNotepad = useCallback((itemId: string, newText: string) => {
-    if (debounceTimeoutRef.current) {
-      clearTimeout(debounceTimeoutRef.current);
-    }
-
-    debounceTimeoutRef.current = setTimeout(() => {
-      setNotepadItems(prev => prev.map(i =>
-        i.id === itemId ? { ...i, text: newText } : i
-      ));
-    }, 150); // 150ms debounce for smooth typing experience
-  }, []);
-
-  // Check microphone permissions on component mount
-  useEffect(() => {
-    const checkMicrophonePermission = async () => {
-      try {
-        if (navigator.permissions && navigator.permissions.query) {
-          const result = await navigator.permissions.query({ name: 'microphone' as PermissionName });
-          setHasMicrophonePermission(result.state === 'granted');
-        } else {
-          // Fallback: try to access microphone
-          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-          stream.getTracks().forEach(track => track.stop());
-          setHasMicrophonePermission(true);
-        }
-      } catch (error) {
-        console.warn('Microphone permission check failed:', error);
-        setHasMicrophonePermission(false);
-      }
-    };
-
-    checkMicrophonePermission();
-  }, []);
-
-  // Cleanup debounced updates on unmount
-  useEffect(() => {
-    return () => {
-      if (debounceTimeoutRef.current) {
-        clearTimeout(debounceTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  const handleVoiceDictation = async () => {
-    // Check browser support
+  const handleVoiceDictation = () => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      toast.error(language === 'he' ? 'הדפדפן שלך לא תומך בהקלטת קול. נסה כרום או אדג׳' : 'Your browser does not support voice recording. Try Chrome or Edge');
-      return;
-    }
-
-    // Check microphone permission
-    if (hasMicrophonePermission === false) {
-      toast.error(language === 'he' ? 'אין הרשאה למיקרופון. בדוק הגדרות הדפדפן' : 'No microphone permission. Check browser settings');
+      toast.error(language === 'he' ? 'הדפדפן שלך לא תומך בהקלטת קול' : 'Your browser does not support voice recording');
       return;
     }
 
     if (isVoiceRecording) {
       // Stop recording
-      if (recognitionRef.current) {
-        try {
-          recognitionRef.current.stop();
-        } catch (error) {
-          console.error('Error stopping recognition:', error);
-        }
-      }
       setIsVoiceRecording(false);
       return;
-    }
-
-    // Request microphone permission if not already granted
-    if (hasMicrophonePermission === null) {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        stream.getTracks().forEach(track => track.stop());
-        setHasMicrophonePermission(true);
-      } catch (error) {
-        setHasMicrophonePermission(false);
-        toast.error(language === 'he' ? 'אין גישה למיקרופון. בדוק הגדרות הדפדפן' : 'Cannot access microphone. Check browser settings');
-        return;
-      }
     }
 
     // Start recording
     setIsVoiceRecording(true);
 
-    try {
-      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      const recognition = new SpeechRecognition();
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
 
-      // Configure recognition settings
-      recognition.lang = language === 'he' ? 'he-IL' : 'en-US';
-      recognition.continuous = false;
-      recognition.interimResults = true; // Enable interim results for better UX
-      recognition.maxAlternatives = 1;
+    recognition.lang = language === 'he' ? 'he-IL' : 'en-US';
+    recognition.continuous = false;
+    recognition.interimResults = false;
 
-      // Store reference for cleanup
-      recognitionRef.current = recognition;
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      const items = transcript.split(/\s*(?:and|,|\s)\s*/).filter(item => item.trim().length > 0);
 
-      let finalTranscript = '';
-      let interimTranscript = '';
+      if (items.length > 0) {
+        const newNotepadItems: NotepadItem[] = items.map((item, index) => ({
+          id: `voice-${Date.now()}-${index}`,
+          text: item.trim(),
+          isChecked: false
+        }));
 
-      recognition.onstart = () => {
-        toast.info(language === 'he' ? 'מקשיב... דבר בבקשה' : 'Listening... please speak');
-      };
+        setNotepadItems(prev => [...prev, ...newNotepadItems]);
 
-      recognition.onresult = (event) => {
-        interimTranscript = '';
-        finalTranscript = '';
-
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          const transcript = event.results[i][0].transcript;
-          if (event.results[i].isFinal) {
-            finalTranscript += transcript;
-          } else {
-            interimTranscript += transcript;
-          }
-        }
-
-        // Show interim results (optional - could show in UI)
-        if (interimTranscript && interimTranscript.trim()) {
-          console.log('Interim:', interimTranscript);
-        }
-      };
-
-      recognition.onend = () => {
-        setIsVoiceRecording(false);
-
-        // Clean up timeouts and references
-        if ((recognition as any)._startTimeout) {
-          clearTimeout((recognition as any)._startTimeout);
-        }
-        recognitionRef.current = null;
-
-        if (finalTranscript && finalTranscript.trim()) {
-          // Process the transcript with better punctuation and item separation
-          const processedItems = processVoiceTranscript(finalTranscript.trim());
-
-          if (processedItems.length > 0) {
-            const newNotepadItems: NotepadItem[] = processedItems.map((item, index) => ({
-              id: `voice-${Date.now()}-${index}`,
-              text: item.trim(),
-              isChecked: false
-            }));
-
-            setNotepadItems(prev => [...prev, ...newNotepadItems]);
-
-            toast.success(language === 'he'
-              ? `התווספו ${processedItems.length} פריטים מהקול`
-              : `Added ${processedItems.length} items from voice`
-            );
-          } else {
-            toast.warning(language === 'he' ? 'לא זוהו פריטים ברורים. נסה שוב' : 'No clear items detected. Try again');
-          }
-        } else {
-          toast.warning(language === 'he' ? 'לא נשמע שום דבר. נסה שוב' : 'Nothing heard. Try again');
-        }
-      };
-
-      recognition.onerror = (event) => {
-        setIsVoiceRecording(false);
-        recognitionRef.current = null;
-
-        let errorMessage = '';
-        switch (event.error) {
-          case 'no-speech':
-            errorMessage = language === 'he' ? 'לא נשמע שום דבר' : 'No speech detected';
-            break;
-          case 'audio-capture':
-            errorMessage = language === 'he' ? 'בעיה עם המיקרופון' : 'Microphone issue';
-            break;
-          case 'not-allowed':
-            errorMessage = language === 'he' ? 'אין הרשאה למיקרופון' : 'Microphone permission denied';
-            setHasMicrophonePermission(false);
-            break;
-          case 'network':
-            errorMessage = language === 'he' ? 'בעיית רשת' : 'Network error';
-            break;
-          default:
-            errorMessage = language === 'he' ? 'שגיאה בהקלטת קול' : 'Voice recording error';
-        }
-
-        console.error('Speech recognition error:', event.error);
-        toast.error(errorMessage);
-      };
-
-      // Start recognition with error recovery
-      try {
-        recognition.start();
-      } catch (error) {
-        console.error('Failed to start recognition:', error);
-        setIsVoiceRecording(false);
-        recognitionRef.current = null;
-        toast.error(language === 'he' ? 'שגיאה בהפעלת הקלטת קול' : 'Error starting voice recording');
-        return;
+        toast.success(language === 'he'
+          ? `התווספו ${items.length} פריטים מהקול`
+          : `Added ${items.length} items from voice`
+        );
       }
+    };
 
-      // Set multiple timeouts for different failure scenarios
-      const startTimeout = setTimeout(() => {
-        if (recognitionRef.current && isVoiceRecording) {
-          try {
-            recognition.stop();
-            toast.warning(language === 'he' ? 'הקלטה נעצרה אוטומטית' : 'Recording stopped automatically');
-          } catch (error) {
-            console.error('Error stopping recognition timeout:', error);
-          }
-        }
-      }, 15000); // 15 second total timeout
+    recognition.onerror = (event) => {
+      console.error('Speech recognition error:', event.error);
+      toast.error(language === 'he' ? 'שגיאה בהקלטת קול' : 'Voice recording error');
+    };
 
-      // Store timeout for cleanup
-      (recognition as any)._startTimeout = startTimeout;
-
-    } catch (error) {
+    recognition.onend = () => {
       setIsVoiceRecording(false);
-      recognitionRef.current = null;
-      console.error('Error initializing speech recognition:', error);
-      toast.error(language === 'he' ? 'שגיאה באתחול הקלטת קול' : 'Error initializing voice recording');
-    }
-  };
+    };
 
-  // Handle quick add for bulk input
-  const handleQuickAdd = () => {
-    if (quickAddText.trim()) {
-      // Add item with specified quantity and unit
-      const newItem: NotepadItem = {
-        id: `quick-${Date.now()}`,
-        text: quickAddText.trim(),
-        isChecked: false,
-        quantity: quickAddQuantity,
-        unit: quickAddUnit
-      };
-      setNotepadItems(prev => [...prev, newItem]);
-
-      // Reset form
-      setQuickAddText('');
-      setQuickAddQuantity(1);
-      setQuickAddUnit('units');
-
-      toast.success(language === 'he' ? 'פריט נוסף לרשימה' : 'Item added to list');
-    } else {
-      // Add blank row (existing behavior)
-      const newItem: NotepadItem = {
-        id: `notepad-${Date.now()}`,
-        text: '',
-        isChecked: false
-      };
-      setNotepadItems(prev => [...prev, newItem]);
-    }
-  };
-
-  // Helper function to process voice transcripts with better punctuation handling
-  const processVoiceTranscript = (transcript: string): string[] => {
-    // Clean up the transcript
-    let cleaned = transcript
-      .toLowerCase()
-      .replace(/[^\w\s\u0590-\u05FF]/g, ' ') // Remove punctuation but keep Hebrew characters
-      .replace(/\s+/g, ' ') // Normalize whitespace
-      .trim();
-
-    // Split by common separators (English and Hebrew)
-    const separators = [
-      /\s+and\s+/gi,
-      /\s*,\s*/g,
-      /\s*;\s*/g,
-      /\s*וגם\s+/g, // Hebrew "and"
-      /\s*ו\s+/g, // Hebrew "and"
-      /\s+or\s+/gi,
-      /\s*plus\s+/gi,
-      /\s*עוד\s+/g, // Hebrew "also/more"
-      /\s*וגם\s+/g, // Hebrew "and also"
-    ];
-
-    let items: string[] = [cleaned];
-
-    separators.forEach(separator => {
-      items = items.flatMap(item => item.split(separator)).filter(item => item.trim().length > 0);
-    });
-
-    // Further split by numbers (like "2 apples, 3 bananas")
-    items = items.flatMap(item => {
-      const numberMatches = item.match(/(\d+)\s+(.+)/g);
-      if (numberMatches) {
-        return numberMatches.map(match => match.trim());
-      }
-      return [item];
-    });
-
-    // Clean up items and filter out very short ones
-    return items
-      .map(item => item.trim())
-      .filter(item => item.length >= 2 && item.length <= 50) // Reasonable length limits
-      .map(item => {
-        // Capitalize first letter for better readability
-        return item.charAt(0).toUpperCase() + item.slice(1);
-      })
-      .filter((item, index, arr) => arr.indexOf(item) === index); // Remove duplicates
+    recognition.start();
   };
 
   // Camera OCR Function
@@ -1011,83 +746,41 @@ export const ShoppingList = () => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Validate file
-    const validation = validateImageFile(file);
-    if (!validation.valid) {
-      toast.error(validation.error);
-      // Reset file input
-      if (cameraInputRef.current) {
-        cameraInputRef.current.value = '';
-      }
-      return;
-    }
-
     setIsProcessingImage(true);
-    toast.info(language === 'he' ? 'מפענח רשימה מהתמונה...' : 'Processing image...');
+    toast.info(language === 'he' ? 'מפענח רשימה...' : 'Processing list...');
 
     try {
-      // Create image preview for user feedback
-      const imageUrl = URL.createObjectURL(file);
-
-      // Initialize Tesseract worker
       const worker = await createWorker();
-
-      // Load both Hebrew and English for better recognition
       await (worker as any).loadLanguage('heb+eng');
       await (worker as any).initialize('heb+eng');
 
-      // Configure OCR settings for better text recognition
-      await (worker as any).setParameters({
-        tessedit_char_whitelist: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz\u0590-\u05FF ', // Include Hebrew characters
-        tessedit_pageseg_mode: '6', // Uniform block of text
-      });
-
-      // Process the image
-      const { data: { text, confidence } } = await (worker as any).recognize(file);
-
-      // Clean up
+      const { data: { text } } = await (worker as any).recognize(file);
       await (worker as any).terminate();
-      URL.revokeObjectURL(imageUrl);
 
-      console.log('OCR Result:', { text, confidence });
+      // Split text by newlines and filter empty lines
+      const lines = text.split('\n')
+        .map(line => line.trim())
+        .filter(line => line.length > 0);
 
-      // Process the recognized text
-      const processedItems = processOCRText(text, confidence);
-
-      if (processedItems.length > 0) {
-        const newNotepadItems: NotepadItem[] = processedItems.map((item, index) => ({
+      if (lines.length > 0) {
+        const newNotepadItems: NotepadItem[] = lines.map((line, index) => ({
           id: `ocr-${Date.now()}-${index}`,
-          text: item,
+          text: line,
           isChecked: false
         }));
 
         setNotepadItems(prev => [...prev, ...newNotepadItems]);
 
         toast.success(language === 'he'
-          ? `התווספו ${processedItems.length} פריטים מהתמונה`
-          : `Added ${processedItems.length} items from image`
+          ? `התווספו ${lines.length} פריטים מהתמונה`
+          : `Added ${lines.length} items from image`
         );
       } else {
-        toast.warning(language === 'he'
-          ? 'לא נמצא טקסט ברור בתמונה. נסה תמונה עם כתב ברור יותר'
-          : 'No clear text found in image. Try an image with clearer text'
-        );
+        toast.warning(language === 'he' ? 'לא נמצא טקסט בתמונה' : 'No text found in image');
       }
-
     } catch (error) {
       console.error('OCR Error:', error);
-
-      let errorMessage = language === 'he' ? 'שגיאה בעיבוד התמונה' : 'Error processing image';
-
-      if (error instanceof Error) {
-        if (error.message.includes('network')) {
-          errorMessage = language === 'he' ? 'בעיית רשת. בדוק חיבור אינטרנט' : 'Network error. Check internet connection';
-        } else if (error.message.includes('memory')) {
-          errorMessage = language === 'he' ? 'התמונה גדולה מדי' : 'Image too large';
-        }
-      }
-
-      toast.error(errorMessage);
+      toast.error(language === 'he' ? 'שגיאה בעיבוד התמונה' : 'Error processing image');
     } finally {
       setIsProcessingImage(false);
       // Reset file input
@@ -1095,261 +788,49 @@ export const ShoppingList = () => {
         cameraInputRef.current.value = '';
       }
     }
-  };
-
-  // Helper function to validate image files
-  const validateImageFile = (file: File): { valid: boolean; error?: string } => {
-    // Check file type
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/bmp'];
-    if (!allowedTypes.includes(file.type)) {
-      return {
-        valid: false,
-        error: language === 'he'
-          ? 'פורמט קובץ לא נתמך. השתמש ב-JPG, PNG, או WebP'
-          : 'Unsupported file format. Use JPG, PNG, or WebP'
-      };
-    }
-
-    // Check file size (max 10MB)
-    const maxSize = 10 * 1024 * 1024; // 10MB
-    if (file.size > maxSize) {
-      return {
-        valid: false,
-        error: language === 'he'
-          ? 'הקובץ גדול מדי. מקסימום 10MB'
-          : 'File too large. Maximum 10MB'
-      };
-    }
-
-    // Check minimum file size (avoid empty files)
-    if (file.size < 1000) { // 1KB minimum
-      return {
-        valid: false,
-        error: language === 'he'
-          ? 'הקובץ קטן מדי או פגום'
-          : 'File too small or corrupted'
-      };
-    }
-
-    return { valid: true };
-  };
-
-  // Helper function to process OCR text with better cleaning and item extraction
-  const processOCRText = (text: string, confidence: number): string[] => {
-    if (!text || text.trim().length === 0) return [];
-
-    // Log confidence for debugging
-    console.log('OCR Confidence:', confidence);
-
-    // Clean up the OCR text
-    let cleaned = text
-      // Remove excessive whitespace and newlines
-      .replace(/\n\s*\n/g, '\n')
-      .replace(/[ \t]+/g, ' ')
-      .trim();
-
-    // Split by lines first
-    let lines = cleaned.split('\n')
-      .map(line => line.trim())
-      .filter(line => line.length > 0);
-
-    // If confidence is low, be more aggressive with filtering
-    if (confidence < 70) {
-      lines = lines.filter(line => {
-        // Filter out very short lines or lines with too many non-alphanumeric chars
-        const alphaNumChars = line.replace(/[^a-zA-Z0-9\u0590-\u05FF]/g, '').length;
-        const totalChars = line.length;
-        return totalChars >= 3 && alphaNumChars / totalChars > 0.6;
-      });
-    }
-
-    // Try to split lines that contain multiple items
-    const items: string[] = [];
-
-    lines.forEach(line => {
-      // Look for common separators
-      const separators = [/,/, /;/, /•/, /◦/, /·/, /-/];
-      let splitItems = [line];
-
-      separators.forEach(separator => {
-        splitItems = splitItems.flatMap(item =>
-          item.split(separator).map(subItem => subItem.trim())
-        );
-      });
-
-      // Filter and clean split items
-      splitItems.forEach(item => {
-        const cleanedItem = item.trim();
-        if (cleanedItem.length >= 2 && cleanedItem.length <= 100) {
-          // Remove common OCR artifacts
-          const finalItem = cleanedItem
-            .replace(/^[-•◦·\s]+/, '') // Remove leading bullets/dashes
-            .replace(/[-•◦·\s]+$/, '') // Remove trailing bullets/dashes
-            .trim();
-
-          if (finalItem.length >= 2) {
-            items.push(finalItem);
-          }
-        }
-      });
-    });
-
-    // Remove duplicates (case insensitive)
-    const uniqueItems = items.filter((item, index, arr) =>
-      arr.findIndex(other => other.toLowerCase() === item.toLowerCase()) === index
-    );
-
-    return uniqueItems.slice(0, 50); // Limit to 50 items max
   };
 
   // Handwriting Recognition Function
   const handleHandwritingSubmit = async (imageData: string) => {
-    if (!imageData) {
-      toast.error(language === 'he' ? 'לא התקבלה תמונה' : 'No image received');
-      setIsHandwritingOpen(false);
-      return;
-    }
-
     setIsProcessingImage(true);
-    setIsHandwritingOpen(false); // Close modal immediately for better UX
-
     toast.info(language === 'he' ? 'מזהה כתב יד...' : 'Recognizing handwriting...');
 
     try {
-      // Validate image data
-      if (!imageData.startsWith('data:image/')) {
-        throw new Error('Invalid image data format');
-      }
-
-      // Initialize Tesseract worker with handwriting-specific settings
       const worker = await createWorker();
-
-      // Load languages (Hebrew + English for mixed handwriting)
       await (worker as any).loadLanguage('heb+eng');
       await (worker as any).initialize('heb+eng');
 
-      // Configure for handwriting recognition
-      await (worker as any).setParameters({
-        tessedit_char_whitelist: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz\u0590-\u05FF ',
-        tessedit_pageseg_mode: '8', // Single word mode for handwriting
-        tessedit_ocr_engine_mode: '2', // Tesseract + LSTM engine
-        textord_min_linesize: '2.5', // Better for handwriting
-      });
-
-      // Process the handwriting image
-      const { data: { text, confidence } } = await (worker as any).recognize(imageData);
-
-      // Clean up worker
+      const { data: { text } } = await (worker as any).recognize(imageData);
       await (worker as any).terminate();
 
-      console.log('Handwriting OCR Result:', { text, confidence });
+      // Split text by newlines and filter empty lines
+      const lines = text.split('\n')
+        .map(line => line.trim())
+        .filter(line => line.length > 0);
 
-      // Process and validate results
-      const processedItems = processHandwritingText(text, confidence);
-
-      if (processedItems.length > 0) {
-        const newNotepadItems: NotepadItem[] = processedItems.map((item, index) => ({
+      if (lines.length > 0) {
+        const newNotepadItems: NotepadItem[] = lines.map((line, index) => ({
           id: `handwriting-${Date.now()}-${index}`,
-          text: item,
+          text: line,
           isChecked: false
         }));
 
         setNotepadItems(prev => [...prev, ...newNotepadItems]);
 
         toast.success(language === 'he'
-          ? `התווספו ${processedItems.length} פריטים מהכתב`
-          : `Added ${processedItems.length} items from handwriting`
+          ? `התווספו ${lines.length} פריטים מהכתב`
+          : `Added ${lines.length} items from handwriting`
         );
       } else {
-        // Provide helpful fallback suggestions
-        toast.warning(language === 'he'
-          ? 'כתב היד לא ברור. נסה לכתוב ברור יותר או השתמש בקול/תמונה'
-          : 'Handwriting not clear. Try writing more clearly or use voice/image input'
-        );
+        toast.warning(language === 'he' ? 'לא נמצא טקסט' : 'No text found');
       }
-
     } catch (error) {
-      console.error('Handwriting recognition error:', error);
-
-      let errorMessage = language === 'he' ? 'שגיאה בעיבוד כתב יד' : 'Error processing handwriting';
-
-      if (error instanceof Error) {
-        if (error.message.includes('network') || error.message.includes('timeout')) {
-          errorMessage = language === 'he'
-            ? 'בעיית רשת. בדוק חיבור אינטרנט'
-            : 'Network error. Check internet connection';
-        } else if (error.message.includes('memory') || error.message.includes('canvas')) {
-          errorMessage = language === 'he'
-            ? 'בעיה עם עיבוד התמונה'
-            : 'Image processing issue';
-        }
-      }
-
-      toast.error(errorMessage);
-
-      // Fallback: offer alternative input methods
-      setTimeout(() => {
-        toast.info(language === 'he'
-          ? 'נסה קול או העלאת תמונה במקום'
-          : 'Try voice or image upload instead'
-        );
-      }, 2000);
+      console.error('Handwriting error:', error);
+      toast.error(language === 'he' ? 'שגיאה בעיבוד כתב יד' : 'Error processing handwriting');
     } finally {
       setIsProcessingImage(false);
+      setIsHandwritingOpen(false);
     }
-  };
-
-  // Helper function to process handwriting OCR results
-  const processHandwritingText = (text: string, confidence: number): string[] => {
-    if (!text || text.trim().length === 0) return [];
-
-    console.log('Handwriting confidence:', confidence);
-
-    // Clean and normalize the recognized text
-    let cleaned = text
-      .replace(/\n\s*\n/g, '\n') // Remove excessive line breaks
-      .replace(/[ \t]+/g, ' ') // Normalize spaces
-      .trim();
-
-    // Split by lines and common handwriting separators
-    let items = cleaned.split(/\n|,|;|\sand\s|\sor\s/)
-      .map(item => item.trim())
-      .filter(item => item.length > 0);
-
-    // For handwriting, be more lenient with short items but filter out noise
-    items = items.filter(item => {
-      // Remove items that are mostly punctuation or numbers only
-      const hasLetters = /[a-zA-Z\u0590-\u05FF]/.test(item);
-      const totalChars = item.length;
-
-      // Allow shorter items for handwriting (people might write single words)
-      return totalChars >= 1 && totalChars <= 80 && (hasLetters || totalChars <= 3);
-    });
-
-    // Clean up individual items
-    items = items.map(item => {
-      return item
-        .replace(/^[-•◦·\s]+/, '') // Remove leading symbols
-        .replace(/[-•◦·\s]+$/, '') // Remove trailing symbols
-        .replace(/\s+/g, ' ') // Normalize spaces
-        .trim();
-    }).filter(item => item.length > 0);
-
-    // If confidence is very low, try to salvage what we can
-    if (confidence < 50 && items.length === 0) {
-      // Try splitting by spaces as a last resort for very poor recognition
-      const words = cleaned.split(/\s+/).filter(word => word.length >= 2 && word.length <= 20);
-      if (words.length > 0) {
-        items = words;
-      }
-    }
-
-    // Remove duplicates and limit results
-    const uniqueItems = [...new Set(items.map(item => item.toLowerCase()))]
-      .map(lowerItem => items.find(item => item.toLowerCase() === lowerItem)!)
-      .slice(0, 30); // Limit to 30 items for handwriting
-
-    return uniqueItems;
   };
 
   const handleDeleteList = (id: string, e: React.MouseEvent) => {
@@ -1450,7 +931,7 @@ export const ShoppingList = () => {
   const progressPercentage = items.length > 0 ? completedCount / items.length * 100 : 0;
 
   return (
-    <div className={`min-h-screen bg-stone-50 dark:bg-slate-950 pb-32 animate-fade-in transition-all duration-500 ${isLanguageTransitioning ? 'opacity-95 scale-[0.995]' : 'opacity-100 scale-100'}`} dir={direction} lang={language}>
+    <div className="min-h-screen bg-stone-50 dark:bg-slate-950 pb-32 animate-fade-in" dir={direction} lang={language}>
       {/* List Creation Confirmation Animation */}
       {showConfirmation && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-[fade-in_0.2s_ease-out,scale-in_0.3s_ease-out]">
@@ -1509,14 +990,14 @@ export const ShoppingList = () => {
 
       {/* Sticky Header Group */}
       <div className="bg-gray-50 dark:bg-slate-950 text-black dark:text-slate-100 shadow-sm sticky top-0 z-50 border-b border-gray-200/50 dark:border-slate-800/50">
-        <div className="max-w-3xl mx-auto px-3 sm:px-4 py-3 md:py-5">
+        <div className="max-w-3xl mx-auto px-3 sm:px-4 py-2 md:py-4">
           <div className="flex justify-between items-center w-full mb-2 sm:mb-3 px-2 sm:px-4">
             {/* Title Section - Never truncate */}
             <div className="flex flex-col gap-0.5 flex-shrink-0 min-w-0">
-              <div className={`flex items-center gap-0.5 text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black drop-shadow-sm leading-tight ${direction === "rtl" ? "flex-row-reverse" : "flex-row"}`}>
+              <div className={`flex items-center gap-0.5 text-lg sm:text-xl md:text-2xl lg:text-3xl font-black drop-shadow-sm leading-tight ${direction === "rtl" ? "flex-row-reverse" : "flex-row"}`}>
                 <span className="flex-shrink-0 truncate">{t.appTitle}</span>
                 <div className={`flex items-center flex-shrink-0 ${direction === "rtl" ? "mr-0.5 sm:mr-1" : "ml-0.5 sm:ml-1"}`}>
-                  <span className="text-black dark:text-slate-100 text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black leading-none">✓</span>
+                  <span className="text-black dark:text-slate-100 text-lg sm:text-xl md:text-2xl lg:text-3xl font-black leading-none">✓</span>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="36"
@@ -1554,70 +1035,40 @@ export const ShoppingList = () => {
               {/* Mobile Sidebar Menu */}
               {isMenuOpen && (
                 <>
-                  {/* Backdrop with enhanced fade animation */}
+                  {/* Backdrop with fade animation */}
                   <div
-                    className="fixed inset-0 bg-black/50 z-[99] backdrop-fade-in"
+                    className="fixed inset-0 bg-black/50 z-[99] animate-fade-in"
                     onClick={() => setIsMenuOpen(false)}
                   />
 
                   {/* Sidebar Drawer */}
                   <div
-                    className={`fixed top-0 right-0 h-full w-[75%] max-w-[280px] bg-white dark:bg-slate-900 z-[100] flex flex-col overflow-y-auto shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] border-2 border-black dark:border-slate-700 animate-slide-in-right`}
+                    className={`fixed top-0 ${language === 'he' ? 'right-0' : 'left-0'} h-full w-[75%] max-w-[280px] bg-card dark:bg-slate-950 z-[100] flex flex-col overflow-y-auto shadow-2xl animate-slide-in-right`}
                   >
                     {/* Menu Header */}
-                    <div className="flex items-center justify-between p-4 sm:p-6 border-b-2 border-black dark:border-slate-700">
-                      <h2 className="text-xl sm:text-2xl font-black text-foreground">{language === 'he' ? 'תפריט' : 'Menu'}</h2>
+                    <div className="flex items-center justify-between p-4 border-b border-border">
+                      <h2 className="text-xl font-bold text-foreground">{language === 'he' ? 'תפריט' : 'Menu'}</h2>
                       <button
                         onClick={() => setIsMenuOpen(false)}
-                        className="h-10 w-10 sm:h-11 sm:w-11 bg-black dark:bg-slate-800 hover:bg-gray-800 dark:hover:bg-slate-700 text-white rounded-xl flex items-center justify-center transition-all active:scale-95 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] active:translate-y-[0px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]"
+                        className="h-10 w-10 bg-muted hover:bg-muted/80 rounded-lg flex items-center justify-center transition-colors active:scale-95"
                       >
                         <X className="w-5 h-5" />
                       </button>
                     </div>
 
                     {/* Menu Content */}
-                    <div className="flex flex-col gap-3 p-4 sm:p-6 flex-1">
-                      {/* Language Toggle with Smooth Transitions */}
-                      <div className={`flex items-center gap-1 p-1 bg-[#FEFCE8] dark:bg-slate-800 rounded-xl border-2 border-black dark:border-slate-700 mb-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all duration-300 ${isLanguageTransitioning ? 'opacity-75 scale-[0.98]' : 'opacity-100 scale-100'}`}>
+                    <div className="flex flex-col gap-2 p-4 flex-1">
+                      {/* Language Toggle */}
+                      <div className="flex items-center gap-1 p-1 bg-muted rounded-lg border border-border mb-4">
                         <button
-                          onClick={async () => {
-                            if (language === 'he') return; // Already active
-                            setIsLanguageTransitioning(true);
-
-                            // Add slight delay for visual feedback
-                            await new Promise(resolve => setTimeout(resolve, 100));
-                            setLanguage('he');
-
-                            // Allow transition to complete
-                            setTimeout(() => setIsLanguageTransitioning(false), 300);
-                          }}
-                          disabled={isLanguageTransitioning}
-                          className={`flex-1 px-3 py-3 rounded-lg font-black text-sm sm:text-base transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${
-                            language === 'he'
-                              ? 'bg-yellow-400 text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] language-button-active'
-                              : 'text-gray-600 dark:text-slate-400 hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 hover:scale-105'
-                          }`}
+                          onClick={() => setLanguage('he')}
+                          className={`flex-1 px-3 py-2.5 rounded-md font-semibold text-sm transition-all active:scale-95 ${language === 'he' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
                         >
                           עברית
                         </button>
                         <button
-                          onClick={async () => {
-                            if (language === 'en') return; // Already active
-                            setIsLanguageTransitioning(true);
-
-                            // Add slight delay for visual feedback
-                            await new Promise(resolve => setTimeout(resolve, 100));
-                            setLanguage('en');
-
-                            // Allow transition to complete
-                            setTimeout(() => setIsLanguageTransitioning(false), 300);
-                          }}
-                          disabled={isLanguageTransitioning}
-                          className={`flex-1 px-3 py-3 rounded-lg font-black text-sm sm:text-base transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${
-                            language === 'en'
-                              ? 'bg-yellow-400 text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] language-button-active'
-                              : 'text-gray-600 dark:text-slate-400 hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 hover:scale-105'
-                          }`}
+                          onClick={() => setLanguage('en')}
+                          className={`flex-1 px-3 py-2.5 rounded-md font-semibold text-sm transition-all active:scale-95 ${language === 'en' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
                         >
                           English
                         </button>
@@ -1630,10 +1081,10 @@ export const ShoppingList = () => {
                           exitEditMode();
                           setIsMenuOpen(false);
                         }}
-                        className="w-full h-12 sm:h-14 bg-yellow-400 text-black font-black hover:bg-yellow-500 transition-all duration-300 text-base sm:text-lg rounded-xl active:scale-95 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] hover:scale-105 border-2 border-black language-transition"
+                        className="w-full h-12 bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-all text-base rounded-lg active:scale-95"
                       >
-                        <Plus className={`h-5 w-5 sm:h-6 sm:w-6 transition-all duration-200 ${language === 'he' ? 'ml-2' : 'mr-2'}`} />
-                        <span className="transition-all duration-300">{t.navigation.list}</span>
+                        <Plus className={`h-5 w-5 ${language === 'he' ? 'ml-2' : 'mr-2'}`} />
+                        {t.navigation.list}
                       </Button>
 
                       {/* Navigation Buttons */}
@@ -1643,10 +1094,10 @@ export const ShoppingList = () => {
                           setIsMenuOpen(false);
                         }}
                         variant="outline"
-                        className="w-full h-12 sm:h-14 flex items-center justify-start gap-3 hover:bg-gray-50 dark:hover:bg-slate-800 transition-all duration-300 text-base sm:text-lg font-bold rounded-xl active:scale-95 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] active:translate-y-[0px] border-2 border-black dark:border-slate-700"
+                        className="w-full h-12 flex items-center justify-start gap-3 hover:bg-muted transition-all text-base font-semibold rounded-lg active:scale-95"
                       >
-                        <Book className="h-5 w-5 sm:h-6 sm:w-6 transition-all duration-200" />
-                        <span className="transition-all duration-300">{t.navigation.notebook}</span>
+                        <Book className="h-5 w-5" />
+                        {t.navigation.notebook}
                       </Button>
 
                       <Button
@@ -1655,10 +1106,10 @@ export const ShoppingList = () => {
                           setIsMenuOpen(false);
                         }}
                         variant="outline"
-                        className="w-full h-12 sm:h-14 flex items-center justify-start gap-3 hover:bg-gray-50 dark:hover:bg-slate-800 transition-all duration-300 text-base sm:text-lg font-bold rounded-xl active:scale-95 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] active:translate-y-[0px] border-2 border-black dark:border-slate-700"
+                        className="w-full h-12 flex items-center justify-start gap-3 hover:bg-muted transition-all text-base font-semibold rounded-lg active:scale-95"
                       >
-                        <History className="h-5 w-5 sm:h-6 sm:w-6 transition-all duration-200" />
-                        <span className="transition-all duration-300">{t.navigation.history}</span>
+                        <History className="h-5 w-5" />
+                        {t.navigation.history}
                       </Button>
 
                       <Button
@@ -1667,10 +1118,10 @@ export const ShoppingList = () => {
                           setIsMenuOpen(false);
                         }}
                         variant="outline"
-                        className="w-full h-12 sm:h-14 flex items-center justify-start gap-3 hover:bg-gray-50 dark:hover:bg-slate-800 transition-all duration-300 text-base sm:text-lg font-bold rounded-xl active:scale-95 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] active:translate-y-[0px] border-2 border-black dark:border-slate-700"
+                        className="w-full h-12 flex items-center justify-start gap-3 hover:bg-muted transition-all text-base font-semibold rounded-lg active:scale-95"
                       >
-                        <BarChart3 className="h-5 w-5 sm:h-6 sm:w-6 transition-all duration-200" />
-                        <span className="transition-all duration-300">{t.navigation.compare}</span>
+                        <BarChart3 className="h-5 w-5" />
+                        {t.navigation.compare}
                       </Button>
 
                       <Button
@@ -1679,10 +1130,10 @@ export const ShoppingList = () => {
                           setIsMenuOpen(false);
                         }}
                         variant="outline"
-                        className="w-full h-12 sm:h-14 flex items-center justify-start gap-3 hover:bg-gray-50 dark:hover:bg-slate-800 transition-all duration-300 text-base sm:text-lg font-bold rounded-xl active:scale-95 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] active:translate-y-[0px] border-2 border-black dark:border-slate-700"
+                        className="w-full h-12 flex items-center justify-start gap-3 hover:bg-muted transition-all text-base font-semibold rounded-lg active:scale-95"
                       >
-                        <Info className="h-5 w-5 sm:h-6 sm:w-6 transition-all duration-200" />
-                        <span className="transition-all duration-300">{t.navigation.about}</span>
+                        <Info className="h-5 w-5" />
+                        {t.navigation.about}
                       </Button>
 
                       {/* Spacer */}
@@ -1695,9 +1146,9 @@ export const ShoppingList = () => {
                           setIsMenuOpen(false);
                         }}
                         variant="ghost"
-                        className="w-full h-12 sm:h-14 flex items-center justify-start gap-3 text-gray-500 dark:text-slate-400 hover:text-black dark:hover:text-white hover:bg-gray-50 dark:hover:bg-slate-800 transition-all text-base sm:text-lg font-bold rounded-xl active:scale-95 shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] active:translate-y-[0px] border border-gray-200 dark:border-slate-700 hover:border-black dark:hover:border-slate-600"
+                        className="w-full h-12 flex items-center justify-start gap-3 text-muted-foreground hover:text-foreground hover:bg-muted transition-all text-base font-semibold rounded-lg active:scale-95"
                       >
-                        <Settings className="h-5 w-5 sm:h-6 sm:w-6" />
+                        <Settings className="h-5 w-5" />
                         {language === 'he' ? 'הגדרות' : 'Settings'}
                       </Button>
                     </div>
@@ -1713,7 +1164,7 @@ export const ShoppingList = () => {
           items.length > 0 && <div className="px-3 sm:px-4 pb-3 sm:pb-4">
             <div className="space-y-1.5 sm:space-y-2">
               <Progress value={progressPercentage} className="h-2 sm:h-2.5 bg-primary-foreground/20" />
-              <p className="text-xs sm:text-sm text-primary-foreground/90 dark:text-slate-300 text-center font-medium transition-all duration-300">
+              <p className="text-xs sm:text-sm text-primary-foreground/90 dark:text-slate-300 text-center font-medium">
                 {t.progressText(completedCount, items.length)}
               </p>
             </div>
@@ -1722,15 +1173,15 @@ export const ShoppingList = () => {
       </div >
 
       {/* Main Content */}
-      <div className="max-w-3xl mx-auto pt-8 sm:pt-10 md:pt-12 lg:pt-16 p-3 sm:p-4 md:p-6 lg:p-8 pb-28 sm:pb-32 md:pb-40 overflow-x-hidden transition-all duration-500 ease-out">
-        <div className="text-center mb-3 sm:mb-4 md:mb-6 language-transition">
-          <h2 className="text-sm sm:text-base md:text-lg font-bold text-foreground mb-0.5 sm:mb-1 transition-all duration-300">
+      <div className="max-w-3xl mx-auto p-3 sm:p-4 md:p-6 lg:p-8 pb-28 sm:pb-32 md:pb-40 overflow-x-hidden">
+        <div className="text-center mb-3 sm:mb-4 md:mb-6">
+          <h2 className="text-xs sm:text-sm md:text-base font-bold text-foreground mb-0.5 sm:mb-1">
             {activeListId
               ? "מעולה! הרשימה מוכנה לעבודה 📝"
               : t.welcomeHeading
             }
           </h2>
-          <p className="text-sm sm:text-base md:text-lg font-medium text-muted-foreground transition-all duration-300 delay-75">
+          <p className="text-xs sm:text-sm md:text-base font-medium text-muted-foreground">
             {activeListId
               ? "תנו לרשימה שם, עדכנו כמויות ושמרו אותה לפנקס."
               : t.welcomeSubtitle
@@ -1756,7 +1207,7 @@ export const ShoppingList = () => {
                 <button
                   onClick={handleReadListAloud}
                   title={isSpeaking ? (language === 'he' ? 'עצור הקראה' : 'Stop reading') : (language === 'he' ? 'הקרא רשימה' : 'Read list aloud')}
-                  className="w-8 h-8 sm:w-9 sm:h-9 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-full p-1.5 sm:p-2 flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition-all duration-200 active:scale-95 touch-manipulation"
+                  className="w-8 h-8 sm:w-9 sm:h-9 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-full p-1.5 sm:p-2 flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition-colors active:scale-95 touch-manipulation"
                   type="button"
                   aria-label={isSpeaking ? (language === 'he' ? 'עצור הקראה' : 'Stop reading') : (language === 'he' ? 'הקרא רשימה' : 'Read list aloud')}
                 >
@@ -1925,12 +1376,10 @@ export const ShoppingList = () => {
                             type="text"
                             value={item.text}
                             onChange={(e) => {
-                              // Allow free typing without restrictions for notepad items
-                              // Only apply basic length limit to prevent memory issues
                               const newText = e.target.value;
-                              if (newText.length <= 200) { // Increased limit for notepad items
-                                debouncedUpdateNotepad(item.id, newText);
-                              }
+                              setNotepadItems(prev => prev.map(i =>
+                                i.id === item.id ? { ...i, text: newText } : i
+                              ));
                             }}
                             onKeyDown={(e) => {
                               const currentIndex = notepadItems.findIndex(i => i.id === item.id);
@@ -1990,57 +1439,6 @@ export const ShoppingList = () => {
                     )}
                   </div>
 
-                  {/* Quick Add Form */}
-                  <div className="mt-4 p-3 bg-white/60 dark:bg-slate-700/60 border-2 border-gray-300 dark:border-slate-600 rounded-lg backdrop-blur-sm">
-                    <div className="flex items-center gap-2">
-                      {/* Item Name Input */}
-                      <StandardizedInput
-                        type="text"
-                        value={quickAddText}
-                        onChange={(e) => setQuickAddText(e.target.value)}
-                        placeholder={language === 'he' ? 'הוסף פריט חדש...' : 'Add new item...'}
-                        className="flex-1 h-9 text-sm border-gray-400 focus:border-yellow-400 bg-white/80 dark:bg-slate-800/80"
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            handleQuickAdd();
-                          }
-                        }}
-                      />
-
-                      {/* Quantity Input */}
-                      <Input
-                        type="number"
-                        min="1"
-                        value={quickAddQuantity}
-                        onChange={(e) => setQuickAddQuantity(parseInt(e.target.value) || 1)}
-                        className="w-14 h-9 text-center text-sm border-gray-400 focus:border-yellow-400 bg-white/80 dark:bg-slate-800/80"
-                      />
-
-                      {/* Unit Select */}
-                      <Select value={quickAddUnit} onValueChange={(value) => setQuickAddUnit(value as Unit)}>
-                        <SelectTrigger className="w-16 h-9 text-xs border-gray-400 focus:border-yellow-400 bg-white/80 dark:bg-slate-800/80">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {UNITS.map((unit) => (
-                            <SelectItem key={unit.value} value={unit.value}>
-                              {language === 'he' ? unit.labelHe : unit.labelEn}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-
-                      {/* Quick Add Button */}
-                      <button
-                        onClick={handleQuickAdd}
-                        className="h-9 px-3 bg-yellow-400 hover:bg-yellow-500 text-black rounded-lg border-2 border-black font-bold text-sm transition-all duration-200 hover:scale-105 active:scale-95 flex items-center justify-center gap-1"
-                      >
-                        <Plus size={16} />
-                        <span>{language === 'he' ? 'הוסף' : 'Add'}</span>
-                      </button>
-                    </div>
-                  </div>
-
                   <div className="flex flex-col sm:flex-row gap-2 mt-4 w-full transition-all duration-300 ease-in-out relative z-10">
                     <div className={`flex gap-2 overflow-hidden p-1 transition-all duration-300 ease-in-out ${notepadItems.length > 0 ? 'w-full sm:w-1/3 opacity-100' : 'w-0 opacity-0'}`}>
                       <Button
@@ -2052,26 +1450,16 @@ export const ShoppingList = () => {
                         {t.clearAllButton}
                       </Button>
                     </div>
-                    <div className="flex gap-2 p-1">
-                      <Button
-                        onClick={() => handleQuickAdd()} // Always add blank row when clicking this button
-                        variant="outline"
-                        className="flex-1 h-11 text-base font-bold border-2 border-gray-400 hover:border-gray-600 text-gray-600 hover:text-gray-800 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
-                      >
-                        <Plus size={20} />
-                        <span>{language === 'he' ? 'הוסף שורה' : 'Add Row'}</span>
-                      </Button>
                     <Button
                       onClick={handlePaste}
                       disabled={notepadItems.length === 0}
-                      className="flex-1 h-11 text-base font-bold bg-yellow-400 text-black hover:bg-yellow-500 px-8 rounded-lg shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] hover:scale-105 active:scale-95 transition-all duration-200 border-2 border-black"
+                      className={`h-11 text-base font-bold bg-yellow-400 text-black hover:bg-yellow-500 px-8 rounded-lg shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] hover:scale-105 active:scale-95 transition-all duration-200 border-2 border-black ${notepadItems.length > 0 ? 'w-full sm:w-2/3' : 'w-full'}`}
                     >
                       <Plus className="mr-2 h-5 w-5" />
                       {language === "he" ? "הפוך לרשימה" : "Turn into List"}
                     </Button>
                   </div>
                 </div>
-              </div>
               )}
 
               {/* Single Item Row */}

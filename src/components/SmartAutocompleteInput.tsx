@@ -151,47 +151,21 @@ export const SmartAutocompleteInput = forwardRef<SmartAutocompleteInputRef, Smar
           }}
           placeholder={placeholder}
           autoFocus={false}
-          className="
-            flex h-11 w-full rounded-xl
-            border-2 border-gray-200 dark:border-slate-600
-            bg-white dark:bg-slate-800
-            px-4 py-3 pr-10
-            text-sm sm:text-base
-            font-medium
-            ring-offset-background
-            file:border-0 file:bg-transparent file:text-sm file:font-medium
-            placeholder:text-gray-400 dark:placeholder:text-slate-500
-            text-gray-900 dark:text-slate-50
-            hover:border-gray-300 dark:hover:border-slate-500
-            focus-visible:outline-none
-            focus-visible:border-yellow-400 dark:focus-visible:border-yellow-400
-            focus-visible:ring-3 focus-visible:ring-yellow-100 dark:focus-visible:ring-yellow-950/40
-            focus-visible:-translate-y-0.5
-            disabled:cursor-not-allowed disabled:opacity-50
-            shadow-sm
-            transition-all duration-200
-          "
+          className="flex h-11 w-full rounded-lg border border-input bg-background px-3 py-2 pr-10 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         />
         {value.length === 0 && (
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-slate-500 pointer-events-none" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
         )}
       </div>
 
       {open && typeof document !== 'undefined' && createPortal(
         <div style={dropdownStyle}>
-          <div className="
-            rounded-xl
-            border-2 border-gray-200 dark:border-slate-700
-            bg-white dark:bg-slate-900
-            text-gray-900 dark:text-slate-50
-            shadow-lg dark:shadow-xl
-            overflow-hidden
-          ">
+          <div className="rounded-xl border-2 border-black bg-white text-popover-foreground shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
 
             {/* Alphabet Filter (Only show when input is empty) */}
             {value.length === 0 && (
-              <div className="p-3 border-b-2 border-gray-100 dark:border-slate-800 bg-gradient-to-r from-yellow-50 to-yellow-100/50 dark:from-yellow-950/20 dark:to-yellow-950/10 overflow-x-auto whitespace-nowrap no-scrollbar">
-                <div className="flex gap-2">
+              <div className="p-2 border-b-2 border-black/10 bg-yellow-50 overflow-x-auto whitespace-nowrap no-scrollbar">
+                <div className="flex gap-1.5">
                   {HEBREW_ALPHABET.map(letter => (
                     <button
                       key={letter}
@@ -200,10 +174,10 @@ export const SmartAutocompleteInput = forwardRef<SmartAutocompleteInputRef, Smar
                         setActiveLetter(prev => prev === letter ? null : letter);
                       }}
                       className={cn(
-                        "w-9 h-9 rounded-lg text-sm font-bold border-2 transition-all flex items-center justify-center flex-shrink-0 shadow-sm",
+                        "w-8 h-8 rounded-lg text-sm font-bold border-2 transition-all flex items-center justify-center flex-shrink-0",
                         activeLetter === letter
-                          ? "bg-yellow-400 text-gray-900 border-yellow-500 shadow-md hover:shadow-lg hover:scale-110"
-                          : "bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-50 border-gray-300 dark:border-slate-700 hover:border-yellow-300 dark:hover:border-yellow-600/50 hover:bg-yellow-50 dark:hover:bg-slate-700/50 active:scale-95"
+                          ? "bg-black text-yellow-400 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                          : "bg-white text-black border-black/20 hover:border-black hover:bg-yellow-100"
                       )}
                     >
                       {letter}
@@ -213,9 +187,9 @@ export const SmartAutocompleteInput = forwardRef<SmartAutocompleteInputRef, Smar
               </div>
             )}
 
-            <div className="max-h-[280px] overflow-y-auto p-2">
+            <div className="max-h-[240px] overflow-y-auto p-1">
               {filteredProducts.length === 0 ? (
-                <div className="px-4 py-8 text-sm text-gray-400 dark:text-slate-500 text-center font-medium">
+                <div className="px-4 py-3 text-sm text-muted-foreground text-center">
                   {value ? "לא נמצאו מוצרים" : "בחר אות או הקלד לחיפוש"}
                 </div>
               ) : (
@@ -228,25 +202,19 @@ export const SmartAutocompleteInput = forwardRef<SmartAutocompleteInputRef, Smar
                         handleSelect(product);
                       }}
                       className={cn(
-                        "
-                          flex w-full items-center px-4 py-3 text-sm sm:text-base
-                          rounded-lg transition-all duration-150
-                          font-medium text-right
-                          hover:scale-105 hover:shadow-sm
-                          active:scale-100
-                        ",
+                        "flex w-full items-center px-3 py-2.5 text-sm rounded-lg transition-colors font-medium text-right",
                         index === selectedIndex
-                          ? "bg-yellow-100 dark:bg-yellow-950/40 text-gray-900 dark:text-yellow-200 font-semibold shadow-sm"
-                          : "text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800/60"
+                          ? "bg-yellow-100 text-black"
+                          : "hover:bg-gray-100 text-gray-700"
                       )}
                     >
                       <Check
                         className={cn(
-                          "ml-2 h-5 w-5 text-emerald-500 dark:text-emerald-400 flex-shrink-0",
+                          "ml-2 h-4 w-4 text-green-600",
                           value === product ? "opacity-100" : "opacity-0"
                         )}
                       />
-                      <span className="text-right flex-grow">{product}</span>
+                      {product}
                     </button>
                   ))}
                 </div>

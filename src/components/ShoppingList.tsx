@@ -120,6 +120,8 @@ export const ShoppingList = () => {
   const [singleItemUnit, setSingleItemUnit] = useState<Unit>('units');
   const [activeListId, setActiveListId] = useState<string | null>(null);
   const [showBulkInput, setShowBulkInput] = useState(false); // NEW STATE
+  const [bulkInputText, setBulkInputText] = useState(""); // Textarea content
+  const bulkInputRef = useRef<HTMLTextAreaElement>(null); // Textarea ref
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showAddAnimation, setShowAddAnimation] = useState(false);
   const [showListSuccess, setShowListSuccess] = useState(false);
@@ -189,6 +191,125 @@ export const ShoppingList = () => {
       window.history.replaceState({}, document.title);
     }
   }, [location.state]);
+
+  const handleAddBulkItems = () => {
+    // Parse the textarea content
+    const lines = bulkInputText
+      .split('\n')
+      .map(line => {
+        // Remove bullet point and trim
+        return line.replace(/^•\s*/, '').trim();
+      })
+      .filter(line => line.length > 0);
+
+    if (lines.length === 0) {
+      toast.warning(language === 'he' ? 'אנא הדבק פריטים' : 'Please paste items');
+      return;
+    }
+
+    // Create shopping items from lines
+    const newItems: ShoppingItem[] = lines.map((line, index) => ({
+      id: `${Date.now()}-${index}`,
+      text: line,
+      checked: false,
+      quantity: 1,
+      unit: 'units' as Unit
+    }));
+
+    if (activeListId) {
+      // Edit Mode: Add items to existing list
+      setItems(prev => [...newItems, ...prev]);
+      setBulkInputText(""); // Clear textarea
+      setShowBulkInput(false); // Close section
+      toast.success(
+        language === 'he' 
+          ? `נוספו ${lines.length} פריטים לרשימה!` 
+          : `Added ${lines.length} items!`
+      );
+    } else {
+      // Home Page Mode: Create new list
+      setItems([...items, ...newItems]);
+      setBulkInputText(""); // Clear textarea
+
+      // Create new list
+      const newListId = Date.now().toString();
+      const currentDate = new Date().toLocaleDateString(language === 'he' ? 'he-IL' : 'en-US', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+      const defaultListName = language === 'he'
+        ? `רשימה חדשה - ${currentDate}`
+        : `New List - ${currentDate}`;
+
+      setActiveListId(newListId);
+      setListName(defaultListName);
+
+      // Auto-focus the title input
+      setTimeout(() => {
+        titleInputRef.current?.focus?.();
+      }, 100);
+    }
+  };
+
+  const handlePasteFromClipboard = async () => {
+    try {
+      const clipboardText = await navigator.clipboard.readText();
+      if (!clipboardText.trim()) {
+        toast.warning(language === 'he' ? 'לוח הזיכרון ריק' : 'Clipboard is empty');
+        return;
+      }
+
+      // Parse clipboard content: split by newlines or commas
+      let lines = clipboardText
+        .split(/[\n,]/)
+        .map(line => line.trim())
+        .filter(line => line.length > 0);
+
+      if (lines.length === 0) {
+        toast.warning(language === 'he' ? 'לא נמצא טקסט לתוקף' : 'No valid text found');
+        return;
+      }
+
+      // Format with bullets
+      const bulletedLines = lines.map(line => {
+        const cleanLine = line.replace(/^•\s*/, '');
+        return `• ${cleanLine}`;
+      });
+
+      // If textarea is empty, add bullets. Otherwise append to existing content.
+      let newText = '';
+      if (bulkInputText.trim().length === 0) {
+        newText = bulletedLines.join('\n');
+      } else {
+        newText = bulkInputText + '\n' + bulletedLines.join('\n');
+      }
+
+      setBulkInputText(newText);
+
+      // Focus and position cursor at end
+      setTimeout(() => {
+        if (bulkInputRef.current) {
+          bulkInputRef.current.focus();
+          bulkInputRef.current.selectionStart = newText.length;
+          bulkInputRef.current.selectionEnd = newText.length;
+        }
+      }, 0);
+
+      toast.success(
+        language === 'he' 
+          ? `הודבקו ${lines.length} פריטים` 
+          : `Pasted ${lines.length} items`
+      );
+    } catch (error) {
+      console.error('Clipboard error:', error);
+      toast.error(
+        language === 'he' 
+          ? 'שגיאה בהדבקה מלוח הזיכרון' 
+          : 'Error reading clipboard'
+      );
+    }
+  };
 
   const handlePaste = () => {
     // Convert notepad items to main shopping items, preserving checked status and quantity
@@ -1158,260 +1279,146 @@ export const ShoppingList = () => {
                 </button>
               </div>
 
-              {/* Bulk Input Card (Notebook Style) - Now ABOVE Single Item Row */}
+              {/* Bulk Input Card - Textarea Style */}
               {showBulkInput && (
-                <div className="relative bg-[#FEFCE8] dark:bg-slate-800 border-2 border-black dark:border-slate-700 rounded-xl p-3 sm:p-4 md:p-6 mb-4 sm:mb-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] focus-within:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:focus-within:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] hover:border-yellow-400 focus-within:border-yellow-400 transition-all duration-200 hover:-translate-y-0.5 sm:hover:-translate-y-1 focus-within:-translate-y-0.5 sm:focus-within:-translate-y-1 overflow-hidden"
-                  style={theme !== 'dark' ? {
-                    backgroundImage: 'repeating-linear-gradient(transparent, transparent 31px, #e5e7eb 31px, #e5e7eb 32px)'
-                  } : {}}
-                >
-                  {/* Spiral Binding Effect */}
-                  <div className={`absolute top-0 bottom-4 ${language === 'he' ? '-right-3' : '-left-3'} w-8 flex flex-col justify-evenly py-2 z-20 pointer-events-none ${theme === 'dark' ? 'hidden' : ''}`}>
-                    {[...Array(12)].map((_, i) => (
-                      <div key={i} className="relative h-4 w-full">
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-[#1a1a1a] rounded-full shadow-inner" />
-                        <div className={`absolute top-1/2 ${language === 'he' ? 'left-1/2' : 'right-1/2'} w-6 h-1.5 bg-zinc-400 rounded-full transform ${language === 'he' ? '-translate-x-1/2 rotate-12' : 'translate-x-1/2 -rotate-12'} shadow-sm`} />
-                      </div>
-                    ))}
+                <div className="bg-white dark:bg-slate-800 border-2 border-black dark:border-slate-700 rounded-xl p-4 sm:p-6 mb-4 sm:mb-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] focus-within:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:focus-within:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] hover:border-yellow-400 focus-within:border-yellow-400 transition-all duration-200 hover:-translate-y-0.5 sm:hover:-translate-y-1 focus-within:-translate-y-0.5 sm:focus-within:-translate-y-1 overflow-hidden">
+                  
+                  {/* Header */}
+                  <div className="mb-3 sm:mb-4">
+                    <h3 className="text-sm sm:text-base font-bold text-black dark:text-white mb-1">
+                      {language === 'he' ? 'הדבק את הרשימה שלך' : 'Paste Your List'}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-slate-400">
+                      {language === 'he' 
+                        ? 'כל שורה תהפוך לפריט עם בול (•). אתה יכול להדביק טקסט או להקליד ישירות.'
+                        : 'Each line becomes an item with a bullet (•). You can paste text or type directly.'}
+                    </p>
                   </div>
 
-                  {/* Quick Paste Button */}
-                  {showPaste && (
-                    <button
-                      onClick={handleQuickPaste}
-                      className={`absolute top-4 ${language === 'he' ? 'left-4' : 'right-4'} flex items-center gap-2 text-gray-600 hover:text-black dark:text-slate-300 dark:hover:text-white transition-colors cursor-pointer z-10`}
-                      title={language === 'he' ? 'הדבק מהלוח' : 'Paste from clipboard'}
-                    >
-                      <ClipboardPaste className="h-5 w-5" />
-                      <span className="text-sm font-medium">
-                        {language === 'he' ? 'הדבק' : 'Paste'}
-                      </span>
-                    </button>
-                  )}
-
-                  {/* Paste Feedback Animation */}
-                  {showPasteFeedback && (
-                    <div className={`absolute top-4 ${language === 'he' ? 'left-20' : 'right-20'} bg-green-500 text-white px-3 py-1 rounded-lg shadow-lg text-sm font-medium animate-in fade-in slide-in-from-right-2 duration-300`}>
-                      {language === 'he' ? 'הודבק!' : 'Pasted!'}
-                    </div>
-                  )}
-
-                  {/* Smart Input Toolbar */}
-                  <div className={`flex gap-4 text-gray-500 mb-2 px-2 ${language === 'en' ? 'flex-row-reverse justify-end' : ''}`}>
-                    {/* Voice Dictation Button */}
-                    <button
-                      onClick={handleVoiceDictation}
-                      className={`p-2 rounded-lg hover:text-black dark:hover:text-white transition-colors hover:bg-gray-100 dark:hover:bg-slate-700 ${isVoiceRecording ? 'text-red-500 animate-pulse' : ''
-                        }`}
-                      title={language === 'he' ? 'הקלטת קול' : 'Voice Dictation'}
-                      disabled={isProcessingImage}
-                    >
-                      <Mic className="h-5 w-5" />
-                    </button>
-
-                    {/* Camera OCR Button */}
-                    <button
-                      onClick={() => cameraInputRef.current?.click()}
-                      className={`p-2 rounded-lg hover:text-black dark:hover:text-white transition-colors hover:bg-gray-100 dark:hover:bg-slate-700 ${isProcessingImage ? 'text-blue-500 animate-pulse' : ''
-                        }`}
-                      title={language === 'he' ? 'סריקת רשימה' : 'Scan List'}
-                      disabled={isVoiceRecording}
-                    >
-                      <Camera className="h-5 w-5" />
-                    </button>
-
-                    {/* Handwriting Button */}
-                    <button
-                      onClick={() => setIsHandwritingOpen(true)}
-                      className={`p-2 rounded-lg hover:text-black dark:hover:text-white transition-colors hover:bg-gray-100 dark:hover:bg-slate-700 ${isProcessingImage ? 'text-blue-500 animate-pulse' : ''
-                        }`}
-                      title={language === 'he' ? 'כתב יד' : 'Handwriting'}
-                      disabled={isVoiceRecording}
-                    >
-                      <PenLine className="h-5 w-5" />
-                    </button>
-
-                    {/* Hidden File Input for Camera */}
-                    <input
-                      ref={cameraInputRef}
-                      type="file"
-                      accept="image/*"
-                      capture="environment"
-                      onChange={handleCameraOCR}
-                      className="hidden"
+                  {/* Textarea with Smart Auto-Bullet Logic */}
+                  <div className="relative mb-3 sm:mb-4">
+                    <textarea
+                      ref={bulkInputRef}
+                      value={bulkInputText}
+                      onChange={(e) => {
+                        // Just accept the text as-is (bullets are handled by other events)
+                        setBulkInputText(e.target.value);
+                      }}
+                      onFocus={(e) => {
+                        // On focus, if empty, add first bullet
+                        if (bulkInputText.trim().length === 0) {
+                          setBulkInputText('• ');
+                          // Set cursor after the bullet and space
+                          setTimeout(() => {
+                            e.currentTarget.selectionStart = 2;
+                            e.currentTarget.selectionEnd = 2;
+                          }, 0);
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        // Handle Enter key: insert newline + bullet
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          const textarea = e.currentTarget;
+                          const start = textarea.selectionStart;
+                          const end = textarea.selectionEnd;
+                          const text = bulkInputText;
+                          
+                          // Insert newline and bullet point
+                          const newText = text.slice(0, start) + '\n• ' + text.slice(end);
+                          setBulkInputText(newText);
+                          
+                          // Restore cursor position after new bullet
+                          setTimeout(() => {
+                            textarea.selectionStart = textarea.selectionEnd = start + 3; // \n + • + space
+                          }, 0);
+                        }
+                      }}
+                      onPaste={(e) => {
+                        // Handle paste event: format clipboard content
+                        e.preventDefault();
+                        
+                        const pastedText = e.clipboardData?.getData('text') || '';
+                        if (!pastedText.trim()) return;
+                        
+                        const textarea = e.currentTarget;
+                        const start = textarea.selectionStart;
+                        const end = textarea.selectionEnd;
+                        const text = bulkInputText;
+                        
+                        // Split pasted text by newlines or commas
+                        const lines = pastedText
+                          .split(/[\n,]/)
+                          .map(line => line.trim())
+                          .filter(line => line.length > 0);
+                        
+                        if (lines.length === 0) return;
+                        
+                        // Format: add bullets to each line
+                        const bulletedLines = lines.map(line => {
+                          // Remove existing bullets if present
+                          const cleanLine = line.replace(/^•\s*/, '');
+                          return `• ${cleanLine}`;
+                        });
+                        
+                        // Insert at cursor position
+                        const formattedPaste = bulletedLines.join('\n');
+                        const newText = text.slice(0, start) + formattedPaste + text.slice(end);
+                        setBulkInputText(newText);
+                        
+                        // Move cursor to end of pasted content
+                        setTimeout(() => {
+                          const newCursorPos = start + formattedPaste.length;
+                          textarea.selectionStart = textarea.selectionEnd = newCursorPos;
+                        }, 0);
+                        
+                        // Show success feedback
+                        toast.success(
+                          language === 'he' 
+                            ? `הודבקו ${lines.length} פריטים` 
+                            : `Pasted ${lines.length} items`
+                        );
+                      }}
+                      placeholder={language === 'he' 
+                        ? 'כאן תופיע הרשימה שלך עם בולים...' 
+                        : 'Your list will appear here with bullets...'}
+                      className="w-full min-h-[150px] sm:min-h-[200px] p-3 sm:p-4 text-sm sm:text-base border-2 border-gray-300 dark:border-slate-600 rounded-lg focus:border-yellow-400 focus:outline-none transition-colors resize-none bg-white dark:bg-slate-900 text-black dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500 font-mono"
+                      dir={language === 'he' ? 'rtl' : 'ltr'}
                     />
                   </div>
 
-                  {/* Notepad Items List */}
-                  <div className="min-h-[140px] space-y-2" dir={language === 'he' ? 'rtl' : 'ltr'}>
-                    {notepadItems.length === 0 ? (
-                      <div
-                        className="text-center py-8 text-gray-600 dark:text-slate-400 font-hand text-lg font-normal leading-relaxed whitespace-pre-line cursor-pointer"
-                        onClick={() => {
-                          const newItem: NotepadItem = {
-                            id: `notepad-${Date.now()}`,
-                            text: '',
-                            isChecked: false
-                          };
-                          setNotepadItems([newItem]);
-                          // Focus the first input
-                          setTimeout(() => {
-                            if (notepadInputRefs.current[0]) {
-                              notepadInputRefs.current[0]!.focus();
-                            }
-                          }, 0);
-                        }}
-                      >
-                        {t.textareaPlaceholder}
-                      </div>
-                    ) : (
-                      notepadItems.map((item, index) => (
-                        <div key={item.id} className="flex items-center gap-3 py-2 w-full overflow-hidden">
-                          {/* Checkbox + Text Input - Take most space */}
-                          <div className="flex items-center gap-2 flex-1 min-w-0">
-                            <Checkbox
-                              checked={item.isChecked}
-                              onCheckedChange={() => toggleNotepadItem(item.id)}
-                              className="h-4 w-4 border-2 border-black dark:border-slate-600 data-[state=checked]:bg-black dark:data-[state=checked]:bg-slate-600 data-[state=checked]:text-yellow-400 flex-shrink-0"
-                            />
-                            <StandardizedInput
-                              variant="notepad"
-                              isChecked={item.isChecked}
-                              ref={(el) => {
-                                notepadInputRefs.current[index] = el;
-                              }}
-                              type="text"
-                              value={item.text}
-                              onChange={(e) => {
-                                const newText = e.target.value;
-                                setNotepadItems(prev => prev.map(i =>
-                                  i.id === item.id ? { ...i, text: newText } : i
-                                ));
-                              }}
-                              onKeyDown={(e) => {
-                                const currentIndex = notepadItems.findIndex(i => i.id === item.id);
+                  {/* Action Buttons */}
+                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full">
+                    {/* Primary: Add Items */}
+                    <Button
+                      onClick={handleAddBulkItems}
+                      disabled={bulkInputText.trim().length === 0}
+                      className="flex-1 h-11 px-4 sm:px-6 text-base font-bold bg-yellow-400 text-black hover:bg-yellow-500 rounded-lg shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] hover:scale-105 active:scale-95 transition-all duration-200 border-2 border-black flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <ShoppingCart className="h-5 w-5" />
+                      {language === 'he' ? 'הוסף לרשימה' : 'Add Items to List'}
+                    </Button>
 
-                                if (e.key === 'Enter') {
-                                  e.preventDefault();
-                                  // Create new item at next position
-                                  const newItem: NotepadItem = {
-                                    id: `notepad-${Date.now()}`,
-                                    text: '',
-                                    isChecked: false,
-                                    quantity: 1,
-                                    unit: 'units'
-                                  };
-                                  setNotepadItems(prev => {
-                                    const newItems = [...prev];
-                                    newItems.splice(currentIndex + 1, 0, newItem);
-                                    return newItems;
-                                  });
-                                  // Focus the new input after state update
-                                  setTimeout(() => {
-                                    if (notepadInputRefs.current[currentIndex + 1]) {
-                                      notepadInputRefs.current[currentIndex + 1]!.focus();
-                                    }
-                                  }, 0);
+                    {/* Secondary: Paste from Clipboard */}
+                    <Button
+                      onClick={handlePasteFromClipboard}
+                      variant="outline"
+                      className="h-11 px-4 sm:px-6 text-base font-bold rounded-lg shadow-[2px_2px_0px_0px_rgba(0,0,0,0.5)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-200 border-2 border-black dark:border-slate-600 dark:hover:bg-slate-700 flex items-center justify-center gap-2"
+                    >
+                      <ClipboardPaste className="h-5 w-5" />
+                      {language === 'he' ? 'הדבק' : 'Paste'}
+                    </Button>
 
-                                } else if (e.key === 'Backspace') {
-                                  if (item.text === '' && currentIndex > 0) {
-                                    e.preventDefault();
-                                    // Delete current item and focus previous
-                                    setNotepadItems(prev => prev.filter(i => i.id !== item.id));
-                                    setTimeout(() => {
-                                      if (notepadInputRefs.current[currentIndex - 1]) {
-                                        notepadInputRefs.current[currentIndex - 1]!.focus();
-                                        // Move cursor to end of text
-                                        const input = notepadInputRefs.current[currentIndex - 1]!;
-                                        input.setSelectionRange(input.value.length, input.value.length);
-                                      }
-                                    }, 0);
-                                  }
-
-                                } else if (e.key === 'ArrowUp') {
-                                  e.preventDefault();
-                                  if (currentIndex > 0 && notepadInputRefs.current[currentIndex - 1]) {
-                                    notepadInputRefs.current[currentIndex - 1]!.focus();
-                                  }
-
-                                } else if (e.key === 'ArrowDown') {
-                                  e.preventDefault();
-                                  if (currentIndex < notepadItems.length - 1 && notepadInputRefs.current[currentIndex + 1]) {
-                                    notepadInputRefs.current[currentIndex + 1]!.focus();
-                                  }
-                                }
-                              }}
-                              placeholder={index === 0 && notepadItems.length === 1 ? (language === 'he' ? "הקלד פריט..." : "Type an item...") : ""}
-                            />
-                          </div>
-
-                          {/* Quantity + Unit */}
-                          <div className="flex items-center gap-1.5 flex-shrink-0">
-                            <input
-                              type="number"
-                              min="0.1"
-                              step="0.1"
-                              value={item.quantity || 1}
-                              onChange={(e) => {
-                                const qty = parseFloat(e.target.value) || 1;
-                                setNotepadItems(prev => prev.map(i =>
-                                  i.id === item.id ? { ...i, quantity: Math.max(0.1, qty) } : i
-                                ));
-                              }}
-                              className="w-12 md:w-16 h-7 md:h-8 text-center text-xs rounded border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-slate-200 focus:border-yellow-400 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] transition-all flex-shrink-0"
-                              title={language === 'he' ? 'כמות' : 'Quantity'}
-                            />
-                            <select
-                              value={item.unit || 'units'}
-                              onChange={(e) => {
-                                setNotepadItems(prev => prev.map(i =>
-                                  i.id === item.id ? { ...i, unit: e.target.value as Unit } : i
-                                ));
-                              }}
-                              className="w-14 md:w-20 h-7 md:h-8 text-xs rounded border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-slate-200 focus:border-yellow-400 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] transition-all flex-shrink-0 cursor-pointer"
-                              title={language === 'he' ? 'יחידה' : 'Unit'}
-                            >
-                              {UNITS.map(u => (
-                                <option key={u.value} value={u.value}>
-                                  {language === 'he' ? u.labelHe : u.labelEn}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row gap-2 mt-4 w-full justify-center items-center transition-all duration-300 ease-in-out relative z-10">
-                    <div className={`flex gap-2 overflow-hidden p-1 transition-all duration-300 ease-in-out ${notepadItems.length > 0 ? 'w-full sm:w-1/3 opacity-100' : 'w-0 opacity-0'}`}>
-                      <Button
-                        onClick={() => setNotepadItems([])}
-                        variant="ghost"
-                        className="flex-1 text-gray-700 dark:text-slate-400 hover:bg-gray-200 hover:text-red-700 h-11 text-base font-medium rounded-full flex items-center justify-center"
-                      >
-                        <Trash2 className="mr-2 h-5 w-5" />
-                        {t.clearAllButton}
-                      </Button>
-                    </div>
-                    <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto justify-center items-center">
-                      <Button
-                        onClick={handlePaste}
-                        disabled={notepadItems.length === 0}
-                        className="h-11 px-6 sm:px-8 text-base font-bold bg-yellow-400 text-black hover:bg-yellow-500 rounded-lg shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] hover:scale-105 active:scale-95 transition-all duration-200 border-2 border-black flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed min-w-max"
-                      >
-                        <ShoppingCart className="h-5 w-5 text-black" />
-                        {language === "he" ? "מצב קנייה" : "Purchase Mode"}
-                      </Button>
-                      <Button
-                        onClick={handleSaveList}
-                        disabled={notepadItems.length === 0}
-                        className="h-11 px-6 sm:px-8 text-base font-bold bg-yellow-400 text-black hover:bg-yellow-500 rounded-lg shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] hover:scale-105 active:scale-95 transition-all duration-200 border-2 border-black flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed min-w-max"
-                      >
-                        <Save className="h-5 w-5 text-black" />
-                        {language === "he" ? "שמור רשימה" : "Save List"}
-                      </Button>
-                    </div>
+                    {/* Tertiary: Clear */}
+                    <Button
+                      onClick={() => setBulkInputText('')}
+                      disabled={bulkInputText.trim().length === 0}
+                      variant="outline"
+                      className="h-11 px-4 sm:px-6 text-base font-bold rounded-lg shadow-[2px_2px_0px_0px_rgba(0,0,0,0.5)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-200 border-2 border-black dark:border-slate-600 dark:hover:bg-slate-700 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Trash2 className="h-5 w-5" />
+                      {language === 'he' ? 'מחק הכל' : 'Clear'}
+                    </Button>
                   </div>
                 </div>
               )}

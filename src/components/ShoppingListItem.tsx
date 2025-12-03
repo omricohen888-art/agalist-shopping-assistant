@@ -89,11 +89,15 @@ export const ShoppingListItem = ({
   const isDimmed = isCompleted && !isAnimating;
 
   return (
-    <div className={`bg-white dark:bg-slate-800 rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] border-2 border-black dark:border-slate-700 py-1.5 px-2 sm:px-3 md:px-4 sm:py-2 flex flex-col sm:flex-row sm:items-center w-full gap-1.5 sm:gap-2 md:gap-3 group hover:translate-y-[-2px] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] transition-all touch-manipulation animate-in slide-in-from-top-4 fade-in duration-300 ${direction === 'rtl' ? 'flex-row-reverse' : 'flex-row'} ${isDimmed ? 'bg-gray-50 dark:bg-slate-700/50 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.5)] border-gray-200 dark:border-slate-600 opacity-60' : ''
+    <div 
+      className={`shopping-item-container bg-white dark:bg-slate-800 rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] border-2 border-black dark:border-slate-700 py-1.5 px-2 sm:px-3 md:px-4 sm:py-2 group hover:translate-y-[-2px] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] transition-all touch-manipulation animate-in slide-in-from-top-4 fade-in duration-300 ${isDimmed ? 'bg-gray-50 dark:bg-slate-700/50 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.5)] border-gray-200 dark:border-slate-600 opacity-60' : ''
       } ${visualChecked ? 'bg-green-50 dark:bg-green-900/20' : ''
-      }`}>
-      {/* TOP ROW: Checkbox + Item Name (wraps on mobile) */}
-      <div className={`flex items-center gap-1 sm:gap-2 flex-1 min-w-0 ${direction === 'rtl' ? 'flex-row-reverse' : 'flex-row'}`}>
+      }`}
+      dir={direction}
+      data-direction={direction}
+    >
+      {/* LEFT GROUP: Checkbox + Item Name */}
+      <div className="shopping-item-left flex items-center gap-1 sm:gap-2 flex-1 min-w-0">
         <Checkbox
           checked={visualChecked}
           onCheckedChange={handleCheck}
@@ -111,8 +115,8 @@ export const ShoppingListItem = ({
         </span>
       </div>
 
-      {/* BOTTOM ROW: Quantity + Unit + Delete (stays below text on mobile) */}
-      <div className={`flex items-center gap-1 sm:gap-2 flex-shrink-0 sm:flex-grow w-full sm:w-auto ${direction === 'rtl' ? 'flex-row-reverse' : 'flex-row'} sm:justify-end`}>
+      {/* RIGHT GROUP: Quantity + Unit + Delete */}
+      <div className="shopping-item-right flex items-center gap-1 sm:gap-2 flex-shrink-0">
         <QuantityInput
           value={item.quantity || 1}
           onChange={(val) => onQuantityChange(item.id, val)}

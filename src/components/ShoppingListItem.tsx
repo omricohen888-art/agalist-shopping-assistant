@@ -43,7 +43,8 @@ const QuantityInput = ({ value, onChange, unit }: QuantityInputProps) => {
           e.currentTarget.blur();
         }
       }}
-      className="w-[2.5rem] sm:w-[3.5rem] h-8 sm:h-9 text-center text-[10px] sm:text-xs rounded-lg shrink-0 px-0 border-2 border-black/20 hover:border-black focus:border-black transition-colors bg-white dark:bg-slate-900 !text-black dark:!text-slate-100"
+      className="h-8 sm:h-9 text-center text-[10px] sm:text-xs rounded-lg px-0 border-2 border-black/20 hover:border-black focus:border-black transition-colors bg-white dark:bg-slate-900 !text-black dark:!text-slate-100"
+      style={{ width: '48px', flexShrink: 0 }}
     />
   );
 };
@@ -90,33 +91,44 @@ export const ShoppingListItem = ({
 
   return (
     <div 
-      className={`shopping-item-container bg-white dark:bg-slate-800 rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] border-2 border-black dark:border-slate-700 py-1.5 px-2 sm:px-3 md:px-4 sm:py-2 group hover:translate-y-[-2px] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] transition-all touch-manipulation animate-in slide-in-from-top-4 fade-in duration-300 ${isDimmed ? 'bg-gray-50 dark:bg-slate-700/50 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.5)] border-gray-200 dark:border-slate-600 opacity-60' : ''
+      className={`shopping-item-row bg-white dark:bg-slate-800 rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] border-2 border-black dark:border-slate-700 px-2 sm:px-3 md:px-4 group hover:translate-y-[-2px] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] transition-all touch-manipulation animate-in slide-in-from-top-4 fade-in duration-300 ${isDimmed ? 'bg-gray-50 dark:bg-slate-700/50 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.5)] border-gray-200 dark:border-slate-600 opacity-60' : ''
       } ${visualChecked ? 'bg-green-50 dark:bg-green-900/20' : ''
-      }`}
+      } flex justify-between items-center w-full py-2`}
       dir={direction}
       data-direction={direction}
+      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '8px 0' }}
     >
-      {/* LEFT GROUP: Checkbox + Item Name */}
-      <div className="shopping-item-left flex items-center gap-1 sm:gap-2 flex-1 min-w-0">
+      {/* CONTAINER A - ITEM INFO: Checkbox + Item Name */}
+      <div 
+        className="shopping-item-info flex items-center gap-3 flex-1 min-w-0"
+        style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: '1 1 auto', minWidth: 0 }}
+      >
         <Checkbox
           checked={visualChecked}
           onCheckedChange={handleCheck}
-          className={`h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 border-2 flex-shrink-0 transition-all duration-200 active:scale-110 rounded-md ${visualChecked
+          className={`border-2 transition-all duration-200 active:scale-110 rounded-md cursor-pointer ${visualChecked
             ? 'border-green-500 bg-green-500 text-white'
             : isDimmed
               ? 'border-gray-400 dark:border-slate-500'
               : 'border-black dark:border-slate-600 data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500 data-[state=checked]:text-white'
             }`}
+          style={{ width: '28px', height: '28px', flexShrink: 0, cursor: 'pointer' }}
         />
         
-        <span className={`text-[11px] sm:text-xs md:text-sm leading-tight sm:leading-snug transition-all font-bold break-words max-w-full overflow-hidden text-wrap ${visualChecked ? "line-through text-gray-500 dark:text-slate-400 decoration-2" : "text-black dark:text-slate-100"
-        }`}>
+        <span 
+          className={`text-xs sm:text-sm leading-snug transition-all font-bold ${visualChecked ? "line-through text-gray-500 dark:text-slate-400 decoration-2" : "text-black dark:text-slate-100"
+          }`}
+          style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+        >
           {item.text}
         </span>
       </div>
 
-      {/* RIGHT GROUP: Quantity + Unit + Delete */}
-      <div className="shopping-item-right flex items-center gap-1 sm:gap-2 flex-shrink-0">
+      {/* CONTAINER B - CONTROLS: Quantity + Unit + Delete */}
+      <div 
+        className="shopping-item-controls flex items-center gap-1.5 flex-shrink-0"
+        style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: '0 0 auto' }}
+      >
         <QuantityInput
           value={item.quantity || 1}
           onChange={(val) => onQuantityChange(item.id, val)}
@@ -127,7 +139,7 @@ export const ShoppingListItem = ({
           value={item.unit || 'units'}
           onValueChange={(val: Unit) => onUnitChange(item.id, val)}
         >
-          <SelectTrigger className="w-14 sm:w-16 h-8 sm:h-9 px-0 sm:px-1 text-[10px] sm:text-xs rounded-lg border-2 border-black/20 hover:border-black focus:border-black transition-colors text-center justify-center [&>span]:w-full [&>span]:text-center [&>svg]:hidden">
+          <SelectTrigger className="h-8 sm:h-9 px-0 text-[10px] sm:text-xs rounded-lg border-2 border-black/20 hover:border-black focus:border-black transition-colors text-center justify-center [&>span]:w-full [&>span]:text-center [&>svg]:hidden" style={{ width: '48px', flexShrink: 0 }}>
             <span className="truncate w-full text-center">
               {(() => {
                 const u = UNITS.find(u => u.value === (item.unit || 'units'));
@@ -148,7 +160,8 @@ export const ShoppingListItem = ({
           variant="ghost"
           size="icon"
           onClick={() => onDelete(item.id)}
-          className="h-8 w-8 sm:h-9 sm:w-9 flex-shrink-0 hover:bg-red-100 text-red-500 hover:text-red-600 touch-manipulation rounded-lg opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
+          className="h-8 w-8 sm:h-9 sm:w-9 hover:bg-red-100 text-red-500 hover:text-red-600 touch-manipulation rounded-lg opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
+          style={{ flexShrink: 0 }}
         >
           <Trash2 className="h-4 w-4 sm:h-5 sm:w-5" />
         </Button>

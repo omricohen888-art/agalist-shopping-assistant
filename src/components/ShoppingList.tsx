@@ -636,42 +636,85 @@ export const ShoppingList = () => {
   };
 
   const handleSaveList = () => {
-    if (items.length === 0) {
+    console.log("=== SAVE LIST DEBUG ===");
+    console.log("Save button clicked!");
+    console.log("Notepad items:", notepadItems);
+    console.log("Notepad items count:", notepadItems.length);
+    console.log("Main items array:", items);
+    console.log("Main items count:", items.length);
+    
+    // CRITICAL FIX: Check notepadItems first (since button is in notepad section)
+    let itemsToSave = notepadItems;
+    
+    if (itemsToSave.length === 0) {
+      console.warn("BLOCKED: No notepad items to save");
       toast.error(t.toasts.noItems);
       return;
     }
+    
+    // Convert notepadItems to ShoppingItem format for storage
+    const convertedItems: ShoppingItem[] = itemsToSave.map(notepadItem => ({
+      id: notepadItem.id,
+      text: notepadItem.text,
+      checked: notepadItem.isChecked,
+      quantity: notepadItem.quantity || 1,
+      unit: (notepadItem.unit || 'units') as Unit,
+      store: undefined
+    }));
+    
+    console.log("✓ Converted items for saving:", convertedItems);
+    console.log("Items count to save:", convertedItems.length);
 
     const isSavedList = activeListId && savedLists.some(list => list.id === activeListId);
+    console.log("Is this a saved list being edited?:", isSavedList);
+    console.log("ActiveListId:", activeListId);
+    console.log("SavedLists:", savedLists);
 
     // If editing an existing saved list, update it directly
     if (isSavedList) {
+      console.log("Branch: Updating existing saved list");
       const existingList = savedLists.find(list => list.id === activeListId);
       if (existingList) {
         const updatedList = {
           ...existingList,
           name: listName || existingList.name,
-          items: [...items]
+          items: convertedItems
         };
+        console.log("Updated list object:", updatedList);
         if (updateSavedList(updatedList)) {
           setSavedLists(getSavedLists());
           toast.success(t.toasts.listUpdated);
+          console.log("List updated successfully!");
         }
       }
       return;
     }
 
     // New draft - open modal to ask for name (listName should already be set from edit mode)
+    console.log("Branch: Creating new list - opening save dialog...");
+    // Store converted items temporarily for confirmSaveList
+    setItems(convertedItems);
     setIsSaveDialogOpen(true);
   };
 
   const confirmSaveList = () => {
+    console.log("=== CONFIRM SAVE LIST DEBUG ===");
+    console.log("Current items to save:", items);
+    console.log("Items count:", items.length);
+    console.log("List name:", listName);
+    
     const newList: SavedList = {
       id: Date.now().toString(),
       name: listName || new Date().toLocaleDateString(language === 'he' ? 'he-IL' : 'en-US', { weekday: 'long', day: 'numeric', month: 'long' }),
       items: [...items],
       createdAt: new Date().toISOString()
     };
+    
+    console.log("New list object being saved:", newList);
+    console.log("Calling saveList function...");
+    
     if (saveList(newList)) {
+      console.log("✓ saveList returned true - save successful");
       setSavedLists(getSavedLists());
       setItems([]);
       setInputText("");
@@ -691,7 +734,10 @@ export const ShoppingList = () => {
           notebookSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
       }, 500);
+    } else {
+      console.error("✗ saveList returned false - save failed");
     }
+    console.log("=== END CONFIRM SAVE DEBUG ===");
   };
 
   const getListText = () => items.map(item => `${item.checked ? "✓" : "○"} ${item.text} ${item.quantity > 1 ? `(${item.quantity} ${item.unit})` : ''}`).join("\n");
@@ -1110,25 +1156,27 @@ export const ShoppingList = () => {
       <div className="sticky top-0 z-50 bg-white/65 dark:bg-slate-900/65 backdrop-blur-[12px] border-b border-black/10 dark:border-white/10 transition-all duration-300">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
           <div className="flex justify-between items-center w-full gap-3 sm:gap-4">
-            {/* Title Section - Compact */}
-            <div className="flex flex-col gap-0 flex-shrink-0 min-w-0 flex-1">
-              <div className={`flex items-center gap-2 sm:gap-3 text-2xl sm:text-3xl font-bold leading-tight ${language === "he" ? "flex-row" : "flex-row-reverse"}`}>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="black"
-                  stroke="black"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0"
-                >
-                  {/* Checkbox background */}
-                  <rect x="3" y="3" width="18" height="18" rx="2" fill="black" stroke="black" strokeWidth="2" />
-                  {/* Checkmark - צהוב */}
-                  <polyline points="6 12 10 16 18 8" fill="none" stroke="rgb(250, 204, 21)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                <span className="truncate text-black dark:text-slate-100">{t.appTitle}</span>
+            {/* Logo Section - LEFT (LTR) / RIGHT (RTL) */}
+            <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="black"
+                stroke="black"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0"
+              >
+                {/* Checkbox background */}
+                <rect x="3" y="3" width="18" height="18" rx="2" fill="black" stroke="black" strokeWidth="2" />
+                {/* Checkmark - yellow */}
+                <polyline points="6 12 10 16 18 8" fill="none" stroke="rgb(250, 204, 21)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              <div className="flex items-center gap-1 sm:gap-1.5">
+                <span className="text-2xl sm:text-3xl font-bold text-black dark:text-slate-100">
+                  {language === 'he' ? 'עגליסט' : 'ShopList'}
+                </span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
@@ -1137,7 +1185,7 @@ export const ShoppingList = () => {
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="h-8 w-8 sm:h-10 sm:w-10 text-black dark:text-slate-100 flex-shrink-0"
+                  className="h-7 w-7 sm:h-8 sm:w-8 text-black dark:text-slate-100 flex-shrink-0 -ml-0.5"
                 >
                   <circle cx="8" cy="21" r="1" />
                   <circle cx="19" cy="21" r="1" />
@@ -1149,8 +1197,11 @@ export const ShoppingList = () => {
               </div>
             </div>
 
-            {/* Actions Section */}
-            <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+            {/* Spacer - Takes remaining space */}
+            <div className="flex-grow" />
+
+            {/* Actions Section - RIGHT (LTR) / LEFT (RTL) */}
+            <div className={`flex items-center gap-2 sm:gap-3 flex-shrink-0 ${language === 'he' ? 'flex-row-reverse' : ''}`}>
               {/* Search Icon */}
               <button
                 className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors active:scale-95"
@@ -1423,14 +1474,14 @@ export const ShoppingList = () => {
                 </div>
               )}
 
-              {/* Single Item Row */}
-              <div className="bg-[#FEFCE8] dark:bg-slate-800 rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] border-2 border-black dark:border-slate-700 p-2 sm:p-3 md:p-4 mb-6 w-full relative overflow-visible">
+              {/* Single Item Row - Urban/Modern Neobrutalism Style */}
+              <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] border-3 border-black dark:border-slate-700 p-4 sm:p-5 md:p-6 mb-6 w-full relative overflow-visible hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all">
                 {/* Decorative "Tape" */}
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-24 h-6 bg-white/30 dark:bg-white/10 rotate-[-2deg] border-l border-r border-white/40 dark:border-white/20 backdrop-blur-[1px]" />
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-28 h-7 bg-white/40 dark:bg-white/15 rotate-[-3deg] border-l-2 border-r-2 border-white/50 dark:border-white/25 backdrop-blur-[1px]" />
 
-                <div className={`flex w-full items-center gap-1 sm:gap-2 flex-nowrap relative z-10 ${language === 'he' ? 'flex-row-reverse' : ''}`}>
+                <div className={`flex w-full items-center gap-2 sm:gap-3 flex-nowrap relative z-10 ${language === 'he' ? 'flex-row-reverse' : ''}`}>
                   {/* LEFT SIDE: Quantity + Unit + Add Button */}
-                  <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+                  <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                     <Input
                       type="number"
                       min="0"
@@ -1479,7 +1530,7 @@ export const ShoppingList = () => {
                   <div className="flex-grow" />
 
                   {/* RIGHT SIDE: Item Input + Add Button */}
-                  <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+                  <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                     <StandardizedInput
                       variant="single-item"
                       ref={singleItemInputRef}
@@ -1744,19 +1795,17 @@ export const ShoppingList = () => {
                 <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto justify-center items-center">
                   <Button
                     onClick={handlePaste}
-                    disabled={notepadItems.length === 0}
-                    className="h-11 px-6 sm:px-8 text-base font-bold bg-yellow-400 text-black hover:bg-yellow-500 rounded-lg shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] hover:scale-105 active:scale-95 transition-all duration-200 border-2 border-black flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed min-w-max"
+                    className="h-11 px-6 sm:px-8 text-base font-bold bg-yellow-400 text-black hover:bg-yellow-500 rounded-lg shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] hover:scale-105 active:scale-95 transition-all duration-200 border-2 border-black flex items-center justify-center gap-2 min-w-max"
                   >
                     <ShoppingCart className="h-5 w-5 text-black" />
                     {language === "he" ? "מצב קנייה" : "Purchase Mode"}
                   </Button>
                   <Button
                     onClick={handleSaveList}
-                    disabled={notepadItems.length === 0}
-                    className="h-11 px-6 sm:px-8 text-base font-bold bg-yellow-400 text-black hover:bg-yellow-500 rounded-lg shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] hover:scale-105 active:scale-95 transition-all duration-200 border-2 border-black flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed min-w-max"
+                    className="h-11 px-6 sm:px-8 text-base font-bold bg-yellow-400 text-black hover:bg-yellow-500 rounded-lg shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] hover:scale-105 active:scale-95 transition-all duration-200 border-2 border-black flex items-center justify-center gap-2 min-w-max"
                   >
                     <Save className="h-5 w-5 text-black" />
-                    {language === "he" ? "שמור רשימה" : "Save List"}
+                    {language === "he" ? "שמור רשימה לאחר כך" : "Save List for Later"}
                   </Button>
                 </div>
               </div>

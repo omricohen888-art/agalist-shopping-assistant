@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
-import { Share2, Trash2, Plus, CheckCircle2, History, Menu, BarChart3, Globe, Save, ClipboardList, Book, Square, CheckSquare, Printer, Mail, FileSpreadsheet, Copy, Pencil, X, ClipboardPaste, Info, ShoppingCart, Check, Volume2, RotateCcw, Settings, Moon, Sun, Mic, Camera, PenLine } from "lucide-react";
+import { Share2, Trash2, Plus, CheckCircle2, History, BarChart3, Globe, Save, ClipboardList, Book, Square, CheckSquare, Printer, Mail, FileSpreadsheet, Copy, Pencil, X, ClipboardPaste, Info, ShoppingCart, Check, Volume2, RotateCcw, Mic, Camera, PenLine } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import { SmartAutocompleteInput, SmartAutocompleteInputRef } from "@/components/SmartAutocompleteInput";
 import { SavedListCard } from "@/components/SavedListCard";
@@ -17,7 +17,6 @@ import { HandwritingCanvas } from "@/components/HandwritingCanvas";
 import { toast } from "sonner";
 import { ShoppingItem, ISRAELI_STORES, UNITS, Unit, SavedList } from "@/types/shopping";
 import { ShoppingListItem } from "@/components/ShoppingListItem";
-import { SettingsModal } from "@/components/SettingsModal";
 import { SortableTemplates } from "@/components/SortableTemplates";
 import { processInput, RateLimiter } from "@/utils/security";
 import { createWorker } from 'tesseract.js';
@@ -30,7 +29,7 @@ interface NotepadItem {
   unit?: Unit;
 }
 import { saveShoppingHistory, saveList, getSavedLists, deleteSavedList, updateSavedList } from "@/utils/storage";
-import { useLanguage, Language } from "@/hooks/use-language";
+import { useGlobalLanguage, Language } from "@/context/LanguageContext";
 import { translations } from "@/utils/translations";
 import { parseItemWithUnit, formatItemDisplay } from "@/utils/itemParser";
 import { useTheme } from "next-themes";
@@ -104,12 +103,11 @@ export const ShoppingList = () => {
   const [isCreateTemplateDialogOpen, setIsCreateTemplateDialogOpen] = useState(false);
   const [newTemplateName, setNewTemplateName] = useState("");
   const [newTemplateItems, setNewTemplateItems] = useState("");
-  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const autocompleteInputRef = useRef<SmartAutocompleteInputRef>(null);
   const singleItemInputRef = useRef<HTMLInputElement>(null);
   const notepadInputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const rateLimiter = useRef(new RateLimiter());
-  const { language, setLanguage, toggleLanguage } = useLanguage();
+  const { language, setLanguage } = useGlobalLanguage();
   const { theme, setTheme } = useTheme();
   const t = translations[language];
   const storeOptions = language === "he" ? ISRAELI_STORES : ENGLISH_STORES;
@@ -128,7 +126,6 @@ export const ShoppingList = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [showPasteFeedback, setShowPasteFeedback] = useState(false);
   const [notepadItems, setNotepadItems] = useState<NotepadItem[]>([]);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // Smart Input States
   const [isVoiceRecording, setIsVoiceRecording] = useState(false);
@@ -931,7 +928,7 @@ export const ShoppingList = () => {
   const progressPercentage = items.length > 0 ? completedCount / items.length * 100 : 0;
 
   return (
-    <div className="min-h-screen bg-stone-50 dark:bg-slate-950 pb-32 animate-fade-in" dir={direction} lang={language}>
+    <div className="min-h-screen bg-white dark:bg-slate-900 pb-32 transition-colors duration-150 overflow-hidden" dir={direction} lang={language}>
       {/* List Creation Confirmation Animation */}
       {showConfirmation && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-[fade-in_0.2s_ease-out,scale-in_0.3s_ease-out]">
@@ -989,179 +986,60 @@ export const ShoppingList = () => {
       )}
 
       {/* Sticky Header Group */}
-      <div className="bg-gray-50 dark:bg-slate-950 text-black dark:text-slate-100 shadow-sm sticky top-0 z-50 border-b border-gray-200/50 dark:border-slate-800/50">
-        <div className="max-w-3xl mx-auto px-3 sm:px-4 py-2 md:py-4">
-          <div className="flex justify-between items-center w-full mb-2 sm:mb-3 px-2 sm:px-4">
-            {/* Title Section - Never truncate */}
-            <div className="flex flex-col gap-0.5 flex-shrink-0 min-w-0">
-              <div className={`flex items-center gap-0.5 text-lg sm:text-xl md:text-2xl lg:text-3xl font-black drop-shadow-sm leading-tight ${direction === "rtl" ? "flex-row-reverse" : "flex-row"}`}>
-                <span className="flex-shrink-0 truncate">{t.appTitle}</span>
-                <div className={`flex items-center flex-shrink-0 ${direction === "rtl" ? "mr-0.5 sm:mr-1" : "ml-0.5 sm:ml-1"}`}>
-                  <span className="text-black dark:text-slate-100 text-lg sm:text-xl md:text-2xl lg:text-3xl font-black leading-none">✓</span>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="36"
-                    height="36"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 lg:h-10 lg:w-10 text-black dark:text-slate-100 flex-shrink-0"
-                  >
-                    <circle cx="8" cy="21" r="1" />
-                    <circle cx="19" cy="21" r="1" />
-                    <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
-                    <path d="M16.5 7.5H5.9" />
-                    <path d="M16.5 10.5H6.7" />
-                    <path d="M16.5 13.5H7.5" />
-                  </svg>
-                </div>
+      <div className="bg-white dark:bg-slate-900 text-black dark:text-slate-100 shadow-sm sticky top-0 z-50 border-b border-gray-200 dark:border-slate-800">
+        <div className="max-w-3xl mx-auto px-3 sm:px-4 py-2 sm:py-2">
+          <div className="flex justify-between items-center w-full gap-2">
+            {/* Title Section - Compact */}
+            <div className="flex flex-col gap-0 flex-shrink-0 min-w-0 flex-1">
+              <div className={`flex items-center gap-1 sm:gap-2 text-2xl sm:text-3xl font-bold leading-tight ${language === "he" ? "flex-row" : "flex-row-reverse"}`}>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="black"
+                  stroke="black"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0"
+                >
+                  {/* Checkbox background */}
+                  <rect x="3" y="3" width="18" height="18" rx="2" fill="black" stroke="black" strokeWidth="2"/>
+                  {/* Checkmark - צהוב */}
+                  <polyline points="6 12 10 16 18 8" fill="none" stroke="rgb(250, 204, 21)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span className="truncate text-black dark:text-slate-100">{t.appTitle}</span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-8 w-8 sm:h-10 sm:w-10 text-black dark:text-slate-100 flex-shrink-0"
+                >
+                  <circle cx="8" cy="21" r="1" />
+                  <circle cx="19" cy="21" r="1" />
+                  <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
+                  <path d="M16.5 7.5H5.9" />
+                  <path d="M16.5 10.5H6.7" />
+                  <path d="M16.5 13.5H7.5" />
+                </svg>
               </div>
-              <p className="text-[10px] sm:text-xs md:text-sm text-black/80 dark:text-slate-400 font-bold mt-0.5 whitespace-nowrap">{t.tagline}</p>
             </div>
 
-            {/* Actions Section - Never shrink */}
-            <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-              {/* Hamburger Menu */}
-              <button
-                onClick={() => setIsMenuOpen(true)}
-                className="w-10 h-10 sm:w-11 sm:h-11 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-full flex items-center justify-center hover:bg-gray-50 dark:hover:bg-slate-700 hover:text-black dark:hover:text-slate-100 active:scale-95 transition-all duration-200 shadow touch-manipulation"
-              >
-                <Menu className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700 dark:text-slate-400" strokeWidth={2} />
-              </button>
-
-              {/* Mobile Sidebar Menu */}
-              {isMenuOpen && (
-                <>
-                  {/* Backdrop with fade animation */}
-                  <div
-                    className="fixed inset-0 bg-black/50 z-[99] animate-fade-in"
-                    onClick={() => setIsMenuOpen(false)}
-                  />
-
-                  {/* Sidebar Drawer */}
-                  <div
-                    className={`fixed top-0 ${language === 'he' ? 'right-0' : 'left-0'} h-full w-[75%] max-w-[280px] bg-card dark:bg-slate-950 z-[100] flex flex-col overflow-y-auto shadow-2xl animate-slide-in-right`}
-                  >
-                    {/* Menu Header */}
-                    <div className="flex items-center justify-between p-4 border-b border-border">
-                      <h2 className="text-xl font-bold text-foreground">{language === 'he' ? 'תפריט' : 'Menu'}</h2>
-                      <button
-                        onClick={() => setIsMenuOpen(false)}
-                        className="h-10 w-10 bg-muted hover:bg-muted/80 rounded-lg flex items-center justify-center transition-colors active:scale-95"
-                      >
-                        <X className="w-5 h-5" />
-                      </button>
-                    </div>
-
-                    {/* Menu Content */}
-                    <div className="flex flex-col gap-2 p-4 flex-1">
-                      {/* Language Toggle */}
-                      <div className="flex items-center gap-1 p-1 bg-muted rounded-lg border border-border mb-4">
-                        <button
-                          onClick={() => setLanguage('he')}
-                          className={`flex-1 px-3 py-2.5 rounded-md font-semibold text-sm transition-all active:scale-95 ${language === 'he' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-                        >
-                          עברית
-                        </button>
-                        <button
-                          onClick={() => setLanguage('en')}
-                          className={`flex-1 px-3 py-2.5 rounded-md font-semibold text-sm transition-all active:scale-95 ${language === 'en' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-                        >
-                          English
-                        </button>
-                      </div>
-
-                      {/* New List Button - Primary Action */}
-                      <Button
-                        onClick={() => {
-                          navigate("/");
-                          exitEditMode();
-                          setIsMenuOpen(false);
-                        }}
-                        className="w-full h-12 bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-all text-base rounded-lg active:scale-95"
-                      >
-                        <Plus className={`h-5 w-5 ${language === 'he' ? 'ml-2' : 'mr-2'}`} />
-                        {t.navigation.list}
-                      </Button>
-
-                      {/* Navigation Buttons */}
-                      <Button
-                        onClick={() => {
-                          navigate("/notebook");
-                          setIsMenuOpen(false);
-                        }}
-                        variant="outline"
-                        className="w-full h-12 flex items-center justify-start gap-3 hover:bg-muted transition-all text-base font-semibold rounded-lg active:scale-95"
-                      >
-                        <Book className="h-5 w-5" />
-                        {t.navigation.notebook}
-                      </Button>
-
-                      <Button
-                        onClick={() => {
-                          navigate("/history");
-                          setIsMenuOpen(false);
-                        }}
-                        variant="outline"
-                        className="w-full h-12 flex items-center justify-start gap-3 hover:bg-muted transition-all text-base font-semibold rounded-lg active:scale-95"
-                      >
-                        <History className="h-5 w-5" />
-                        {t.navigation.history}
-                      </Button>
-
-                      <Button
-                        onClick={() => {
-                          navigate("/compare");
-                          setIsMenuOpen(false);
-                        }}
-                        variant="outline"
-                        className="w-full h-12 flex items-center justify-start gap-3 hover:bg-muted transition-all text-base font-semibold rounded-lg active:scale-95"
-                      >
-                        <BarChart3 className="h-5 w-5" />
-                        {t.navigation.compare}
-                      </Button>
-
-                      <Button
-                        onClick={() => {
-                          navigate("/about");
-                          setIsMenuOpen(false);
-                        }}
-                        variant="outline"
-                        className="w-full h-12 flex items-center justify-start gap-3 hover:bg-muted transition-all text-base font-semibold rounded-lg active:scale-95"
-                      >
-                        <Info className="h-5 w-5" />
-                        {t.navigation.about}
-                      </Button>
-
-                      {/* Spacer */}
-                      <div className="flex-1" />
-
-                      {/* Settings at bottom */}
-                      <Button
-                        onClick={() => {
-                          setIsSettingsModalOpen(true);
-                          setIsMenuOpen(false);
-                        }}
-                        variant="ghost"
-                        className="w-full h-12 flex items-center justify-start gap-3 text-muted-foreground hover:text-foreground hover:bg-muted transition-all text-base font-semibold rounded-lg active:scale-95"
-                      >
-                        <Settings className="h-5 w-5" />
-                        {language === 'he' ? 'הגדרות' : 'Settings'}
-                      </Button>
-                    </div>
-                  </div>
-                </>
-              )}
+            {/* Actions Section */}
+            <div className="flex items-center gap-1.5 flex-shrink-0">
+              {/* Settings are now in bottom Navigation */}
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Progress Bar - Part of sticky header */}
-        {
-          items.length > 0 && <div className="px-3 sm:px-4 pb-3 sm:pb-4">
+      {/* Progress Bar - Part of sticky header */}
+      {
+        items.length > 0 && <div className="bg-white dark:bg-slate-900 px-3 sm:px-4 pb-3 sm:pb-4 sticky top-16 z-50 border-b border-gray-200 dark:border-slate-800">
+          <div className="max-w-3xl mx-auto">
             <div className="space-y-1.5 sm:space-y-2">
               <Progress value={progressPercentage} className="h-2 sm:h-2.5 bg-primary-foreground/20" />
               <p className="text-xs sm:text-sm text-primary-foreground/90 dark:text-slate-300 text-center font-medium">
@@ -1169,19 +1047,19 @@ export const ShoppingList = () => {
               </p>
             </div>
           </div>
-        }
-      </div >
+        </div>
+      }
 
       {/* Main Content */}
-      <div className="max-w-3xl mx-auto p-3 sm:p-4 md:p-6 lg:p-8 pb-28 sm:pb-32 md:pb-40 overflow-x-hidden">
-        <div className="text-center mb-3 sm:mb-4 md:mb-6">
-          <h2 className="text-xs sm:text-sm md:text-base font-bold text-foreground mb-0.5 sm:mb-1">
+      <div className="max-w-3xl mx-auto p-3 sm:p-4 md:p-6 lg:p-8 pb-28 sm:pb-32 md:pb-40 overflow-hidden w-full min-w-0">
+        <div className="text-center mb-6 sm:mb-8 md:mb-10 mt-4 sm:mt-6">
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-2 sm:mb-3">
             {activeListId
               ? "מעולה! הרשימה מוכנה לעבודה 📝"
               : t.welcomeHeading
             }
           </h2>
-          <p className="text-xs sm:text-sm md:text-base font-medium text-muted-foreground">
+          <p className="text-sm sm:text-base md:text-lg font-medium text-muted-foreground">
             {activeListId
               ? "תנו לרשימה שם, עדכנו כמויות ושמרו אותה לפנקס."
               : t.welcomeSubtitle
@@ -1255,7 +1133,7 @@ export const ShoppingList = () => {
 
               {/* Bulk Input Card (Notebook Style) - Now ABOVE Single Item Row */}
               {showBulkInput && (
-                <div className="relative bg-[#FEFCE8] dark:bg-slate-800 border-2 border-black dark:border-slate-700 rounded-xl p-3 sm:p-4 md:p-6 mb-4 sm:mb-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] focus-within:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:focus-within:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] hover:border-yellow-400 focus-within:border-yellow-400 transition-all duration-200 hover:-translate-y-0.5 sm:hover:-translate-y-1 focus-within:-translate-y-0.5 sm:focus-within:-translate-y-1"
+                <div className="relative bg-[#FEFCE8] dark:bg-slate-800 border-2 border-black dark:border-slate-700 rounded-xl p-3 sm:p-4 md:p-6 mb-4 sm:mb-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] focus-within:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:focus-within:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] hover:border-yellow-400 focus-within:border-yellow-400 transition-all duration-200 hover:-translate-y-0.5 sm:hover:-translate-y-1 focus-within:-translate-y-0.5 sm:focus-within:-translate-y-1 overflow-hidden"
                   style={theme !== 'dark' ? {
                     backgroundImage: 'repeating-linear-gradient(transparent, transparent 31px, #e5e7eb 31px, #e5e7eb 32px)'
                   } : {}}
@@ -1361,8 +1239,9 @@ export const ShoppingList = () => {
                       </div>
                     ) : (
                       notepadItems.map((item, index) => (
-                        <div key={item.id} className={`flex items-center gap-2 py-1 w-full ${language === 'he' ? 'flex-row-reverse' : ''}`}>
-                          <div className="flex items-center gap-2 flex-shrink-0">
+                        <div key={item.id} className={`flex md:flex-row md:items-center gap-3 py-2 w-full overflow-hidden ${language === 'he' ? 'md:flex-row-reverse flex-row-reverse' : 'flex-row-reverse md:flex-row'}`}>
+                          {/* Quantity + Unit - Compact on mobile */}
+                          <div className="flex items-center gap-1.5 flex-shrink-0">
                             <input
                               type="number"
                               min="0.1"
@@ -1374,7 +1253,7 @@ export const ShoppingList = () => {
                                   i.id === item.id ? { ...i, quantity: Math.max(0.1, qty) } : i
                                 ));
                               }}
-                              className="w-16 h-8 text-center text-xs rounded border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-slate-200 focus:border-yellow-400 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] transition-all flex-shrink-0"
+                              className="w-12 md:w-16 h-7 md:h-8 text-center text-xs rounded border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-slate-200 focus:border-yellow-400 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] transition-all flex-shrink-0"
                               title={language === 'he' ? 'כמות' : 'Quantity'}
                             />
                             <select
@@ -1384,7 +1263,7 @@ export const ShoppingList = () => {
                                   i.id === item.id ? { ...i, unit: e.target.value as Unit } : i
                                 ));
                               }}
-                              className="w-20 h-8 text-xs rounded border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-slate-200 focus:border-yellow-400 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] transition-all flex-shrink-0 cursor-pointer"
+                              className="w-14 md:w-20 h-7 md:h-8 text-xs rounded border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-slate-200 focus:border-yellow-400 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] transition-all flex-shrink-0 cursor-pointer"
                               title={language === 'he' ? 'יחידה' : 'Unit'}
                             >
                               {UNITS.map(u => (
@@ -1394,8 +1273,9 @@ export const ShoppingList = () => {
                               ))}
                             </select>
                           </div>
-                          <div className="flex-grow" />
-                          <div className="flex items-center gap-2 flex-shrink-0">
+
+                          {/* Checkbox + Text Input - Take most space */}
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
                             <Checkbox
                               checked={item.isChecked}
                               onCheckedChange={() => toggleNotepadItem(item.id)}
@@ -1591,7 +1471,7 @@ export const ShoppingList = () => {
             </>
           ) : (
             // Notebook Style Input
-            <div className="relative bg-[#FEFCE8] dark:bg-slate-800 border-2 border-black dark:border-slate-700 rounded-xl p-4 md:p-6 mb-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] focus-within:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] hover:border-yellow-400 focus-within:border-yellow-400 transition-all duration-200 hover:-translate-y-1 focus-within:-translate-y-1"
+            <div className="relative bg-[#FEFCE8] dark:bg-slate-800 border-2 border-black dark:border-slate-700 rounded-xl p-4 md:p-6 mb-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] focus-within:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] hover:border-yellow-400 focus-within:border-yellow-400 transition-all duration-200 hover:-translate-y-1 focus-within:-translate-y-1 overflow-hidden"
               style={theme !== 'dark' ? {
                 backgroundImage: 'repeating-linear-gradient(transparent, transparent 31px, #e5e7eb 31px, #e5e7eb 32px)'
               } : {}}
@@ -1697,8 +1577,9 @@ export const ShoppingList = () => {
                   </div>
                 ) : (
                   notepadItems.map((item, index) => (
-                    <div key={item.id} className={`flex items-center gap-2 py-1 w-full ${language === 'he' ? 'flex-row-reverse' : ''}`}>
-                      <div className="flex items-center gap-2 flex-shrink-0">
+                    <div key={item.id} className={`flex md:flex-row md:items-center gap-3 py-2 w-full overflow-hidden ${language === 'he' ? 'md:flex-row-reverse flex-row-reverse' : 'flex-row-reverse md:flex-row'}`}>
+                      {/* Quantity + Unit - Compact on mobile */}
+                      <div className="flex items-center gap-1.5 flex-shrink-0">
                         <input
                           type="number"
                           min="0.1"
@@ -1710,7 +1591,7 @@ export const ShoppingList = () => {
                               i.id === item.id ? { ...i, quantity: Math.max(0.1, qty) } : i
                             ));
                           }}
-                          className="w-16 h-8 text-center text-xs rounded border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-slate-200 focus:border-yellow-400 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] transition-all flex-shrink-0"
+                          className="w-12 md:w-16 h-7 md:h-8 text-center text-xs rounded border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-slate-200 focus:border-yellow-400 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] transition-all flex-shrink-0"
                           title={language === 'he' ? 'כמות' : 'Quantity'}
                         />
                         <select
@@ -1720,7 +1601,7 @@ export const ShoppingList = () => {
                               i.id === item.id ? { ...i, unit: e.target.value as Unit } : i
                             ));
                           }}
-                          className="w-20 h-8 text-xs rounded border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-slate-200 focus:border-yellow-400 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] transition-all flex-shrink-0 cursor-pointer"
+                          className="w-14 md:w-20 h-7 md:h-8 text-xs rounded border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-slate-200 focus:border-yellow-400 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] transition-all flex-shrink-0 cursor-pointer"
                           title={language === 'he' ? 'יחידה' : 'Unit'}
                         >
                           {UNITS.map(u => (
@@ -1730,8 +1611,9 @@ export const ShoppingList = () => {
                           ))}
                         </select>
                       </div>
-                      <div className="flex-grow" />
-                      <div className="flex items-center gap-2 flex-shrink-0">
+
+                      {/* Checkbox + Text Input - Take most space */}
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
                         <Checkbox
                           checked={item.isChecked}
                           onCheckedChange={() => toggleNotepadItem(item.id)}
@@ -1802,7 +1684,7 @@ export const ShoppingList = () => {
                             }
                           }
                         }}
-                        className={`flex-1 text-lg font-normal font-hand bg-transparent outline-none caret-yellow-500 dark:caret-white ${item.isChecked ? 'line-through text-gray-500 dark:text-slate-500' : 'text-black dark:text-slate-200'} placeholder:text-gray-400 dark:placeholder:text-slate-500`}
+                        className={`flex-1 min-w-0 text-lg font-normal font-hand bg-transparent outline-none caret-yellow-500 dark:caret-white overflow-hidden text-ellipsis whitespace-nowrap ${item.isChecked ? 'line-through text-gray-500 dark:text-slate-500' : 'text-black dark:text-slate-200'} placeholder:text-gray-400 dark:placeholder:text-slate-500`}
                         placeholder={index === 0 && notepadItems.length === 1 ? "הקלד פריט..." : ""}
                       />
                       </div>
@@ -1876,37 +1758,36 @@ export const ShoppingList = () => {
                 </Button>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
                 {savedLists
                   .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
                   .slice(0, 6)
                   .map((list, index) => (
-                    <div key={list.id} className="h-[280px]">
-                      <SavedListCard
-                        list={list}
-                        index={index}
-                        language={language}
-                        t={t}
-                        onLoad={handleLoadList}
-                        onDelete={(id) => {
-                          if (deleteSavedList(id)) {
-                            setSavedLists(getSavedLists());
-                            toast.success(t.toasts.listDeleted);
-                          }
-                        }}
-                        onToggleItem={(listId, itemId) => {
-                          const list = savedLists.find(l => l.id === listId);
-                          if (!list) return;
-                          const updatedItems = list.items.map(item =>
-                            item.id === itemId ? { ...item, checked: !item.checked } : item
-                          );
-                          const updatedList = { ...list, items: updatedItems };
-                          if (updateSavedList(updatedList)) {
-                            setSavedLists(getSavedLists());
-                          }
-                        }}
-                      />
-                    </div>
+                    <SavedListCard
+                      key={list.id}
+                      list={list}
+                      index={index}
+                      language={language}
+                      t={t}
+                      onLoad={handleLoadList}
+                      onDelete={(id) => {
+                        if (deleteSavedList(id)) {
+                          setSavedLists(getSavedLists());
+                          toast.success(t.toasts.listDeleted);
+                        }
+                      }}
+                      onToggleItem={(listId, itemId) => {
+                        const list = savedLists.find(l => l.id === listId);
+                        if (!list) return;
+                        const updatedItems = list.items.map(item =>
+                          item.id === itemId ? { ...item, checked: !item.checked } : item
+                        );
+                        const updatedList = { ...list, items: updatedItems };
+                        if (updateSavedList(updatedList)) {
+                          setSavedLists(getSavedLists());
+                        }
+                      }}
+                    />
                   ))}
               </div>
             </div>
@@ -2197,11 +2078,6 @@ export const ShoppingList = () => {
           </DialogContent>
         </Dialog>
 
-        <SettingsModal
-          open={isSettingsModalOpen}
-          onOpenChange={setIsSettingsModalOpen}
-        />
-
         {isHandwritingOpen && (
           <HandwritingCanvas
             onSubmit={handleHandwritingSubmit}
@@ -2209,7 +2085,7 @@ export const ShoppingList = () => {
             language={language}
           />
         )}
-      </div >
-    </div >
+      </div>
+    </div>
   );
 };

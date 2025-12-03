@@ -4,13 +4,13 @@ import { ShoppingItem } from "@/types/shopping";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
-import { useLanguage } from "@/hooks/use-language";
+import { useGlobalLanguage } from "@/context/LanguageContext";
 import { toast } from "sonner";
 
 export const ShoppingMode = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const { language } = useLanguage();
+    const { language } = useGlobalLanguage();
     const [items, setItems] = useState<ShoppingItem[]>([]);
     const [listName, setListName] = useState("");
 

@@ -10,6 +10,7 @@ interface SoundSettingsContextType {
   setMuted: (muted: boolean) => void;
   setVolume: (volume: number) => void;
   playSound: (frequency?: number, duration?: number) => void;
+  playFeedback: (type: 'click' | 'success' | 'error' | 'warning' | 'info') => void;
 }
 
 const SoundSettingsContext = createContext<SoundSettingsContextType | undefined>(undefined);
@@ -18,7 +19,16 @@ const SOUND_SETTINGS_KEY = 'sound-settings';
 
 const defaultSettings: SoundSettings = {
   isMuted: false,
-  volume: 0.5,
+  volume: 0.15, // Reduced from 0.5 for subtler audio
+};
+
+// Preset sound profiles with optimized frequencies and durations
+const SOUND_PROFILES = {
+  click: { frequency: 800, duration: 0.08 },      // Short, clean click
+  success: { frequency: 520, duration: 0.15 },    // Pleasant success tone
+  error: { frequency: 330, duration: 0.12 },      // Warning tone
+  warning: { frequency: 440, duration: 0.1 },     // Alert tone
+  info: { frequency: 600, duration: 0.1 },        // Info tone
 };
 
 export const useSoundSettings = () => {
@@ -66,10 +76,13 @@ export const SoundSettingsProvider = ({ children }: { children: React.ReactNode 
       gainNode.connect(ctx.destination);
 
       oscillator.frequency.setValueAtTime(frequency, ctx.currentTime);
-      oscillator.frequency.exponentialRampToValueAtTime(frequency * 0.4, ctx.currentTime + duration);
+      // Subtle frequency sweep for more natural sound
+      oscillator.frequency.exponentialRampToValueAtTime(frequency * 0.5, ctx.currentTime + duration);
 
-      gainNode.gain.setValueAtTime(settings.volume * 0.3, ctx.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
+      // Clean fade in/out envelope
+      gainNode.gain.setValueAtTime(0, ctx.currentTime);
+      gainNode.gain.linearRampToValueAtTime(settings.volume * 0.2, ctx.currentTime + 0.01);
+      gainNode.gain.linearRampToValueAtTime(0, ctx.currentTime + duration);
 
       oscillator.start(ctx.currentTime);
       oscillator.stop(ctx.currentTime + duration);
@@ -78,8 +91,13 @@ export const SoundSettingsProvider = ({ children }: { children: React.ReactNode 
     }
   };
 
+  const playFeedback = (type: 'click' | 'success' | 'error' | 'warning' | 'info') => {
+    const profile = SOUND_PROFILES[type];
+    playSound(profile.frequency, profile.duration);
+  };
+
   return (
-    <SoundSettingsContext.Provider value={{ settings, setMuted, setVolume, playSound }}>
+    <SoundSettingsContext.Provider value={{ settings, setMuted, setVolume, playSound, playFeedback }}>
       {children}
     </SoundSettingsContext.Provider>
   );

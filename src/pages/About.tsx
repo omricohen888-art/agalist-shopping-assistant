@@ -1,12 +1,12 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ArrowLeft, Info, ShoppingCart } from "lucide-react";
-import { useLanguage } from "@/hooks/use-language";
+import { useGlobalLanguage } from "@/context/LanguageContext";
 import { translations } from "@/utils/translations";
 
 const About = () => {
     const navigate = useNavigate();
-    const { language } = useLanguage();
+    const { language } = useGlobalLanguage();
     const t = translations[language];
     const direction = language === 'he' ? 'rtl' : 'ltr';
 

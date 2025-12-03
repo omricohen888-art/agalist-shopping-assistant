@@ -73,7 +73,7 @@ const Compare = () => {
         </div>
       </div>
 
-      <div className="w-full max-w-4xl mx-auto px-4 py-6 sm:py-8 space-y-6 sm:space-y-8 animate-fade-in">
+      <div className="w-full max-w-4xl mx-auto px-4 py-6 sm:py-8 space-y-6 sm:space-y-8">
         {history.length < 2 ? (
           <div className="p-6 sm:p-10 text-center rounded-3xl border-2 border-dashed border-black/20 dark:border-white/20">
             <div className="text-5xl sm:text-6xl mb-4 grayscale opacity-50">📊</div>

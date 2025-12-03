@@ -4,7 +4,7 @@ import { ShoppingItem, Unit } from "@/types/shopping";
 import { ShoppingItemRow } from "@/components/ShoppingItemRow";
 import { Button } from "@/components/ui/button";
 import { Plus, Rocket, Save } from "lucide-react";
-import { useLanguage } from "@/hooks/use-language";
+import { useGlobalLanguage } from "@/context/LanguageContext";
 import { toast } from "sonner";
 
 interface HomeItem {
@@ -17,7 +17,7 @@ interface HomeItem {
 
 export const Home = () => {
     const navigate = useNavigate();
-    const { language } = useLanguage();
+    const { language } = useGlobalLanguage();
     const [items, setItems] = useState<HomeItem[]>([]);
 
     const addNewItem = () => {

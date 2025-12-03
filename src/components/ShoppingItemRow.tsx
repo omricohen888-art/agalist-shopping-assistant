@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Trash2 } from "lucide-react";
-import { useLanguage } from "@/hooks/use-language";
+import { useGlobalLanguage } from "@/context/LanguageContext";
 
 interface ShoppingItemRowItem {
     id: string;
@@ -20,7 +20,7 @@ interface ShoppingItemRowProps {
 }
 
 export const ShoppingItemRow = ({ item, onUpdate, onDelete }: ShoppingItemRowProps) => {
-    const { language } = useLanguage();
+    const { language } = useGlobalLanguage();
 
     return (
         <div className={`flex items-center gap-2 py-2 border-b border-gray-300 dark:border-slate-600 w-full ${language === 'he' ? 'flex-row-reverse' : ''}`}>

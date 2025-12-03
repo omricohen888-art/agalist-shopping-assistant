@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Volume2, VolumeX } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useLanguage } from "@/hooks/use-language";
+import { useGlobalLanguage } from "@/context/LanguageContext";
 import { useSoundSettings } from "@/hooks/use-sound-settings.tsx";
 import { translations } from "@/utils/translations";
 
@@ -16,7 +16,7 @@ interface SettingsModalProps {
 
 export const SettingsModal = ({ open, onOpenChange }: SettingsModalProps) => {
   const { theme, setTheme } = useTheme();
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage } = useGlobalLanguage();
   const { settings, setMuted, setVolume, playSound } = useSoundSettings();
   const t = translations[language];
 

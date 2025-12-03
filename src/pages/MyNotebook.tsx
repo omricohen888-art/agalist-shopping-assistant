@@ -5,12 +5,12 @@ import { getSavedLists, deleteSavedList, updateSavedList } from "@/utils/storage
 import { SavedListCard } from "@/components/SavedListCard";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ArrowLeft, Plus, Book } from "lucide-react";
-import { useLanguage } from "@/hooks/use-language";
+import { useGlobalLanguage } from "@/context/LanguageContext";
 import { translations } from "@/utils/translations";
 
 const MyNotebook = () => {
     const navigate = useNavigate();
-    const { language } = useLanguage();
+    const { language } = useGlobalLanguage();
     const t = translations[language];
     const direction = language === 'he' ? 'rtl' : 'ltr';
     const [savedLists, setSavedLists] = useState<SavedList[]>([]);
@@ -92,7 +92,7 @@ const MyNotebook = () => {
                         </div>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-10">
                         {savedLists.map((list, index) => (
                             <SavedListCard
                                 key={list.id}

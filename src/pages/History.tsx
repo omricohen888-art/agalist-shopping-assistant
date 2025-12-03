@@ -6,7 +6,7 @@ import { ArrowRight, Trash2, Calendar, ShoppingCart, DollarSign, TrendingUp } fr
 import { getShoppingHistory, deleteShoppingHistory, clearAllHistory } from "@/utils/storage";
 import { ShoppingHistory as ShoppingHistoryType } from "@/types/shopping";
 import { toast } from "sonner";
-import { useLanguage, Language } from "@/hooks/use-language";
+import { useGlobalLanguage, Language } from "@/context/LanguageContext";
 
 const historyTranslations: Record<
   Language,
@@ -118,7 +118,7 @@ const historyTranslations: Record<
 const History = () => {
   const navigate = useNavigate();
   const [history, setHistory] = useState<ShoppingHistoryType[]>([]);
-  const { language, toggleLanguage } = useLanguage();
+  const { language, setLanguage } = useGlobalLanguage();
   const t = historyTranslations[language];
   const direction = language === "he" ? "rtl" : "ltr";
   const locale = language === "he" ? "he-IL" : "en-US";
@@ -191,7 +191,7 @@ const History = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={toggleLanguage}
+              onClick={() => setLanguage(language === 'he' ? 'en' : 'he')}
               className="hidden sm:flex h-9 border-2 border-black dark:border-slate-700 font-bold hover:bg-black/5 dark:hover:bg-white/10"
             >
               {t.languageLabel}
@@ -211,7 +211,7 @@ const History = () => {
         </div>
       </div>
 
-      <div className="w-full max-w-4xl mx-auto px-4 py-6 sm:py-8 space-y-6 sm:space-y-8 animate-fade-in">
+      <div className="w-full max-w-4xl mx-auto px-4 py-6 sm:py-8 space-y-6 sm:space-y-8">
         {history.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="p-4 sm:p-5 bg-[#FEFCE8] dark:bg-slate-800 border-2 border-black dark:border-slate-700 rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">

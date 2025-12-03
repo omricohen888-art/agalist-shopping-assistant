@@ -89,30 +89,17 @@ export const ShoppingListItem = ({
   const isDimmed = isCompleted && !isAnimating;
 
   return (
-    <div className={`bg-white dark:bg-slate-800 rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] border-2 border-black dark:border-slate-700 py-2 px-2 sm:px-3 flex flex-row items-center justify-between flex-nowrap w-full gap-2 sm:gap-3 group hover:translate-y-[-2px] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] transition-all touch-manipulation animate-in slide-in-from-top-4 fade-in duration-300 min-h-[3.5rem] sm:min-h-[3rem] ${isDimmed ? 'bg-gray-50 dark:bg-slate-700/50 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.5)] border-gray-200 dark:border-slate-600 opacity-60' : ''
+    <div className={`bg-white dark:bg-slate-800 rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] border-2 border-black dark:border-slate-700 py-2 px-2 sm:px-3 flex items-center w-full gap-2 sm:gap-3 group hover:translate-y-[-2px] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] transition-all touch-manipulation animate-in slide-in-from-top-4 fade-in duration-300 min-h-[3.5rem] sm:min-h-[3rem] ${direction === 'rtl' ? 'flex-row-reverse' : 'flex-row'} ${isDimmed ? 'bg-gray-50 dark:bg-slate-700/50 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.5)] border-gray-200 dark:border-slate-600 opacity-60' : ''
       } ${visualChecked ? 'bg-green-50 dark:bg-green-900/20' : ''
       }`}>
-      <Checkbox
-        checked={visualChecked}
-        onCheckedChange={handleCheck}
-        className={`h-5 w-5 sm:h-6 sm:w-6 border-2 flex-shrink-0 transition-all duration-200 active:scale-110 rounded-md ${visualChecked
-          ? 'border-green-500 bg-green-500 text-white'
-          : isDimmed
-            ? 'border-gray-400 dark:border-slate-500'
-            : 'border-black dark:border-slate-600 data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500 data-[state=checked]:text-white'
-          }`}
-      />
-      <span className={`flex-grow text-sm sm:text-base md:text-lg leading-tight sm:leading-relaxed transition-all text-right break-words min-w-0 font-bold ${visualChecked ? "line-through text-gray-500 dark:text-slate-400 decoration-2" : "text-black dark:text-slate-100"
-        }`}>
-        {item.text}
-      </span>
-
-      <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0 border-l-2 border-black/10 dark:border-slate-700/50 pl-1 sm:pl-2" onClick={(e) => e.stopPropagation()}>
+      {/* LEFT SIDE: Quantity + Unit */}
+      <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
         <QuantityInput
           value={item.quantity || 1}
           onChange={(val) => onQuantityChange(item.id, val)}
           unit={item.unit}
         />
+        
         <Select
           value={item.unit || 'units'}
           onValueChange={(val: Unit) => onUnitChange(item.id, val)}
@@ -133,15 +120,39 @@ export const ShoppingListItem = ({
             ))}
           </SelectContent>
         </Select>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => onDelete(item.id)}
-          className="h-8 w-8 sm:h-9 sm:w-9 flex-shrink-0 hover:bg-red-100 text-red-500 hover:text-red-600 touch-manipulation rounded-lg opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
-        >
-          <Trash2 className="h-4 w-4 sm:h-5 sm:w-5" />
-        </Button>
       </div>
+
+      {/* CENTER: Empty spacer - grows to push item name to the right */}
+      <div className="flex-grow" />
+
+      {/* RIGHT SIDE: Checkbox + Item Name */}
+      <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+        <Checkbox
+          checked={visualChecked}
+          onCheckedChange={handleCheck}
+          className={`h-5 w-5 sm:h-6 sm:w-6 border-2 flex-shrink-0 transition-all duration-200 active:scale-110 rounded-md ${visualChecked
+            ? 'border-green-500 bg-green-500 text-white'
+            : isDimmed
+              ? 'border-gray-400 dark:border-slate-500'
+              : 'border-black dark:border-slate-600 data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500 data-[state=checked]:text-white'
+            }`}
+        />
+        
+        <span className={`text-sm sm:text-base md:text-lg leading-tight sm:leading-relaxed transition-all font-bold ${visualChecked ? "line-through text-gray-500 dark:text-slate-400 decoration-2" : "text-black dark:text-slate-100"
+        }`}>
+          {item.text}
+        </span>
+      </div>
+
+      {/* FAR RIGHT: Delete Button */}
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => onDelete(item.id)}
+        className="h-8 w-8 sm:h-9 sm:w-9 flex-shrink-0 hover:bg-red-100 text-red-500 hover:text-red-600 touch-manipulation rounded-lg opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
+      >
+        <Trash2 className="h-4 w-4 sm:h-5 sm:w-5" />
+      </Button>
     </div>
   );
 };

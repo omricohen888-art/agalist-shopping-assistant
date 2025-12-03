@@ -194,13 +194,13 @@ export const ShoppingList = () => {
   }, [location.state]);
 
   const handlePaste = () => {
-    // Convert notepad items to main shopping items, preserving checked status
+    // Convert notepad items to main shopping items, preserving checked status and quantity
     const newItems: ShoppingItem[] = notepadItems.map((notepadItem, index) => ({
       id: `${Date.now()}-${index}`,
       text: notepadItem.text,
       checked: notepadItem.isChecked, // Preserve the checked status!
-      quantity: 1,
-      unit: 'units' as Unit
+      quantity: notepadItem.quantity || 1,
+      unit: (notepadItem.unit || 'units') as Unit
     }));
 
     if (activeListId) {
@@ -1361,103 +1361,150 @@ export const ShoppingList = () => {
                       </div>
                     ) : (
                       notepadItems.map((item, index) => (
-                        <div key={item.id} className="flex items-center gap-3 py-1">
-                          <Checkbox
-                            checked={item.isChecked}
-                            onCheckedChange={() => toggleNotepadItem(item.id)}
-                            className="h-4 w-4 border-2 border-black dark:border-slate-600 data-[state=checked]:bg-black dark:data-[state=checked]:bg-slate-600 data-[state=checked]:text-yellow-400 flex-shrink-0"
-                          />
-                          <StandardizedInput
-                            variant="notepad"
-                            isChecked={item.isChecked}
-                            ref={(el) => {
-                              notepadInputRefs.current[index] = el;
-                            }}
-                            type="text"
-                            value={item.text}
-                            onChange={(e) => {
-                              const newText = e.target.value;
-                              setNotepadItems(prev => prev.map(i =>
-                                i.id === item.id ? { ...i, text: newText } : i
-                              ));
-                            }}
-                            onKeyDown={(e) => {
-                              const currentIndex = notepadItems.findIndex(i => i.id === item.id);
+                        <div key={item.id} className={`flex items-center gap-2 py-1 w-full ${language === 'he' ? 'flex-row-reverse' : ''}`}>
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <input
+                              type="number"
+                              min="0.1"
+                              step="0.1"
+                              value={item.quantity || 1}
+                              onChange={(e) => {
+                                const qty = parseFloat(e.target.value) || 1;
+                                setNotepadItems(prev => prev.map(i =>
+                                  i.id === item.id ? { ...i, quantity: Math.max(0.1, qty) } : i
+                                ));
+                              }}
+                              className="w-16 h-8 text-center text-xs rounded border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-slate-200 focus:border-yellow-400 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] transition-all flex-shrink-0"
+                              title={language === 'he' ? 'כמות' : 'Quantity'}
+                            />
+                            <select
+                              value={item.unit || 'units'}
+                              onChange={(e) => {
+                                setNotepadItems(prev => prev.map(i =>
+                                  i.id === item.id ? { ...i, unit: e.target.value as Unit } : i
+                                ));
+                              }}
+                              className="w-20 h-8 text-xs rounded border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-slate-200 focus:border-yellow-400 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] transition-all flex-shrink-0 cursor-pointer"
+                              title={language === 'he' ? 'יחידה' : 'Unit'}
+                            >
+                              {UNITS.map(u => (
+                                <option key={u.value} value={u.value}>
+                                  {language === 'he' ? u.labelHe : u.labelEn}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          <div className="flex-grow" />
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <Checkbox
+                              checked={item.isChecked}
+                              onCheckedChange={() => toggleNotepadItem(item.id)}
+                              className="h-4 w-4 border-2 border-black dark:border-slate-600 data-[state=checked]:bg-black dark:data-[state=checked]:bg-slate-600 data-[state=checked]:text-yellow-400 flex-shrink-0"
+                            />
+                            <StandardizedInput
+                              variant="notepad"
+                              isChecked={item.isChecked}
+                              ref={(el) => {
+                                notepadInputRefs.current[index] = el;
+                              }}
+                              type="text"
+                              value={item.text}
+                              onChange={(e) => {
+                                const newText = e.target.value;
+                                setNotepadItems(prev => prev.map(i =>
+                                  i.id === item.id ? { ...i, text: newText } : i
+                                ));
+                              }}
+                              onKeyDown={(e) => {
+                                const currentIndex = notepadItems.findIndex(i => i.id === item.id);
 
-                              if (e.key === 'Enter') {
-                                e.preventDefault();
-                                // Create new item at next position
-                                const newItem: NotepadItem = {
-                                  id: `notepad-${Date.now()}`,
-                                  text: '',
-                                  isChecked: false
-                                };
-                                setNotepadItems(prev => {
-                                  const newItems = [...prev];
-                                  newItems.splice(currentIndex + 1, 0, newItem);
-                                  return newItems;
-                                });
-                                // Focus the new input after state update
-                                setTimeout(() => {
-                                  if (notepadInputRefs.current[currentIndex + 1]) {
-                                    notepadInputRefs.current[currentIndex + 1]!.focus();
-                                  }
-                                }, 0);
-
-                              } else if (e.key === 'Backspace') {
-                                if (item.text === '' && currentIndex > 0) {
+                                if (e.key === 'Enter') {
                                   e.preventDefault();
-                                  // Delete current item and focus previous
-                                  setNotepadItems(prev => prev.filter(i => i.id !== item.id));
+                                  // Create new item at next position
+                                  const newItem: NotepadItem = {
+                                    id: `notepad-${Date.now()}`,
+                                    text: '',
+                                    isChecked: false,
+                                    quantity: 1,
+                                    unit: 'units'
+                                  };
+                                  setNotepadItems(prev => {
+                                    const newItems = [...prev];
+                                    newItems.splice(currentIndex + 1, 0, newItem);
+                                    return newItems;
+                                  });
+                                  // Focus the new input after state update
                                   setTimeout(() => {
-                                    if (notepadInputRefs.current[currentIndex - 1]) {
-                                      notepadInputRefs.current[currentIndex - 1]!.focus();
-                                      // Move cursor to end of text
-                                      const input = notepadInputRefs.current[currentIndex - 1]!;
-                                      input.setSelectionRange(input.value.length, input.value.length);
+                                    if (notepadInputRefs.current[currentIndex + 1]) {
+                                      notepadInputRefs.current[currentIndex + 1]!.focus();
                                     }
                                   }, 0);
-                                }
 
-                              } else if (e.key === 'ArrowUp') {
-                                e.preventDefault();
-                                if (currentIndex > 0 && notepadInputRefs.current[currentIndex - 1]) {
-                                  notepadInputRefs.current[currentIndex - 1]!.focus();
-                                }
+                                } else if (e.key === 'Backspace') {
+                                  if (item.text === '' && currentIndex > 0) {
+                                    e.preventDefault();
+                                    // Delete current item and focus previous
+                                    setNotepadItems(prev => prev.filter(i => i.id !== item.id));
+                                    setTimeout(() => {
+                                      if (notepadInputRefs.current[currentIndex - 1]) {
+                                        notepadInputRefs.current[currentIndex - 1]!.focus();
+                                        // Move cursor to end of text
+                                        const input = notepadInputRefs.current[currentIndex - 1]!;
+                                        input.setSelectionRange(input.value.length, input.value.length);
+                                      }
+                                    }, 0);
+                                  }
 
-                              } else if (e.key === 'ArrowDown') {
-                                e.preventDefault();
-                                if (currentIndex < notepadItems.length - 1 && notepadInputRefs.current[currentIndex + 1]) {
-                                  notepadInputRefs.current[currentIndex + 1]!.focus();
+                                } else if (e.key === 'ArrowUp') {
+                                  e.preventDefault();
+                                  if (currentIndex > 0 && notepadInputRefs.current[currentIndex - 1]) {
+                                    notepadInputRefs.current[currentIndex - 1]!.focus();
+                                  }
+
+                                } else if (e.key === 'ArrowDown') {
+                                  e.preventDefault();
+                                  if (currentIndex < notepadItems.length - 1 && notepadInputRefs.current[currentIndex + 1]) {
+                                    notepadInputRefs.current[currentIndex + 1]!.focus();
+                                  }
                                 }
-                              }
-                            }}
-                            placeholder={index === 0 && notepadItems.length === 1 ? "הקלד פריט..." : ""}
-                          />
+                              }}
+                              placeholder={index === 0 && notepadItems.length === 1 ? "הקלד פריט..." : ""}
+                            />
+                          </div>
                         </div>
                       ))
                     )}
                   </div>
 
-                  <div className="flex flex-col sm:flex-row gap-2 mt-4 w-full transition-all duration-300 ease-in-out relative z-10">
+                  <div className="flex flex-col sm:flex-row gap-2 mt-4 w-full justify-center items-center transition-all duration-300 ease-in-out relative z-10">
                     <div className={`flex gap-2 overflow-hidden p-1 transition-all duration-300 ease-in-out ${notepadItems.length > 0 ? 'w-full sm:w-1/3 opacity-100' : 'w-0 opacity-0'}`}>
                       <Button
                         onClick={() => setNotepadItems([])}
                         variant="ghost"
-                        className="flex-1 text-gray-700 dark:text-slate-400 hover:bg-gray-200 hover:text-red-700 h-11 text-base font-medium rounded-full"
+                        className="flex-1 text-gray-700 dark:text-slate-400 hover:bg-gray-200 hover:text-red-700 h-11 text-base font-medium rounded-full flex items-center justify-center"
                       >
                         <Trash2 className="mr-2 h-5 w-5" />
                         {t.clearAllButton}
                       </Button>
                     </div>
-                    <Button
-                      onClick={handlePaste}
-                      disabled={notepadItems.length === 0}
-                      className={`h-11 text-base font-bold bg-yellow-400 text-black hover:bg-yellow-500 px-8 rounded-lg shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] hover:scale-105 active:scale-95 transition-all duration-200 border-2 border-black ${notepadItems.length > 0 ? 'w-full sm:w-2/3' : 'w-full'}`}
-                    >
-                      <Plus className="mr-2 h-5 w-5" />
-                      {language === "he" ? "הפוך לרשימה" : "Turn into List"}
-                    </Button>
+                    <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto justify-center items-center">
+                      <Button
+                        onClick={handlePaste}
+                        disabled={notepadItems.length === 0}
+                        className="h-11 px-6 sm:px-8 text-base font-bold bg-yellow-400 text-black hover:bg-yellow-500 rounded-lg shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] hover:scale-105 active:scale-95 transition-all duration-200 border-2 border-black flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed min-w-max"
+                      >
+                        <ShoppingCart className="h-5 w-5 text-black" />
+                        {language === "he" ? "מצב קנייה" : "Purchase Mode"}
+                      </Button>
+                      <Button
+                        onClick={handleSaveList}
+                        disabled={notepadItems.length === 0}
+                        className="h-11 px-6 sm:px-8 text-base font-bold bg-yellow-400 text-black hover:bg-yellow-500 rounded-lg shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] hover:scale-105 active:scale-95 transition-all duration-200 border-2 border-black flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed min-w-max"
+                      >
+                        <Save className="h-5 w-5 text-black" />
+                        {language === "he" ? "שמור רשימה" : "Save List"}
+                      </Button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -1467,65 +1514,75 @@ export const ShoppingList = () => {
                 {/* Decorative "Tape" */}
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-24 h-6 bg-white/30 dark:bg-white/10 rotate-[-2deg] border-l border-r border-white/40 dark:border-white/20 backdrop-blur-[1px]" />
 
-                <div className="flex w-full items-center gap-1 sm:gap-2 flex-nowrap relative z-10">
-                  <StandardizedInput
-                    variant="single-item"
-                    ref={singleItemInputRef}
-                    placeholder={t.addItemPlaceholder}
-                    value={singleItemInput}
-                    onChange={(e) => setSingleItemInput(e.target.value)}
-                    onKeyDown={e => e.key === "Enter" && handleAddSingleItem()}
-                  />
-                  <Input
-                    type="number"
-                    min="0"
-                    step={singleItemUnit === 'units' ? "1" : "0.1"}
-                    value={singleItemQuantity}
-                    onChange={(e) => setSingleItemQuantity(e.target.value)}
-                    className="w-[2.5rem] sm:w-[3.5rem] h-9 sm:h-10 text-center text-[10px] sm:text-xs rounded-lg shrink-0 px-0 border-2 border-black dark:border-slate-700 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all bg-white dark:bg-slate-900 !text-black dark:!text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
-                    onBlur={() => {
-                      let val = parseFloat(singleItemQuantity);
-                      if (singleItemUnit === 'units' && !isNaN(val)) {
-                        setSingleItemQuantity(Math.round(val).toString());
-                      }
-                    }}
-                  />
-                  <Select
-                    value={singleItemUnit}
-                    onValueChange={(val: Unit) => {
-                      setSingleItemUnit(val);
-                      if (val === 'units') {
-                        const currentQty = parseFloat(singleItemQuantity);
-                        if (!isNaN(currentQty)) {
-                          setSingleItemQuantity(Math.round(currentQty).toString());
+                <div className={`flex w-full items-center gap-1 sm:gap-2 flex-nowrap relative z-10 ${language === 'he' ? 'flex-row-reverse' : ''}`}>
+                  {/* LEFT SIDE: Quantity + Unit + Add Button */}
+                  <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+                    <Input
+                      type="number"
+                      min="0"
+                      step={singleItemUnit === 'units' ? "1" : "0.1"}
+                      value={singleItemQuantity}
+                      onChange={(e) => setSingleItemQuantity(e.target.value)}
+                      className="w-[2.5rem] sm:w-[3.5rem] h-9 sm:h-10 text-center text-[10px] sm:text-xs rounded-lg shrink-0 px-0 border-2 border-black dark:border-slate-700 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all bg-white dark:bg-slate-900 !text-black dark:!text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
+                      onBlur={() => {
+                        let val = parseFloat(singleItemQuantity);
+                        if (singleItemUnit === 'units' && !isNaN(val)) {
+                          setSingleItemQuantity(Math.round(val).toString());
                         }
-                      }
-                    }}
-                  >
-                    <SelectTrigger className="w-[3.5rem] sm:w-[4.5rem] h-9 sm:h-10 text-[10px] sm:text-xs rounded-lg shrink-0 px-0 sm:px-1 border-2 border-black dark:border-slate-700 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all bg-white dark:bg-slate-900 text-center justify-center [&>span]:w-full [&>span]:text-center [&>svg]:hidden !text-black dark:!text-slate-100">
-                      <span className="truncate w-full text-center">
-                        {(() => {
-                          const u = UNITS.find(u => u.value === (singleItemUnit || 'units'));
-                          return u ? (language === 'he' ? u.labelHe : u.labelEn) : '';
-                        })()}
-                      </span>
-                    </SelectTrigger>
-                    <SelectContent className="border-2 border-black dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] bg-white dark:bg-slate-900">
-                      {UNITS.map(u => (
-                        <SelectItem key={u.value} value={u.value}>
-                          {language === 'he' ? u.labelHe : u.labelEn}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <div title={t.addItemButton}>
-                    <Button
-                      onClick={handleAddSingleItem}
-                      disabled={!singleItemInput.trim()}
-                      className="w-9 h-9 sm:w-10 sm:h-10 p-0 shrink-0 grid place-items-center bg-yellow-400 text-black rounded-lg border-2 border-transparent hover:bg-yellow-500 hover:scale-105 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[1px] active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:bg-stone-300 disabled:text-stone-500"
+                      }}
+                    />
+                    <Select
+                      value={singleItemUnit}
+                      onValueChange={(val: Unit) => {
+                        setSingleItemUnit(val);
+                        if (val === 'units') {
+                          const currentQty = parseFloat(singleItemQuantity);
+                          if (!isNaN(currentQty)) {
+                            setSingleItemQuantity(Math.round(currentQty).toString());
+                          }
+                        }
+                      }}
                     >
-                      <Plus className="h-5 w-5 sm:h-6 sm:w-6" strokeWidth={3} />
-                    </Button>
+                      <SelectTrigger className="w-[3.5rem] sm:w-[4.5rem] h-9 sm:h-10 text-[10px] sm:text-xs rounded-lg shrink-0 px-0 sm:px-1 border-2 border-black dark:border-slate-700 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all bg-white dark:bg-slate-900 text-center justify-center [&>span]:w-full [&>span]:text-center [&>svg]:hidden !text-black dark:!text-slate-100">
+                        <span className="truncate w-full text-center">
+                          {(() => {
+                            const u = UNITS.find(u => u.value === (singleItemUnit || 'units'));
+                            return u ? (language === 'he' ? u.labelHe : u.labelEn) : '';
+                          })()}
+                        </span>
+                      </SelectTrigger>
+                      <SelectContent className="border-2 border-black dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] bg-white dark:bg-slate-900">
+                        {UNITS.map(u => (
+                          <SelectItem key={u.value} value={u.value}>
+                            {language === 'he' ? u.labelHe : u.labelEn}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* CENTER: Empty spacer */}
+                  <div className="flex-grow" />
+
+                  {/* RIGHT SIDE: Item Input + Add Button */}
+                  <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+                    <StandardizedInput
+                      variant="single-item"
+                      ref={singleItemInputRef}
+                      placeholder={t.addItemPlaceholder}
+                      value={singleItemInput}
+                      onChange={(e) => setSingleItemInput(e.target.value)}
+                      onKeyDown={e => e.key === "Enter" && handleAddSingleItem()}
+                    />
+                    <div title={t.addItemButton}>
+                      <Button
+                        onClick={handleAddSingleItem}
+                        disabled={!singleItemInput.trim()}
+                        className="w-9 h-9 sm:w-10 sm:h-10 p-0 shrink-0 grid place-items-center bg-yellow-400 text-black rounded-lg border-2 border-transparent hover:bg-yellow-500 hover:scale-105 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[1px] active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:bg-stone-300 disabled:text-stone-500"
+                      >
+                        <Plus className="h-5 w-5 sm:h-6 sm:w-6" strokeWidth={3} />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1640,46 +1697,82 @@ export const ShoppingList = () => {
                   </div>
                 ) : (
                   notepadItems.map((item, index) => (
-                    <div key={item.id} className="flex items-center gap-3 py-1">
-                      <Checkbox
-                        checked={item.isChecked}
-                        onCheckedChange={() => toggleNotepadItem(item.id)}
-                        className="h-4 w-4 border-2 border-black dark:border-slate-600 data-[state=checked]:bg-black dark:data-[state=checked]:bg-slate-600 data-[state=checked]:text-yellow-400 flex-shrink-0"
-                      />
-                      <input
-                        ref={(el) => {
-                          notepadInputRefs.current[index] = el;
-                        }}
-                        type="text"
-                        value={item.text}
-                        onChange={(e) => {
-                          const newText = e.target.value;
-                          setNotepadItems(prev => prev.map(i =>
-                            i.id === item.id ? { ...i, text: newText } : i
-                          ));
-                        }}
-                        onKeyDown={(e) => {
-                          const currentIndex = notepadItems.findIndex(i => i.id === item.id);
+                    <div key={item.id} className={`flex items-center gap-2 py-1 w-full ${language === 'he' ? 'flex-row-reverse' : ''}`}>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <input
+                          type="number"
+                          min="0.1"
+                          step="0.1"
+                          value={item.quantity || 1}
+                          onChange={(e) => {
+                            const qty = parseFloat(e.target.value) || 1;
+                            setNotepadItems(prev => prev.map(i =>
+                              i.id === item.id ? { ...i, quantity: Math.max(0.1, qty) } : i
+                            ));
+                          }}
+                          className="w-16 h-8 text-center text-xs rounded border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-slate-200 focus:border-yellow-400 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] transition-all flex-shrink-0"
+                          title={language === 'he' ? 'כמות' : 'Quantity'}
+                        />
+                        <select
+                          value={item.unit || 'units'}
+                          onChange={(e) => {
+                            setNotepadItems(prev => prev.map(i =>
+                              i.id === item.id ? { ...i, unit: e.target.value as Unit } : i
+                            ));
+                          }}
+                          className="w-20 h-8 text-xs rounded border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-slate-200 focus:border-yellow-400 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] transition-all flex-shrink-0 cursor-pointer"
+                          title={language === 'he' ? 'יחידה' : 'Unit'}
+                        >
+                          {UNITS.map(u => (
+                            <option key={u.value} value={u.value}>
+                              {language === 'he' ? u.labelHe : u.labelEn}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="flex-grow" />
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <Checkbox
+                          checked={item.isChecked}
+                          onCheckedChange={() => toggleNotepadItem(item.id)}
+                          className="h-4 w-4 border-2 border-black dark:border-slate-600 data-[state=checked]:bg-black dark:data-[state=checked]:bg-slate-600 data-[state=checked]:text-yellow-400 flex-shrink-0"
+                        />
+                        <input
+                          ref={(el) => {
+                            notepadInputRefs.current[index] = el;
+                          }}
+                          type="text"
+                          value={item.text}
+                          onChange={(e) => {
+                            const newText = e.target.value;
+                            setNotepadItems(prev => prev.map(i =>
+                              i.id === item.id ? { ...i, text: newText } : i
+                            ));
+                          }}
+                          onKeyDown={(e) => {
+                            const currentIndex = notepadItems.findIndex(i => i.id === item.id);
 
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            // Create new item at next position
-                            const newItem: NotepadItem = {
-                              id: `notepad-${Date.now()}`,
-                              text: '',
-                              isChecked: false
-                            };
-                            setNotepadItems(prev => {
-                              const newItems = [...prev];
-                              newItems.splice(currentIndex + 1, 0, newItem);
-                              return newItems;
-                            });
-                            // Focus the new input after state update
-                            setTimeout(() => {
-                              if (notepadInputRefs.current[currentIndex + 1]) {
-                                notepadInputRefs.current[currentIndex + 1]!.focus();
-                              }
-                            }, 0);
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              // Create new item at next position
+                              const newItem: NotepadItem = {
+                                id: `notepad-${Date.now()}`,
+                                text: '',
+                                isChecked: false,
+                                quantity: 1,
+                                unit: 'units'
+                              };
+                              setNotepadItems(prev => {
+                                const newItems = [...prev];
+                                newItems.splice(currentIndex + 1, 0, newItem);
+                                return newItems;
+                              });
+                              // Focus the new input after state update
+                              setTimeout(() => {
+                                if (notepadInputRefs.current[currentIndex + 1]) {
+                                  notepadInputRefs.current[currentIndex + 1]!.focus();
+                                }
+                              }, 0);
 
                           } else if (e.key === 'Backspace') {
                             if (item.text === '' && currentIndex > 0) {
@@ -1712,32 +1805,43 @@ export const ShoppingList = () => {
                         className={`flex-1 text-lg font-normal font-hand bg-transparent outline-none caret-yellow-500 dark:caret-white ${item.isChecked ? 'line-through text-gray-500 dark:text-slate-500' : 'text-black dark:text-slate-200'} placeholder:text-gray-400 dark:placeholder:text-slate-500`}
                         placeholder={index === 0 && notepadItems.length === 1 ? "הקלד פריט..." : ""}
                       />
+                      </div>
                     </div>
                   ))
                 )}
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-2 mt-4 w-full transition-all duration-300 ease-in-out relative z-10">
+              <div className="flex flex-col sm:flex-row gap-2 mt-4 w-full justify-center items-center transition-all duration-300 ease-in-out relative z-10">
                 {/* Secondary buttons */}
                 <div className={`flex gap-2 overflow-hidden p-1 transition-all duration-300 ease-in-out ${notepadItems.length > 0 ? 'w-full sm:w-1/3 opacity-100' : 'w-0 opacity-0'}`}>
                   <Button
                     onClick={() => setNotepadItems([])}
                     variant="ghost"
-                    className="flex-1 text-gray-700 dark:text-slate-400 hover:bg-gray-200 hover:text-red-700 h-11 text-base font-medium rounded-full"
+                    className="flex-1 text-gray-700 dark:text-slate-400 hover:bg-gray-200 hover:text-red-700 h-11 text-base font-medium rounded-full flex items-center justify-center"
                   >
                     <Trash2 className="mr-2 h-5 w-5" />
                     {t.clearAllButton}
                   </Button>
                 </div>
-                {/* Add button */}
-                <Button
-                  onClick={handlePaste}
-                  disabled={notepadItems.length === 0}
-                  className={`h-11 text-base font-bold bg-yellow-400 text-black hover:bg-yellow-500 px-8 rounded-lg shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] hover:scale-105 active:scale-95 transition-all duration-200 border-2 border-black ${notepadItems.length > 0 ? 'w-full sm:w-2/3' : 'w-full'}`}
-                >
-                  <Plus className="mr-2 h-5 w-5" />
-                  {language === "he" ? "הפוך לרשימה" : "Turn into List"}
-                </Button>
+                {/* Two action buttons */}
+                <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto justify-center items-center">
+                  <Button
+                    onClick={handlePaste}
+                    disabled={notepadItems.length === 0}
+                    className="h-11 px-6 sm:px-8 text-base font-bold bg-yellow-400 text-black hover:bg-yellow-500 rounded-lg shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] hover:scale-105 active:scale-95 transition-all duration-200 border-2 border-black flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed min-w-max"
+                  >
+                    <ShoppingCart className="h-5 w-5 text-black" />
+                    {language === "he" ? "מצב קנייה" : "Purchase Mode"}
+                  </Button>
+                  <Button
+                    onClick={handleSaveList}
+                    disabled={notepadItems.length === 0}
+                    className="h-11 px-6 sm:px-8 text-base font-bold bg-yellow-400 text-black hover:bg-yellow-500 rounded-lg shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] hover:scale-105 active:scale-95 transition-all duration-200 border-2 border-black flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed min-w-max"
+                  >
+                    <Save className="h-5 w-5 text-black" />
+                    {language === "he" ? "שמור רשימה" : "Save List"}
+                  </Button>
+                </div>
               </div>
             </div>
           )

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   DndContext,
   closestCenter,
@@ -24,7 +24,36 @@ interface Template {
   id: string;
   name: string;
   items: string[];
+  isCustom?: boolean;
 }
+
+// System template translations - maps ID to both languages
+const systemTemplateTranslations: Record<string, { he: { name: string; items: string[] }; en: { name: string; items: string[] } }> = {
+  grocery: {
+    he: { name: "השלמות למכולת", items: ["חלב", "לחם", "קוטג'", "ביצים", "עגבניות"] },
+    en: { name: "Quick Grocery Run", items: ["Milk", "Bread", "Cottage Cheese", "Eggs", "Tomatoes"] }
+  },
+  hiking: {
+    he: { name: "ציוד לטיול", items: ["פינג'אן", "קפה שחור", "אוהל", "שק שינה", "בקבוקי מים", "קרם הגנה", "פנס", "מפית לחות"] },
+    en: { name: "Hiking & Camping", items: ["Finjan", "Black Coffee", "Tent", "Sleeping Bag", "Water Bottles", "Sunscreen", "Flashlight", "Wet Wipes"] }
+  },
+  tech: {
+    he: { name: "אלקטרוניקה וגאדג'טים", items: ["כבל HDMI", "סוללות AA", "מטען USB-C", "עכבר", "מקלדת", "אוזניות"] },
+    en: { name: "Tech & Gadgets", items: ["HDMI Cable", "AA Batteries", "USB-C Charger", "Mouse", "Keyboard", "Headphones"] }
+  },
+  bbq: {
+    he: { name: "על האש", items: ["פחמים", "סטייקים", "קבב", "חומוס", "פיתות", "סלטים", "מלקחיים", "מלח גס"] },
+    en: { name: "BBQ Party", items: ["Charcoal", "Steaks", "Kebabs", "Hummus", "Pita Bread", "Salads", "Tongs", "Coarse Salt"] }
+  },
+  cleaning: {
+    he: { name: "ניקיון ופארם", items: ["אקונומיקה", "נוזל רצפות", "שמפו", "משחת שיניים", "אבקת כביסה", "סבון ידיים", "נייר טואלט"] },
+    en: { name: "Cleaning & Pharmacy", items: ["Bleach", "Floor Cleaner", "Shampoo", "Toothpaste", "Laundry Detergent", "Hand Soap", "Toilet Paper"] }
+  },
+  family: {
+    he: { name: "קנייה משפחתית גדולה", items: ["שניצל", "פסטה", "אורז", "מלפפונים", "פלפלים", "מילקי", "גבינה צהובה", "במבה", "ביסלי", "פיצה קפואה", "חזה עוף", "שמן", "קורנפלקס", "נייר טואלט", "יוגורט", "לחם", "חלב"] },
+    en: { name: "Big Family Shop", items: ["Schnitzel", "Pasta", "Rice", "Cucumbers", "Peppers", "Milky", "Yellow Cheese", "Bamba", "Bisli", "Frozen Pizza", "Chicken Breast", "Oil", "Cereal", "Toilet Paper", "Yogurt", "Bread", "Milk"] }
+  }
+};
 
 interface SortableTemplateItemProps {
   template: Template;
@@ -64,7 +93,6 @@ const SortableTemplateItem = ({
     >
       {isEditMode && (
         <>
-          {/* Delete Button */}
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -76,7 +104,6 @@ const SortableTemplateItem = ({
             <X className="w-3.5 h-3.5" />
           </button>
           
-          {/* Drag Handle */}
           <div
             {...listeners}
             {...attributes}
@@ -109,8 +136,12 @@ interface SortableTemplatesProps {
   onCreateNew: () => void;
 }
 
-const STORAGE_KEY = 'activeTemplates';
+const STORAGE_KEY = 'activeTemplateIds';
+const STORAGE_KEY_CUSTOM = 'customTemplatesData';
 const STORAGE_KEY_EXPANDED = 'templatesExpanded';
+
+// Default system template IDs
+const DEFAULT_TEMPLATE_IDS = ['grocery', 'hiking', 'tech', 'bbq', 'cleaning', 'family'];
 
 export const SortableTemplates = ({
   systemTemplates,
@@ -118,19 +149,47 @@ export const SortableTemplates = ({
   onTemplateClick,
   onCreateNew,
 }: SortableTemplatesProps) => {
-  // Initialize with system templates if localStorage is empty
-  const [activeTemplates, setActiveTemplates] = useState<Template[]>(() => {
+  // Store only template IDs for ordering
+  const [activeTemplateIds, setActiveTemplateIds] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        return parsed.length > 0 ? parsed : systemTemplates;
+        return parsed.length > 0 ? parsed : DEFAULT_TEMPLATE_IDS;
       }
-      return systemTemplates;
+      return DEFAULT_TEMPLATE_IDS;
     } catch {
-      return systemTemplates;
+      return DEFAULT_TEMPLATE_IDS;
     }
   });
+
+  // Store custom templates separately with their content
+  const [customTemplates, setCustomTemplates] = useState<Template[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_CUSTOM);
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  // Build the active templates list with proper translations
+  const activeTemplates = useMemo(() => {
+    return activeTemplateIds.map(id => {
+      // Check if it's a system template
+      const systemTranslation = systemTemplateTranslations[id];
+      if (systemTranslation) {
+        const translated = systemTranslation[language];
+        return { id, name: translated.name, items: translated.items };
+      }
+      // Check if it's a custom template
+      const custom = customTemplates.find(t => t.id === id);
+      if (custom) {
+        return { ...custom, isCustom: true };
+      }
+      return null;
+    }).filter((t): t is Template => t !== null);
+  }, [activeTemplateIds, customTemplates, language]);
 
   const [isExpanded, setIsExpanded] = useState(() => {
     try {
@@ -154,10 +213,15 @@ export const SortableTemplates = ({
     })
   );
 
-  // Persist to localStorage whenever activeTemplates changes
+  // Persist template IDs to localStorage
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(activeTemplates));
-  }, [activeTemplates]);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(activeTemplateIds));
+  }, [activeTemplateIds]);
+
+  // Persist custom templates
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY_CUSTOM, JSON.stringify(customTemplates));
+  }, [customTemplates]);
 
   // Persist expanded state
   useEffect(() => {
@@ -168,16 +232,18 @@ export const SortableTemplates = ({
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
-      setActiveTemplates((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over.id);
-        return arrayMove(items, oldIndex, newIndex);
+      setActiveTemplateIds((ids) => {
+        const oldIndex = ids.indexOf(active.id as string);
+        const newIndex = ids.indexOf(over.id as string);
+        return arrayMove(ids, oldIndex, newIndex);
       });
     }
   };
 
   const handleDelete = (id: string) => {
-    setActiveTemplates((prev) => prev.filter((t) => t.id !== id));
+    setActiveTemplateIds((prev) => prev.filter((tid) => tid !== id));
+    // Also remove from custom templates if it's custom
+    setCustomTemplates((prev) => prev.filter((t) => t.id !== id));
   };
 
   const toggleEditMode = () => {
@@ -231,7 +297,7 @@ export const SortableTemplates = ({
           onDragEnd={handleDragEnd}
         >
           <SortableContext
-            items={activeTemplates.map((t) => t.id)}
+            items={activeTemplateIds}
             strategy={verticalListSortingStrategy}
           >
             <div className="flex flex-wrap justify-center gap-2.5">

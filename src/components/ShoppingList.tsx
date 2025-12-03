@@ -1170,7 +1170,7 @@ export const ShoppingList = () => {
                   )}
 
                   {/* Smart Input Toolbar */}
-                  <div className="flex gap-4 text-gray-500 mb-2 px-2">
+                  <div className={`flex gap-4 text-gray-500 mb-2 px-2 ${language === 'en' ? 'flex-row-reverse justify-end' : ''}`}>
                     {/* Voice Dictation Button */}
                     <button
                       onClick={handleVoiceDictation}
@@ -1216,7 +1216,7 @@ export const ShoppingList = () => {
                   </div>
 
                   {/* Notepad Items List */}
-                  <div className="min-h-[140px] space-y-2">
+                  <div className="min-h-[140px] space-y-2" dir={language === 'he' ? 'rtl' : 'ltr'}>
                     {notepadItems.length === 0 ? (
                       <div
                         className="text-center py-8 text-gray-600 dark:text-slate-400 font-hand text-lg font-normal leading-relaxed whitespace-pre-line cursor-pointer"
@@ -1239,41 +1239,7 @@ export const ShoppingList = () => {
                       </div>
                     ) : (
                       notepadItems.map((item, index) => (
-                        <div key={item.id} className={`flex md:flex-row md:items-center gap-3 py-2 w-full overflow-hidden ${language === 'he' ? 'md:flex-row-reverse flex-row-reverse' : 'flex-row-reverse md:flex-row'}`}>
-                          {/* Quantity + Unit - Compact on mobile */}
-                          <div className="flex items-center gap-1.5 flex-shrink-0">
-                            <input
-                              type="number"
-                              min="0.1"
-                              step="0.1"
-                              value={item.quantity || 1}
-                              onChange={(e) => {
-                                const qty = parseFloat(e.target.value) || 1;
-                                setNotepadItems(prev => prev.map(i =>
-                                  i.id === item.id ? { ...i, quantity: Math.max(0.1, qty) } : i
-                                ));
-                              }}
-                              className="w-12 md:w-16 h-7 md:h-8 text-center text-xs rounded border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-slate-200 focus:border-yellow-400 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] transition-all flex-shrink-0"
-                              title={language === 'he' ? 'כמות' : 'Quantity'}
-                            />
-                            <select
-                              value={item.unit || 'units'}
-                              onChange={(e) => {
-                                setNotepadItems(prev => prev.map(i =>
-                                  i.id === item.id ? { ...i, unit: e.target.value as Unit } : i
-                                ));
-                              }}
-                              className="w-14 md:w-20 h-7 md:h-8 text-xs rounded border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-slate-200 focus:border-yellow-400 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] transition-all flex-shrink-0 cursor-pointer"
-                              title={language === 'he' ? 'יחידה' : 'Unit'}
-                            >
-                              {UNITS.map(u => (
-                                <option key={u.value} value={u.value}>
-                                  {language === 'he' ? u.labelHe : u.labelEn}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-
+                        <div key={item.id} className="flex items-center gap-3 py-2 w-full overflow-hidden">
                           {/* Checkbox + Text Input - Take most space */}
                           <div className="flex items-center gap-2 flex-1 min-w-0">
                             <Checkbox
@@ -1348,8 +1314,42 @@ export const ShoppingList = () => {
                                   }
                                 }
                               }}
-                              placeholder={index === 0 && notepadItems.length === 1 ? "הקלד פריט..." : ""}
+                              placeholder={index === 0 && notepadItems.length === 1 ? (language === 'he' ? "הקלד פריט..." : "Type an item...") : ""}
                             />
+                          </div>
+                          
+                          {/* Quantity + Unit */}
+                          <div className="flex items-center gap-1.5 flex-shrink-0">
+                            <input
+                              type="number"
+                              min="0.1"
+                              step="0.1"
+                              value={item.quantity || 1}
+                              onChange={(e) => {
+                                const qty = parseFloat(e.target.value) || 1;
+                                setNotepadItems(prev => prev.map(i =>
+                                  i.id === item.id ? { ...i, quantity: Math.max(0.1, qty) } : i
+                                ));
+                              }}
+                              className="w-12 md:w-16 h-7 md:h-8 text-center text-xs rounded border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-slate-200 focus:border-yellow-400 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] transition-all flex-shrink-0"
+                              title={language === 'he' ? 'כמות' : 'Quantity'}
+                            />
+                            <select
+                              value={item.unit || 'units'}
+                              onChange={(e) => {
+                                setNotepadItems(prev => prev.map(i =>
+                                  i.id === item.id ? { ...i, unit: e.target.value as Unit } : i
+                                ));
+                              }}
+                              className="w-14 md:w-20 h-7 md:h-8 text-xs rounded border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-slate-200 focus:border-yellow-400 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] transition-all flex-shrink-0 cursor-pointer"
+                              title={language === 'he' ? 'יחידה' : 'Unit'}
+                            >
+                              {UNITS.map(u => (
+                                <option key={u.value} value={u.value}>
+                                  {language === 'he' ? u.labelHe : u.labelEn}
+                                </option>
+                              ))}
+                            </select>
                           </div>
                         </div>
                       ))
@@ -1508,7 +1508,7 @@ export const ShoppingList = () => {
               )}
 
               {/* Smart Input Toolbar */}
-              <div className="flex gap-4 text-gray-500 mb-4 px-2">
+              <div className={`flex gap-4 text-gray-500 mb-4 px-2 ${language === 'en' ? 'flex-row-reverse justify-end' : ''}`}>
                 {/* Voice Dictation Button */}
                 <button
                   onClick={handleVoiceDictation}
@@ -1554,10 +1554,10 @@ export const ShoppingList = () => {
               </div>
 
               {/* Notepad Items List */}
-              <div className="min-h-[140px] space-y-2">
+              <div className="min-h-[140px] space-y-2" dir={language === 'he' ? 'rtl' : 'ltr'}>
                 {notepadItems.length === 0 ? (
                   <div
-                    className="text-center py-8 text-gray-600 dark:text-slate-400 font-hand text-lg font-normal leading-relaxed whitespace-pre-line cursor-pointer"
+                    className={`py-8 text-gray-600 dark:text-slate-400 font-hand text-lg font-normal leading-relaxed whitespace-pre-line cursor-pointer ${language === 'he' ? 'text-center' : 'text-center'}`}
                     onClick={() => {
                       const newItem: NotepadItem = {
                         id: `notepad-${Date.now()}`,
@@ -1577,41 +1577,7 @@ export const ShoppingList = () => {
                   </div>
                 ) : (
                   notepadItems.map((item, index) => (
-                    <div key={item.id} className={`flex md:flex-row md:items-center gap-3 py-2 w-full overflow-hidden ${language === 'he' ? 'md:flex-row-reverse flex-row-reverse' : 'flex-row-reverse md:flex-row'}`}>
-                      {/* Quantity + Unit - Compact on mobile */}
-                      <div className="flex items-center gap-1.5 flex-shrink-0">
-                        <input
-                          type="number"
-                          min="0.1"
-                          step="0.1"
-                          value={item.quantity || 1}
-                          onChange={(e) => {
-                            const qty = parseFloat(e.target.value) || 1;
-                            setNotepadItems(prev => prev.map(i =>
-                              i.id === item.id ? { ...i, quantity: Math.max(0.1, qty) } : i
-                            ));
-                          }}
-                          className="w-12 md:w-16 h-7 md:h-8 text-center text-xs rounded border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-slate-200 focus:border-yellow-400 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] transition-all flex-shrink-0"
-                          title={language === 'he' ? 'כמות' : 'Quantity'}
-                        />
-                        <select
-                          value={item.unit || 'units'}
-                          onChange={(e) => {
-                            setNotepadItems(prev => prev.map(i =>
-                              i.id === item.id ? { ...i, unit: e.target.value as Unit } : i
-                            ));
-                          }}
-                          className="w-14 md:w-20 h-7 md:h-8 text-xs rounded border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-slate-200 focus:border-yellow-400 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] transition-all flex-shrink-0 cursor-pointer"
-                          title={language === 'he' ? 'יחידה' : 'Unit'}
-                        >
-                          {UNITS.map(u => (
-                            <option key={u.value} value={u.value}>
-                              {language === 'he' ? u.labelHe : u.labelEn}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-
+                    <div key={item.id} className="flex items-center gap-3 py-2 w-full overflow-hidden">
                       {/* Checkbox + Text Input - Take most space */}
                       <div className="flex items-center gap-2 flex-1 min-w-0">
                         <Checkbox
@@ -1619,7 +1585,9 @@ export const ShoppingList = () => {
                           onCheckedChange={() => toggleNotepadItem(item.id)}
                           className="h-4 w-4 border-2 border-black dark:border-slate-600 data-[state=checked]:bg-black dark:data-[state=checked]:bg-slate-600 data-[state=checked]:text-yellow-400 flex-shrink-0"
                         />
-                        <input
+                        <StandardizedInput
+                          variant="notepad"
+                          isChecked={item.isChecked}
                           ref={(el) => {
                             notepadInputRefs.current[index] = el;
                           }}
@@ -1656,37 +1624,70 @@ export const ShoppingList = () => {
                                 }
                               }, 0);
 
-                          } else if (e.key === 'Backspace') {
-                            if (item.text === '' && currentIndex > 0) {
+                            } else if (e.key === 'Backspace') {
+                              if (item.text === '' && currentIndex > 0) {
+                                e.preventDefault();
+                                // Delete current item and focus previous
+                                setNotepadItems(prev => prev.filter(i => i.id !== item.id));
+                                setTimeout(() => {
+                                  if (notepadInputRefs.current[currentIndex - 1]) {
+                                    notepadInputRefs.current[currentIndex - 1]!.focus();
+                                    // Move cursor to end of text
+                                    const input = notepadInputRefs.current[currentIndex - 1]!;
+                                    input.setSelectionRange(input.value.length, input.value.length);
+                                  }
+                                }, 0);
+                              }
+
+                            } else if (e.key === 'ArrowUp') {
                               e.preventDefault();
-                              // Delete current item and focus previous
-                              setNotepadItems(prev => prev.filter(i => i.id !== item.id));
-                              setTimeout(() => {
-                                if (notepadInputRefs.current[currentIndex - 1]) {
-                                  notepadInputRefs.current[currentIndex - 1]!.focus();
-                                  // Move cursor to end of text
-                                  const input = notepadInputRefs.current[currentIndex - 1]!;
-                                  input.setSelectionRange(input.value.length, input.value.length);
-                                }
-                              }, 0);
-                            }
+                              if (currentIndex > 0 && notepadInputRefs.current[currentIndex - 1]) {
+                                notepadInputRefs.current[currentIndex - 1]!.focus();
+                              }
 
-                          } else if (e.key === 'ArrowUp') {
-                            e.preventDefault();
-                            if (currentIndex > 0 && notepadInputRefs.current[currentIndex - 1]) {
-                              notepadInputRefs.current[currentIndex - 1]!.focus();
+                            } else if (e.key === 'ArrowDown') {
+                              e.preventDefault();
+                              if (currentIndex < notepadItems.length - 1 && notepadInputRefs.current[currentIndex + 1]) {
+                                notepadInputRefs.current[currentIndex + 1]!.focus();
+                              }
                             }
-
-                          } else if (e.key === 'ArrowDown') {
-                            e.preventDefault();
-                            if (currentIndex < notepadItems.length - 1 && notepadInputRefs.current[currentIndex + 1]) {
-                              notepadInputRefs.current[currentIndex + 1]!.focus();
-                            }
-                          }
-                        }}
-                        className={`flex-1 min-w-0 text-lg font-normal font-hand bg-transparent outline-none caret-yellow-500 dark:caret-white overflow-hidden text-ellipsis whitespace-nowrap ${item.isChecked ? 'line-through text-gray-500 dark:text-slate-500' : 'text-black dark:text-slate-200'} placeholder:text-gray-400 dark:placeholder:text-slate-500`}
-                        placeholder={index === 0 && notepadItems.length === 1 ? "הקלד פריט..." : ""}
-                      />
+                          }}
+                          placeholder={index === 0 && notepadItems.length === 1 ? (language === 'he' ? "הקלד פריט..." : "Type an item...") : ""}
+                        />
+                      </div>
+                      
+                      {/* Quantity + Unit */}
+                      <div className="flex items-center gap-1.5 flex-shrink-0">
+                        <input
+                          type="number"
+                          min="0.1"
+                          step="0.1"
+                          value={item.quantity || 1}
+                          onChange={(e) => {
+                            const qty = parseFloat(e.target.value) || 1;
+                            setNotepadItems(prev => prev.map(i =>
+                              i.id === item.id ? { ...i, quantity: Math.max(0.1, qty) } : i
+                            ));
+                          }}
+                          className="w-12 md:w-16 h-7 md:h-8 text-center text-xs rounded border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-slate-200 focus:border-yellow-400 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] transition-all flex-shrink-0"
+                          title={language === 'he' ? 'כמות' : 'Quantity'}
+                        />
+                        <select
+                          value={item.unit || 'units'}
+                          onChange={(e) => {
+                            setNotepadItems(prev => prev.map(i =>
+                              i.id === item.id ? { ...i, unit: e.target.value as Unit } : i
+                            ));
+                          }}
+                          className="w-14 md:w-20 h-7 md:h-8 text-xs rounded border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-slate-200 focus:border-yellow-400 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] transition-all flex-shrink-0 cursor-pointer"
+                          title={language === 'he' ? 'יחידה' : 'Unit'}
+                        >
+                          {UNITS.map(u => (
+                            <option key={u.value} value={u.value}>
+                              {language === 'he' ? u.labelHe : u.labelEn}
+                            </option>
+                          ))}
+                        </select>
                       </div>
                     </div>
                   ))

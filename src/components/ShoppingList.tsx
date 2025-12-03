@@ -1092,6 +1092,8 @@ export const ShoppingList = () => {
           </p>
         </div>
 
+
+
         {
           activeListId && (
             <div className="flex justify-between items-center w-full mb-3 sm:mb-4 gap-2">

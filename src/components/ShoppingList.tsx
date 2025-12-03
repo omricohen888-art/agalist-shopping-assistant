@@ -928,7 +928,7 @@ export const ShoppingList = () => {
   const progressPercentage = items.length > 0 ? completedCount / items.length * 100 : 0;
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-900 pb-32 transition-colors duration-150 overflow-x-hidden" dir={direction} lang={language}>
+    <div className="min-h-screen bg-white dark:bg-slate-900 pb-32 transition-colors duration-150" dir={direction} lang={language}>
       {/* List Creation Confirmation Animation */}
       {showConfirmation && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-[fade-in_0.2s_ease-out,scale-in_0.3s_ease-out]">
@@ -986,7 +986,7 @@ export const ShoppingList = () => {
       )}
 
       {/* Sticky Header Group */}
-      <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md text-black dark:text-slate-100 shadow-sm sticky top-0 z-50 border-b border-gray-200/50 dark:border-slate-800/50 transition-all duration-200">
+      <div className="sticky top-0 z-50 bg-white/65 dark:bg-slate-900/65 backdrop-blur-[12px] border-b border-black/10 dark:border-white/10 transition-all duration-300">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
           <div className="flex justify-between items-center w-full gap-3 sm:gap-4">
             {/* Title Section - Compact */}

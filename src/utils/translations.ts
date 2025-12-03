@@ -95,7 +95,7 @@ export const translations: Record<Language, {
         tagline: "רושמת, מארגנת וחוסכת!",
         fabLabel: "להוספת הרשימה לחץ כאן",
         menuTitle: "תפריט",
-        welcomeHeading:"שלחו לכם רשימת? רוצים לכתוב אחת חדשה?",
+        welcomeHeading: "שלחו לכם רשימת קניות? רוצים לכתוב אחת חדשה?",
         welcomeSubtitle: "הזינו אותה כאן וקבלו חוויית קנייה מהנה, אינטראקטיבית וחסכונית.",
         templatesHeading: "אין לכם רשימה? נסו אחת לדוגמה:",
         recentListsHeading: "רשימות אחרונות",

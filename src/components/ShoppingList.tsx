@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
-import { Share2, Trash2, Plus, CheckCircle2, History, BarChart3, Globe, Save, ClipboardList, Book, Square, CheckSquare, Printer, Mail, FileSpreadsheet, Copy, Pencil, X, ClipboardPaste, Info, ShoppingCart, Check, Volume2, RotateCcw, Mic, Camera, PenLine } from "lucide-react";
+import { Share2, Trash2, Plus, CheckCircle2, History, BarChart3, Globe, Save, ClipboardList, Book, Square, CheckSquare, Printer, Mail, FileSpreadsheet, Copy, Pencil, X, ClipboardPaste, Info, ShoppingCart, Check, Volume2, RotateCcw, Mic, Camera, PenLine, Search, User } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import { SmartAutocompleteInput, SmartAutocompleteInputRef } from "@/components/SmartAutocompleteInput";
 import { SavedListCard } from "@/components/SavedListCard";
@@ -928,7 +928,7 @@ export const ShoppingList = () => {
   const progressPercentage = items.length > 0 ? completedCount / items.length * 100 : 0;
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-900 pb-32 transition-colors duration-150 overflow-hidden" dir={direction} lang={language}>
+    <div className="min-h-screen bg-white dark:bg-slate-900 pb-32 transition-colors duration-150 overflow-x-hidden" dir={direction} lang={language}>
       {/* List Creation Confirmation Animation */}
       {showConfirmation && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-[fade-in_0.2s_ease-out,scale-in_0.3s_ease-out]">
@@ -986,12 +986,12 @@ export const ShoppingList = () => {
       )}
 
       {/* Sticky Header Group */}
-      <div className="bg-white dark:bg-slate-900 text-black dark:text-slate-100 shadow-sm sticky top-0 z-50 border-b border-gray-200 dark:border-slate-800">
-        <div className="max-w-3xl mx-auto px-3 sm:px-4 py-2 sm:py-2">
-          <div className="flex justify-between items-center w-full gap-2">
+      <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md text-black dark:text-slate-100 shadow-sm sticky top-0 z-50 border-b border-gray-200/50 dark:border-slate-800/50 transition-all duration-200">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
+          <div className="flex justify-between items-center w-full gap-3 sm:gap-4">
             {/* Title Section - Compact */}
             <div className="flex flex-col gap-0 flex-shrink-0 min-w-0 flex-1">
-              <div className={`flex items-center gap-1 sm:gap-2 text-2xl sm:text-3xl font-bold leading-tight ${language === "he" ? "flex-row" : "flex-row-reverse"}`}>
+              <div className={`flex items-center gap-2 sm:gap-3 text-2xl sm:text-3xl font-bold leading-tight ${language === "he" ? "flex-row" : "flex-row-reverse"}`}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
@@ -1003,9 +1003,9 @@ export const ShoppingList = () => {
                   className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0"
                 >
                   {/* Checkbox background */}
-                  <rect x="3" y="3" width="18" height="18" rx="2" fill="black" stroke="black" strokeWidth="2"/>
+                  <rect x="3" y="3" width="18" height="18" rx="2" fill="black" stroke="black" strokeWidth="2" />
                   {/* Checkmark - צהוב */}
-                  <polyline points="6 12 10 16 18 8" fill="none" stroke="rgb(250, 204, 21)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <polyline points="6 12 10 16 18 8" fill="none" stroke="rgb(250, 204, 21)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
                 <span className="truncate text-black dark:text-slate-100">{t.appTitle}</span>
                 <svg
@@ -1029,8 +1029,33 @@ export const ShoppingList = () => {
             </div>
 
             {/* Actions Section */}
-            <div className="flex items-center gap-1.5 flex-shrink-0">
-              {/* Settings are now in bottom Navigation */}
+            <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+              {/* Search Icon */}
+              <button
+                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors active:scale-95"
+                title={language === 'he' ? 'חיפוש' : 'Search'}
+                aria-label={language === 'he' ? 'חיפוש' : 'Search'}
+              >
+                <Search className="h-5 w-5 sm:h-6 sm:w-6 text-gray-700 dark:text-slate-300" strokeWidth={2} />
+              </button>
+
+              {/* Shopping Cart Icon */}
+              <button
+                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors active:scale-95"
+                title={language === 'he' ? 'מצב קנייה' : 'Shopping Mode'}
+                aria-label={language === 'he' ? 'מצב קנייה' : 'Shopping Mode'}
+              >
+                <ShoppingCart className="h-5 w-5 sm:h-6 sm:w-6 text-gray-700 dark:text-slate-300" strokeWidth={2} />
+              </button>
+
+              {/* Profile Icon */}
+              <button
+                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors active:scale-95"
+                title={language === 'he' ? 'פרופיל' : 'Profile'}
+                aria-label={language === 'he' ? 'פרופיל' : 'Profile'}
+              >
+                <User className="h-5 w-5 sm:h-6 sm:w-6 text-gray-700 dark:text-slate-300" strokeWidth={2} />
+              </button>
             </div>
           </div>
         </div>
@@ -1038,11 +1063,11 @@ export const ShoppingList = () => {
 
       {/* Progress Bar - Part of sticky header */}
       {
-        items.length > 0 && <div className="bg-white dark:bg-slate-900 px-3 sm:px-4 pb-3 sm:pb-4 sticky top-16 z-50 border-b border-gray-200 dark:border-slate-800">
+        items.length > 0 && <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md px-4 sm:px-6 pb-3 sm:pb-4 sticky top-[60px] sm:top-[72px] z-40 border-b border-gray-200/50 dark:border-slate-800/50 transition-all duration-200">
           <div className="max-w-3xl mx-auto">
             <div className="space-y-1.5 sm:space-y-2">
-              <Progress value={progressPercentage} className="h-2 sm:h-2.5 bg-primary-foreground/20" />
-              <p className="text-xs sm:text-sm text-primary-foreground/90 dark:text-slate-300 text-center font-medium">
+              <Progress value={progressPercentage} className="h-2 sm:h-2.5 bg-gray-200 dark:bg-slate-700" />
+              <p className="text-xs sm:text-sm text-gray-600 dark:text-slate-400 text-center font-medium">
                 {t.progressText(completedCount, items.length)}
               </p>
             </div>
@@ -1317,7 +1342,7 @@ export const ShoppingList = () => {
                               placeholder={index === 0 && notepadItems.length === 1 ? (language === 'he' ? "הקלד פריט..." : "Type an item...") : ""}
                             />
                           </div>
-                          
+
                           {/* Quantity + Unit */}
                           <div className="flex items-center gap-1.5 flex-shrink-0">
                             <input
@@ -1655,7 +1680,7 @@ export const ShoppingList = () => {
                           placeholder={index === 0 && notepadItems.length === 1 ? (language === 'he' ? "הקלד פריט..." : "Type an item...") : ""}
                         />
                       </div>
-                      
+
                       {/* Quantity + Unit */}
                       <div className="flex items-center gap-1.5 flex-shrink-0">
                         <input

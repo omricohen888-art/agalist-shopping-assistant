@@ -1901,9 +1901,9 @@ export const ShoppingList = () => {
         {/* Items List */}
         {
           items && items.length > 0 && (
-            <div className="space-y-4">
+            <div className="space-y-5 sm:space-y-6">
               {/* Pending Items */}
-              <div className="space-y-2.5">
+              <div className="space-y-3 sm:space-y-4">
                 {items.filter(item => !item.checked).map((item) => (
                   <ShoppingListItem
                     key={item.id}
@@ -1918,16 +1918,19 @@ export const ShoppingList = () => {
 
               {/* Completed Items Separator */}
               {items.filter(item => item.checked).length > 0 && (
-                <div className="text-gray-500 dark:text-slate-500 text-sm font-medium py-4 flex items-center gap-4 before:h-px before:flex-1 before:bg-gray-300 dark:before:bg-slate-600 after:h-px after:flex-1 after:bg-gray-300 dark:after:bg-slate-600">
-                  <span className="whitespace-nowrap">
-                    {language === 'he' ? `בוצע (${items.filter(item => item.checked).length})` : `Completed (${items.filter(item => item.checked).length})`}
+                <div className="flex items-center gap-3 sm:gap-4 py-2">
+                  <div className="h-px flex-1 bg-gradient-to-r from-transparent via-success/30 to-transparent" />
+                  <span className="text-sm font-semibold text-success flex items-center gap-2 px-3 py-1.5 bg-success/10 rounded-full">
+                    <Check className="h-4 w-4" />
+                    {language === 'he' ? `בוצע (${items.filter(item => item.checked).length})` : `Done (${items.filter(item => item.checked).length})`}
                   </span>
+                  <div className="h-px flex-1 bg-gradient-to-r from-transparent via-success/30 to-transparent" />
                 </div>
               )}
 
               {/* Completed Items (Always Visible) */}
               {items.filter(item => item.checked).length > 0 && (
-                <div className="space-y-2.5">
+                <div className="space-y-3 sm:space-y-4">
                   {items.filter(item => item.checked).map((item) => (
                     <ShoppingListItem
                       key={item.id}

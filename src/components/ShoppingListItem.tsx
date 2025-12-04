@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Trash2 } from "lucide-react";
+import { Trash2, Check } from "lucide-react";
 import { ShoppingItem, Unit, UNITS } from "@/types/shopping";
 import { useGlobalLanguage } from "@/context/LanguageContext";
 import { useSoundSettings } from "@/hooks/use-sound-settings.tsx";
@@ -11,9 +11,10 @@ interface QuantityInputProps {
   value: number;
   onChange: (val: number) => void;
   unit: Unit;
+  isCompleted?: boolean;
 }
 
-const QuantityInput = ({ value, onChange, unit }: QuantityInputProps) => {
+const QuantityInput = ({ value, onChange, unit, isCompleted }: QuantityInputProps) => {
   const [localValue, setLocalValue] = useState(value.toString());
 
   const handleBlur = () => {
@@ -43,8 +44,12 @@ const QuantityInput = ({ value, onChange, unit }: QuantityInputProps) => {
           e.currentTarget.blur();
         }
       }}
-      className="h-8 sm:h-9 text-center text-[10px] sm:text-xs rounded-lg px-0 border-2 border-black/20 hover:border-black focus:border-black transition-colors bg-white dark:bg-slate-900 !text-black dark:!text-slate-100"
-      style={{ width: '48px', flexShrink: 0 }}
+      className={`h-10 sm:h-11 text-center text-sm sm:text-base font-semibold rounded-xl px-1 border-2 transition-all duration-200 touch-manipulation
+        ${isCompleted 
+          ? 'border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 text-gray-400 dark:text-slate-500' 
+          : 'border-gray-200 dark:border-slate-600 hover:border-primary focus:border-primary focus:ring-2 focus:ring-primary/20 bg-white dark:bg-slate-800 text-foreground'
+        }`}
+      style={{ width: '56px', flexShrink: 0 }}
     />
   );
 };
@@ -78,11 +83,11 @@ export const ShoppingListItem = ({
     // Start animation
     setIsAnimating(true);
 
-    // Wait 600ms before actually toggling
+    // Wait 500ms before actually toggling
     setTimeout(() => {
       onToggle(item.id);
       setIsAnimating(false);
-    }, 600);
+    }, 500);
   };
 
   // Determine visual state (show as checked if animating, even if not actually checked yet)
@@ -91,80 +96,150 @@ export const ShoppingListItem = ({
 
   return (
     <div 
-      className={`shopping-item-row bg-white dark:bg-slate-800 rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] border-2 border-black dark:border-slate-700 px-2 sm:px-3 md:px-4 group hover:translate-y-[-2px] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] transition-all touch-manipulation animate-in slide-in-from-top-4 fade-in duration-300 ${isDimmed ? 'bg-gray-50 dark:bg-slate-700/50 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.5)] border-gray-200 dark:border-slate-600 opacity-60' : ''
-      } ${visualChecked ? 'bg-green-50 dark:bg-green-900/20' : ''
-      } flex justify-between items-center w-full py-2`}
+      className={`
+        relative overflow-hidden
+        bg-card rounded-2xl 
+        border-2 transition-all duration-300 ease-out
+        touch-manipulation
+        ${isDimmed 
+          ? 'border-gray-100 dark:border-slate-700/50 bg-gray-50/80 dark:bg-slate-800/50' 
+          : visualChecked 
+            ? 'border-success/30 bg-success/5 dark:bg-success/10' 
+            : 'border-gray-100 dark:border-slate-700 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5'
+        }
+        ${!isDimmed && !visualChecked ? 'active:scale-[0.98]' : ''}
+      `}
       dir={direction}
-      data-direction={direction}
-      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '8px 0' }}
     >
-      {/* CONTAINER A - ITEM INFO: Checkbox + Item Name */}
-      <div 
-        className="shopping-item-info flex items-center gap-3 flex-1 min-w-0"
-        style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: '1 1 auto', minWidth: 0 }}
-      >
-        <Checkbox
-          checked={visualChecked}
-          onCheckedChange={handleCheck}
-          className={`border-2 transition-all duration-200 active:scale-110 rounded-md cursor-pointer ${visualChecked
-            ? 'border-green-500 bg-green-500 text-white'
-            : isDimmed
-              ? 'border-gray-400 dark:border-slate-500'
-              : 'border-black dark:border-slate-600 data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500 data-[state=checked]:text-white'
-            }`}
-          style={{ width: '28px', height: '28px', flexShrink: 0, cursor: 'pointer' }}
-        />
-        
-        <span 
-          className={`text-xs sm:text-sm leading-snug transition-all font-bold ${visualChecked ? "line-through text-gray-500 dark:text-slate-400 decoration-2" : "text-black dark:text-slate-100"
-          }`}
-          style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
-        >
-          {item.text}
-        </span>
-      </div>
+      {/* Success celebration gradient overlay */}
+      {visualChecked && !isDimmed && (
+        <div className="absolute inset-0 bg-gradient-to-r from-success/10 via-transparent to-success/5 pointer-events-none" />
+      )}
 
-      {/* CONTAINER B - CONTROLS: Quantity + Unit + Delete */}
-      <div 
-        className="shopping-item-controls flex items-center gap-1.5 flex-shrink-0"
-        style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: '0 0 auto' }}
-      >
-        <QuantityInput
-          value={item.quantity || 1}
-          onChange={(val) => onQuantityChange(item.id, val)}
-          unit={item.unit}
-        />
+      <div className="relative flex items-center gap-3 sm:gap-4 p-3 sm:p-4">
+        {/* Large Touch-Friendly Checkbox */}
+        <button
+          onClick={handleCheck}
+          className={`
+            relative flex-shrink-0 
+            w-12 h-12 sm:w-14 sm:h-14 
+            rounded-2xl 
+            border-3 
+            flex items-center justify-center
+            transition-all duration-300 ease-out
+            touch-manipulation
+            active:scale-90
+            ${visualChecked
+              ? 'bg-success border-success shadow-lg shadow-success/30'
+              : isDimmed
+                ? 'border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-700'
+                : 'border-gray-300 dark:border-slate-500 bg-white dark:bg-slate-800 hover:border-success hover:bg-success/10'
+            }
+          `}
+          aria-label={visualChecked ? 'Uncheck item' : 'Check item'}
+        >
+          {visualChecked && (
+            <Check 
+              className="h-7 w-7 sm:h-8 sm:w-8 text-white animate-in zoom-in-50 duration-300" 
+              strokeWidth={3.5} 
+            />
+          )}
+          {isAnimating && (
+            <div className="absolute inset-0 rounded-2xl bg-success/20 animate-ping" />
+          )}
+        </button>
         
-        <Select
-          value={item.unit || 'units'}
-          onValueChange={(val: Unit) => onUnitChange(item.id, val)}
-        >
-          <SelectTrigger className="h-8 sm:h-9 px-0 text-[10px] sm:text-xs rounded-lg border-2 border-black/20 hover:border-black focus:border-black transition-colors text-center justify-center [&>span]:w-full [&>span]:text-center [&>svg]:hidden" style={{ width: '48px', flexShrink: 0 }}>
-            <span className="truncate w-full text-center">
-              {(() => {
-                const u = UNITS.find(u => u.value === (item.unit || 'units'));
-                return u ? (language === 'he' ? u.labelHe : u.labelEn) : '';
-              })()}
-            </span>
-          </SelectTrigger>
-          <SelectContent className="border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-            {UNITS.map(u => (
-              <SelectItem key={u.value} value={u.value}>
-                {language === 'he' ? u.labelHe : u.labelEn}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {/* Item Name - Flexible width */}
+        <div className="flex-1 min-w-0 py-1">
+          <span 
+            className={`
+              block text-base sm:text-lg font-semibold leading-tight
+              transition-all duration-300
+              ${visualChecked 
+                ? "line-through text-muted-foreground decoration-2 decoration-success/50" 
+                : "text-foreground"
+              }
+              ${isDimmed ? 'opacity-60' : ''}
+            `}
+            style={{ 
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden'
+            }}
+          >
+            {item.text}
+          </span>
+        </div>
 
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => onDelete(item.id)}
-          className="h-8 w-8 sm:h-9 sm:w-9 hover:bg-red-100 text-red-500 hover:text-red-600 touch-manipulation rounded-lg opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
-          style={{ flexShrink: 0 }}
-        >
-          <Trash2 className="h-4 w-4 sm:h-5 sm:w-5" />
-        </Button>
+        {/* Controls Section */}
+        <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+          {/* Quantity Input */}
+          <QuantityInput
+            value={item.quantity || 1}
+            onChange={(val) => onQuantityChange(item.id, val)}
+            unit={item.unit}
+            isCompleted={isDimmed}
+          />
+          
+          {/* Unit Select */}
+          <Select
+            value={item.unit || 'units'}
+            onValueChange={(val: Unit) => onUnitChange(item.id, val)}
+          >
+            <SelectTrigger 
+              className={`
+                h-10 sm:h-11 px-2 text-sm sm:text-base font-medium
+                rounded-xl border-2 transition-all duration-200
+                text-center justify-center 
+                [&>svg]:hidden
+                touch-manipulation
+                ${isDimmed 
+                  ? 'border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 text-gray-400 dark:text-slate-500' 
+                  : 'border-gray-200 dark:border-slate-600 hover:border-primary focus:border-primary focus:ring-2 focus:ring-primary/20 bg-white dark:bg-slate-800'
+                }
+              `} 
+              style={{ width: '64px', flexShrink: 0 }}
+            >
+              <span className="truncate w-full text-center">
+                {(() => {
+                  const u = UNITS.find(u => u.value === (item.unit || 'units'));
+                  return u ? (language === 'he' ? u.labelHe : u.labelEn) : '';
+                })()}
+              </span>
+            </SelectTrigger>
+            <SelectContent className="border-2 border-gray-200 dark:border-slate-600 rounded-xl shadow-xl">
+              {UNITS.map(u => (
+                <SelectItem 
+                  key={u.value} 
+                  value={u.value}
+                  className="text-sm sm:text-base py-2.5 cursor-pointer"
+                >
+                  {language === 'he' ? u.labelHe : u.labelEn}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Delete Button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onDelete(item.id)}
+            className={`
+              h-10 w-10 sm:h-11 sm:w-11 
+              rounded-xl
+              text-gray-400 dark:text-slate-500
+              hover:bg-destructive/10 hover:text-destructive
+              active:scale-90
+              transition-all duration-200
+              touch-manipulation
+              ${isDimmed ? 'opacity-50' : ''}
+            `}
+          >
+            <Trash2 className="h-5 w-5 sm:h-6 sm:w-6" />
+          </Button>
+        </div>
       </div>
     </div>
   );

@@ -24,11 +24,11 @@ const defaultSettings: SoundSettings = {
 
 // Preset sound profiles with optimized frequencies and durations
 const SOUND_PROFILES = {
-  click: { frequency: 800, duration: 0.08 },      // Short, clean click
-  success: { frequency: 520, duration: 0.15 },    // Pleasant success tone
-  error: { frequency: 330, duration: 0.12 },      // Warning tone
-  warning: { frequency: 440, duration: 0.1 },     // Alert tone
-  info: { frequency: 600, duration: 0.1 },        // Info tone
+  click: { frequencies: [800], duration: 0.06 },
+  success: { frequencies: [523, 659, 784], duration: 0.2 }, // C major chord for pleasant success
+  error: { frequencies: [330, 294], duration: 0.15 },
+  warning: { frequencies: [440], duration: 0.1 },
+  info: { frequencies: [600], duration: 0.08 },
 };
 
 export const useSoundSettings = () => {
@@ -75,13 +75,12 @@ export const SoundSettingsProvider = ({ children }: { children: React.ReactNode 
       oscillator.connect(gainNode);
       gainNode.connect(ctx.destination);
 
+      oscillator.type = 'sine';
       oscillator.frequency.setValueAtTime(frequency, ctx.currentTime);
-      // Subtle frequency sweep for more natural sound
-      oscillator.frequency.exponentialRampToValueAtTime(frequency * 0.5, ctx.currentTime + duration);
+      oscillator.frequency.exponentialRampToValueAtTime(frequency * 0.7, ctx.currentTime + duration);
 
-      // Clean fade in/out envelope
       gainNode.gain.setValueAtTime(0, ctx.currentTime);
-      gainNode.gain.linearRampToValueAtTime(settings.volume * 0.2, ctx.currentTime + 0.01);
+      gainNode.gain.linearRampToValueAtTime(settings.volume * 0.15, ctx.currentTime + 0.01);
       gainNode.gain.linearRampToValueAtTime(0, ctx.currentTime + duration);
 
       oscillator.start(ctx.currentTime);
@@ -91,9 +90,48 @@ export const SoundSettingsProvider = ({ children }: { children: React.ReactNode 
     }
   };
 
+  const playChord = (frequencies: number[], duration: number) => {
+    if (settings.isMuted) return;
+
+    try {
+      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioContext) return;
+
+      const ctx = new AudioContext();
+      
+      frequencies.forEach((freq, index) => {
+        const oscillator = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(ctx.destination);
+
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(freq, ctx.currentTime);
+        
+        // Stagger the notes slightly for arpeggio effect
+        const startDelay = index * 0.03;
+        const noteVolume = settings.volume * 0.1 / frequencies.length;
+
+        gainNode.gain.setValueAtTime(0, ctx.currentTime + startDelay);
+        gainNode.gain.linearRampToValueAtTime(noteVolume, ctx.currentTime + startDelay + 0.02);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + startDelay + duration);
+
+        oscillator.start(ctx.currentTime + startDelay);
+        oscillator.stop(ctx.currentTime + startDelay + duration);
+      });
+    } catch (error) {
+      console.log('Audio not supported');
+    }
+  };
+
   const playFeedback = (type: 'click' | 'success' | 'error' | 'warning' | 'info') => {
     const profile = SOUND_PROFILES[type];
-    playSound(profile.frequency, profile.duration);
+    if (profile.frequencies.length > 1) {
+      playChord(profile.frequencies, profile.duration);
+    } else {
+      playSound(profile.frequencies[0], profile.duration);
+    }
   };
 
   return (

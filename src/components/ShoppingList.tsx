@@ -11,11 +11,13 @@ import { Share2, Trash2, Plus, CheckCircle2, History, BarChart3, Globe, Save, Cl
 import { FaWhatsapp } from "react-icons/fa";
 import { SmartAutocompleteInput, SmartAutocompleteInputRef } from "@/components/SmartAutocompleteInput";
 import { SavedListCard } from "@/components/SavedListCard";
+import { CompletedTripCard } from "@/components/CompletedTripCard";
+import { HistoryDetailModal } from "@/components/HistoryDetailModal";
 import { StandardizedInput } from "@/components/ui/standardized-input";
 import { StandardizedTextarea } from "@/components/ui/standardized-textarea";
 import { HandwritingCanvas } from "@/components/HandwritingCanvas";
 import { toast } from "sonner";
-import { ShoppingItem, ISRAELI_STORES, UNITS, Unit, SavedList } from "@/types/shopping";
+import { ShoppingItem, ShoppingHistory, ISRAELI_STORES, UNITS, Unit, SavedList } from "@/types/shopping";
 import { ShoppingListItem } from "@/components/ShoppingListItem";
 import { SortableTemplates } from "@/components/SortableTemplates";
 import { SortModeToggle } from "@/components/SortModeToggle";
@@ -31,7 +33,7 @@ interface NotepadItem {
   quantity?: number;
   unit?: Unit;
 }
-import { saveShoppingHistory, saveList, getSavedLists, deleteSavedList, updateSavedList } from "@/utils/storage";
+import { saveShoppingHistory, getShoppingHistory, deleteShoppingHistory, saveList, getSavedLists, deleteSavedList, updateSavedList } from "@/utils/storage";
 import { useGlobalLanguage, Language } from "@/context/LanguageContext";
 import { translations } from "@/utils/translations";
 import { parseItemWithUnit, formatItemDisplay } from "@/utils/itemParser";
@@ -134,6 +136,11 @@ export const ShoppingList = () => {
   const [isSmartSort, setIsSmartSort] = useState(true); // Default to smart sort
   const [bulkPreviewItems, setBulkPreviewItems] = useState<Array<{ id: string; text: string; category: CategoryKey }>>([]);
 
+  // Shopping History States
+  const [shoppingHistory, setShoppingHistory] = useState<ShoppingHistory[]>([]);
+  const [selectedTrip, setSelectedTrip] = useState<ShoppingHistory | null>(null);
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+
   // Smart Input States
   const [isVoiceRecording, setIsVoiceRecording] = useState(false);
   const [isProcessingImage, setIsProcessingImage] = useState(false);
@@ -150,6 +157,7 @@ export const ShoppingList = () => {
 
   useEffect(() => {
     setSavedLists(getSavedLists());
+    setShoppingHistory(getShoppingHistory());
   }, []);
 
   // Load custom templates from localStorage
@@ -1140,6 +1148,9 @@ export const ShoppingList = () => {
       // Close dialog first
       setIsFinishDialogOpen(false);
       
+      // Update shopping history state
+      setShoppingHistory(getShoppingHistory());
+      
       // Show success celebration
       toast.success(language === 'he' ? '🎉 הקנייה הושלמה בהצלחה!' : '🎉 Shopping completed successfully!');
       
@@ -2015,57 +2026,113 @@ export const ShoppingList = () => {
           />
         )}
 
-        {/* Recent Lists Preview */}
+        {/* Dashboard - Saved Lists & Completed Trips */}
         {
-          items.length === 0 && savedLists.length > 0 && (
-            <div className="mb-12 border-t-2 border-black/5 pt-8 max-w-5xl mx-auto px-4">
-              <div className="flex justify-between items-center mb-6 px-2">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                  <History className="h-5 w-5 text-yellow-500" />
-                  {t.recentListsHeading}
-                </h3>
-                <Button
-                  variant="ghost"
-                  onClick={() => navigate("/notebook")}
-                  className="text-sm font-bold text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/20"
-                >
-                  {t.viewAllListsButton}
-                  {language === 'he' ? <div className="mr-1 rotate-180">➜</div> : <div className="ml-1">➜</div>}
-                </Button>
-              </div>
+          items.length === 0 && (savedLists.length > 0 || shoppingHistory.length > 0) && (
+            <div className="mb-12 border-t-2 border-black/5 pt-8 max-w-5xl mx-auto px-4 space-y-10">
+              
+              {/* Active/Pending Lists Section */}
+              {savedLists.length > 0 && (
+                <div>
+                  <div className="flex justify-between items-center mb-6 px-2">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                      <ClipboardList className="h-5 w-5 text-yellow-500" />
+                      {language === 'he' ? 'רשימות מוכנות' : 'Ready to Shop'}
+                      <span className="text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 px-2 py-0.5 rounded-full font-semibold">
+                        {savedLists.length}
+                      </span>
+                    </h3>
+                    <Button
+                      variant="ghost"
+                      onClick={() => navigate("/notebook")}
+                      className="text-sm font-bold text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/20"
+                    >
+                      {t.viewAllListsButton}
+                      {language === 'he' ? <div className="mr-1 rotate-180">➜</div> : <div className="ml-1">➜</div>}
+                    </Button>
+                  </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
-                {savedLists
-                  .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-                  .slice(0, 6)
-                  .map((list, index) => (
-                    <SavedListCard
-                      key={list.id}
-                      list={list}
-                      index={index}
-                      language={language}
-                      t={t}
-                      onLoad={handleLoadList}
-                      onDelete={(id) => {
-                        if (deleteSavedList(id)) {
-                          setSavedLists(getSavedLists());
-                          toast.success(t.toasts.listDeleted);
-                        }
-                      }}
-                      onToggleItem={(listId, itemId) => {
-                        const list = savedLists.find(l => l.id === listId);
-                        if (!list) return;
-                        const updatedItems = list.items.map(item =>
-                          item.id === itemId ? { ...item, checked: !item.checked } : item
-                        );
-                        const updatedList = { ...list, items: updatedItems };
-                        if (updateSavedList(updatedList)) {
-                          setSavedLists(getSavedLists());
-                        }
-                      }}
-                    />
-                  ))}
-              </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
+                    {savedLists
+                      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                      .slice(0, 4)
+                      .map((list, index) => (
+                        <SavedListCard
+                          key={list.id}
+                          list={list}
+                          index={index}
+                          language={language}
+                          t={t}
+                          onLoad={handleLoadList}
+                          onDelete={(id) => {
+                            if (deleteSavedList(id)) {
+                              setSavedLists(getSavedLists());
+                              toast.success(t.toasts.listDeleted);
+                            }
+                          }}
+                          onToggleItem={(listId, itemId) => {
+                            const list = savedLists.find(l => l.id === listId);
+                            if (!list) return;
+                            const updatedItems = list.items.map(item =>
+                              item.id === itemId ? { ...item, checked: !item.checked } : item
+                            );
+                            const updatedList = { ...list, items: updatedItems };
+                            if (updateSavedList(updatedList)) {
+                              setSavedLists(getSavedLists());
+                            }
+                          }}
+                        />
+                      ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Completed Trips Section */}
+              {shoppingHistory.length > 0 && (
+                <div>
+                  <div className="flex justify-between items-center mb-6 px-2">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                      <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                      {language === 'he' ? 'קניות שהושלמו' : 'Completed Trips'}
+                      <span className="text-xs bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-full font-semibold">
+                        {shoppingHistory.length}
+                      </span>
+                    </h3>
+                    <Button
+                      variant="ghost"
+                      onClick={() => navigate("/history")}
+                      className="text-sm font-bold text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:text-emerald-300 dark:hover:bg-emerald-900/20"
+                    >
+                      {language === 'he' ? 'צפה בהכל' : 'View All'}
+                      {language === 'he' ? <div className="mr-1 rotate-180">➜</div> : <div className="ml-1">➜</div>}
+                    </Button>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
+                    {shoppingHistory
+                      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                      .slice(0, 4)
+                      .map((trip, index) => (
+                        <CompletedTripCard
+                          key={trip.id}
+                          trip={trip}
+                          index={index}
+                          language={language}
+                          onViewDetails={(trip) => {
+                            setSelectedTrip(trip);
+                            setIsHistoryModalOpen(true);
+                          }}
+                          onDelete={(id) => {
+                            if (deleteShoppingHistory(id)) {
+                              setShoppingHistory(getShoppingHistory());
+                              toast.success(language === 'he' ? 'הקנייה נמחקה' : 'Trip deleted');
+                            }
+                          }}
+                        />
+                      ))}
+                  </div>
+                </div>
+              )}
             </div>
           )
         }
@@ -2393,6 +2460,17 @@ export const ShoppingList = () => {
             language={language}
           />
         )}
+
+        {/* History Detail Modal */}
+        <HistoryDetailModal
+          trip={selectedTrip}
+          isOpen={isHistoryModalOpen}
+          onClose={() => {
+            setIsHistoryModalOpen(false);
+            setSelectedTrip(null);
+          }}
+          language={language}
+        />
       </div>
     </div>
   );

@@ -473,11 +473,21 @@ export const ShoppingList = () => {
   };
 
   const handleTemplateClick = (templateItems: string[]) => {
-    const newNotepadItems: NotepadItem[] = templateItems.map((item, index) => ({
+    let newNotepadItems: NotepadItem[] = templateItems.map((item, index) => ({
       id: `template-${Date.now()}-${index}`,
       text: item,
       isChecked: false
     }));
+    
+    // Apply smart sort if enabled
+    if (isSmartSort) {
+      newNotepadItems = [...newNotepadItems].sort((a, b) => {
+        const categoryA = detectCategory(a.text);
+        const categoryB = detectCategory(b.text);
+        return CATEGORY_ORDER.indexOf(categoryA) - CATEGORY_ORDER.indexOf(categoryB);
+      });
+    }
+    
     setNotepadItems(newNotepadItems);
   };
 
@@ -1935,16 +1945,26 @@ export const ShoppingList = () => {
                 )}
               </div>
 
-              {/* Sort Mode Toggle - Visible when items exist */}
-              {notepadItems.length > 0 && (
-                <div className="mt-4 mb-2 px-2">
-                  <SortModeToggle
-                    isSmartSort={isSmartSort}
-                    onToggle={setIsSmartSort}
-                    language={language}
-                  />
-                </div>
-              )}
+              {/* Sort Mode Toggle - Always visible */}
+              <div className="mt-4 mb-2 px-2">
+                <SortModeToggle
+                  isSmartSort={isSmartSort}
+                  onToggle={(enabled) => {
+                    setIsSmartSort(enabled);
+                    // Re-sort notepad items if there are any
+                    if (enabled && notepadItems.length > 0) {
+                      const sorted = [...notepadItems].sort((a, b) => {
+                        const categoryA = detectCategory(a.text);
+                        const categoryB = detectCategory(b.text);
+                        return CATEGORY_ORDER.indexOf(categoryA) - CATEGORY_ORDER.indexOf(categoryB);
+                      });
+                      setNotepadItems(sorted);
+                      toast.success(language === 'he' ? 'הפריטים מסודרים לפי קטגוריה' : 'Items sorted by category');
+                    }
+                  }}
+                  language={language}
+                />
+              </div>
 
               <div className="flex flex-col sm:flex-row gap-2 mt-4 w-full justify-center items-center transition-all duration-300 ease-in-out relative z-10">
                 {/* Secondary buttons */}

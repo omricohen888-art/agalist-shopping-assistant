@@ -354,7 +354,7 @@ export const ShoppingList = () => {
 
   const handlePaste = () => {
     // Convert notepad items to main shopping items, preserving checked status and quantity
-    const newItems: ShoppingItem[] = notepadItems.map((notepadItem, index) => ({
+    let newItems: ShoppingItem[] = notepadItems.map((notepadItem, index) => ({
       id: `${Date.now()}-${index}`,
       text: notepadItem.text,
       checked: notepadItem.isChecked, // Preserve the checked status!
@@ -362,10 +362,16 @@ export const ShoppingList = () => {
       unit: (notepadItem.unit || 'units') as Unit
     }));
 
+    // Apply smart sort if enabled
+    if (isSmartSort) {
+      newItems = sortByCategory(newItems);
+    }
+
     if (activeListId) {
       // Edit Mode: Prepend items, clear input, NO success animation
       setItems(prev => [...newItems, ...prev]);
       setInputText("");
+      setNotepadItems([]);
       // Optional: Scroll to top to see new items
       window.scrollTo({ top: 0, behavior: 'smooth' });
       // Show success toast
@@ -374,6 +380,7 @@ export const ShoppingList = () => {
       // Home Page Mode: Create new list, show success animation
       setItems([...items, ...newItems]);
       setInputText("");
+      setNotepadItems([]);
 
       // Show success animation
       setShowListSuccess(true);
@@ -1928,6 +1935,17 @@ export const ShoppingList = () => {
                 )}
               </div>
 
+              {/* Sort Mode Toggle - Visible when items exist */}
+              {notepadItems.length > 0 && (
+                <div className="mt-4 mb-2 px-2">
+                  <SortModeToggle
+                    isSmartSort={isSmartSort}
+                    onToggle={setIsSmartSort}
+                    language={language}
+                  />
+                </div>
+              )}
+
               <div className="flex flex-col sm:flex-row gap-2 mt-4 w-full justify-center items-center transition-all duration-300 ease-in-out relative z-10">
                 {/* Secondary buttons */}
                 <div className={`flex gap-2 overflow-hidden p-1 transition-all duration-300 ease-in-out ${notepadItems.length > 0 ? 'w-full sm:w-1/3 opacity-100' : 'w-0 opacity-0'}`}>
@@ -2026,19 +2044,36 @@ export const ShoppingList = () => {
         {/* Secondary Action Bar */}
         {
           items && items.length > 0 && (
-            <div className="flex justify-start mb-4">
-              <button
-                onClick={() => {
-                  if (items && items.length > 0) {
-                    setItems(items.map(item => ({ ...item, checked: false })));
-                    toast.success(language === 'he' ? 'כל הסימונים אופסו' : 'All checks reset');
+            <div className="flex flex-col gap-3 mb-4">
+              {/* Sort Toggle */}
+              <SortModeToggle
+                isSmartSort={isSmartSort}
+                onToggle={(enabled) => {
+                  setIsSmartSort(enabled);
+                  // Re-sort items when toggling
+                  if (enabled) {
+                    setItems(sortByCategory(items));
+                    toast.success(language === 'he' ? 'הפריטים מסודרים לפי קטגוריה' : 'Items sorted by category');
                   }
                 }}
-                className="text-sm text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-              >
-                <RotateCcw className="w-4 h-4" />
-                <span>{language === 'he' ? 'אפס סימונים' : 'Reset Checks'}</span>
-              </button>
+                language={language}
+              />
+              
+              {/* Reset checks button */}
+              <div className="flex justify-start">
+                <button
+                  onClick={() => {
+                    if (items && items.length > 0) {
+                      setItems(items.map(item => ({ ...item, checked: false })));
+                      toast.success(language === 'he' ? 'כל הסימונים אופסו' : 'All checks reset');
+                    }
+                  }}
+                  className="text-sm text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  <span>{language === 'he' ? 'אפס סימונים' : 'Reset Checks'}</span>
+                </button>
+              </div>
             </div>
           )
         }

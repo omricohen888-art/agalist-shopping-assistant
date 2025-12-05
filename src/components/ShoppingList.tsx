@@ -1153,28 +1153,49 @@ export const ShoppingList = () => {
       )}
 
       {/* Sticky Header Group */}
-      <div className="sticky top-0 z-50 bg-white/65 dark:bg-slate-900/65 backdrop-blur-[12px] border-b border-black/10 dark:border-white/10 transition-all duration-300">
+      <div className="sticky top-0 z-50 glass-strong border-b border-border/30 transition-all duration-300">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
           <div className="flex justify-between items-center w-full gap-3 sm:gap-4">
-            {/* Logo Section - LEFT (LTR) / RIGHT (RTL) */}
-            <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+            {/* Logo Section - Clickable to go Home */}
+            <button
+              onClick={() => {
+                if (activeListId && items.length > 0) {
+                  // If in edit mode with items, confirm before leaving
+                  const confirmExit = window.confirm(
+                    language === 'he' 
+                      ? 'האם אתה בטוח שברצונך לצאת? שינויים שלא נשמרו יאבדו.' 
+                      : 'Are you sure you want to exit? Unsaved changes will be lost.'
+                  );
+                  if (!confirmExit) return;
+                }
+                // Reset all state
+                setActiveListId(null);
+                setItems([]);
+                setListName('');
+                setInputText('');
+                setNotepadItems([]);
+                setBulkInputText('');
+                setShowBulkInput(false);
+              }}
+              className="flex items-center gap-2 sm:gap-3 flex-shrink-0 hover:opacity-80 active:scale-95 transition-all duration-200 touch-manipulation"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
-                fill="black"
-                stroke="black"
+                fill="currentColor"
+                stroke="currentColor"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0"
+                className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0 text-foreground"
               >
                 {/* Checkbox background */}
-                <rect x="3" y="3" width="18" height="18" rx="2" fill="black" stroke="black" strokeWidth="2" />
+                <rect x="3" y="3" width="18" height="18" rx="2" fill="currentColor" stroke="currentColor" strokeWidth="2" />
                 {/* Checkmark - yellow */}
-                <polyline points="6 12 10 16 18 8" fill="none" stroke="rgb(250, 204, 21)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                <polyline points="6 12 10 16 18 8" fill="none" stroke="hsl(48, 96%, 53%)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
               <div className="flex items-center gap-1 sm:gap-1.5">
-                <span className="text-2xl sm:text-3xl font-bold text-black dark:text-slate-100">
+                <span className="text-2xl sm:text-3xl font-bold text-foreground">
                   {language === 'he' ? 'עגליסט' : 'ShopList'}
                 </span>
                 <svg
@@ -1185,7 +1206,7 @@ export const ShoppingList = () => {
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="h-7 w-7 sm:h-8 sm:w-8 text-black dark:text-slate-100 flex-shrink-0 -ml-0.5"
+                  className="h-7 w-7 sm:h-8 sm:w-8 text-foreground flex-shrink-0 -ml-0.5"
                 >
                   <circle cx="8" cy="21" r="1" />
                   <circle cx="19" cy="21" r="1" />
@@ -1195,38 +1216,60 @@ export const ShoppingList = () => {
                   <path d="M16.5 13.5H7.5" />
                 </svg>
               </div>
-            </div>
+            </button>
 
             {/* Spacer - Takes remaining space */}
             <div className="flex-grow" />
 
             {/* Actions Section - RIGHT (LTR) / LEFT (RTL) */}
-            <div className={`flex items-center gap-2 sm:gap-3 flex-shrink-0 ${language === 'he' ? 'flex-row-reverse' : ''}`}>
+            <div className={`flex items-center gap-1.5 sm:gap-2 flex-shrink-0 ${language === 'he' ? 'flex-row-reverse' : ''}`}>
+              {/* Exit Button - Only shown in edit mode */}
+              {activeListId && (
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    if (items.length > 0) {
+                      const confirmExit = window.confirm(
+                        language === 'he' 
+                          ? 'האם אתה בטוח שברצונך לצאת? שינויים שלא נשמרו יאבדו.' 
+                          : 'Are you sure you want to exit? Unsaved changes will be lost.'
+                      );
+                      if (!confirmExit) return;
+                    }
+                    exitEditMode();
+                  }}
+                  className="h-10 px-3 sm:px-4 rounded-xl bg-destructive/10 text-destructive hover:bg-destructive/20 font-semibold text-sm sm:text-base touch-manipulation active:scale-95 transition-all"
+                >
+                  <X className="h-4 w-4 sm:h-5 sm:w-5 mr-1" />
+                  {language === 'he' ? 'יציאה' : 'Exit'}
+                </Button>
+              )}
+
               {/* Search Icon */}
               <button
-                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors active:scale-95"
+                className="p-2.5 rounded-xl glass hover:bg-muted/80 transition-all active:scale-95 touch-manipulation"
                 title={language === 'he' ? 'חיפוש' : 'Search'}
                 aria-label={language === 'he' ? 'חיפוש' : 'Search'}
               >
-                <Search className="h-5 w-5 sm:h-6 sm:w-6 text-gray-700 dark:text-slate-300" strokeWidth={2} />
+                <Search className="h-5 w-5 sm:h-6 sm:w-6 text-muted-foreground" strokeWidth={2} />
               </button>
 
               {/* Shopping Cart Icon */}
               <button
-                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors active:scale-95"
+                className="p-2.5 rounded-xl glass hover:bg-muted/80 transition-all active:scale-95 touch-manipulation"
                 title={language === 'he' ? 'מצב קנייה' : 'Shopping Mode'}
                 aria-label={language === 'he' ? 'מצב קנייה' : 'Shopping Mode'}
               >
-                <ShoppingCart className="h-5 w-5 sm:h-6 sm:w-6 text-gray-700 dark:text-slate-300" strokeWidth={2} />
+                <ShoppingCart className="h-5 w-5 sm:h-6 sm:w-6 text-muted-foreground" strokeWidth={2} />
               </button>
 
               {/* Profile Icon */}
               <button
-                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors active:scale-95"
+                className="p-2.5 rounded-xl glass hover:bg-muted/80 transition-all active:scale-95 touch-manipulation"
                 title={language === 'he' ? 'פרופיל' : 'Profile'}
                 aria-label={language === 'he' ? 'פרופיל' : 'Profile'}
               >
-                <User className="h-5 w-5 sm:h-6 sm:w-6 text-gray-700 dark:text-slate-300" strokeWidth={2} />
+                <User className="h-5 w-5 sm:h-6 sm:w-6 text-muted-foreground" strokeWidth={2} />
               </button>
             </div>
           </div>
@@ -1287,40 +1330,31 @@ export const ShoppingList = () => {
 
         {
           activeListId && (
-            <div className="flex justify-between items-center w-full mb-3 sm:mb-4 gap-2">
-              <div className="flex items-center gap-1.5 sm:gap-2 cursor-pointer hover:text-gray-600 dark:hover:text-gray-300 transition-colors flex-1 min-w-0">
-                <Pencil className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-400 flex-shrink-0" />
-                <input
-                  ref={titleInputRef}
-                  value={listName}
-                  onChange={(e) => setListName(e.target.value)}
-                  className="flex-1 bg-transparent text-base sm:text-lg md:text-xl lg:text-2xl font-extrabold border-none outline-none px-1 py-1 select-text focus:cursor-text hover:cursor-text transition border-b-2 border-transparent focus:border-gray-400 hover:border-gray-300 focus:outline-none focus:ring-0 truncate"
-                  placeholder={language === 'he' ? 'שם הרשימה...' : 'List name...'}
-                  style={{ minWidth: 0 }}
-                />
-              </div>
-              <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+            <div className="glass-strong rounded-2xl p-4 sm:p-5 mb-4 sm:mb-6 border border-border/30">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                  <Pencil className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground flex-shrink-0" />
+                  <input
+                    ref={titleInputRef}
+                    value={listName}
+                    onChange={(e) => setListName(e.target.value)}
+                    className="flex-1 bg-transparent text-lg sm:text-xl md:text-2xl font-bold border-none outline-none px-2 py-1 select-text focus:cursor-text hover:cursor-text transition-all border-b-2 border-transparent focus:border-primary hover:border-primary/50 rounded-lg truncate placeholder:text-muted-foreground/50"
+                    placeholder={language === 'he' ? 'שם הרשימה...' : 'List name...'}
+                    style={{ minWidth: 0 }}
+                  />
+                </div>
                 <button
                   onClick={handleReadListAloud}
                   title={isSpeaking ? (language === 'he' ? 'עצור הקראה' : 'Stop reading') : (language === 'he' ? 'הקרא רשימה' : 'Read list aloud')}
-                  className="w-8 h-8 sm:w-9 sm:h-9 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-full p-1.5 sm:p-2 flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition-colors active:scale-95 touch-manipulation"
+                  className="w-11 h-11 sm:w-12 sm:h-12 glass hover:bg-muted/80 rounded-xl flex items-center justify-center flex-shrink-0 transition-all active:scale-95 touch-manipulation"
                   type="button"
                   aria-label={isSpeaking ? (language === 'he' ? 'עצור הקראה' : 'Stop reading') : (language === 'he' ? 'הקרא רשימה' : 'Read list aloud')}
                 >
                   {isSpeaking ? (
-                    <Square className="h-4 w-4 sm:h-5 sm:w-5 text-gray-900 dark:text-slate-100" />
+                    <Square className="h-5 w-5 sm:h-6 sm:w-6 text-foreground" />
                   ) : (
-                    <Volume2 className="h-4 w-4 sm:h-5 sm:w-5 text-gray-900 dark:text-slate-100" />
+                    <Volume2 className="h-5 w-5 sm:h-6 sm:w-6 text-foreground" />
                   )}
-                </button>
-                <button
-                  onClick={exitEditMode}
-                  title={t.exitEditMode}
-                  className="w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 bg-white shadow-md rounded-full flex items-center justify-center flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 hover:bg-gray-50 transition-colors active:scale-95 touch-manipulation"
-                  type="button"
-                  aria-label={t.exitEditMode}
-                >
-                  <X className="h-4 w-4 sm:h-5 sm:w-5 text-gray-900" />
                 </button>
               </div>
             </div>
@@ -1331,42 +1365,47 @@ export const ShoppingList = () => {
         {
           activeListId ? (
             <>
-              {/* Trigger Button */}
-              <div className="flex items-baseline gap-2 mb-3 sm:mb-4">
-                <button
-                  type="button"
-                  className="flex items-center gap-1.5 sm:gap-2 text-yellow-600 hover:text-yellow-700 text-sm sm:text-base md:text-lg font-bold focus:outline-none hover:underline px-1 py-0.5 rounded transition active:scale-95 touch-manipulation"
-                  onClick={() => setShowBulkInput(v => !v)}
-                  aria-expanded={showBulkInput}
-                  tabIndex={0}
-                >
-                  <ClipboardPaste className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" />
-                  <span>
-                    {language === "he"
-                      ? "רוצה להדביק רשימה ארוכה?"
-                      : "Want to paste a long list?"}
-                  </span>
-                </button>
-              </div>
+              {/* Trigger Button for Bulk Input */}
+              <button
+                type="button"
+                className="w-full glass-strong rounded-2xl p-4 sm:p-5 mb-4 sm:mb-6 flex items-center justify-between hover:shadow-lg hover:border-primary/30 border border-border/30 transition-all duration-200 active:scale-[0.99] touch-manipulation group"
+                onClick={() => setShowBulkInput(v => !v)}
+                aria-expanded={showBulkInput}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                    <ClipboardPaste className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+                  </div>
+                  <div className={`text-${language === 'he' ? 'right' : 'left'}`}>
+                    <span className="block text-sm sm:text-base font-bold text-foreground">
+                      {language === "he" ? "הדבק רשימה ארוכה" : "Paste Multiple Items"}
+                    </span>
+                    <span className="block text-xs sm:text-sm text-muted-foreground">
+                      {language === "he" ? "הדבק טקסט מ-WhatsApp או מקור אחר" : "Paste text from WhatsApp or other source"}
+                    </span>
+                  </div>
+                </div>
+                <Plus className={`h-5 w-5 sm:h-6 sm:w-6 text-muted-foreground transition-transform duration-200 ${showBulkInput ? 'rotate-45' : ''}`} />
+              </button>
 
-              {/* Bulk Input Card - Textarea Style */}
+              {/* Bulk Input Card - Glassmorphism Style */}
               {showBulkInput && (
-                <div className="bg-white dark:bg-slate-800 border-2 border-black dark:border-slate-700 rounded-xl p-4 sm:p-6 mb-4 sm:mb-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] focus-within:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:focus-within:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] hover:border-yellow-400 focus-within:border-yellow-400 transition-all duration-200 hover:-translate-y-0.5 sm:hover:-translate-y-1 focus-within:-translate-y-0.5 sm:focus-within:-translate-y-1 overflow-hidden">
+                <div className="glass-strong rounded-3xl p-4 sm:p-6 mb-4 sm:mb-6 border border-border/30 shadow-xl animate-fade-in overflow-hidden">
                   
                   {/* Header */}
-                  <div className="mb-3 sm:mb-4">
-                    <h3 className="text-sm sm:text-base font-bold text-black dark:text-white mb-1">
+                  <div className="mb-4 sm:mb-5">
+                    <h3 className="text-base sm:text-lg font-bold text-foreground mb-1">
                       {language === 'he' ? 'הדבק את הרשימה שלך' : 'Paste Your List'}
                     </h3>
-                    <p className="text-xs sm:text-sm text-gray-600 dark:text-slate-400">
+                    <p className="text-sm text-muted-foreground">
                       {language === 'he' 
-                        ? 'כל שורה תהפוך לפריט עם בול (•). אתה יכול להדביק טקסט או להקליד ישירות.'
-                        : 'Each line becomes an item with a bullet (•). You can paste text or type directly.'}
+                        ? 'כל שורה תהפוך לפריט. אתה יכול להדביק טקסט או להקליד ישירות.'
+                        : 'Each line becomes an item. You can paste text or type directly.'}
                     </p>
                   </div>
 
                   {/* Textarea with Smart Auto-Bullet Logic */}
-                  <div className="relative mb-3 sm:mb-4">
+                  <div className="relative mb-4 sm:mb-5">
                     <textarea
                       ref={bulkInputRef}
                       value={bulkInputText}
@@ -1452,62 +1491,74 @@ export const ShoppingList = () => {
                       placeholder={language === 'he' 
                         ? 'כאן תופיע הרשימה שלך עם בולים...' 
                         : 'Your list will appear here with bullets...'}
-                      className="w-full min-h-[150px] sm:min-h-[200px] p-3 sm:p-4 text-sm sm:text-base border-2 border-gray-300 dark:border-slate-600 rounded-lg focus:border-yellow-400 focus:outline-none transition-colors resize-none bg-white dark:bg-slate-900 text-black dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500 font-mono"
+                      className="w-full min-h-[180px] sm:min-h-[220px] p-4 sm:p-5 text-base sm:text-lg glass rounded-2xl border border-border/50 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none transition-all resize-none placeholder:text-muted-foreground/50 font-mono leading-relaxed touch-manipulation"
                       dir={language === 'he' ? 'rtl' : 'ltr'}
                     />
                   </div>
 
-                  {/* Action Buttons */}
-                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full">
-                    {/* Primary: Add Items */}
+                  {/* Action Buttons - Mobile Optimized */}
+                  <div className="flex flex-col gap-3 w-full">
+                    {/* Primary: Add Items - Full Width */}
                     <Button
                       onClick={handleAddBulkItems}
                       disabled={bulkInputText.trim().length === 0}
-                      className="flex-1 h-11 px-4 sm:px-6 text-base font-bold bg-yellow-400 text-black hover:bg-yellow-500 rounded-lg shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] hover:scale-105 active:scale-95 transition-all duration-200 border-2 border-black flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full h-14 sm:h-16 text-base sm:text-lg font-bold bg-gradient-to-br from-primary to-primary/90 text-primary-foreground hover:opacity-90 rounded-2xl shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
                     >
-                      <ShoppingCart className="h-5 w-5" />
+                      <ShoppingCart className="h-5 w-5 sm:h-6 sm:w-6" />
                       {language === 'he' ? 'הוסף לרשימה' : 'Add Items to List'}
                     </Button>
 
-                    {/* Secondary: Paste from Clipboard */}
-                    <Button
-                      onClick={handlePasteFromClipboard}
-                      variant="outline"
-                      className="h-11 px-4 sm:px-6 text-base font-bold rounded-lg shadow-[2px_2px_0px_0px_rgba(0,0,0,0.5)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-200 border-2 border-black dark:border-slate-600 dark:hover:bg-slate-700 flex items-center justify-center gap-2"
-                    >
-                      <ClipboardPaste className="h-5 w-5" />
-                      {language === 'he' ? 'הדבק' : 'Paste'}
-                    </Button>
+                    <div className="flex gap-3">
+                      {/* Secondary: Paste from Clipboard */}
+                      <Button
+                        onClick={handlePasteFromClipboard}
+                        variant="outline"
+                        className="flex-1 h-12 sm:h-14 text-sm sm:text-base font-semibold rounded-xl glass border border-border/50 hover:bg-muted/50 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 touch-manipulation"
+                      >
+                        <ClipboardPaste className="h-4 w-4 sm:h-5 sm:w-5" />
+                        {language === 'he' ? 'הדבק' : 'Paste'}
+                      </Button>
 
-                    {/* Tertiary: Clear */}
-                    <Button
-                      onClick={() => setBulkInputText('')}
-                      disabled={bulkInputText.trim().length === 0}
-                      variant="outline"
-                      className="h-11 px-4 sm:px-6 text-base font-bold rounded-lg shadow-[2px_2px_0px_0px_rgba(0,0,0,0.5)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-200 border-2 border-black dark:border-slate-600 dark:hover:bg-slate-700 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <Trash2 className="h-5 w-5" />
-                      {language === 'he' ? 'מחק הכל' : 'Clear'}
-                    </Button>
+                      {/* Tertiary: Clear */}
+                      <Button
+                        onClick={() => setBulkInputText('')}
+                        disabled={bulkInputText.trim().length === 0}
+                        variant="outline"
+                        className="flex-1 h-12 sm:h-14 text-sm sm:text-base font-semibold rounded-xl glass border border-border/50 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
+                      >
+                        <Trash2 className="h-4 w-4 sm:h-5 sm:w-5" />
+                        {language === 'he' ? 'מחק' : 'Clear'}
+                      </Button>
+                    </div>
                   </div>
                 </div>
               )}
 
-              {/* Single Item Row - Urban/Modern Neobrutalism Style */}
-              <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] border-3 border-black dark:border-slate-700 p-4 sm:p-5 md:p-6 mb-6 w-full relative overflow-visible hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all">
-                {/* Decorative "Tape" */}
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-28 h-7 bg-white/40 dark:bg-white/15 rotate-[-3deg] border-l-2 border-r-2 border-white/50 dark:border-white/25 backdrop-blur-[1px]" />
+              {/* Single Item Row - Glassmorphism Style */}
+              <div className="glass-strong rounded-3xl p-4 sm:p-5 md:p-6 mb-6 w-full border border-border/30 shadow-lg hover:shadow-xl transition-all duration-300">
+                <div className={`flex flex-col sm:flex-row w-full gap-3 sm:gap-4 ${language === 'he' ? 'sm:flex-row-reverse' : ''}`}>
+                  {/* Item Name Input - Full Width on Mobile */}
+                  <div className="flex-1 min-w-0">
+                    <StandardizedInput
+                      variant="single-item"
+                      ref={singleItemInputRef}
+                      placeholder={t.addItemPlaceholder}
+                      value={singleItemInput}
+                      onChange={(e) => setSingleItemInput(e.target.value)}
+                      onKeyDown={e => e.key === "Enter" && handleAddSingleItem()}
+                      className="w-full h-14 sm:h-16 text-base sm:text-lg px-4 sm:px-5 rounded-2xl glass border border-border/50 focus:border-primary focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground/50 touch-manipulation"
+                    />
+                  </div>
 
-                <div className={`flex w-full items-center gap-2 sm:gap-3 flex-nowrap relative z-10 ${language === 'he' ? 'flex-row-reverse' : ''}`}>
-                  {/* LEFT SIDE: Quantity + Unit + Add Button */}
-                  <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                  {/* Quantity + Unit + Add Button Row */}
+                  <div className={`flex items-center gap-2 sm:gap-3 ${language === 'he' ? 'flex-row-reverse' : ''}`}>
                     <Input
                       type="number"
                       min="0"
                       step={singleItemUnit === 'units' ? "1" : "0.1"}
                       value={singleItemQuantity}
                       onChange={(e) => setSingleItemQuantity(e.target.value)}
-                      className="w-[2.5rem] sm:w-[3.5rem] h-9 sm:h-10 text-center text-[10px] sm:text-xs rounded-lg shrink-0 px-0 border-2 border-black dark:border-slate-700 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all bg-white dark:bg-slate-900 !text-black dark:!text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500"
+                      className="w-16 sm:w-20 h-12 sm:h-14 text-center text-base sm:text-lg font-semibold rounded-xl glass border border-border/50 focus:border-primary focus:ring-2 focus:ring-primary/20 shrink-0 touch-manipulation"
                       onBlur={() => {
                         let val = parseFloat(singleItemQuantity);
                         if (singleItemUnit === 'units' && !isNaN(val)) {
@@ -1527,7 +1578,7 @@ export const ShoppingList = () => {
                         }
                       }}
                     >
-                      <SelectTrigger className="w-[3.5rem] sm:w-[4.5rem] h-9 sm:h-10 text-[10px] sm:text-xs rounded-lg shrink-0 px-0 sm:px-1 border-2 border-black dark:border-slate-700 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all bg-white dark:bg-slate-900 text-center justify-center [&>span]:w-full [&>span]:text-center [&>svg]:hidden !text-black dark:!text-slate-100">
+                      <SelectTrigger className="w-20 sm:w-24 h-12 sm:h-14 text-sm sm:text-base font-semibold rounded-xl shrink-0 glass border border-border/50 focus:ring-2 focus:ring-primary/20 text-center justify-center [&>span]:w-full [&>span]:text-center [&>svg]:hidden touch-manipulation">
                         <span className="truncate w-full text-center">
                           {(() => {
                             const u = UNITS.find(u => u.value === (singleItemUnit || 'units'));
@@ -1535,38 +1586,23 @@ export const ShoppingList = () => {
                           })()}
                         </span>
                       </SelectTrigger>
-                      <SelectContent className="border-2 border-black dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] bg-white dark:bg-slate-900">
+                      <SelectContent className="glass-strong rounded-2xl shadow-2xl border-0">
                         {UNITS.map(u => (
-                          <SelectItem key={u.value} value={u.value}>
+                          <SelectItem key={u.value} value={u.value} className="text-base py-3 rounded-xl mx-1">
                             {language === 'he' ? u.labelHe : u.labelEn}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
-                  </div>
-
-                  {/* CENTER: Empty spacer */}
-                  <div className="flex-grow" />
-
-                  {/* RIGHT SIDE: Item Input + Add Button */}
-                  <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-                    <StandardizedInput
-                      variant="single-item"
-                      ref={singleItemInputRef}
-                      placeholder={t.addItemPlaceholder}
-                      value={singleItemInput}
-                      onChange={(e) => setSingleItemInput(e.target.value)}
-                      onKeyDown={e => e.key === "Enter" && handleAddSingleItem()}
-                    />
-                    <div title={t.addItemButton}>
-                      <Button
-                        onClick={handleAddSingleItem}
-                        disabled={!singleItemInput.trim()}
-                        className="w-9 h-9 sm:w-10 sm:h-10 p-0 shrink-0 grid place-items-center bg-yellow-400 text-black rounded-lg border-2 border-transparent hover:bg-yellow-500 hover:scale-105 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[1px] active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:bg-stone-300 disabled:text-stone-500"
-                      >
-                        <Plus className="h-5 w-5 sm:h-6 sm:w-6" strokeWidth={3} />
-                      </Button>
-                    </div>
+                    
+                    {/* Add Button */}
+                    <Button
+                      onClick={handleAddSingleItem}
+                      disabled={!singleItemInput.trim()}
+                      className="w-14 h-12 sm:w-16 sm:h-14 p-0 shrink-0 grid place-items-center bg-gradient-to-br from-primary to-primary/90 text-primary-foreground rounded-xl hover:opacity-90 shadow-lg shadow-primary/20 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
+                    >
+                      <Plus className="h-6 w-6 sm:h-7 sm:w-7" strokeWidth={2.5} />
+                    </Button>
                   </div>
                 </div>
               </div>

@@ -18,6 +18,8 @@ import { toast } from "sonner";
 import { ShoppingItem, ISRAELI_STORES, UNITS, Unit, SavedList } from "@/types/shopping";
 import { ShoppingListItem } from "@/components/ShoppingListItem";
 import { SortableTemplates } from "@/components/SortableTemplates";
+import { SortModeToggle } from "@/components/SortModeToggle";
+import { sortByCategory, detectCategory, getCategoryInfo, CategoryKey, CATEGORY_ORDER } from "@/utils/categorySort";
 import { processInput, RateLimiter } from "@/utils/security";
 import { createWorker } from 'tesseract.js';
 
@@ -128,6 +130,8 @@ export const ShoppingList = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [showPasteFeedback, setShowPasteFeedback] = useState(false);
   const [notepadItems, setNotepadItems] = useState<NotepadItem[]>([]);
+  const [isSmartSort, setIsSmartSort] = useState(true); // Default to smart sort
+  const [bulkPreviewItems, setBulkPreviewItems] = useState<Array<{ id: string; text: string; category: CategoryKey }>>([]);
 
   // Smart Input States
   const [isVoiceRecording, setIsVoiceRecording] = useState(false);
@@ -208,7 +212,7 @@ export const ShoppingList = () => {
     }
 
     // Create shopping items from lines
-    const newItems: ShoppingItem[] = lines.map((line, index) => ({
+    let newItems: ShoppingItem[] = lines.map((line, index) => ({
       id: `${Date.now()}-${index}`,
       text: line,
       checked: false,
@@ -216,10 +220,16 @@ export const ShoppingList = () => {
       unit: 'units' as Unit
     }));
 
+    // Apply smart sort if enabled
+    if (isSmartSort) {
+      newItems = sortByCategory(newItems);
+    }
+
     if (activeListId) {
       // Edit Mode: Add items to existing list
       setItems(prev => [...newItems, ...prev]);
       setBulkInputText(""); // Clear textarea
+      setBulkPreviewItems([]); // Clear preview
       setShowBulkInput(false); // Close section
       toast.success(
         language === 'he' 
@@ -230,6 +240,7 @@ export const ShoppingList = () => {
       // Home Page Mode: Create new list
       setItems([...items, ...newItems]);
       setBulkInputText(""); // Clear textarea
+      setBulkPreviewItems([]); // Clear preview
 
       // Create new list
       const newListId = Date.now().toString();
@@ -251,6 +262,35 @@ export const ShoppingList = () => {
       }, 100);
     }
   };
+  
+  // Update preview items when bulk input or sort mode changes
+  useEffect(() => {
+    const lines = bulkInputText
+      .split('\n')
+      .map(line => line.replace(/^•\s*/, '').trim())
+      .filter(line => line.length > 0);
+    
+    if (lines.length === 0) {
+      setBulkPreviewItems([]);
+      return;
+    }
+
+    let previewItems = lines.map((line, index) => ({
+      id: `preview-${index}`,
+      text: line,
+      category: detectCategory(line)
+    }));
+
+    if (isSmartSort) {
+      previewItems = [...previewItems].sort((a, b) => {
+        const indexA = CATEGORY_ORDER.indexOf(a.category);
+        const indexB = CATEGORY_ORDER.indexOf(b.category);
+        return indexA - indexB;
+      });
+    }
+
+    setBulkPreviewItems(previewItems);
+  }, [bulkInputText, isSmartSort]);
 
   const handlePasteFromClipboard = async () => {
     try {
@@ -1491,10 +1531,62 @@ export const ShoppingList = () => {
                       placeholder={language === 'he' 
                         ? 'כאן תופיע הרשימה שלך עם בולים...' 
                         : 'Your list will appear here with bullets...'}
-                      className="w-full min-h-[180px] sm:min-h-[220px] p-4 sm:p-5 text-base sm:text-lg glass rounded-2xl border border-border/50 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none transition-all resize-none placeholder:text-muted-foreground/50 font-mono leading-relaxed touch-manipulation"
+                      className="w-full min-h-[140px] sm:min-h-[160px] p-4 sm:p-5 text-base sm:text-lg glass rounded-2xl border border-border/50 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none transition-all resize-none placeholder:text-muted-foreground/50 font-mono leading-relaxed touch-manipulation"
                       dir={language === 'he' ? 'rtl' : 'ltr'}
                     />
                   </div>
+
+                  {/* Sort Mode Toggle - Pill Shaped */}
+                  {bulkPreviewItems.length > 0 && (
+                    <div className="mb-4 sm:mb-5 animate-fade-in">
+                      <SortModeToggle
+                        isSmartSort={isSmartSort}
+                        onToggle={setIsSmartSort}
+                        language={language}
+                      />
+                    </div>
+                  )}
+
+                  {/* Live Preview - Animated List */}
+                  {bulkPreviewItems.length > 0 && (
+                    <div className="mb-4 sm:mb-5 glass rounded-2xl border border-border/30 overflow-hidden">
+                      <div className="px-4 py-3 border-b border-border/20 flex items-center justify-between">
+                        <span className="text-sm font-semibold text-foreground">
+                          {language === 'he' ? 'תצוגה מקדימה' : 'Preview'}
+                        </span>
+                        <span className="text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded-full">
+                          {bulkPreviewItems.length} {language === 'he' ? 'פריטים' : 'items'}
+                        </span>
+                      </div>
+                      <div className="max-h-[200px] overflow-y-auto p-2">
+                        <div className="space-y-1">
+                          {bulkPreviewItems.map((item, index) => {
+                            const categoryInfo = getCategoryInfo(item.category);
+                            return (
+                              <div
+                                key={item.id}
+                                className="flex items-center gap-3 px-3 py-2 rounded-xl bg-background/50 hover:bg-background/80 transition-all duration-300 animate-fade-in"
+                                style={{ 
+                                  animationDelay: `${index * 30}ms`,
+                                  animationFillMode: 'backwards'
+                                }}
+                              >
+                                <span className="text-lg flex-shrink-0">{categoryInfo.icon}</span>
+                                <span className="text-sm font-medium text-foreground flex-1 truncate" dir={language === 'he' ? 'rtl' : 'ltr'}>
+                                  {item.text}
+                                </span>
+                                {isSmartSort && (
+                                  <span className="text-xs text-muted-foreground bg-muted/30 px-2 py-0.5 rounded-full flex-shrink-0">
+                                    {language === 'he' ? categoryInfo.nameHe : categoryInfo.nameEn}
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Action Buttons - Mobile Optimized */}
                   <div className="flex flex-col gap-3 w-full">

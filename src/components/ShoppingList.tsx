@@ -1235,13 +1235,32 @@ export const ShoppingList = () => {
 
       {/* Progress Bar - Part of sticky header */}
       {
-        items.length > 0 && <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md px-4 sm:px-6 pb-3 sm:pb-4 sticky top-[60px] sm:top-[72px] z-40 border-b border-gray-200/50 dark:border-slate-800/50 transition-all duration-200">
+        items.length > 0 && <div className="glass-strong px-4 sm:px-6 pb-4 sm:pb-5 sticky top-[60px] sm:top-[72px] z-40 border-b border-border/30 transition-all duration-200">
           <div className="max-w-3xl mx-auto">
-            <div className="space-y-1.5 sm:space-y-2">
-              <Progress value={progressPercentage} className="h-2 sm:h-2.5 bg-gray-200 dark:bg-slate-700" />
-              <p className="text-xs sm:text-sm text-gray-600 dark:text-slate-400 text-center font-medium">
-                {t.progressText(completedCount, items.length)}
-              </p>
+            <div className="space-y-2 sm:space-y-3">
+              {/* Progress bar with gradient */}
+              <div className="relative h-3 sm:h-4 bg-muted/50 rounded-full overflow-hidden shadow-inner">
+                <div 
+                  className="absolute inset-y-0 left-0 bg-gradient-to-r from-success via-success to-success/80 rounded-full transition-all duration-500 ease-out shadow-md shadow-success/30"
+                  style={{ width: `${progressPercentage}%` }}
+                />
+                {/* Shine effect */}
+                <div 
+                  className="absolute inset-y-0 left-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0 rounded-full transition-all duration-500"
+                  style={{ width: `${progressPercentage}%` }}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <p className="text-sm sm:text-base text-muted-foreground font-medium">
+                  {t.progressText(completedCount, items.length)}
+                </p>
+                {progressPercentage === 100 && (
+                  <span className="text-success text-sm font-bold flex items-center gap-1 animate-bounce-in">
+                    <Check className="h-4 w-4" />
+                    {language === 'he' ? 'הושלם!' : 'Complete!'}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -1662,13 +1681,14 @@ export const ShoppingList = () => {
                   </div>
                 ) : (
                   notepadItems.map((item, index) => (
-                    <div key={item.id} className="flex items-center gap-3 py-2 w-full overflow-hidden">
+                    <div key={item.id} className="flex items-center gap-4 py-3 w-full overflow-hidden">
                       {/* Checkbox + Text Input - Take most space */}
-                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
                         <Checkbox
                           checked={item.isChecked}
                           onCheckedChange={() => toggleNotepadItem(item.id)}
-                          className="h-4 w-4 border-2 border-black dark:border-slate-600 data-[state=checked]:bg-black dark:data-[state=checked]:bg-slate-600 data-[state=checked]:text-yellow-400 flex-shrink-0"
+                          size="lg"
+                          className="flex-shrink-0"
                         />
                         <StandardizedInput
                           variant="notepad"
@@ -1901,34 +1921,39 @@ export const ShoppingList = () => {
         {/* Items List */}
         {
           items && items.length > 0 && (
-            <div className="space-y-5 sm:space-y-6">
+            <div className="space-y-4 sm:space-y-5">
               {/* Pending Items */}
               <div className="space-y-3 sm:space-y-4">
-                {items.filter(item => !item.checked).map((item) => (
-                  <ShoppingListItem
-                    key={item.id}
-                    item={item}
-                    onToggle={toggleItem}
-                    onDelete={deleteItem}
-                    onQuantityChange={updateItemQuantity}
-                    onUnitChange={updateItemUnit}
-                  />
+                {items.filter(item => !item.checked).map((item, index) => (
+                  <div 
+                    key={item.id} 
+                    className="animate-fade-in"
+                    style={{ animationDelay: `${index * 50}ms` }}
+                  >
+                    <ShoppingListItem
+                      item={item}
+                      onToggle={toggleItem}
+                      onDelete={deleteItem}
+                      onQuantityChange={updateItemQuantity}
+                      onUnitChange={updateItemUnit}
+                    />
+                  </div>
                 ))}
               </div>
 
               {/* Completed Items Separator */}
               {items.filter(item => item.checked).length > 0 && (
-                <div className="flex items-center gap-3 sm:gap-4 py-2">
-                  <div className="h-px flex-1 bg-gradient-to-r from-transparent via-success/30 to-transparent" />
-                  <span className="text-sm font-semibold text-success flex items-center gap-2 px-3 py-1.5 bg-success/10 rounded-full">
-                    <Check className="h-4 w-4" />
-                    {language === 'he' ? `בוצע (${items.filter(item => item.checked).length})` : `Done (${items.filter(item => item.checked).length})`}
+                <div className="flex items-center gap-4 py-4">
+                  <div className="h-px flex-1 bg-gradient-to-r from-transparent via-success/40 to-transparent" />
+                  <span className="text-sm font-bold text-success flex items-center gap-2.5 px-4 py-2 bg-success/15 rounded-full shadow-sm shadow-success/20 border border-success/20">
+                    <Check className="h-4 w-4" strokeWidth={3} />
+                    {language === 'he' ? `נרכשו ${items.filter(item => item.checked).length}` : `Completed ${items.filter(item => item.checked).length}`}
                   </span>
-                  <div className="h-px flex-1 bg-gradient-to-r from-transparent via-success/30 to-transparent" />
+                  <div className="h-px flex-1 bg-gradient-to-r from-transparent via-success/40 to-transparent" />
                 </div>
               )}
 
-              {/* Completed Items (Always Visible) */}
+              {/* Completed Items */}
               {items.filter(item => item.checked).length > 0 && (
                 <div className="space-y-3 sm:space-y-4">
                   {items.filter(item => item.checked).map((item) => (
@@ -1948,20 +1973,27 @@ export const ShoppingList = () => {
           )}
         {
           items && items.length > 0 && (
-            <div className="fixed bottom-0 left-0 right-0 z-[60] bg-white/95 dark:bg-slate-950/95 backdrop-blur-md border-t border-gray-200 dark:border-slate-800 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] p-3 sm:p-4 safe-area-inset-bottom">
+            <div className="fixed bottom-0 left-0 right-0 z-[60] glass-strong border-t border-border/50 shadow-[0_-8px_30px_-5px_rgba(0,0,0,0.15)] p-4 sm:p-5 safe-area-inset-bottom">
               <div className="max-w-3xl mx-auto">
-                <div className="flex flex-row gap-2 sm:gap-4">
+                <div className="flex flex-row gap-3 sm:gap-4">
                   {(() => {
                     const isSavedList = activeListId && savedLists.some(list => list.id === activeListId);
                     return (
-                      <Button variant="outline" onClick={handleSaveList} className="flex-1 h-11 sm:h-12 font-bold text-sm sm:text-base touch-manipulation rounded-xl bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-700 active:scale-95 transition-all">
-                        <Save className={`h-4 w-4 sm:h-5 sm:w-5 ${language === 'he' ? 'ml-1 sm:ml-2' : 'mr-1 sm:mr-2'}`} />
+                      <Button 
+                        variant="outline" 
+                        onClick={handleSaveList} 
+                        className="flex-1 h-14 sm:h-16 font-bold text-base sm:text-lg touch-manipulation rounded-2xl glass border-2 border-border/50 hover:border-primary/50 hover:bg-primary/5 active:scale-95 transition-all duration-200"
+                      >
+                        <Save className={`h-5 w-5 sm:h-6 sm:w-6 ${language === 'he' ? 'ml-2 sm:ml-3' : 'mr-2 sm:mr-3'}`} />
                         <span className="truncate">{isSavedList ? t.saveChangesButton : t.saveListButton}</span>
                       </Button>
                     );
                   })()}
-                  <Button onClick={openFinishDialog} className="flex-1 h-11 sm:h-12 font-bold bg-slate-900 text-white hover:bg-slate-800 text-sm sm:text-base touch-manipulation rounded-xl border-2 border-slate-700 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] sm:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] sm:hover:translate-y-[-2px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] sm:hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] active:translate-y-[0px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:scale-95 transition-all">
-                    <ClipboardList className={`h-4 w-4 sm:h-5 sm:w-5 ${language === 'he' ? 'ml-1 sm:ml-2' : 'mr-1 sm:mr-2'}`} />
+                  <Button 
+                    onClick={openFinishDialog} 
+                    className="flex-1 h-14 sm:h-16 font-bold text-base sm:text-lg touch-manipulation rounded-2xl bg-gradient-to-br from-foreground to-foreground/90 text-background hover:opacity-90 shadow-xl hover:shadow-2xl active:scale-95 transition-all duration-200"
+                  >
+                    <ClipboardList className={`h-5 w-5 sm:h-6 sm:w-6 ${language === 'he' ? 'ml-2 sm:ml-3' : 'mr-2 sm:mr-3'}`} />
                     <span className="truncate">{t.summarizeButton}</span>
                   </Button>
                 </div>

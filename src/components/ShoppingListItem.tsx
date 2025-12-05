@@ -1,10 +1,12 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Trash2, Check, Plus, Minus } from "lucide-react";
+import { Trash2, Check, Plus, Minus, Sparkles } from "lucide-react";
 import { ShoppingItem, Unit, UNITS } from "@/types/shopping";
 import { useGlobalLanguage } from "@/context/LanguageContext";
 import { useSoundSettings } from "@/hooks/use-sound-settings.tsx";
+import { useHaptics } from "@/hooks/use-haptics";
+import { ConfettiEffect } from "./ConfettiEffect";
 
 interface QuantityStepperProps {
   value: number;
@@ -16,16 +18,19 @@ interface QuantityStepperProps {
 const QuantityStepper = ({ value, onChange, unit, isCompleted }: QuantityStepperProps) => {
   const step = unit === 'units' ? 1 : 0.5;
   const minValue = unit === 'units' ? 1 : 0.1;
+  const { lightTap } = useHaptics();
   
   const handleIncrement = useCallback(() => {
+    lightTap();
     const newValue = Math.round((value + step) * 10) / 10;
     onChange(newValue);
-  }, [value, step, onChange]);
+  }, [value, step, onChange, lightTap]);
 
   const handleDecrement = useCallback(() => {
+    lightTap();
     const newValue = Math.max(minValue, Math.round((value - step) * 10) / 10);
     onChange(newValue);
-  }, [value, step, minValue, onChange]);
+  }, [value, step, minValue, onChange, lightTap]);
 
   const displayValue = unit === 'units' ? Math.round(value) : value;
 
@@ -34,12 +39,12 @@ const QuantityStepper = ({ value, onChange, unit, isCompleted }: QuantityStepper
       className={`
         inline-flex items-center 
         rounded-2xl 
-        border-2 
         overflow-hidden
-        transition-all duration-200
+        transition-all duration-300 ease-out
+        shadow-sm
         ${isCompleted 
-          ? 'border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50 opacity-60' 
-          : 'border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 hover:border-primary/50'
+          ? 'bg-muted/50 opacity-50' 
+          : 'glass hover:shadow-md hover:shadow-primary/10'
         }
       `}
     >
@@ -50,13 +55,13 @@ const QuantityStepper = ({ value, onChange, unit, isCompleted }: QuantityStepper
         disabled={isCompleted || value <= minValue}
         className={`
           flex items-center justify-center
-          w-11 h-11 sm:w-12 sm:h-12
-          transition-all duration-150
+          w-12 h-12 sm:w-14 sm:h-14
+          transition-all duration-200
           touch-manipulation
-          active:scale-90
+          active:scale-90 active:bg-primary/10
           ${isCompleted || value <= minValue
-            ? 'text-gray-300 dark:text-slate-600 cursor-not-allowed'
-            : 'text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-primary active:bg-primary/10'
+            ? 'text-muted-foreground/40 cursor-not-allowed'
+            : 'text-foreground/70 hover:bg-primary/10 hover:text-primary'
           }
         `}
         aria-label="Decrease quantity"
@@ -67,14 +72,15 @@ const QuantityStepper = ({ value, onChange, unit, isCompleted }: QuantityStepper
       {/* Value Display */}
       <div 
         className={`
-          min-w-[3rem] sm:min-w-[3.5rem] 
+          min-w-[3.5rem] sm:min-w-[4rem] 
           text-center 
           font-bold 
-          text-lg sm:text-xl
+          text-xl sm:text-2xl
           tabular-nums
           select-none
+          py-2
           ${isCompleted 
-            ? 'text-gray-400 dark:text-slate-500' 
+            ? 'text-muted-foreground/50' 
             : 'text-foreground'
           }
         `}
@@ -89,13 +95,13 @@ const QuantityStepper = ({ value, onChange, unit, isCompleted }: QuantityStepper
         disabled={isCompleted}
         className={`
           flex items-center justify-center
-          w-11 h-11 sm:w-12 sm:h-12
-          transition-all duration-150
+          w-12 h-12 sm:w-14 sm:h-14
+          transition-all duration-200
           touch-manipulation
-          active:scale-90
+          active:scale-90 active:bg-primary/10
           ${isCompleted
-            ? 'text-gray-300 dark:text-slate-600 cursor-not-allowed'
-            : 'text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-primary active:bg-primary/10'
+            ? 'text-muted-foreground/40 cursor-not-allowed'
+            : 'text-foreground/70 hover:bg-primary/10 hover:text-primary'
           }
         `}
         aria-label="Increase quantity"
@@ -124,17 +130,45 @@ export const ShoppingListItem = ({
   isCompleted = false
 }: ShoppingListItemProps) => {
   const [isAnimating, setIsAnimating] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [ripplePos, setRipplePos] = useState({ x: 0, y: 0 });
+  const [showRipple, setShowRipple] = useState(false);
+  const checkboxRef = useRef<HTMLButtonElement>(null);
+  
   const { language } = useGlobalLanguage();
-  const { playSound } = useSoundSettings();
+  const { playFeedback } = useSoundSettings();
+  const { successPattern } = useHaptics();
   const direction = language === 'he' ? 'rtl' : 'ltr';
 
-  const handleCheck = () => {
-    playSound(800, 0.1);
+  const handleCheck = (e: React.MouseEvent) => {
+    if (item.checked) {
+      // Unchecking - simple feedback
+      playFeedback('click');
+      onToggle(item.id);
+      return;
+    }
+
+    // Checking - full celebration!
+    const rect = checkboxRef.current?.getBoundingClientRect();
+    if (rect) {
+      setRipplePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+    }
+    
+    setShowRipple(true);
     setIsAnimating(true);
+    setShowConfetti(true);
+    
+    // Haptic + Sound feedback
+    successPattern();
+    playFeedback('success');
+    
+    // Staggered animations
+    setTimeout(() => setShowRipple(false), 600);
     setTimeout(() => {
       onToggle(item.id);
       setIsAnimating(false);
-    }, 500);
+    }, 400);
+    setTimeout(() => setShowConfetti(false), 800);
   };
 
   const visualChecked = isAnimating || item.checked;
@@ -144,56 +178,68 @@ export const ShoppingListItem = ({
     <div 
       className={`
         relative overflow-hidden
-        bg-card rounded-2xl 
-        border-2 transition-all duration-300 ease-out
+        rounded-3xl 
+        transition-all duration-400 ease-out
         touch-manipulation
         ${isDimmed 
-          ? 'border-gray-100 dark:border-slate-700/50 bg-gray-50/80 dark:bg-slate-800/50' 
+          ? 'glass opacity-60 scale-[0.98]' 
           : visualChecked 
-            ? 'border-success/30 bg-success/5 dark:bg-success/10' 
-            : 'border-gray-100 dark:border-slate-700 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5'
+            ? 'glass-strong border-2 border-success/40 shadow-lg shadow-success/10' 
+            : 'glass-strong hover:shadow-xl hover:shadow-primary/5 hover:scale-[1.01] active:scale-[0.99]'
         }
-        ${!isDimmed && !visualChecked ? 'active:scale-[0.99]' : ''}
       `}
       dir={direction}
     >
-      {/* Success gradient overlay */}
+      {/* Success celebration gradient */}
       {visualChecked && !isDimmed && (
-        <div className="absolute inset-0 bg-gradient-to-r from-success/10 via-transparent to-success/5 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-br from-success/15 via-success/5 to-transparent pointer-events-none" />
       )}
 
-      <div className="relative p-3 sm:p-4">
+      {/* Confetti Effect */}
+      <ConfettiEffect isActive={showConfetti} origin={{ x: 15, y: 30 }} />
+
+      <div className="relative p-4 sm:p-5">
         {/* Top Row: Checkbox + Name + Delete */}
-        <div className="flex items-center gap-3 sm:gap-4 mb-3">
-          {/* Large Touch-Friendly Checkbox */}
+        <div className="flex items-center gap-4 mb-4">
+          {/* Premium Checkbox */}
           <button
+            ref={checkboxRef}
             onClick={handleCheck}
             className={`
               relative flex-shrink-0 
-              w-12 h-12 sm:w-14 sm:h-14 
+              w-14 h-14 sm:w-16 sm:h-16 
               rounded-2xl 
-              border-3 
               flex items-center justify-center
               transition-all duration-300 ease-out
               touch-manipulation
-              active:scale-90
+              overflow-hidden
               ${visualChecked
-                ? 'bg-success border-success shadow-lg shadow-success/30'
+                ? 'bg-gradient-to-br from-success to-success/80 shadow-xl shadow-success/30 animate-checkbox-pulse'
                 : isDimmed
-                  ? 'border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-700'
-                  : 'border-gray-300 dark:border-slate-500 bg-white dark:bg-slate-800 hover:border-success hover:bg-success/10'
+                  ? 'bg-muted border-2 border-muted-foreground/20'
+                  : 'bg-card border-2 border-border hover:border-success/50 hover:bg-success/5 hover:shadow-lg active:scale-95'
               }
             `}
             aria-label={visualChecked ? 'Uncheck item' : 'Check item'}
           >
-            {visualChecked && (
-              <Check 
-                className="h-7 w-7 sm:h-8 sm:w-8 text-white animate-in zoom-in-50 duration-300" 
-                strokeWidth={3.5} 
+            {/* Ripple effect */}
+            {showRipple && (
+              <span 
+                className="absolute w-4 h-4 bg-success/30 rounded-full animate-ripple"
+                style={{ left: ripplePos.x, top: ripplePos.y, transform: 'translate(-50%, -50%)' }}
               />
             )}
-            {isAnimating && (
-              <div className="absolute inset-0 rounded-2xl bg-success/20 animate-ping" />
+            
+            {visualChecked && (
+              <>
+                <Check 
+                  className="h-8 w-8 sm:h-9 sm:w-9 text-success-foreground animate-check-bounce" 
+                  strokeWidth={3} 
+                />
+                {!isDimmed && (
+                  <Sparkles className="absolute -top-1 -right-1 h-4 w-4 text-primary animate-pulse-soft" />
+                )}
+              </>
             )}
           </button>
           
@@ -201,13 +247,14 @@ export const ShoppingListItem = ({
           <div className="flex-1 min-w-0">
             <span 
               className={`
-                block text-base sm:text-lg font-semibold leading-tight
-                transition-all duration-300
-                ${visualChecked 
-                  ? "line-through text-muted-foreground decoration-2 decoration-success/50" 
-                  : "text-foreground"
+                block text-lg sm:text-xl font-semibold leading-snug
+                transition-all duration-400
+                ${visualChecked && !isDimmed
+                  ? "strike-animate text-muted-foreground" 
+                  : visualChecked
+                    ? "line-through text-muted-foreground/60 decoration-2"
+                    : "text-foreground"
                 }
-                ${isDimmed ? 'opacity-60' : ''}
               `}
               style={{ 
                 display: '-webkit-box',
@@ -226,14 +273,14 @@ export const ShoppingListItem = ({
             size="icon"
             onClick={() => onDelete(item.id)}
             className={`
-              h-10 w-10 sm:h-11 sm:w-11 
-              rounded-xl flex-shrink-0
-              text-gray-400 dark:text-slate-500
+              h-12 w-12 sm:h-14 sm:w-14 
+              rounded-2xl flex-shrink-0
+              text-muted-foreground/60
               hover:bg-destructive/10 hover:text-destructive
               active:scale-90
               transition-all duration-200
               touch-manipulation
-              ${isDimmed ? 'opacity-50' : ''}
+              ${isDimmed ? 'opacity-40' : ''}
             `}
           >
             <Trash2 className="h-5 w-5 sm:h-6 sm:w-6" />
@@ -257,17 +304,18 @@ export const ShoppingListItem = ({
           >
             <SelectTrigger 
               className={`
-                h-11 sm:h-12 px-3 sm:px-4
-                text-sm sm:text-base font-semibold
-                rounded-2xl border-2 transition-all duration-200
+                h-12 sm:h-14 px-4 sm:px-5
+                text-base sm:text-lg font-semibold
+                rounded-2xl transition-all duration-200
                 [&>svg]:hidden
                 touch-manipulation
+                shadow-sm
                 ${isDimmed 
-                  ? 'border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50 text-gray-400 dark:text-slate-500 opacity-60' 
-                  : 'border-gray-200 dark:border-slate-600 hover:border-primary focus:border-primary focus:ring-2 focus:ring-primary/20 bg-white dark:bg-slate-800'
+                  ? 'bg-muted/50 text-muted-foreground/50 opacity-50' 
+                  : 'glass hover:shadow-md focus:ring-2 focus:ring-primary/30'
                 }
               `} 
-              style={{ minWidth: '80px' }}
+              style={{ minWidth: '90px' }}
             >
               <span className="truncate">
                 {(() => {
@@ -276,12 +324,12 @@ export const ShoppingListItem = ({
                 })()}
               </span>
             </SelectTrigger>
-            <SelectContent className="border-2 border-gray-200 dark:border-slate-600 rounded-xl shadow-xl">
+            <SelectContent className="glass-strong rounded-2xl shadow-2xl border-0">
               {UNITS.map(u => (
                 <SelectItem 
                   key={u.value} 
                   value={u.value}
-                  className="text-sm sm:text-base py-3 cursor-pointer"
+                  className="text-base sm:text-lg py-3.5 cursor-pointer rounded-xl mx-1 my-0.5"
                 >
                   {language === 'he' ? u.labelHe : u.labelEn}
                 </SelectItem>
@@ -289,7 +337,7 @@ export const ShoppingListItem = ({
             </SelectContent>
           </Select>
 
-          {/* Spacer to push controls to start */}
+          {/* Spacer */}
           <div className="flex-1" />
         </div>
       </div>

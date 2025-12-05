@@ -1137,13 +1137,24 @@ export const ShoppingList = () => {
       totalItems: items.length
     };
     if (saveShoppingHistory(history)) {
-      toast.success(t.toasts.saveSuccess);
+      // Close dialog first
+      setIsFinishDialogOpen(false);
+      
+      // Show success celebration
+      toast.success(language === 'he' ? '🎉 הקנייה הושלמה בהצלחה!' : '🎉 Shopping completed successfully!');
+      
+      // Reset ALL state to return to notepad home
       setItems([]);
+      setNotepadItems([]);
       setInputText("");
       setTotalAmount("");
       setSelectedStore("");
       setCustomStore("");
-      setIsFinishDialogOpen(false);
+      setActiveListId(null);
+      setListName("");
+      
+      // Scroll to top smoothly
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
       toast.error(t.toasts.saveError);
     }

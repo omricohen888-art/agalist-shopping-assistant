@@ -19,6 +19,7 @@ import { ShoppingItem, ISRAELI_STORES, UNITS, Unit, SavedList } from "@/types/sh
 import { ShoppingListItem } from "@/components/ShoppingListItem";
 import { SortableTemplates } from "@/components/SortableTemplates";
 import { SortModeToggle } from "@/components/SortModeToggle";
+import { StartShoppingButton, SaveListButton } from "@/components/StartShoppingButton";
 import { sortByCategory, detectCategory, getCategoryInfo, CategoryKey, CATEGORY_ORDER } from "@/utils/categorySort";
 import { processInput, RateLimiter } from "@/utils/security";
 import { createWorker } from 'tesseract.js';
@@ -1940,21 +1941,17 @@ export const ShoppingList = () => {
                   </Button>
                 </div>
                 {/* Two action buttons */}
-                <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto justify-center items-center">
-                  <Button
+                <div className={`flex flex-col sm:flex-row gap-3 w-full sm:w-auto justify-center items-center ${notepadItems.length > 0 ? '' : 'pt-2'}`}>
+                  <StartShoppingButton
                     onClick={handlePaste}
-                    className="h-11 px-6 sm:px-8 text-base font-bold bg-yellow-400 text-black hover:bg-yellow-500 rounded-lg shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] hover:scale-105 active:scale-95 transition-all duration-200 border-2 border-black flex items-center justify-center gap-2 min-w-max"
-                  >
-                    <ShoppingCart className="h-5 w-5 text-black" />
-                    {language === "he" ? "מצב קנייה" : "Purchase Mode"}
-                  </Button>
-                  <Button
+                    language={language}
+                    disabled={notepadItems.length === 0}
+                  />
+                  <SaveListButton
                     onClick={handleSaveList}
-                    className="h-11 px-6 sm:px-8 text-base font-bold bg-yellow-400 text-black hover:bg-yellow-500 rounded-lg shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] hover:scale-105 active:scale-95 transition-all duration-200 border-2 border-black flex items-center justify-center gap-2 min-w-max"
-                  >
-                    <Save className="h-5 w-5 text-black" />
-                    {language === "he" ? "שמור רשימה לאחר כך" : "Save List for Later"}
-                  </Button>
+                    language={language}
+                    disabled={notepadItems.length === 0}
+                  />
                 </div>
               </div>
             </div>

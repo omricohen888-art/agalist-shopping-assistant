@@ -1945,26 +1945,24 @@ export const ShoppingList = () => {
                 )}
               </div>
 
-              {/* Sort Mode Toggle - Always visible */}
-              <div className="mt-4 mb-2 px-2">
-                <SortModeToggle
-                  isSmartSort={isSmartSort}
-                  onToggle={(enabled) => {
-                    setIsSmartSort(enabled);
-                    // Re-sort notepad items if there are any
-                    if (enabled && notepadItems.length > 0) {
-                      const sorted = [...notepadItems].sort((a, b) => {
-                        const categoryA = detectCategory(a.text);
-                        const categoryB = detectCategory(b.text);
-                        return CATEGORY_ORDER.indexOf(categoryA) - CATEGORY_ORDER.indexOf(categoryB);
-                      });
-                      setNotepadItems(sorted);
-                      toast.success(language === 'he' ? 'הפריטים מסודרים לפי קטגוריה' : 'Items sorted by category');
-                    }
-                  }}
-                  language={language}
-                />
-              </div>
+              {/* Sort Mode Toggle - Only visible when items exist */}
+              {notepadItems.length > 0 && (
+                <div className="mt-4 mb-2 px-2 animate-fade-in">
+                  <SortModeToggle
+                    isSmartSort={isSmartSort}
+                    onToggle={(enabled) => {
+                      setIsSmartSort(enabled);
+                      // Re-sort notepad items
+                      if (enabled) {
+                        const sorted = sortByCategory(notepadItems);
+                        setNotepadItems(sorted);
+                        toast.success(language === 'he' ? 'הפריטים מסודרים לפי קטגוריה' : 'Items sorted by category');
+                      }
+                    }}
+                    language={language}
+                  />
+                </div>
+              )}
 
               <div className="flex flex-col sm:flex-row gap-2 mt-4 w-full justify-center items-center transition-all duration-300 ease-in-out relative z-10">
                 {/* Secondary buttons */}

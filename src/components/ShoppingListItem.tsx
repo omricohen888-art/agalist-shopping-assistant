@@ -275,11 +275,12 @@ const QuantityStepper = ({ value, onChange, unit, isCompleted }: QuantityStepper
         className={`
           w-16 sm:w-18
           px-2 sm:px-3
+          py-1 sm:py-1.5
           text-center
           font-bold
           text-base sm:text-lg
-          bg-transparent
-          border-0
+          bg-white dark:bg-slate-800
+          border border-border/50
           focus:outline-none
           focus:ring-2 focus:ring-accent/40 focus:ring-inset
           rounded-lg
@@ -287,8 +288,8 @@ const QuantityStepper = ({ value, onChange, unit, isCompleted }: QuantityStepper
           selection:bg-accent/30
           transition-all duration-200
           ${isCompleted 
-            ? 'text-muted-foreground/50 cursor-not-allowed' 
-            : 'text-accent/80'
+            ? 'text-muted-foreground/50 cursor-not-allowed dark:text-slate-500' 
+            : 'text-gray-900 dark:text-slate-100'
           }
         `}
       />
@@ -517,9 +518,10 @@ export const ShoppingListItem = ({
                 [&>svg]:hidden
                 touch-manipulation
                 shadow-sm
+                border border-border/50
                 ${isDimmed 
-                  ? 'bg-muted/50 text-muted-foreground/50 opacity-50' 
-                  : 'glass hover:shadow-md focus:ring-2 focus:ring-primary/30'
+                  ? 'bg-muted/50 text-muted-foreground/50 opacity-50 dark:bg-slate-700 dark:text-slate-500' 
+                  : 'bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 hover:shadow-md focus:ring-2 focus:ring-primary/30'
                 }
               `} 
               style={{ minWidth: '90px' }}

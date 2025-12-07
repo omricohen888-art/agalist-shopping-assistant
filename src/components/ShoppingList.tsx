@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
-import { Share2, Trash2, Plus, CheckCircle2, History, BarChart3, Globe, Save, ClipboardList, Book, Square, CheckSquare, Printer, Mail, FileSpreadsheet, Copy, Pencil, X, ClipboardPaste, Info, ShoppingCart, Check, Volume2, RotateCcw, Mic, Camera, PenLine, Search, User, ChevronDown } from "lucide-react";
+import { Share2, Trash2, Plus, Minus, CheckCircle2, History, BarChart3, Globe, Save, ClipboardList, Book, Square, CheckSquare, Printer, Mail, FileSpreadsheet, Copy, Pencil, X, ClipboardPaste, Info, ShoppingCart, Check, Volume2, RotateCcw, Mic, Camera, PenLine, Search, User, ChevronDown } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import { SmartAutocompleteInput, SmartAutocompleteInputRef } from "@/components/SmartAutocompleteInput";
 import { SavedListCard } from "@/components/SavedListCard";
@@ -2168,20 +2168,45 @@ export const ShoppingList = () => {
 
                         {/* Quantity + Unit */}
                         <div className="flex items-center gap-1.5 flex-shrink-0">
-                          <input
-                            type="number"
-                            min="0.1"
-                            step="0.1"
-                            value={item.quantity || 1}
-                            onChange={(e) => {
-                              const qty = parseFloat(e.target.value) || 1;
-                              setNotepadItems(prev => prev.map(i =>
-                                i.id === item.id ? { ...i, quantity: Math.max(0.1, qty) } : i
-                              ));
-                            }}
-                            className="w-12 md:w-16 h-7 md:h-8 text-center text-xs rounded border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-slate-200 focus:border-yellow-400 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] transition-all flex-shrink-0"
-                            title={language === 'he' ? 'כמות' : 'Quantity'}
-                          />
+                          {/* Custom Stepper Container - No Keyboard Trigger */}
+                          <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-slate-700 border border-gray-300 dark:border-slate-600">
+                            {/* Minus Button */}
+                            <button
+                              onClick={() => {
+                                setNotepadItems(prev => prev.map(i =>
+                                  i.id === item.id 
+                                    ? { ...i, quantity: Math.max(0.1, (i.quantity || 1) - 1) } 
+                                    : i
+                                ));
+                              }}
+                              className="flex items-center justify-center h-6 w-6 rounded transition-colors hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-600 dark:text-slate-300 active:scale-90"
+                              title={language === 'he' ? 'הקטן' : 'Decrease'}
+                              type="button"
+                            >
+                              <Minus className="h-4 w-4" strokeWidth={2} />
+                            </button>
+                            
+                            {/* Quantity Display - Read-only for better mobile UX */}
+                            <span className="w-8 text-center text-xs font-semibold text-gray-900 dark:text-slate-100 tabular-nums">
+                              {(item.quantity || 1).toFixed(item.unit && ['kg', 'g', 'liters', 'ml', 'oz', 'lbs'].includes(item.unit) ? 2 : 0)}
+                            </span>
+                            
+                            {/* Plus Button */}
+                            <button
+                              onClick={() => {
+                                setNotepadItems(prev => prev.map(i =>
+                                  i.id === item.id 
+                                    ? { ...i, quantity: (i.quantity || 1) + 1 } 
+                                    : i
+                                ));
+                              }}
+                              className="flex items-center justify-center h-6 w-6 rounded transition-colors hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-600 dark:text-slate-300 active:scale-90"
+                              title={language === 'he' ? 'הגדל' : 'Increase'}
+                              type="button"
+                            >
+                              <Plus className="h-4 w-4" strokeWidth={2} />
+                            </button>
+                          </div>
                           <select
                             value={item.unit || 'units'}
                             onChange={(e) => {

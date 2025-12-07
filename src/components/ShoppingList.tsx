@@ -26,7 +26,6 @@ import { StartShoppingButton, SaveListButton } from "@/components/StartShoppingB
 import { sortByCategory, detectCategory, getCategoryInfo, CategoryKey, CATEGORY_ORDER } from "@/utils/categorySort";
 import { processInput, RateLimiter } from "@/utils/security";
 import { createWorker } from 'tesseract.js';
-
 interface NotepadItem {
   id: string;
   text: string;
@@ -39,57 +38,69 @@ import { useGlobalLanguage, Language } from "@/context/LanguageContext";
 import { translations } from "@/utils/translations";
 import { parseItemWithUnit, formatItemDisplay } from "@/utils/itemParser";
 import { useTheme } from "next-themes";
-
-
-const ENGLISH_STORES = [
-  "Shufersal",
-  "Rami Levy",
-  "Victory",
-  "Yenot Bitan",
-  "Machsanei HaShuk",
-  "Super-Pharm",
-  "Shufersal Deal",
-  "AM:PM",
-  "Yohannoff",
-  "Mega Ba'Ir",
-  "Tiv Taam",
-  "Cofix",
-  "Hazi Hinam",
-  "Other"
-] as const;
+const ENGLISH_STORES = ["Shufersal", "Rami Levy", "Victory", "Yenot Bitan", "Machsanei HaShuk", "Super-Pharm", "Shufersal Deal", "AM:PM", "Yohannoff", "Mega Ba'Ir", "Tiv Taam", "Cofix", "Hazi Hinam", "Other"] as const;
 
 // Template data for quick start
 const templates = {
-  he: [
-    { id: "grocery", name: "השלמות למכולת", items: ["חלב", "לחם", "קוטג'", "ביצים", "עגבניות"] },
-    { id: "hiking", name: "ציוד לטיול", items: ["פינג'אן", "קפה שחור", "אוהל", "שק שינה", "בקבוקי מים", "קרם הגנה", "פנס", "מפית לחות"] },
-    { id: "tech", name: "אלקטרוניקה וגאדג'טים", items: ["כבל HDMI", "סוללות AA", "מטען USB-C", "עכבר", "מקלדת", "אוזניות"] },
-    { id: "bbq", name: "על האש", items: ["פחמים", "סטייקים", "קבב", "חומוס", "פיתות", "סלטים", "מלקחיים", "מלח גס"] },
-    { id: "cleaning", name: "ניקיון ופארם", items: ["אקונומיקה", "נוזל רצפות", "שמפו", "משחת שיניים", "אבקת כביסה", "סבון ידיים", "נייר טואלט"] },
-    { id: "family", name: "קנייה משפחתית גדולה", items: ["שניצל", "פסטה", "אורז", "מלפפונים", "פלפלים", "מילקי", "גבינה צהובה", "במבה", "ביסלי", "פיצה קפואה", "חזה עוף", "שמן", "קורנפלקס", "נייר טואלט", "יוגורט", "לחם", "חלב"] }
-  ],
-  en: [
-    { id: "grocery", name: "Small Run", items: ["Milk", "Bread", "Cottage Cheese", "Eggs", "Tomatoes"] },
-    { id: "hiking", name: "Hiking/Camping", items: ["Finjan", "Black Coffee", "Tent", "Sleeping Bag", "Water bottles", "Sunscreen", "Flashlight", "Wet wipes"] },
-    { id: "tech", name: "Tech & Gadgets", items: ["HDMI Cable", "AA Batteries", "USB-C Charger", "Mouse", "Keyboard", "Headphones"] },
-    { id: "bbq", name: "BBQ", items: ["Charcoal", "Steaks", "Kebabs", "Hummus", "Pita bread", "Salads", "Tongs", "Coarse salt"] },
-    { id: "cleaning", name: "Cleaning & Pharmacy", items: ["Bleach", "Floor cleaner", "Shampoo", "Toothpaste", "Laundry detergent", "Hand soap", "Toilet paper"] },
-    { id: "family", name: "Big Family Shop", items: ["Schnitzel", "Pasta", "Rice", "Cucumbers", "Peppers", "Milky", "Yellow Cheese", "Bamba", "Bisli", "Frozen Pizza", "Chicken breast", "Oil", "Cereal", "Toilet paper", "Yogurt", "Bread", "Milk"] }
-  ]
+  he: [{
+    id: "grocery",
+    name: "השלמות למכולת",
+    items: ["חלב", "לחם", "קוטג'", "ביצים", "עגבניות"]
+  }, {
+    id: "hiking",
+    name: "ציוד לטיול",
+    items: ["פינג'אן", "קפה שחור", "אוהל", "שק שינה", "בקבוקי מים", "קרם הגנה", "פנס", "מפית לחות"]
+  }, {
+    id: "tech",
+    name: "אלקטרוניקה וגאדג'טים",
+    items: ["כבל HDMI", "סוללות AA", "מטען USB-C", "עכבר", "מקלדת", "אוזניות"]
+  }, {
+    id: "bbq",
+    name: "על האש",
+    items: ["פחמים", "סטייקים", "קבב", "חומוס", "פיתות", "סלטים", "מלקחיים", "מלח גס"]
+  }, {
+    id: "cleaning",
+    name: "ניקיון ופארם",
+    items: ["אקונומיקה", "נוזל רצפות", "שמפו", "משחת שיניים", "אבקת כביסה", "סבון ידיים", "נייר טואלט"]
+  }, {
+    id: "family",
+    name: "קנייה משפחתית גדולה",
+    items: ["שניצל", "פסטה", "אורז", "מלפפונים", "פלפלים", "מילקי", "גבינה צהובה", "במבה", "ביסלי", "פיצה קפואה", "חזה עוף", "שמן", "קורנפלקס", "נייר טואלט", "יוגורט", "לחם", "חלב"]
+  }],
+  en: [{
+    id: "grocery",
+    name: "Small Run",
+    items: ["Milk", "Bread", "Cottage Cheese", "Eggs", "Tomatoes"]
+  }, {
+    id: "hiking",
+    name: "Hiking/Camping",
+    items: ["Finjan", "Black Coffee", "Tent", "Sleeping Bag", "Water bottles", "Sunscreen", "Flashlight", "Wet wipes"]
+  }, {
+    id: "tech",
+    name: "Tech & Gadgets",
+    items: ["HDMI Cable", "AA Batteries", "USB-C Charger", "Mouse", "Keyboard", "Headphones"]
+  }, {
+    id: "bbq",
+    name: "BBQ",
+    items: ["Charcoal", "Steaks", "Kebabs", "Hummus", "Pita bread", "Salads", "Tongs", "Coarse salt"]
+  }, {
+    id: "cleaning",
+    name: "Cleaning & Pharmacy",
+    items: ["Bleach", "Floor cleaner", "Shampoo", "Toothpaste", "Laundry detergent", "Hand soap", "Toilet paper"]
+  }, {
+    id: "family",
+    name: "Big Family Shop",
+    items: ["Schnitzel", "Pasta", "Rice", "Cucumbers", "Peppers", "Milky", "Yellow Cheese", "Bamba", "Bisli", "Frozen Pizza", "Chicken breast", "Oil", "Cereal", "Toilet paper", "Yogurt", "Bread", "Milk"]
+  }]
 };
-
-
-
 const heToEnStoreMap = ISRAELI_STORES.reduce((acc, store, index) => {
   acc[store] = ENGLISH_STORES[index];
   return acc;
 }, {} as Record<string, string>);
-
 const enToHeStoreMap = ENGLISH_STORES.reduce((acc, store, index) => {
   acc[store] = ISRAELI_STORES[index];
   return acc;
 }, {} as Record<string, string>);
-
 export const ShoppingList = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -105,7 +116,11 @@ export const ShoppingList = () => {
   const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
   const [renamingListId, setRenamingListId] = useState<string | null>(null);
   const [renamingListName, setRenamingListName] = useState("");
-  const [customTemplates, setCustomTemplates] = useState<Array<{ id: string, name: string, items: string[] }>>([]);
+  const [customTemplates, setCustomTemplates] = useState<Array<{
+    id: string;
+    name: string;
+    items: string[];
+  }>>([]);
   const [isCreateTemplateDialogOpen, setIsCreateTemplateDialogOpen] = useState(false);
   const [newTemplateName, setNewTemplateName] = useState("");
   const [newTemplateItems, setNewTemplateItems] = useState("");
@@ -113,14 +128,19 @@ export const ShoppingList = () => {
   const singleItemInputRef = useRef<HTMLInputElement>(null);
   const notepadInputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const rateLimiter = useRef(new RateLimiter());
-  const { language, setLanguage } = useGlobalLanguage();
-  const { theme, setTheme } = useTheme();
+  const {
+    language,
+    setLanguage
+  } = useGlobalLanguage();
+  const {
+    theme,
+    setTheme
+  } = useTheme();
   const t = translations[language];
   const storeOptions = language === "he" ? ISRAELI_STORES : ENGLISH_STORES;
   const otherLabel = language === "he" ? "אחר" : "Other";
   const direction = language === "he" ? "rtl" : "ltr";
   const currentTemplates = templates[language];
-
   const [singleItemInput, setSingleItemInput] = useState("");
   const [singleItemQuantity, setSingleItemQuantity] = useState("1");
   const [singleItemUnit, setSingleItemUnit] = useState<Unit>('units');
@@ -136,7 +156,11 @@ export const ShoppingList = () => {
   const [notepadItems, setNotepadItems] = useState<NotepadItem[]>([]);
   const [isSmartSort, setIsSmartSort] = useState(true); // Default to smart sort
   const [collapsedNotepadCategories, setCollapsedNotepadCategories] = useState<Set<CategoryKey>>(new Set());
-  const [bulkPreviewItems, setBulkPreviewItems] = useState<Array<{ id: string; text: string; category: CategoryKey }>>([]);
+  const [bulkPreviewItems, setBulkPreviewItems] = useState<Array<{
+    id: string;
+    text: string;
+    category: CategoryKey;
+  }>>([]);
   const [showSortHint, setShowSortHint] = useState(false); // Feature discovery hint visibility
   const sortHintTimeoutRef = useRef<NodeJS.Timeout | null>(null); // Hint auto-dismiss timeout
 
@@ -159,14 +183,14 @@ export const ShoppingList = () => {
   // Feature Discovery: Show Smart Sort hint once per user
   useEffect(() => {
     const hasSeenHint = localStorage.getItem('hasSeenSortHint');
-    
+
     // Show hint if: items exist AND Smart Sort is ON AND user hasn't seen it before
     if (notepadItems.length > 0 && isSmartSort && !hasSeenHint) {
       setShowSortHint(true);
-      
+
       // Mark as seen
       localStorage.setItem('hasSeenSortHint', 'true');
-      
+
       // Auto-dismiss after 6 seconds
       if (sortHintTimeoutRef.current) {
         clearTimeout(sortHintTimeoutRef.current);
@@ -175,7 +199,6 @@ export const ShoppingList = () => {
         setShowSortHint(false);
       }, 6000);
     }
-    
     return () => {
       if (sortHintTimeoutRef.current) {
         clearTimeout(sortHintTimeoutRef.current);
@@ -183,9 +206,8 @@ export const ShoppingList = () => {
     };
   }, [notepadItems.length, isSmartSort]);
   const hasContent = inputText.trim().length > 0 || items.length > 0 || notepadItems.length > 0;
-  const showPaste = notepadItems.length === 0 || (notepadItems.length === 1 && notepadItems[0].text === '');
+  const showPaste = notepadItems.length === 0 || notepadItems.length === 1 && notepadItems[0].text === '';
   const titleInputRef = useRef<HTMLInputElement>(null);
-
   useEffect(() => {
     setSavedLists(getSavedLists());
     setShoppingHistory(getShoppingHistory());
@@ -212,7 +234,6 @@ export const ShoppingList = () => {
   useEffect(() => {
     localStorage.setItem('customTemplates', JSON.stringify(customTemplates));
   }, [customTemplates]);
-
   useEffect(() => {
     setSelectedStore(prev => {
       if (!prev) {
@@ -227,7 +248,6 @@ export const ShoppingList = () => {
       return prev;
     });
   }, [language]);
-
   useEffect(() => {
     if (location.state?.loadList) {
       handleLoadList(location.state.loadList);
@@ -235,17 +255,12 @@ export const ShoppingList = () => {
       window.history.replaceState({}, document.title);
     }
   }, [location.state]);
-
   const handleAddBulkItems = () => {
     // Parse the textarea content
-    const lines = bulkInputText
-      .split('\n')
-      .map(line => {
-        // Remove bullet point and trim
-        return line.replace(/^•\s*/, '').trim();
-      })
-      .filter(line => line.length > 0);
-
+    const lines = bulkInputText.split('\n').map(line => {
+      // Remove bullet point and trim
+      return line.replace(/^•\s*/, '').trim();
+    }).filter(line => line.length > 0);
     if (lines.length === 0) {
       toast.warning(language === 'he' ? 'אנא הדבק פריטים' : 'Please paste items');
       return;
@@ -264,18 +279,13 @@ export const ShoppingList = () => {
     if (isSmartSort) {
       newItems = sortByCategory(newItems);
     }
-
     if (activeListId) {
       // Edit Mode: Add items to existing list
       setItems(prev => [...newItems, ...prev]);
       setBulkInputText(""); // Clear textarea
       setBulkPreviewItems([]); // Clear preview
       setInputMode('single'); // Reset to single mode
-      toast.success(
-        language === 'he' 
-          ? `נוספו ${lines.length} פריטים לרשימה!` 
-          : `Added ${lines.length} items!`
-      );
+      toast.success(language === 'he' ? `נוספו ${lines.length} פריטים לרשימה!` : `Added ${lines.length} items!`);
     } else {
       // Home Page Mode: Create new list
       setItems([...items, ...newItems]);
@@ -289,10 +299,7 @@ export const ShoppingList = () => {
         month: '2-digit',
         year: 'numeric'
       });
-      const defaultListName = language === 'he'
-        ? `רשימה חדשה - ${currentDate}`
-        : `New List - ${currentDate}`;
-
+      const defaultListName = language === 'he' ? `רשימה חדשה - ${currentDate}` : `New List - ${currentDate}`;
       setActiveListId(newListId);
       setListName(defaultListName);
 
@@ -302,25 +309,19 @@ export const ShoppingList = () => {
       }, 100);
     }
   };
-  
+
   // Update preview items when bulk input or sort mode changes
   useEffect(() => {
-    const lines = bulkInputText
-      .split('\n')
-      .map(line => line.replace(/^•\s*/, '').trim())
-      .filter(line => line.length > 0);
-    
+    const lines = bulkInputText.split('\n').map(line => line.replace(/^•\s*/, '').trim()).filter(line => line.length > 0);
     if (lines.length === 0) {
       setBulkPreviewItems([]);
       return;
     }
-
     let previewItems = lines.map((line, index) => ({
       id: `preview-${index}`,
       text: line,
       category: detectCategory(line)
     }));
-
     if (isSmartSort) {
       previewItems = [...previewItems].sort((a, b) => {
         const indexA = CATEGORY_ORDER.indexOf(a.category);
@@ -328,10 +329,8 @@ export const ShoppingList = () => {
         return indexA - indexB;
       });
     }
-
     setBulkPreviewItems(previewItems);
   }, [bulkInputText, isSmartSort]);
-
   const handlePasteFromClipboard = async () => {
     try {
       const clipboardText = await navigator.clipboard.readText();
@@ -341,11 +340,7 @@ export const ShoppingList = () => {
       }
 
       // Parse clipboard content: split by newlines or commas
-      let lines = clipboardText
-        .split(/[\n,]/)
-        .map(line => line.trim())
-        .filter(line => line.length > 0);
-
+      let lines = clipboardText.split(/[\n,]/).map(line => line.trim()).filter(line => line.length > 0);
       if (lines.length === 0) {
         toast.warning(language === 'he' ? 'לא נמצא טקסט לתוקף' : 'No valid text found');
         return;
@@ -364,7 +359,6 @@ export const ShoppingList = () => {
       } else {
         newText = bulkInputText + '\n' + bulletedLines.join('\n');
       }
-
       setBulkInputText(newText);
 
       // Focus and position cursor at end
@@ -375,28 +369,19 @@ export const ShoppingList = () => {
           bulkInputRef.current.selectionEnd = newText.length;
         }
       }, 0);
-
-      toast.success(
-        language === 'he' 
-          ? `הודבקו ${lines.length} פריטים` 
-          : `Pasted ${lines.length} items`
-      );
+      toast.success(language === 'he' ? `הודבקו ${lines.length} פריטים` : `Pasted ${lines.length} items`);
     } catch (error) {
       console.error('Clipboard error:', error);
-      toast.error(
-        language === 'he' 
-          ? 'שגיאה בהדבקה מלוח הזיכרון' 
-          : 'Error reading clipboard'
-      );
+      toast.error(language === 'he' ? 'שגיאה בהדבקה מלוח הזיכרון' : 'Error reading clipboard');
     }
   };
-
   const handlePaste = () => {
     // Convert notepad items to main shopping items, preserving checked status and quantity
     let newItems: ShoppingItem[] = notepadItems.map((notepadItem, index) => ({
       id: `${Date.now()}-${index}`,
       text: notepadItem.text,
-      checked: notepadItem.isChecked, // Preserve the checked status!
+      checked: notepadItem.isChecked,
+      // Preserve the checked status!
       quantity: notepadItem.quantity || 1,
       unit: (notepadItem.unit || 'units') as Unit
     }));
@@ -405,14 +390,16 @@ export const ShoppingList = () => {
     if (isSmartSort) {
       newItems = sortByCategory(newItems);
     }
-
     if (activeListId) {
       // Edit Mode: Prepend items, clear input, NO success animation
       setItems(prev => [...newItems, ...prev]);
       setInputText("");
       setNotepadItems([]);
       // Optional: Scroll to top to see new items
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
       // Show success toast
       toast.success(language === 'he' ? "נוסף בהצלחה לרשימה!" : "Added successfully!");
     } else {
@@ -432,10 +419,7 @@ export const ShoppingList = () => {
         month: '2-digit',
         year: 'numeric'
       });
-      const defaultListName = language === 'he'
-        ? `רשימה חדשה - ${currentDate}`
-        : `New List - ${currentDate}`;
-
+      const defaultListName = language === 'he' ? `רשימה חדשה - ${currentDate}` : `New List - ${currentDate}`;
       setActiveListId(newListId);
       setListName(defaultListName);
 
@@ -445,13 +429,12 @@ export const ShoppingList = () => {
       }, 100);
     }
   };
-
   const toggleNotepadItem = (id: string) => {
-    setNotepadItems(prev => prev.map(item =>
-      item.id === id ? { ...item, isChecked: !item.isChecked } : item
-    ));
+    setNotepadItems(prev => prev.map(item => item.id === id ? {
+      ...item,
+      isChecked: !item.isChecked
+    } : item));
   };
-
   const handleQuickPaste = async () => {
     try {
       const clipboardText = await navigator.clipboard.readText();
@@ -474,7 +457,6 @@ export const ShoppingList = () => {
         // Process items with security checks
         const processedItems: string[] = [];
         let hasErrors = false;
-
         for (const item of allItems) {
           const result = processInput(item, notepadItems, rateLimiter.current);
           if (result.canAdd && result.isValid) {
@@ -485,7 +467,6 @@ export const ShoppingList = () => {
             hasErrors = true;
           }
         }
-
         if (processedItems.length === 0) {
           toast.error(language === 'he' ? "לא נמצאו פריטים תקינים" : "No valid items found");
           return;
@@ -497,7 +478,6 @@ export const ShoppingList = () => {
           text: item,
           isChecked: false
         }));
-
         setNotepadItems(prev => [...prev, ...newNotepadItems]);
 
         // Record the add for rate limiting (only once per paste operation)
@@ -510,14 +490,13 @@ export const ShoppingList = () => {
       toast.error(language === 'he' ? "שגיאה בהדבקה מהלוח" : "Error pasting from clipboard");
     }
   };
-
   const handleTemplateClick = (templateItems: string[]) => {
     let newNotepadItems: NotepadItem[] = templateItems.map((item, index) => ({
       id: `template-${Date.now()}-${index}`,
       text: item,
       isChecked: false
     }));
-    
+
     // Apply smart sort if enabled
     if (isSmartSort) {
       newNotepadItems = [...newNotepadItems].sort((a, b) => {
@@ -526,22 +505,18 @@ export const ShoppingList = () => {
         return CATEGORY_ORDER.indexOf(categoryA) - CATEGORY_ORDER.indexOf(categoryB);
       });
     }
-    
     setNotepadItems(newNotepadItems);
   };
-
   const handleCreateTemplate = () => {
     if (!newTemplateName.trim() || !newTemplateItems.trim()) {
       toast.error(language === 'he' ? 'אנא מלא את כל השדות' : 'Please fill all fields');
       return;
     }
-
     const items = newTemplateItems.split('\n').map(line => line.trim()).filter(line => line.length > 0);
     if (items.length === 0) {
       toast.error(language === 'he' ? 'אנא הוסף לפחות פריט אחד' : 'Please add at least one item');
       return;
     }
-
     const newTemplate = {
       id: `custom-${Date.now()}`,
       name: newTemplateName.trim(),
@@ -565,31 +540,25 @@ export const ShoppingList = () => {
     setIsCreateTemplateDialogOpen(false);
     toast.success(language === 'he' ? 'התבנית נוצרה בהצלחה!' : 'Template created successfully!');
   };
-
   const handleAddSingleItem = () => {
     if (!singleItemInput.trim()) return;
 
     // Process input with security checks
     const result = processInput(singleItemInput, items, rateLimiter.current);
-
     if (!result.canAdd) {
       toast.error(result.error || 'Failed to add item');
       return;
     }
-
     if (!result.isValid) {
       toast.error(result.error || 'Invalid input');
       return;
     }
-
     let quantity = parseFloat(singleItemQuantity);
     if (isNaN(quantity) || quantity < 0) quantity = 1;
-
     if (singleItemUnit === 'units') {
       quantity = Math.round(quantity);
       if (quantity === 0) quantity = 1;
     }
-
     const newItem: ShoppingItem = {
       id: `${Date.now()}`,
       text: result.processedText,
@@ -597,7 +566,6 @@ export const ShoppingList = () => {
       quantity: quantity,
       unit: singleItemUnit
     };
-
     setItems([newItem, ...items]); // Prepend item
     setSingleItemInput("");
     setSingleItemQuantity("1");
@@ -618,11 +586,12 @@ export const ShoppingList = () => {
       autocompleteInputRef.current?.focus();
     }, 0);
   };
-
   const updateItemQuantity = (id: string, quantity: number) => {
-    setItems(items.map(item => item.id === id ? { ...item, quantity: Math.max(0, quantity) } : item));
+    setItems(items.map(item => item.id === id ? {
+      ...item,
+      quantity: Math.max(0, quantity)
+    } : item));
   };
-
   const updateItemUnit = (id: string, unit: Unit) => {
     setItems(items.map(item => {
       if (item.id === id) {
@@ -630,27 +599,27 @@ export const ShoppingList = () => {
         if (unit === 'units') {
           newQuantity = Math.max(1, Math.round(item.quantity));
         }
-        return { ...item, unit, quantity: newQuantity };
+        return {
+          ...item,
+          unit,
+          quantity: newQuantity
+        };
       }
       return item;
     }));
   };
-
   const playSuccessSound = () => {
     try {
       const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
       if (!AudioContext) return;
-
       const ctx = new AudioContext();
 
       // Helper to play a single note
       const playNote = (freq: number, startTime: number, duration: number) => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
-
         osc.connect(gain);
         gain.connect(ctx.destination);
-
         osc.type = 'sine'; // Soft wave
         osc.frequency.value = freq;
 
@@ -662,27 +631,24 @@ export const ShoppingList = () => {
         osc.start(startTime);
         osc.stop(startTime + duration);
       };
-
       const now = ctx.currentTime;
       // Play a "Major Third" interval (Happy sound)
       // Note 1: High C (880 Hz)
       playNote(880, now, 0.3);
       // Note 2: E (1108 Hz) - slightly delayed creates a "Sparkle" effect
       playNote(1108, now + 0.05, 0.3);
-
     } catch (e) {
       console.error("Audio error", e);
     }
   };
-
   const toggleItem = (id: string) => {
     // Play success sound
     playSuccessSound();
-
     setItems(prevItems => {
-      const updatedItems = prevItems.map(item =>
-        item.id === id ? { ...item, checked: !item.checked } : item
-      );
+      const updatedItems = prevItems.map(item => item.id === id ? {
+        ...item,
+        checked: !item.checked
+      } : item);
 
       // Auto-sort: unchecked items first, then checked items
       return updatedItems.sort((a, b) => {
@@ -691,11 +657,9 @@ export const ShoppingList = () => {
       });
     });
   };
-
   const deleteItem = (id: string) => {
     setItems(items.filter(item => item.id !== id));
   };
-
   const shareList = async () => {
     const listText = items.map(item => `${item.checked ? "✓" : "○"} ${item.text}`).join("\n");
     if (navigator.share) {
@@ -714,24 +678,20 @@ export const ShoppingList = () => {
       copyToClipboard(listText);
     }
   };
-
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast.success(t.toasts.copySuccess);
   };
-
   const clearCompleted = () => {
     setItems(items.filter(item => !item.checked));
     toast.success(t.toasts.clearedCompleted);
   };
-
   const clearAll = () => {
     setItems([]);
     setInputText("");
     setActiveListId(null);
     toast.success(t.toasts.clearedAll);
   };
-
   const handleSaveList = () => {
     console.log("=== SAVE LIST DEBUG ===");
     console.log("Save button clicked!");
@@ -739,16 +699,15 @@ export const ShoppingList = () => {
     console.log("Notepad items count:", notepadItems.length);
     console.log("Main items array:", items);
     console.log("Main items count:", items.length);
-    
+
     // CRITICAL FIX: Check notepadItems first (since button is in notepad section)
     let itemsToSave = notepadItems;
-    
     if (itemsToSave.length === 0) {
       console.warn("BLOCKED: No notepad items to save");
       toast.error(t.toasts.noItems);
       return;
     }
-    
+
     // Convert notepadItems to ShoppingItem format for storage
     const convertedItems: ShoppingItem[] = itemsToSave.map(notepadItem => ({
       id: notepadItem.id,
@@ -758,10 +717,8 @@ export const ShoppingList = () => {
       unit: (notepadItem.unit || 'units') as Unit,
       store: undefined
     }));
-    
     console.log("✓ Converted items for saving:", convertedItems);
     console.log("Items count to save:", convertedItems.length);
-
     const isSavedList = activeListId && savedLists.some(list => list.id === activeListId);
     console.log("Is this a saved list being edited?:", isSavedList);
     console.log("ActiveListId:", activeListId);
@@ -793,23 +750,23 @@ export const ShoppingList = () => {
     setItems(convertedItems);
     setIsSaveDialogOpen(true);
   };
-
   const confirmSaveList = () => {
     console.log("=== CONFIRM SAVE LIST DEBUG ===");
     console.log("Current items to save:", items);
     console.log("Items count:", items.length);
     console.log("List name:", listName);
-    
     const newList: SavedList = {
       id: Date.now().toString(),
-      name: listName || new Date().toLocaleDateString(language === 'he' ? 'he-IL' : 'en-US', { weekday: 'long', day: 'numeric', month: 'long' }),
+      name: listName || new Date().toLocaleDateString(language === 'he' ? 'he-IL' : 'en-US', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long'
+      }),
       items: [...items],
       createdAt: new Date().toISOString()
     };
-    
     console.log("New list object being saved:", newList);
     console.log("Calling saveList function...");
-    
     if (saveList(newList)) {
       console.log("✓ saveList returned true - save successful");
       setSavedLists(getSavedLists());
@@ -828,7 +785,10 @@ export const ShoppingList = () => {
       setTimeout(() => {
         const notebookSection = document.getElementById('my-notebooks');
         if (notebookSection) {
-          notebookSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          notebookSection.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
         }
       }, 500);
     } else {
@@ -836,24 +796,18 @@ export const ShoppingList = () => {
     }
     console.log("=== END CONFIRM SAVE DEBUG ===");
   };
-
   const getListText = () => items.map(item => `${item.checked ? "✓" : "○"} ${item.text} ${item.quantity > 1 ? `(${item.quantity} ${item.unit})` : ''}`).join("\n");
-
   const handleShareWhatsApp = () => {
     const text = encodeURIComponent(getListText());
     window.open(`https://wa.me/?text=${text}`, '_blank');
   };
-
   const handleShareEmail = () => {
     const subject = encodeURIComponent(listName || t.shareTitle);
     const body = encodeURIComponent(getListText());
     window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
   };
-
   const handleExportCSV = () => {
-    const csvContent = "data:text/csv;charset=utf-8,"
-      + "Item,Quantity,Unit,Checked\n"
-      + items.map(e => `"${e.text}",${e.quantity},${e.unit},${e.checked}`).join("\n");
+    const csvContent = "data:text/csv;charset=utf-8," + "Item,Quantity,Unit,Checked\n" + items.map(e => `"${e.text}",${e.quantity},${e.unit},${e.checked}`).join("\n");
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
@@ -862,18 +816,15 @@ export const ShoppingList = () => {
     link.click();
     document.body.removeChild(link);
   };
-
   const handlePrint = () => {
     window.print();
   };
-
   const handleLoadList = (list: SavedList) => {
     setItems([...list.items]);
     setActiveListId(list.id);
     setListName(list.name);
     toast.success(t.toasts.listLoaded);
   };
-
   const exitEditMode = () => {
     // Stop TTS if active
     if (isSpeaking) {
@@ -885,14 +836,15 @@ export const ShoppingList = () => {
     setInputText("");
     setListName("");
   };
-
   const resetChecks = () => {
     if (items && items.length > 0) {
-      setItems(items.map(item => ({ ...item, checked: false })));
+      setItems(items.map(item => ({
+        ...item,
+        checked: false
+      })));
       toast.success(language === 'he' ? 'הרשימה אופסה מחדש' : 'List reset');
     }
   };
-
   const handleReadListAloud = () => {
     // If already speaking, stop
     if (isSpeaking) {
@@ -912,12 +864,8 @@ export const ShoppingList = () => {
 
     // Construct the text to read
     let textToRead = listName ? `${listName}. ` : '';
-
-    uncheckedItems.forEach((item) => {
-      const unitText = item.unit === 'units'
-        ? (language === 'he' ? 'יחידות' : 'units')
-        : item.unit;
-
+    uncheckedItems.forEach(item => {
+      const unitText = item.unit === 'units' ? language === 'he' ? 'יחידות' : 'units' : item.unit;
       if (item.quantity > 1) {
         textToRead += `${item.quantity} ${unitText} ${item.text}. `;
       } else {
@@ -953,7 +901,6 @@ export const ShoppingList = () => {
       toast.error(language === 'he' ? 'הדפדפן שלך לא תומך בהקלטת קול' : 'Your browser does not support voice recording');
       return;
     }
-
     if (isVoiceRecording) {
       // Stop recording
       setIsVoiceRecording(false);
@@ -962,43 +909,31 @@ export const ShoppingList = () => {
 
     // Start recording
     setIsVoiceRecording(true);
-
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
-
     recognition.lang = language === 'he' ? 'he-IL' : 'en-US';
     recognition.continuous = false;
     recognition.interimResults = false;
-
-    recognition.onresult = (event) => {
+    recognition.onresult = event => {
       const transcript = event.results[0][0].transcript;
       const items = transcript.split(/\s*(?:and|,|\s)\s*/).filter(item => item.trim().length > 0);
-
       if (items.length > 0) {
         const newNotepadItems: NotepadItem[] = items.map((item, index) => ({
           id: `voice-${Date.now()}-${index}`,
           text: item.trim(),
           isChecked: false
         }));
-
         setNotepadItems(prev => [...prev, ...newNotepadItems]);
-
-        toast.success(language === 'he'
-          ? `התווספו ${items.length} פריטים מהקול`
-          : `Added ${items.length} items from voice`
-        );
+        toast.success(language === 'he' ? `התווספו ${items.length} פריטים מהקול` : `Added ${items.length} items from voice`);
       }
     };
-
-    recognition.onerror = (event) => {
+    recognition.onerror = event => {
       console.error('Speech recognition error:', event.error);
       toast.error(language === 'he' ? 'שגיאה בהקלטת קול' : 'Voice recording error');
     };
-
     recognition.onend = () => {
       setIsVoiceRecording(false);
     };
-
     recognition.start();
   };
 
@@ -1006,36 +941,29 @@ export const ShoppingList = () => {
   const handleCameraOCR = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-
     setIsProcessingImage(true);
     toast.info(language === 'he' ? 'מפענח רשימה...' : 'Processing list...');
-
     try {
       const worker = await createWorker();
       await (worker as any).loadLanguage('heb+eng');
       await (worker as any).initialize('heb+eng');
-
-      const { data: { text } } = await (worker as any).recognize(file);
+      const {
+        data: {
+          text
+        }
+      } = await (worker as any).recognize(file);
       await (worker as any).terminate();
 
       // Split text by newlines and filter empty lines
-      const lines = text.split('\n')
-        .map(line => line.trim())
-        .filter(line => line.length > 0);
-
+      const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
       if (lines.length > 0) {
         const newNotepadItems: NotepadItem[] = lines.map((line, index) => ({
           id: `ocr-${Date.now()}-${index}`,
           text: line,
           isChecked: false
         }));
-
         setNotepadItems(prev => [...prev, ...newNotepadItems]);
-
-        toast.success(language === 'he'
-          ? `התווספו ${lines.length} פריטים מהתמונה`
-          : `Added ${lines.length} items from image`
-        );
+        toast.success(language === 'he' ? `התווספו ${lines.length} פריטים מהתמונה` : `Added ${lines.length} items from image`);
       } else {
         toast.warning(language === 'he' ? 'לא נמצא טקסט בתמונה' : 'No text found in image');
       }
@@ -1055,33 +983,27 @@ export const ShoppingList = () => {
   const handleHandwritingSubmit = async (imageData: string) => {
     setIsProcessingImage(true);
     toast.info(language === 'he' ? 'מזהה כתב יד...' : 'Recognizing handwriting...');
-
     try {
       const worker = await createWorker();
       await (worker as any).loadLanguage('heb+eng');
       await (worker as any).initialize('heb+eng');
-
-      const { data: { text } } = await (worker as any).recognize(imageData);
+      const {
+        data: {
+          text
+        }
+      } = await (worker as any).recognize(imageData);
       await (worker as any).terminate();
 
       // Split text by newlines and filter empty lines
-      const lines = text.split('\n')
-        .map(line => line.trim())
-        .filter(line => line.length > 0);
-
+      const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
       if (lines.length > 0) {
         const newNotepadItems: NotepadItem[] = lines.map((line, index) => ({
           id: `handwriting-${Date.now()}-${index}`,
           text: line,
           isChecked: false
         }));
-
         setNotepadItems(prev => [...prev, ...newNotepadItems]);
-
-        toast.success(language === 'he'
-          ? `התווספו ${lines.length} פריטים מהכתב`
-          : `Added ${lines.length} items from handwriting`
-        );
+        toast.success(language === 'he' ? `התווספו ${lines.length} פריטים מהכתב` : `Added ${lines.length} items from handwriting`);
       } else {
         toast.warning(language === 'he' ? 'לא נמצא טקסט' : 'No text found');
       }
@@ -1093,7 +1015,6 @@ export const ShoppingList = () => {
       setIsHandwritingOpen(false);
     }
   };
-
   const handleDeleteList = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (deleteSavedList(id)) {
@@ -1101,37 +1022,36 @@ export const ShoppingList = () => {
       toast.success(t.toasts.listDeleted);
     }
   };
-
   const handleRenameList = (list: SavedList, e: React.MouseEvent) => {
     e.stopPropagation();
     setRenamingListId(list.id);
     setRenamingListName(list.name);
     setIsRenameDialogOpen(true);
   };
-
   const handleToggleSavedItem = (listId: string, itemId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     const list = savedLists.find(l => l.id === listId);
     if (!list) return;
-
-    const updatedItems = list.items.map(item =>
-      item.id === itemId ? { ...item, checked: !item.checked } : item
-    );
-
-    const updatedList = { ...list, items: updatedItems };
+    const updatedItems = list.items.map(item => item.id === itemId ? {
+      ...item,
+      checked: !item.checked
+    } : item);
+    const updatedList = {
+      ...list,
+      items: updatedItems
+    };
     if (updateSavedList(updatedList)) {
       setSavedLists(getSavedLists());
     }
   };
-
   const confirmRenameList = () => {
     if (!renamingListId || !renamingListName.trim()) return;
-
     const listToUpdate = savedLists.find(l => l.id === renamingListId);
     if (!listToUpdate) return;
-
-    const updatedList = { ...listToUpdate, name: renamingListName.trim() };
-
+    const updatedList = {
+      ...listToUpdate,
+      name: renamingListName.trim()
+    };
     if (updateSavedList(updatedList)) {
       setSavedLists(getSavedLists());
       setIsRenameDialogOpen(false);
@@ -1144,12 +1064,12 @@ export const ShoppingList = () => {
   // Helper function to render grouped notepad items
   const renderGroupedNotepadItems = () => {
     const groups = new Map<CategoryKey, NotepadItem[]>();
-    
+
     // Initialize all categories
     for (const key of CATEGORY_ORDER) {
       groups.set(key, []);
     }
-    
+
     // Categorize items
     for (const item of notepadItems) {
       const category = detectCategory(item.text);
@@ -1157,35 +1077,30 @@ export const ShoppingList = () => {
       group.push(item);
       groups.set(category, group);
     }
-    
+
     // Remove empty categories
     for (const key of CATEGORY_ORDER) {
       if (groups.get(key)?.length === 0) {
         groups.delete(key);
       }
     }
-    
-    return (
-      <div className="space-y-4 sm:space-y-5" dir={language === 'he' ? 'rtl' : 'ltr'}>
+    return <div className="space-y-4 sm:space-y-5" dir={language === 'he' ? 'rtl' : 'ltr'}>
         {Array.from(groups.entries()).map(([categoryKey, categoryItems], groupIndex) => {
-          const categoryInfo = getCategoryInfo(categoryKey);
-          const isCollapsed = collapsedNotepadCategories.has(categoryKey);
-          
-          return (
-            <div key={categoryKey} className="animate-fade-in" style={{ animationDelay: `${groupIndex * 50}ms` }}>
+        const categoryInfo = getCategoryInfo(categoryKey);
+        const isCollapsed = collapsedNotepadCategories.has(categoryKey);
+        return <div key={categoryKey} className="animate-fade-in" style={{
+          animationDelay: `${groupIndex * 50}ms`
+        }}>
               {/* Category Header */}
-              <div
-                className="sticky top-0 z-20 mb-2 cursor-pointer select-none"
-                onClick={() => {
-                  const newSet = new Set(collapsedNotepadCategories);
-                  if (newSet.has(categoryKey)) {
-                    newSet.delete(categoryKey);
-                  } else {
-                    newSet.add(categoryKey);
-                  }
-                  setCollapsedNotepadCategories(newSet);
-                }}
-              >
+              <div className="sticky top-0 z-20 mb-2 cursor-pointer select-none" onClick={() => {
+            const newSet = new Set(collapsedNotepadCategories);
+            if (newSet.has(categoryKey)) {
+              newSet.delete(categoryKey);
+            } else {
+              newSet.add(categoryKey);
+            }
+            setCollapsedNotepadCategories(newSet);
+          }}>
                 <div className="glass rounded-2xl border border-border/40 shadow-md hover:shadow-lg transition-all duration-200 hover:border-border/60 overflow-hidden group">
                   <div className="bg-gradient-to-r from-primary/8 to-primary/5 dark:from-primary/15 dark:to-primary/10 px-4 sm:px-5 py-3 sm:py-4 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -1200,148 +1115,108 @@ export const ShoppingList = () => {
                       </span>
                     </div>
                     <div className="flex-shrink-0 p-1">
-                      <ChevronDown
-                        className={`h-5 w-5 sm:h-6 sm:w-6 text-foreground/60 group-hover:text-primary transition-all duration-300 ${
-                          isCollapsed ? '-rotate-90' : ''
-                        }`}
-                        strokeWidth={2.5}
-                      />
+                      <ChevronDown className={`h-5 w-5 sm:h-6 sm:w-6 text-foreground/60 group-hover:text-primary transition-all duration-300 ${isCollapsed ? '-rotate-90' : ''}`} strokeWidth={2.5} />
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Category Items */}
-              {!isCollapsed && (
-                <div className="space-y-2 sm:space-y-3 mt-2 sm:mt-3 animate-fade-in">
+              {!isCollapsed && <div className="space-y-2 sm:space-y-3 mt-2 sm:mt-3 animate-fade-in">
                   {categoryItems.map((item, itemIndex) => {
-                    const actualIndex = notepadItems.findIndex(i => i.id === item.id);
-                    return (
-                      <div key={item.id} className="flex items-center gap-4 py-3 w-full overflow-hidden ml-2 sm:ml-4 animate-fade-in" style={{ animationDelay: `${itemIndex * 30}ms` }}>
+              const actualIndex = notepadItems.findIndex(i => i.id === item.id);
+              return <div key={item.id} className="flex items-center gap-4 py-3 w-full overflow-hidden ml-2 sm:ml-4 animate-fade-in" style={{
+                animationDelay: `${itemIndex * 30}ms`
+              }}>
                         {/* Checkbox + Text Input */}
                         <div className="flex items-center gap-3 flex-1 min-w-0">
-                          <Checkbox
-                            checked={item.isChecked}
-                            onCheckedChange={() => toggleNotepadItem(item.id)}
-                            size="lg"
-                            className="flex-shrink-0"
-                          />
-                          <StandardizedInput
-                            variant="notepad"
-                            isChecked={item.isChecked}
-                            ref={(el) => {
-                              notepadInputRefs.current[actualIndex] = el;
-                            }}
-                            type="text"
-                            value={item.text}
-                            onChange={(e) => {
-                              const newText = e.target.value;
-                              setNotepadItems(prev => prev.map(i =>
-                                i.id === item.id ? { ...i, text: newText } : i
-                              ));
-                            }}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
-                                e.preventDefault();
-                                const newItem: NotepadItem = {
-                                  id: `notepad-${Date.now()}`,
-                                  text: '',
-                                  isChecked: false,
-                                  quantity: 1,
-                                  unit: 'units'
-                                };
-                                setNotepadItems(prev => {
-                                  const newItems = [...prev];
-                                  newItems.splice(actualIndex + 1, 0, newItem);
-                                  return newItems;
-                                });
-                                setTimeout(() => {
-                                  if (notepadInputRefs.current[actualIndex + 1]) {
-                                    notepadInputRefs.current[actualIndex + 1]!.focus();
-                                  }
-                                }, 0);
-                              } else if (e.key === 'Backspace') {
-                                if (item.text === '' && actualIndex > 0) {
-                                  e.preventDefault();
-                                  setNotepadItems(prev => prev.filter(i => i.id !== item.id));
-                                  setTimeout(() => {
-                                    if (notepadInputRefs.current[actualIndex - 1]) {
-                                      notepadInputRefs.current[actualIndex - 1]!.focus();
-                                      const input = notepadInputRefs.current[actualIndex - 1]!;
-                                      input.setSelectionRange(input.value.length, input.value.length);
-                                    }
-                                  }, 0);
-                                }
-                              } else if (e.key === 'ArrowUp') {
-                                e.preventDefault();
-                                if (actualIndex > 0 && notepadInputRefs.current[actualIndex - 1]) {
-                                  notepadInputRefs.current[actualIndex - 1]!.focus();
-                                }
-                              } else if (e.key === 'ArrowDown') {
-                                e.preventDefault();
-                                if (actualIndex < notepadItems.length - 1 && notepadInputRefs.current[actualIndex + 1]) {
-                                  notepadInputRefs.current[actualIndex + 1]!.focus();
-                                }
-                              }
-                            }}
-                            placeholder={language === 'he' ? 'הקלד פריט...' : 'Type an item...'}
-                          />
+                          <Checkbox checked={item.isChecked} onCheckedChange={() => toggleNotepadItem(item.id)} size="lg" className="flex-shrink-0" />
+                          <StandardizedInput variant="notepad" isChecked={item.isChecked} ref={el => {
+                    notepadInputRefs.current[actualIndex] = el;
+                  }} type="text" value={item.text} onChange={e => {
+                    const newText = e.target.value;
+                    setNotepadItems(prev => prev.map(i => i.id === item.id ? {
+                      ...i,
+                      text: newText
+                    } : i));
+                  }} onKeyDown={e => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      const newItem: NotepadItem = {
+                        id: `notepad-${Date.now()}`,
+                        text: '',
+                        isChecked: false,
+                        quantity: 1,
+                        unit: 'units'
+                      };
+                      setNotepadItems(prev => {
+                        const newItems = [...prev];
+                        newItems.splice(actualIndex + 1, 0, newItem);
+                        return newItems;
+                      });
+                      setTimeout(() => {
+                        if (notepadInputRefs.current[actualIndex + 1]) {
+                          notepadInputRefs.current[actualIndex + 1]!.focus();
+                        }
+                      }, 0);
+                    } else if (e.key === 'Backspace') {
+                      if (item.text === '' && actualIndex > 0) {
+                        e.preventDefault();
+                        setNotepadItems(prev => prev.filter(i => i.id !== item.id));
+                        setTimeout(() => {
+                          if (notepadInputRefs.current[actualIndex - 1]) {
+                            notepadInputRefs.current[actualIndex - 1]!.focus();
+                            const input = notepadInputRefs.current[actualIndex - 1]!;
+                            input.setSelectionRange(input.value.length, input.value.length);
+                          }
+                        }, 0);
+                      }
+                    } else if (e.key === 'ArrowUp') {
+                      e.preventDefault();
+                      if (actualIndex > 0 && notepadInputRefs.current[actualIndex - 1]) {
+                        notepadInputRefs.current[actualIndex - 1]!.focus();
+                      }
+                    } else if (e.key === 'ArrowDown') {
+                      e.preventDefault();
+                      if (actualIndex < notepadItems.length - 1 && notepadInputRefs.current[actualIndex + 1]) {
+                        notepadInputRefs.current[actualIndex + 1]!.focus();
+                      }
+                    }
+                  }} placeholder={language === 'he' ? 'הקלד פריט...' : 'Type an item...'} />
                         </div>
 
                         {/* Quantity + Unit */}
                         <div className="flex items-center gap-1.5 flex-shrink-0">
-                          <input
-                            type="number"
-                            min="0.1"
-                            step="0.1"
-                            value={item.quantity || 1}
-                            onChange={(e) => {
-                              const qty = parseFloat(e.target.value) || 1;
-                              setNotepadItems(prev => prev.map(i =>
-                                i.id === item.id ? { ...i, quantity: Math.max(0.1, qty) } : i
-                              ));
-                            }}
-                            className="w-12 md:w-16 h-7 md:h-8 text-center text-xs rounded border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-slate-200 focus:border-yellow-400 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] transition-all flex-shrink-0"
-                            title={language === 'he' ? 'כמות' : 'Quantity'}
-                          />
-                          <select
-                            value={item.unit || 'units'}
-                            onChange={(e) => {
-                              setNotepadItems(prev => prev.map(i =>
-                                i.id === item.id ? { ...i, unit: e.target.value as Unit } : i
-                              ));
-                            }}
-                            className="w-14 md:w-20 h-7 md:h-8 text-xs rounded border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-slate-200 focus:border-yellow-400 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] transition-all flex-shrink-0 cursor-pointer"
-                            title={language === 'he' ? 'יחידה' : 'Unit'}
-                          >
-                            {UNITS.map(u => (
-                              <option key={u.value} value={u.value}>
+                          <input type="number" min="0.1" step="0.1" value={item.quantity || 1} onChange={e => {
+                    const qty = parseFloat(e.target.value) || 1;
+                    setNotepadItems(prev => prev.map(i => i.id === item.id ? {
+                      ...i,
+                      quantity: Math.max(0.1, qty)
+                    } : i));
+                  }} className="w-12 md:w-16 h-7 md:h-8 text-center text-xs rounded border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-slate-200 focus:border-yellow-400 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] transition-all flex-shrink-0" title={language === 'he' ? 'כמות' : 'Quantity'} />
+                          <select value={item.unit || 'units'} onChange={e => {
+                    setNotepadItems(prev => prev.map(i => i.id === item.id ? {
+                      ...i,
+                      unit: e.target.value as Unit
+                    } : i));
+                  }} className="w-14 md:w-20 h-7 md:h-8 text-xs rounded border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-slate-200 focus:border-yellow-400 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] transition-all flex-shrink-0 cursor-pointer" title={language === 'he' ? 'יחידה' : 'Unit'}>
+                            {UNITS.map(u => <option key={u.value} value={u.value}>
                                 {language === 'he' ? u.labelHe : u.labelEn}
-                              </option>
-                            ))}
+                              </option>)}
                           </select>
                         </div>
 
                         {/* Delete Button */}
-                        <button
-                          onClick={() => setNotepadItems(prev => prev.filter(i => i.id !== item.id))}
-                          className="p-2 text-gray-500 hover:text-red-600 dark:hover:text-red-400 transition-colors hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg flex-shrink-0"
-                          title={language === 'he' ? 'מחק' : 'Delete'}
-                        >
+                        <button onClick={() => setNotepadItems(prev => prev.filter(i => i.id !== item.id))} className="p-2 text-gray-500 hover:text-red-600 dark:hover:text-red-400 transition-colors hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg flex-shrink-0" title={language === 'he' ? 'מחק' : 'Delete'}>
                           <Trash2 className="h-4 w-4" />
                         </button>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-    );
+                      </div>;
+            })}
+                </div>}
+            </div>;
+      })}
+      </div>;
   };
-
   const openFinishDialog = () => {
     if (items.length === 0) {
       toast.error(t.toasts.noItems);
@@ -1354,7 +1229,6 @@ export const ShoppingList = () => {
     }
     setIsFinishDialogOpen(true);
   };
-
   const handleFinishShopping = () => {
     const amount = parseFloat(totalAmount);
     if (isNaN(amount) || amount <= 0) {
@@ -1379,13 +1253,13 @@ export const ShoppingList = () => {
     if (saveShoppingHistory(history)) {
       // Close dialog first
       setIsFinishDialogOpen(false);
-      
+
       // Update shopping history state
       setShoppingHistory(getShoppingHistory());
-      
+
       // Show success celebration
       toast.success(language === 'he' ? '🎉 הקנייה הושלמה בהצלחה!' : '🎉 Shopping completed successfully!');
-      
+
       // Reset ALL state to return to notepad home
       setItems([]);
       setNotepadItems([]);
@@ -1395,49 +1269,41 @@ export const ShoppingList = () => {
       setCustomStore("");
       setActiveListId(null);
       setListName("");
-      
+
       // Scroll to top smoothly
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
     } else {
       toast.error(t.toasts.saveError);
     }
   };
-
   const completedCount = items.filter(item => item.checked).length;
   const progressPercentage = items.length > 0 ? completedCount / items.length * 100 : 0;
-
-  return (
-    <div className="min-h-screen bg-white dark:bg-slate-900 pb-32 transition-colors duration-150" dir={direction} lang={language}>
+  return <div className="min-h-screen bg-white dark:bg-slate-900 pb-32 transition-colors duration-150" dir={direction} lang={language}>
       {/* List Creation Confirmation Animation */}
-      {showConfirmation && (
-        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-[fade-in_0.2s_ease-out,scale-in_0.3s_ease-out]">
+      {showConfirmation && <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-[fade-in_0.2s_ease-out,scale-in_0.3s_ease-out]">
           <div className="bg-[#22c55e] text-white rounded-full p-4 shadow-[0_0_20px_rgba(34,197,94,0.5)] animate-pulse">
             <CheckCircle2 className="h-12 w-12" strokeWidth={3} />
           </div>
-        </div>
-      )}
+        </div>}
 
       {/* Add Item Animation */}
-      {showAddAnimation && (
-        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-none">
-          <div
-            className="text-6xl font-black animate-[fade-in_0.15s_ease-out,fade-out_0.3s_ease-out_0.3s]"
-            style={{
-              background: 'linear-gradient(135deg, #FACC15 0%, #22c55e 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              filter: 'drop-shadow(0 2px 8px rgba(250, 204, 21, 0.4))',
-              animation: 'float-up 0.6s ease-out',
-            }}
-          >
+      {showAddAnimation && <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-none">
+          <div className="text-6xl font-black animate-[fade-in_0.15s_ease-out,fade-out_0.3s_ease-out_0.3s]" style={{
+        background: 'linear-gradient(135deg, #FACC15 0%, #22c55e 100%)',
+        WebkitBackgroundClip: 'text',
+        WebkitTextFillColor: 'transparent',
+        backgroundClip: 'text',
+        filter: 'drop-shadow(0 2px 8px rgba(250, 204, 21, 0.4))',
+        animation: 'float-up 0.6s ease-out'
+      }}>
             +
           </div>
-        </div>
-      )}
+        </div>}
       {/* List Created Success Animation */}
-      {showListSuccess && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
+      {showListSuccess && <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
           {/* Backdrop */}
           <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px] animate-in fade-in duration-200" />
 
@@ -1461,46 +1327,29 @@ export const ShoppingList = () => {
               </p>
             </div>
           </div>
-        </div>
-      )}
+        </div>}
 
       {/* Sticky Header Group */}
       <div className="sticky top-0 z-50 glass-strong border-b border-border/30 transition-all duration-300">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
           <div className="flex justify-between items-center w-full gap-3 sm:gap-4">
             {/* Logo Section - Clickable to go Home */}
-            <button
-              onClick={() => {
-                if (activeListId && items.length > 0) {
-                  // If in edit mode with items, confirm before leaving
-                  const confirmExit = window.confirm(
-                    language === 'he' 
-                      ? 'האם אתה בטוח שברצונך לצאת? שינויים שלא נשמרו יאבדו.' 
-                      : 'Are you sure you want to exit? Unsaved changes will be lost.'
-                  );
-                  if (!confirmExit) return;
-                }
-                // Reset all state
-                setActiveListId(null);
-                setItems([]);
-                setListName('');
-                setInputText('');
-                setNotepadItems([]);
-                setBulkInputText('');
-                setInputMode('single');
-              }}
-              className="flex items-center gap-2 sm:gap-3 flex-shrink-0 hover:opacity-80 active:scale-95 transition-all duration-200 touch-manipulation"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0 text-foreground"
-              >
+            <button onClick={() => {
+            if (activeListId && items.length > 0) {
+              // If in edit mode with items, confirm before leaving
+              const confirmExit = window.confirm(language === 'he' ? 'האם אתה בטוח שברצונך לצאת? שינויים שלא נשמרו יאבדו.' : 'Are you sure you want to exit? Unsaved changes will be lost.');
+              if (!confirmExit) return;
+            }
+            // Reset all state
+            setActiveListId(null);
+            setItems([]);
+            setListName('');
+            setInputText('');
+            setNotepadItems([]);
+            setBulkInputText('');
+            setInputMode('single');
+          }} className="flex items-center gap-2 sm:gap-3 flex-shrink-0 hover:opacity-80 active:scale-95 transition-all duration-200 touch-manipulation">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0 text-foreground">
                 {/* Checkbox background */}
                 <rect x="3" y="3" width="18" height="18" rx="2" fill="currentColor" stroke="currentColor" strokeWidth="2" />
                 {/* Checkmark - yellow */}
@@ -1510,16 +1359,7 @@ export const ShoppingList = () => {
                 <span className="text-2xl sm:text-3xl font-bold text-foreground">
                   {language === 'he' ? 'עגליסט' : 'ShopList'}
                 </span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-7 w-7 sm:h-8 sm:w-8 text-foreground flex-shrink-0 -ml-0.5"
-                >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-7 w-7 sm:h-8 sm:w-8 text-foreground flex-shrink-0 -ml-0.5">
                   <circle cx="8" cy="21" r="1" />
                   <circle cx="19" cy="21" r="1" />
                   <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
@@ -1536,51 +1376,29 @@ export const ShoppingList = () => {
             {/* Actions Section - RIGHT (LTR) / LEFT (RTL) */}
             <div className={`flex items-center gap-1.5 sm:gap-2 flex-shrink-0 ${language === 'he' ? 'flex-row-reverse' : ''}`}>
               {/* Exit Button - Only shown in edit mode */}
-              {activeListId && (
-                <Button
-                  variant="ghost"
-                  onClick={() => {
-                    if (items.length > 0) {
-                      const confirmExit = window.confirm(
-                        language === 'he' 
-                          ? 'האם אתה בטוח שברצונך לצאת? שינויים שלא נשמרו יאבדו.' 
-                          : 'Are you sure you want to exit? Unsaved changes will be lost.'
-                      );
-                      if (!confirmExit) return;
-                    }
-                    exitEditMode();
-                  }}
-                  className="h-10 px-3 sm:px-4 rounded-xl bg-destructive/10 text-destructive hover:bg-destructive/20 font-semibold text-sm sm:text-base touch-manipulation active:scale-95 transition-all"
-                >
+              {activeListId && <Button variant="ghost" onClick={() => {
+              if (items.length > 0) {
+                const confirmExit = window.confirm(language === 'he' ? 'האם אתה בטוח שברצונך לצאת? שינויים שלא נשמרו יאבדו.' : 'Are you sure you want to exit? Unsaved changes will be lost.');
+                if (!confirmExit) return;
+              }
+              exitEditMode();
+            }} className="h-10 px-3 sm:px-4 rounded-xl bg-destructive/10 text-destructive hover:bg-destructive/20 font-semibold text-sm sm:text-base touch-manipulation active:scale-95 transition-all">
                   <X className="h-4 w-4 sm:h-5 sm:w-5 mr-1" />
                   {language === 'he' ? 'יציאה' : 'Exit'}
-                </Button>
-              )}
+                </Button>}
 
               {/* Search Icon */}
-              <button
-                className="p-2.5 rounded-xl glass hover:bg-muted/80 transition-all active:scale-95 touch-manipulation"
-                title={language === 'he' ? 'חיפוש' : 'Search'}
-                aria-label={language === 'he' ? 'חיפוש' : 'Search'}
-              >
+              <button className="p-2.5 rounded-xl glass hover:bg-muted/80 transition-all active:scale-95 touch-manipulation" title={language === 'he' ? 'חיפוש' : 'Search'} aria-label={language === 'he' ? 'חיפוש' : 'Search'}>
                 <Search className="h-5 w-5 sm:h-6 sm:w-6 text-muted-foreground" strokeWidth={2} />
               </button>
 
               {/* Shopping Cart Icon */}
-              <button
-                className="p-2.5 rounded-xl glass hover:bg-muted/80 transition-all active:scale-95 touch-manipulation"
-                title={language === 'he' ? 'מצב קנייה' : 'Shopping Mode'}
-                aria-label={language === 'he' ? 'מצב קנייה' : 'Shopping Mode'}
-              >
+              <button className="p-2.5 rounded-xl glass hover:bg-muted/80 transition-all active:scale-95 touch-manipulation" title={language === 'he' ? 'מצב קנייה' : 'Shopping Mode'} aria-label={language === 'he' ? 'מצב קנייה' : 'Shopping Mode'}>
                 <ShoppingCart className="h-5 w-5 sm:h-6 sm:w-6 text-muted-foreground" strokeWidth={2} />
               </button>
 
               {/* Profile Icon */}
-              <button
-                className="p-2.5 rounded-xl glass hover:bg-muted/80 transition-all active:scale-95 touch-manipulation"
-                title={language === 'he' ? 'פרופיל' : 'Profile'}
-                aria-label={language === 'he' ? 'פרופיל' : 'Profile'}
-              >
+              <button className="p-2.5 rounded-xl glass hover:bg-muted/80 transition-all active:scale-95 touch-manipulation" title={language === 'he' ? 'פרופיל' : 'Profile'} aria-label={language === 'he' ? 'פרופיל' : 'Profile'}>
                 <User className="h-5 w-5 sm:h-6 sm:w-6 text-muted-foreground" strokeWidth={2} />
               </button>
             </div>
@@ -1589,306 +1407,198 @@ export const ShoppingList = () => {
       </div>
 
       {/* Progress Bar - Part of sticky header */}
-      {
-        items.length > 0 && <div className="glass-strong px-4 sm:px-6 pb-4 sm:pb-5 sticky top-[60px] sm:top-[72px] z-40 border-b border-border/30 transition-all duration-200">
+      {items.length > 0 && <div className="glass-strong px-4 sm:px-6 pb-4 sm:pb-5 sticky top-[60px] sm:top-[72px] z-40 border-b border-border/30 transition-all duration-200">
           <div className="max-w-3xl mx-auto">
             <div className="space-y-2 sm:space-y-3">
               {/* Progress bar with gradient */}
               <div className="relative h-3 sm:h-4 bg-muted/50 rounded-full overflow-hidden shadow-inner">
-                <div 
-                  className="absolute inset-y-0 left-0 bg-gradient-to-r from-success via-success to-success/80 rounded-full transition-all duration-500 ease-out shadow-md shadow-success/30"
-                  style={{ width: `${progressPercentage}%` }}
-                />
+                <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-success via-success to-success/80 rounded-full transition-all duration-500 ease-out shadow-md shadow-success/30" style={{
+              width: `${progressPercentage}%`
+            }} />
                 {/* Shine effect */}
-                <div 
-                  className="absolute inset-y-0 left-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0 rounded-full transition-all duration-500"
-                  style={{ width: `${progressPercentage}%` }}
-                />
+                <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0 rounded-full transition-all duration-500" style={{
+              width: `${progressPercentage}%`
+            }} />
               </div>
               <div className="flex items-center justify-between">
                 <p className="text-sm sm:text-base text-muted-foreground font-medium">
                   {t.progressText(completedCount, items.length)}
                 </p>
-                {progressPercentage === 100 && (
-                  <span className="text-success text-sm font-bold flex items-center gap-1 animate-bounce-in">
+                {progressPercentage === 100 && <span className="text-success text-sm font-bold flex items-center gap-1 animate-bounce-in">
                     <Check className="h-4 w-4" />
                     {language === 'he' ? 'הושלם!' : 'Complete!'}
-                  </span>
-                )}
+                  </span>}
               </div>
             </div>
           </div>
-        </div>
-      }
+        </div>}
 
       {/* Main Content */}
       <div className="max-w-3xl mx-auto p-3 sm:p-4 md:p-6 lg:p-8 pb-28 sm:pb-32 md:pb-40 overflow-hidden w-full min-w-0">
         <div className="text-center mb-6 sm:mb-8 md:mb-10 mt-4 sm:mt-6">
-          <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-2 sm:mb-3">
-            {activeListId
-              ? "מעולה! הרשימה מוכנה לעבודה 📝"
-              : t.welcomeHeading
-            }
-          </h2>
-          <p className="text-sm sm:text-base md:text-lg font-medium text-muted-foreground">
-            {activeListId
-              ? "תנו לרשימה שם, עדכנו כמויות ושמרו אותה לפנקס."
-              : t.welcomeSubtitle
-            }
-          </p>
+          
+          
         </div>
 
 
 
-        {
-          activeListId && (
-            <div className="glass-strong rounded-2xl p-4 sm:p-5 mb-4 sm:mb-6 border border-border/30">
+        {activeListId && <div className="glass-strong rounded-2xl p-4 sm:p-5 mb-4 sm:mb-6 border border-border/30">
               <div className="flex items-center gap-3 sm:gap-4">
                 <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
                   <Pencil className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground flex-shrink-0" />
-                  <input
-                    ref={titleInputRef}
-                    value={listName}
-                    onChange={(e) => setListName(e.target.value)}
-                    className="flex-1 bg-transparent text-lg sm:text-xl md:text-2xl font-bold border-none outline-none px-2 py-1 select-text focus:cursor-text hover:cursor-text transition-all border-b-2 border-transparent focus:border-primary hover:border-primary/50 rounded-lg truncate placeholder:text-muted-foreground/50"
-                    placeholder={language === 'he' ? 'שם הרשימה...' : 'List name...'}
-                    style={{ minWidth: 0 }}
-                  />
+                  <input ref={titleInputRef} value={listName} onChange={e => setListName(e.target.value)} className="flex-1 bg-transparent text-lg sm:text-xl md:text-2xl font-bold border-none outline-none px-2 py-1 select-text focus:cursor-text hover:cursor-text transition-all border-b-2 border-transparent focus:border-primary hover:border-primary/50 rounded-lg truncate placeholder:text-muted-foreground/50" placeholder={language === 'he' ? 'שם הרשימה...' : 'List name...'} style={{
+              minWidth: 0
+            }} />
                 </div>
-                <button
-                  onClick={handleReadListAloud}
-                  title={isSpeaking ? (language === 'he' ? 'עצור הקראה' : 'Stop reading') : (language === 'he' ? 'הקרא רשימה' : 'Read list aloud')}
-                  className="w-11 h-11 sm:w-12 sm:h-12 glass hover:bg-muted/80 rounded-xl flex items-center justify-center flex-shrink-0 transition-all active:scale-95 touch-manipulation"
-                  type="button"
-                  aria-label={isSpeaking ? (language === 'he' ? 'עצור הקראה' : 'Stop reading') : (language === 'he' ? 'הקרא רשימה' : 'Read list aloud')}
-                >
-                  {isSpeaking ? (
-                    <Square className="h-5 w-5 sm:h-6 sm:w-6 text-foreground" />
-                  ) : (
-                    <Volume2 className="h-5 w-5 sm:h-6 sm:w-6 text-foreground" />
-                  )}
+                <button onClick={handleReadListAloud} title={isSpeaking ? language === 'he' ? 'עצור הקראה' : 'Stop reading' : language === 'he' ? 'הקרא רשימה' : 'Read list aloud'} className="w-11 h-11 sm:w-12 sm:h-12 glass hover:bg-muted/80 rounded-xl flex items-center justify-center flex-shrink-0 transition-all active:scale-95 touch-manipulation" type="button" aria-label={isSpeaking ? language === 'he' ? 'עצור הקראה' : 'Stop reading' : language === 'he' ? 'הקרא רשימה' : 'Read list aloud'}>
+                  {isSpeaking ? <Square className="h-5 w-5 sm:h-6 sm:w-6 text-foreground" /> : <Volume2 className="h-5 w-5 sm:h-6 sm:w-6 text-foreground" />}
                 </button>
               </div>
-            </div>
-          )
-        }
+            </div>}
 
         {/* Edit Mode Logic - Unified Input Card */}
-        {
-          activeListId ? (
-            <>
+        {activeListId ? <>
               {/* UNIFIED INPUT CARD */}
               <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-gray-200 dark:border-slate-700 p-6 mb-6 w-full">
                 
                 {/* TAB SWITCHER - Segmented Control */}
                 <div className="flex gap-3 mb-6 p-1 bg-gray-100 dark:bg-slate-800 rounded-xl w-fit mx-auto">
                   {/* Tab 1: Single Item */}
-                  <button
-                    onClick={() => setInputMode('single')}
-                    className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 ${
-                      inputMode === 'single'
-                        ? 'bg-white dark:bg-slate-700 text-gray-900 dark:text-white shadow-md'
-                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                    }`}
-                  >
+                  <button onClick={() => setInputMode('single')} className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 ${inputMode === 'single' ? 'bg-white dark:bg-slate-700 text-gray-900 dark:text-white shadow-md' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'}`}>
                     {language === 'he' ? 'פריט בודד' : 'Single Item'}
                   </button>
                   
                   {/* Tab 2: Paste List */}
-                  <button
-                    onClick={() => setInputMode('bulk')}
-                    className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 ${
-                      inputMode === 'bulk'
-                        ? 'bg-white dark:bg-slate-700 text-gray-900 dark:text-white shadow-md'
-                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                    }`}
-                  >
+                  <button onClick={() => setInputMode('bulk')} className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 ${inputMode === 'bulk' ? 'bg-white dark:bg-slate-700 text-gray-900 dark:text-white shadow-md' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'}`}>
                     {language === 'he' ? 'רשימה מלאה' : 'Paste List'}
                   </button>
                 </div>
 
                 {/* SINGLE ITEM MODE */}
-                {inputMode === 'single' && (
-                  <div className="space-y-4">
+                {inputMode === 'single' && <div className="space-y-4">
                     {/* Item Name Input */}
                     <div className="flex-1 min-w-0">
-                      <StandardizedInput
-                        variant="single-item"
-                        ref={singleItemInputRef}
-                        placeholder={t.addItemPlaceholder}
-                        value={singleItemInput}
-                        onChange={(e) => setSingleItemInput(e.target.value)}
-                        onKeyDown={e => e.key === "Enter" && handleAddSingleItem()}
-                        className="w-full h-14 sm:h-16 text-base sm:text-lg px-4 sm:px-5 rounded-xl border border-gray-300 dark:border-slate-600 focus:border-primary focus:ring-2 focus:ring-primary/20 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400 touch-manipulation"
-                      />
+                      <StandardizedInput variant="single-item" ref={singleItemInputRef} placeholder={t.addItemPlaceholder} value={singleItemInput} onChange={e => setSingleItemInput(e.target.value)} onKeyDown={e => e.key === "Enter" && handleAddSingleItem()} className="w-full h-14 sm:h-16 text-base sm:text-lg px-4 sm:px-5 rounded-xl border border-gray-300 dark:border-slate-600 focus:border-primary focus:ring-2 focus:ring-primary/20 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400 touch-manipulation" />
                     </div>
 
                     {/* Quantity + Unit + Add Button Row */}
                     <div className={`flex items-center gap-3 ${language === 'he' ? 'flex-row-reverse' : ''}`}>
-                      <Input
-                        type="number"
-                        min="0"
-                        step={singleItemUnit === 'units' ? "1" : "0.1"}
-                        value={singleItemQuantity}
-                        onChange={(e) => setSingleItemQuantity(e.target.value)}
-                        className="w-16 sm:w-20 h-12 sm:h-14 text-center text-base sm:text-lg font-semibold border border-gray-300 dark:border-slate-600 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 bg-white dark:bg-slate-800 text-gray-900 dark:text-white shrink-0 touch-manipulation"
-                        onBlur={() => {
-                          let val = parseFloat(singleItemQuantity);
-                          if (singleItemUnit === 'units' && !isNaN(val)) {
-                            setSingleItemQuantity(Math.round(val).toString());
-                          }
-                        }}
-                      />
-                      <Select
-                        value={singleItemUnit}
-                        onValueChange={(val: Unit) => {
-                          setSingleItemUnit(val);
-                          if (val === 'units') {
-                            const currentQty = parseFloat(singleItemQuantity);
-                            if (!isNaN(currentQty)) {
-                              setSingleItemQuantity(Math.round(currentQty).toString());
-                            }
-                          }
-                        }}
-                      >
+                      <Input type="number" min="0" step={singleItemUnit === 'units' ? "1" : "0.1"} value={singleItemQuantity} onChange={e => setSingleItemQuantity(e.target.value)} className="w-16 sm:w-20 h-12 sm:h-14 text-center text-base sm:text-lg font-semibold border border-gray-300 dark:border-slate-600 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 bg-white dark:bg-slate-800 text-gray-900 dark:text-white shrink-0 touch-manipulation" onBlur={() => {
+                let val = parseFloat(singleItemQuantity);
+                if (singleItemUnit === 'units' && !isNaN(val)) {
+                  setSingleItemQuantity(Math.round(val).toString());
+                }
+              }} />
+                      <Select value={singleItemUnit} onValueChange={(val: Unit) => {
+                setSingleItemUnit(val);
+                if (val === 'units') {
+                  const currentQty = parseFloat(singleItemQuantity);
+                  if (!isNaN(currentQty)) {
+                    setSingleItemQuantity(Math.round(currentQty).toString());
+                  }
+                }
+              }}>
                         <SelectTrigger className="w-20 sm:w-24 h-12 sm:h-14 text-sm sm:text-base font-semibold border border-gray-300 dark:border-slate-600 rounded-lg shrink-0 bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/20 text-center justify-center [&>span]:w-full [&>span]:text-center [&>svg]:hidden touch-manipulation">
                           <span className="truncate w-full text-center">
                             {(() => {
-                              const u = UNITS.find(u => u.value === (singleItemUnit || 'units'));
-                              return u ? (language === 'he' ? u.labelHe : u.labelEn) : '';
-                            })()}
+                      const u = UNITS.find(u => u.value === (singleItemUnit || 'units'));
+                      return u ? language === 'he' ? u.labelHe : u.labelEn : '';
+                    })()}
                           </span>
                         </SelectTrigger>
                         <SelectContent className="rounded-xl shadow-2xl border border-gray-200 dark:border-slate-700">
-                          {UNITS.map(u => (
-                            <SelectItem key={u.value} value={u.value} className="text-base py-3 rounded-lg mx-1">
+                          {UNITS.map(u => <SelectItem key={u.value} value={u.value} className="text-base py-3 rounded-lg mx-1">
                               {language === 'he' ? u.labelHe : u.labelEn}
-                            </SelectItem>
-                          ))}
+                            </SelectItem>)}
                         </SelectContent>
                       </Select>
                       
                       {/* Add Button */}
-                      <Button
-                        onClick={handleAddSingleItem}
-                        disabled={!singleItemInput.trim()}
-                        className="w-14 h-12 sm:w-16 sm:h-14 p-0 shrink-0 grid place-items-center bg-gradient-to-br from-primary to-primary/90 text-primary-foreground rounded-lg hover:opacity-90 shadow-lg shadow-primary/20 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
-                      >
+                      <Button onClick={handleAddSingleItem} disabled={!singleItemInput.trim()} className="w-14 h-12 sm:w-16 sm:h-14 p-0 shrink-0 grid place-items-center bg-gradient-to-br from-primary to-primary/90 text-primary-foreground rounded-lg hover:opacity-90 shadow-lg shadow-primary/20 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation">
                         <Plus className="h-6 w-6 sm:h-7 sm:w-7" strokeWidth={2.5} />
                       </Button>
                     </div>
-                  </div>
-                )}
+                  </div>}
 
                 {/* BULK/LIST MODE */}
-                {inputMode === 'bulk' && (
-                  <div className="space-y-4">
+                {inputMode === 'bulk' && <div className="space-y-4">
                     {/* Textarea with Smart Auto-Bullet Logic */}
                     <div className="relative mb-4 sm:mb-5">
-                    <textarea
-                      ref={bulkInputRef}
-                      value={bulkInputText}
-                      onChange={(e) => {
-                        // Just accept the text as-is (bullets are handled by other events)
-                        setBulkInputText(e.target.value);
-                      }}
-                      onFocus={(e) => {
-                        // On focus, if empty, add first bullet
-                        if (bulkInputText.trim().length === 0) {
-                          setBulkInputText('• ');
-                          // Set cursor after the bullet and space
-                          setTimeout(() => {
-                            e.currentTarget.selectionStart = 2;
-                            e.currentTarget.selectionEnd = 2;
-                          }, 0);
-                        }
-                      }}
-                      onKeyDown={(e) => {
-                        // Handle Enter key: insert newline + bullet
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          const textarea = e.currentTarget;
-                          const start = textarea.selectionStart;
-                          const end = textarea.selectionEnd;
-                          const text = bulkInputText;
-                          
-                          // Insert newline and bullet point
-                          const newText = text.slice(0, start) + '\n• ' + text.slice(end);
-                          setBulkInputText(newText);
-                          
-                          // Restore cursor position after new bullet
-                          setTimeout(() => {
-                            textarea.selectionStart = textarea.selectionEnd = start + 3; // \n + • + space
-                          }, 0);
-                        }
-                      }}
-                      onPaste={(e) => {
-                        // Handle paste event: format clipboard content
-                        e.preventDefault();
-                        
-                        const pastedText = e.clipboardData?.getData('text') || '';
-                        if (!pastedText.trim()) return;
-                        
-                        const textarea = e.currentTarget;
-                        const start = textarea.selectionStart;
-                        const end = textarea.selectionEnd;
-                        const text = bulkInputText;
-                        
-                        // Split pasted text by newlines or commas
-                        const lines = pastedText
-                          .split(/[\n,]/)
-                          .map(line => line.trim())
-                          .filter(line => line.length > 0);
-                        
-                        if (lines.length === 0) return;
-                        
-                        // Format: add bullets to each line
-                        const bulletedLines = lines.map(line => {
-                          // Remove existing bullets if present
-                          const cleanLine = line.replace(/^•\s*/, '');
-                          return `• ${cleanLine}`;
-                        });
-                        
-                        // Insert at cursor position
-                        const formattedPaste = bulletedLines.join('\n');
-                        const newText = text.slice(0, start) + formattedPaste + text.slice(end);
-                        setBulkInputText(newText);
-                        
-                        // Move cursor to end of pasted content
-                        setTimeout(() => {
-                          const newCursorPos = start + formattedPaste.length;
-                          textarea.selectionStart = textarea.selectionEnd = newCursorPos;
-                        }, 0);
-                        
-                        // Show success feedback
-                        toast.success(
-                          language === 'he' 
-                            ? `הודבקו ${lines.length} פריטים` 
-                            : `Pasted ${lines.length} items`
-                        );
-                      }}
-                      placeholder={language === 'he' 
-                        ? 'הדבק כאן רשימה (חלב, לחם...)' 
-                        : 'Paste list here (milk, bread...)'}
-                      className="w-full min-h-[140px] sm:min-h-[160px] p-4 sm:p-5 text-base sm:text-lg rounded-xl border border-gray-300 dark:border-slate-600 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none transition-all resize-none bg-white dark:bg-slate-800 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400 font-mono leading-relaxed touch-manipulation"
-                      dir={language === 'he' ? 'rtl' : 'ltr'}
-                    />
+                    <textarea ref={bulkInputRef} value={bulkInputText} onChange={e => {
+                // Just accept the text as-is (bullets are handled by other events)
+                setBulkInputText(e.target.value);
+              }} onFocus={e => {
+                // On focus, if empty, add first bullet
+                if (bulkInputText.trim().length === 0) {
+                  setBulkInputText('• ');
+                  // Set cursor after the bullet and space
+                  setTimeout(() => {
+                    e.currentTarget.selectionStart = 2;
+                    e.currentTarget.selectionEnd = 2;
+                  }, 0);
+                }
+              }} onKeyDown={e => {
+                // Handle Enter key: insert newline + bullet
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  const textarea = e.currentTarget;
+                  const start = textarea.selectionStart;
+                  const end = textarea.selectionEnd;
+                  const text = bulkInputText;
+
+                  // Insert newline and bullet point
+                  const newText = text.slice(0, start) + '\n• ' + text.slice(end);
+                  setBulkInputText(newText);
+
+                  // Restore cursor position after new bullet
+                  setTimeout(() => {
+                    textarea.selectionStart = textarea.selectionEnd = start + 3; // \n + • + space
+                  }, 0);
+                }
+              }} onPaste={e => {
+                // Handle paste event: format clipboard content
+                e.preventDefault();
+                const pastedText = e.clipboardData?.getData('text') || '';
+                if (!pastedText.trim()) return;
+                const textarea = e.currentTarget;
+                const start = textarea.selectionStart;
+                const end = textarea.selectionEnd;
+                const text = bulkInputText;
+
+                // Split pasted text by newlines or commas
+                const lines = pastedText.split(/[\n,]/).map(line => line.trim()).filter(line => line.length > 0);
+                if (lines.length === 0) return;
+
+                // Format: add bullets to each line
+                const bulletedLines = lines.map(line => {
+                  // Remove existing bullets if present
+                  const cleanLine = line.replace(/^•\s*/, '');
+                  return `• ${cleanLine}`;
+                });
+
+                // Insert at cursor position
+                const formattedPaste = bulletedLines.join('\n');
+                const newText = text.slice(0, start) + formattedPaste + text.slice(end);
+                setBulkInputText(newText);
+
+                // Move cursor to end of pasted content
+                setTimeout(() => {
+                  const newCursorPos = start + formattedPaste.length;
+                  textarea.selectionStart = textarea.selectionEnd = newCursorPos;
+                }, 0);
+
+                // Show success feedback
+                toast.success(language === 'he' ? `הודבקו ${lines.length} פריטים` : `Pasted ${lines.length} items`);
+              }} placeholder={language === 'he' ? 'הדבק כאן רשימה (חלב, לחם...)' : 'Paste list here (milk, bread...)'} className="w-full min-h-[140px] sm:min-h-[160px] p-4 sm:p-5 text-base sm:text-lg rounded-xl border border-gray-300 dark:border-slate-600 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none transition-all resize-none bg-white dark:bg-slate-800 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400 font-mono leading-relaxed touch-manipulation" dir={language === 'he' ? 'rtl' : 'ltr'} />
                   </div>
 
                   {/* Sort Mode Toggle - Only show when items exist */}
-                  {bulkPreviewItems.length > 0 && (
-                    <div className="mb-4 animate-fade-in">
-                      <SortModeToggle
-                        isSmartSort={isSmartSort}
-                        onToggle={setIsSmartSort}
-                        language={language}
-                      />
-                    </div>
-                  )}
+                  {bulkPreviewItems.length > 0 && <div className="mb-4 animate-fade-in">
+                      <SortModeToggle isSmartSort={isSmartSort} onToggle={setIsSmartSort} language={language} />
+                    </div>}
 
                   {/* Live Preview - Animated List */}
-                  {bulkPreviewItems.length > 0 && (
-                    <div className="mb-4 bg-gray-50 dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden">
+                  {bulkPreviewItems.length > 0 && <div className="mb-4 bg-gray-50 dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden">
                       <div className="px-4 py-3 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between">
                         <span className="text-sm font-semibold text-gray-900 dark:text-white">
                           {language === 'he' ? 'תצוגה מקדימה' : 'Preview'}
@@ -1900,263 +1610,178 @@ export const ShoppingList = () => {
                       <div className="max-h-[200px] overflow-y-auto p-2">
                         <div className="space-y-1">
                           {bulkPreviewItems.map((item, index) => {
-                            const categoryInfo = getCategoryInfo(item.category);
-                            return (
-                              <div
-                                key={item.id}
-                                className="flex items-center gap-3 px-3 py-2 rounded-lg bg-white dark:bg-slate-700 hover:bg-gray-100 dark:hover:bg-slate-600 transition-all duration-300 animate-fade-in"
-                                style={{ 
-                                  animationDelay: `${index * 30}ms`,
-                                  animationFillMode: 'backwards'
-                                }}
-                              >
+                    const categoryInfo = getCategoryInfo(item.category);
+                    return <div key={item.id} className="flex items-center gap-3 px-3 py-2 rounded-lg bg-white dark:bg-slate-700 hover:bg-gray-100 dark:hover:bg-slate-600 transition-all duration-300 animate-fade-in" style={{
+                      animationDelay: `${index * 30}ms`,
+                      animationFillMode: 'backwards'
+                    }}>
                                 <span className="text-lg flex-shrink-0">{categoryInfo.icon}</span>
                                 <span className="text-sm font-medium text-gray-900 dark:text-white flex-1 truncate" dir={language === 'he' ? 'rtl' : 'ltr'}>
                                   {item.text}
                                 </span>
-                                {isSmartSort && (
-                                  <span className="text-xs text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-slate-600 px-2 py-0.5 rounded-full flex-shrink-0">
+                                {isSmartSort && <span className="text-xs text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-slate-600 px-2 py-0.5 rounded-full flex-shrink-0">
                                     {language === 'he' ? categoryInfo.nameHe : categoryInfo.nameEn}
-                                  </span>
-                                )}
-                              </div>
-                            );
-                          })}
+                                  </span>}
+                              </div>;
+                  })}
                         </div>
                       </div>
-                    </div>
-                  )}
+                    </div>}
 
                   {/* Action Buttons */}
                   <div className="flex flex-col gap-3 w-full">
                     {/* Primary: Add Items - Full Width */}
-                    <Button
-                      onClick={handleAddBulkItems}
-                      disabled={bulkInputText.trim().length === 0}
-                      className="w-full h-14 sm:h-16 text-base sm:text-lg font-bold bg-gradient-to-br from-primary to-primary/90 text-primary-foreground hover:opacity-90 rounded-xl shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
-                    >
+                    <Button onClick={handleAddBulkItems} disabled={bulkInputText.trim().length === 0} className="w-full h-14 sm:h-16 text-base sm:text-lg font-bold bg-gradient-to-br from-primary to-primary/90 text-primary-foreground hover:opacity-90 rounded-xl shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation">
                       <ShoppingCart className="h-5 w-5 sm:h-6 sm:w-6" />
                       {language === 'he' ? 'הוסף לרשימה' : 'Add Items to List'}
                     </Button>
 
                     <div className="flex gap-3">
                       {/* Secondary: Paste from Clipboard */}
-                      <Button
-                        onClick={handlePasteFromClipboard}
-                        variant="outline"
-                        className="flex-1 h-12 sm:h-14 text-sm sm:text-base font-semibold rounded-lg border border-gray-300 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-900 dark:text-white active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 touch-manipulation"
-                      >
+                      <Button onClick={handlePasteFromClipboard} variant="outline" className="flex-1 h-12 sm:h-14 text-sm sm:text-base font-semibold rounded-lg border border-gray-300 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-900 dark:text-white active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 touch-manipulation">
                         <ClipboardPaste className="h-4 w-4 sm:h-5 sm:w-5" />
                         {language === 'he' ? 'הדבק' : 'Paste'}
                       </Button>
 
                       {/* Tertiary: Clear */}
-                      <Button
-                        onClick={() => setBulkInputText('')}
-                        disabled={bulkInputText.trim().length === 0}
-                        variant="outline"
-                        className="flex-1 h-12 sm:h-14 text-sm sm:text-base font-semibold rounded-lg border border-gray-300 dark:border-slate-600 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 hover:border-red-300 dark:hover:border-red-600 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
-                      >
+                      <Button onClick={() => setBulkInputText('')} disabled={bulkInputText.trim().length === 0} variant="outline" className="flex-1 h-12 sm:h-14 text-sm sm:text-base font-semibold rounded-lg border border-gray-300 dark:border-slate-600 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 hover:border-red-300 dark:hover:border-red-600 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation">
                         <Trash2 className="h-4 w-4 sm:h-5 sm:w-5" />
                         {language === 'he' ? 'מחק' : 'Clear'}
                       </Button>
                     </div>
                   </div>
-                  </div>
-                )}
+                  </div>}
               </div>
-            </>
-          ) : (
-            // Notebook Style Input (Dashboard/Home View)
-            <div className="relative bg-[#FEFCE8] dark:bg-slate-800 border-2 border-black dark:border-slate-700 rounded-xl p-4 md:p-6 mb-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] focus-within:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] hover:border-yellow-400 focus-within:border-yellow-400 transition-all duration-200 hover:-translate-y-1 focus-within:-translate-y-1 overflow-hidden"
-              style={theme !== 'dark' ? {
-                backgroundImage: 'repeating-linear-gradient(transparent, transparent 31px, #e5e7eb 31px, #e5e7eb 32px)'
-              } : {}}
-            >
+            </> :
+      // Notebook Style Input (Dashboard/Home View)
+      <div className="relative bg-[#FEFCE8] dark:bg-slate-800 border-2 border-black dark:border-slate-700 rounded-xl p-4 md:p-6 mb-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] focus-within:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] hover:border-yellow-400 focus-within:border-yellow-400 transition-all duration-200 hover:-translate-y-1 focus-within:-translate-y-1 overflow-hidden" style={theme !== 'dark' ? {
+        backgroundImage: 'repeating-linear-gradient(transparent, transparent 31px, #e5e7eb 31px, #e5e7eb 32px)'
+      } : {}}>
               {/* Spiral Binding Effect */}
               <div className={`absolute top-0 bottom-4 ${language === 'he' ? '-right-3' : '-left-3'} w-8 flex flex-col justify-evenly py-2 z-20 pointer-events-none ${theme === 'dark' ? 'hidden' : ''}`}>
-                {[...Array(12)].map((_, i) => (
-                  <div key={i} className="relative h-4 w-full">
+                {[...Array(12)].map((_, i) => <div key={i} className="relative h-4 w-full">
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-[#1a1a1a] rounded-full shadow-inner" />
                     <div className={`absolute top-1/2 ${language === 'he' ? 'left-1/2' : 'right-1/2'} w-6 h-1.5 bg-zinc-400 rounded-full transform ${language === 'he' ? '-translate-x-1/2 rotate-12' : 'translate-x-1/2 -rotate-12'} shadow-sm`} />
-                  </div>
-                ))}
+                  </div>)}
               </div>
 
               {/* Quick Paste Button */}
-              {showPaste && (
-                <button
-                  onClick={handleQuickPaste}
-                  className={`absolute top-4 ${language === 'he' ? 'left-4' : 'right-4'} flex items-center gap-2 text-gray-600 hover:text-black dark:text-slate-300 dark:hover:text-white transition-colors cursor-pointer z-10`}
-                  title={language === 'he' ? 'הדבק מהלוח' : 'Paste from clipboard'}
-                >
+              {showPaste && <button onClick={handleQuickPaste} className={`absolute top-4 ${language === 'he' ? 'left-4' : 'right-4'} flex items-center gap-2 text-gray-600 hover:text-black dark:text-slate-300 dark:hover:text-white transition-colors cursor-pointer z-10`} title={language === 'he' ? 'הדבק מהלוח' : 'Paste from clipboard'}>
                   <ClipboardPaste className="h-5 w-5" />
                   <span className="text-sm font-medium">
                     {language === 'he' ? 'הדבק' : 'Paste'}
                   </span>
-                </button>
-              )}
+                </button>}
 
               {/* Paste Feedback Animation */}
-              {showPasteFeedback && (
-                <div className={`absolute top-4 ${language === 'he' ? 'left-20' : 'right-20'} bg-green-500 text-white px-3 py-1 rounded-lg shadow-lg text-sm font-medium animate-in fade-in slide-in-from-right-2 duration-300`}>
+              {showPasteFeedback && <div className={`absolute top-4 ${language === 'he' ? 'left-20' : 'right-20'} bg-green-500 text-white px-3 py-1 rounded-lg shadow-lg text-sm font-medium animate-in fade-in slide-in-from-right-2 duration-300`}>
                   {language === 'he' ? 'הודבק!' : 'Pasted!'}
-                </div>
-              )}
+                </div>}
 
               {/* Smart Input Toolbar */}
               <div className={`flex gap-4 text-gray-500 mb-4 px-2 ${language === 'en' ? 'flex-row-reverse justify-end' : ''}`}>
                 {/* Voice Dictation Button */}
-                <button
-                  onClick={handleVoiceDictation}
-                  className={`p-2 rounded-lg hover:text-black dark:hover:text-white transition-colors hover:bg-gray-100 dark:hover:bg-slate-700 ${isVoiceRecording ? 'text-red-500 animate-pulse' : ''
-                    }`}
-                  title={language === 'he' ? 'הקלטת קול' : 'Voice Dictation'}
-                  disabled={isProcessingImage}
-                >
+                <button onClick={handleVoiceDictation} className={`p-2 rounded-lg hover:text-black dark:hover:text-white transition-colors hover:bg-gray-100 dark:hover:bg-slate-700 ${isVoiceRecording ? 'text-red-500 animate-pulse' : ''}`} title={language === 'he' ? 'הקלטת קול' : 'Voice Dictation'} disabled={isProcessingImage}>
                   <Mic className="h-5 w-5" />
                 </button>
 
                 {/* Camera OCR Button */}
-                <button
-                  onClick={() => cameraInputRef.current?.click()}
-                  className={`p-2 rounded-lg hover:text-black dark:hover:text-white transition-colors hover:bg-gray-100 dark:hover:bg-slate-700 ${isProcessingImage ? 'text-blue-500 animate-pulse' : ''
-                    }`}
-                  title={language === 'he' ? 'סריקת רשימה' : 'Scan List'}
-                  disabled={isVoiceRecording}
-                >
+                <button onClick={() => cameraInputRef.current?.click()} className={`p-2 rounded-lg hover:text-black dark:hover:text-white transition-colors hover:bg-gray-100 dark:hover:bg-slate-700 ${isProcessingImage ? 'text-blue-500 animate-pulse' : ''}`} title={language === 'he' ? 'סריקת רשימה' : 'Scan List'} disabled={isVoiceRecording}>
                   <Camera className="h-5 w-5" />
                 </button>
 
                 {/* Handwriting Button */}
-                <button
-                  onClick={() => setIsHandwritingOpen(true)}
-                  className={`p-2 rounded-lg hover:text-black dark:hover:text-white transition-colors hover:bg-gray-100 dark:hover:bg-slate-700 ${isProcessingImage ? 'text-blue-500 animate-pulse' : ''
-                    }`}
-                  title={language === 'he' ? 'כתב יד' : 'Handwriting'}
-                  disabled={isVoiceRecording}
-                >
+                <button onClick={() => setIsHandwritingOpen(true)} className={`p-2 rounded-lg hover:text-black dark:hover:text-white transition-colors hover:bg-gray-100 dark:hover:bg-slate-700 ${isProcessingImage ? 'text-blue-500 animate-pulse' : ''}`} title={language === 'he' ? 'כתב יד' : 'Handwriting'} disabled={isVoiceRecording}>
                   <PenLine className="h-5 w-5" />
                 </button>
 
                 {/* Hidden File Input for Camera */}
-                <input
-                  ref={cameraInputRef}
-                  type="file"
-                  accept="image/*"
-                  capture="environment"
-                  onChange={handleCameraOCR}
-                  className="hidden"
-                />
+                <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleCameraOCR} className="hidden" />
               </div>
 
               {/* Notepad Items List */}
               <div className="min-h-[140px]" dir={language === 'he' ? 'rtl' : 'ltr'}>
-                {notepadItems.length === 0 ? (
-                  <div
-                    className={`py-8 text-gray-600 dark:text-slate-400 font-hand text-lg font-normal leading-relaxed whitespace-pre-line cursor-pointer ${language === 'he' ? 'text-center' : 'text-center'}`}
-                    onClick={() => {
-                      const newItem: NotepadItem = {
-                        id: `notepad-${Date.now()}`,
-                        text: '',
-                        isChecked: false
-                      };
-                      setNotepadItems([newItem]);
-                      // Focus the first input
-                      setTimeout(() => {
-                        if (notepadInputRefs.current[0]) {
-                          notepadInputRefs.current[0]!.focus();
-                        }
-                      }, 0);
-                    }}
-                  >
+                {notepadItems.length === 0 ? <div className={`py-8 text-gray-600 dark:text-slate-400 font-hand text-lg font-normal leading-relaxed whitespace-pre-line cursor-pointer ${language === 'he' ? 'text-center' : 'text-center'}`} onClick={() => {
+            const newItem: NotepadItem = {
+              id: `notepad-${Date.now()}`,
+              text: '',
+              isChecked: false
+            };
+            setNotepadItems([newItem]);
+            // Focus the first input
+            setTimeout(() => {
+              if (notepadInputRefs.current[0]) {
+                notepadInputRefs.current[0]!.focus();
+              }
+            }, 0);
+          }}>
                     {t.textareaPlaceholder}
-                  </div>
-                ) : isSmartSort ? (
-                  // Grouped view
-                  renderGroupedNotepadItems()
-                ) : (
-                  // Flat list view
-                  <div className="space-y-2" dir={language === 'he' ? 'rtl' : 'ltr'}>
-                    {notepadItems.map((item, index) => (
-                      <div key={item.id} className="flex items-center gap-4 py-3 w-full overflow-hidden">
+                  </div> : isSmartSort ?
+          // Grouped view
+          renderGroupedNotepadItems() :
+          // Flat list view
+          <div className="space-y-2" dir={language === 'he' ? 'rtl' : 'ltr'}>
+                    {notepadItems.map((item, index) => <div key={item.id} className="flex items-center gap-4 py-3 w-full overflow-hidden">
                         {/* Checkbox + Text Input - Take most space */}
                         <div className="flex items-center gap-3 flex-1 min-w-0">
-                          <Checkbox
-                            checked={item.isChecked}
-                            onCheckedChange={() => toggleNotepadItem(item.id)}
-                            size="lg"
-                            className="flex-shrink-0"
-                          />
-                          <StandardizedInput
-                            variant="notepad"
-                            isChecked={item.isChecked}
-                            ref={(el) => {
-                              notepadInputRefs.current[index] = el;
-                            }}
-                            type="text"
-                            value={item.text}
-                            onChange={(e) => {
-                              const newText = e.target.value;
-                              setNotepadItems(prev => prev.map(i =>
-                                i.id === item.id ? { ...i, text: newText } : i
-                              ));
-                            }}
-                            onKeyDown={(e) => {
-                              const currentIndex = notepadItems.findIndex(i => i.id === item.id);
-
-                              if (e.key === 'Enter') {
-                                e.preventDefault();
-                                // Create new item at next position
-                                const newItem: NotepadItem = {
-                                  id: `notepad-${Date.now()}`,
-                                  text: '',
-                                  isChecked: false,
-                                  quantity: 1,
-                                  unit: 'units'
-                                };
-                                setNotepadItems(prev => {
-                                  const newItems = [...prev];
-                                  newItems.splice(currentIndex + 1, 0, newItem);
-                                  return newItems;
-                                });
-                                // Focus the new input after state update
-                                setTimeout(() => {
-                                  if (notepadInputRefs.current[currentIndex + 1]) {
-                                    notepadInputRefs.current[currentIndex + 1]!.focus();
-                                  }
-                                }, 0);
-
-                              } else if (e.key === 'Backspace') {
-                                if (item.text === '' && currentIndex > 0) {
-                                  e.preventDefault();
-                                  // Delete current item and focus previous
-                                  setNotepadItems(prev => prev.filter(i => i.id !== item.id));
-                                  setTimeout(() => {
-                                    if (notepadInputRefs.current[currentIndex - 1]) {
-                                      notepadInputRefs.current[currentIndex - 1]!.focus();
-                                      // Move cursor to end of text
-                                      const input = notepadInputRefs.current[currentIndex - 1]!;
-                                      input.setSelectionRange(input.value.length, input.value.length);
-                                    }
-                                  }, 0);
-                                }
-
-                              } else if (e.key === 'ArrowUp') {
-                                e.preventDefault();
-                                if (currentIndex > 0 && notepadInputRefs.current[currentIndex - 1]) {
-                                  notepadInputRefs.current[currentIndex - 1]!.focus();
-                                }
-
-                              } else if (e.key === 'ArrowDown') {
-                                e.preventDefault();
-                                if (currentIndex < notepadItems.length - 1 && notepadInputRefs.current[currentIndex + 1]) {
-                                  notepadInputRefs.current[currentIndex + 1]!.focus();
-                                }
-                              }
-                            }}
-                            placeholder={index === 0 && notepadItems.length === 1 ? (language === 'he' ? "הקלד פריט..." : "Type an item...") : ""}
-                          />
+                          <Checkbox checked={item.isChecked} onCheckedChange={() => toggleNotepadItem(item.id)} size="lg" className="flex-shrink-0" />
+                          <StandardizedInput variant="notepad" isChecked={item.isChecked} ref={el => {
+                  notepadInputRefs.current[index] = el;
+                }} type="text" value={item.text} onChange={e => {
+                  const newText = e.target.value;
+                  setNotepadItems(prev => prev.map(i => i.id === item.id ? {
+                    ...i,
+                    text: newText
+                  } : i));
+                }} onKeyDown={e => {
+                  const currentIndex = notepadItems.findIndex(i => i.id === item.id);
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    // Create new item at next position
+                    const newItem: NotepadItem = {
+                      id: `notepad-${Date.now()}`,
+                      text: '',
+                      isChecked: false,
+                      quantity: 1,
+                      unit: 'units'
+                    };
+                    setNotepadItems(prev => {
+                      const newItems = [...prev];
+                      newItems.splice(currentIndex + 1, 0, newItem);
+                      return newItems;
+                    });
+                    // Focus the new input after state update
+                    setTimeout(() => {
+                      if (notepadInputRefs.current[currentIndex + 1]) {
+                        notepadInputRefs.current[currentIndex + 1]!.focus();
+                      }
+                    }, 0);
+                  } else if (e.key === 'Backspace') {
+                    if (item.text === '' && currentIndex > 0) {
+                      e.preventDefault();
+                      // Delete current item and focus previous
+                      setNotepadItems(prev => prev.filter(i => i.id !== item.id));
+                      setTimeout(() => {
+                        if (notepadInputRefs.current[currentIndex - 1]) {
+                          notepadInputRefs.current[currentIndex - 1]!.focus();
+                          // Move cursor to end of text
+                          const input = notepadInputRefs.current[currentIndex - 1]!;
+                          input.setSelectionRange(input.value.length, input.value.length);
+                        }
+                      }, 0);
+                    }
+                  } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    if (currentIndex > 0 && notepadInputRefs.current[currentIndex - 1]) {
+                      notepadInputRefs.current[currentIndex - 1]!.focus();
+                    }
+                  } else if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    if (currentIndex < notepadItems.length - 1 && notepadInputRefs.current[currentIndex + 1]) {
+                      notepadInputRefs.current[currentIndex + 1]!.focus();
+                    }
+                  }
+                }} placeholder={index === 0 && notepadItems.length === 1 ? language === 'he' ? "הקלד פריט..." : "Type an item..." : ""} />
                         </div>
 
                         {/* Quantity + Unit */}
@@ -2164,18 +1789,12 @@ export const ShoppingList = () => {
                           {/* Custom Stepper Container - No Keyboard Trigger */}
                           <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-slate-700 border border-gray-300 dark:border-slate-600">
                             {/* Minus Button */}
-                            <button
-                              onClick={() => {
-                                setNotepadItems(prev => prev.map(i =>
-                                  i.id === item.id 
-                                    ? { ...i, quantity: Math.max(0.1, (i.quantity || 1) - 1) } 
-                                    : i
-                                ));
-                              }}
-                              className="flex items-center justify-center h-6 w-6 rounded transition-colors hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-600 dark:text-slate-300 active:scale-90"
-                              title={language === 'he' ? 'הקטן' : 'Decrease'}
-                              type="button"
-                            >
+                            <button onClick={() => {
+                    setNotepadItems(prev => prev.map(i => i.id === item.id ? {
+                      ...i,
+                      quantity: Math.max(0.1, (i.quantity || 1) - 1)
+                    } : i));
+                  }} className="flex items-center justify-center h-6 w-6 rounded transition-colors hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-600 dark:text-slate-300 active:scale-90" title={language === 'he' ? 'הקטן' : 'Decrease'} type="button">
                               <Minus className="h-4 w-4" strokeWidth={2} />
                             </button>
                             
@@ -2185,59 +1804,39 @@ export const ShoppingList = () => {
                             </span>
                             
                             {/* Plus Button */}
-                            <button
-                              onClick={() => {
-                                setNotepadItems(prev => prev.map(i =>
-                                  i.id === item.id 
-                                    ? { ...i, quantity: (i.quantity || 1) + 1 } 
-                                    : i
-                                ));
-                              }}
-                              className="flex items-center justify-center h-6 w-6 rounded transition-colors hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-600 dark:text-slate-300 active:scale-90"
-                              title={language === 'he' ? 'הגדל' : 'Increase'}
-                              type="button"
-                            >
+                            <button onClick={() => {
+                    setNotepadItems(prev => prev.map(i => i.id === item.id ? {
+                      ...i,
+                      quantity: (i.quantity || 1) + 1
+                    } : i));
+                  }} className="flex items-center justify-center h-6 w-6 rounded transition-colors hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-600 dark:text-slate-300 active:scale-90" title={language === 'he' ? 'הגדל' : 'Increase'} type="button">
                               <Plus className="h-4 w-4" strokeWidth={2} />
                             </button>
                           </div>
-                          <select
-                            value={item.unit || 'units'}
-                            onChange={(e) => {
-                              setNotepadItems(prev => prev.map(i =>
-                                i.id === item.id ? { ...i, unit: e.target.value as Unit } : i
-                              ));
-                            }}
-                            className="w-14 md:w-20 h-7 md:h-8 text-xs rounded border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-slate-200 focus:border-yellow-400 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] transition-all flex-shrink-0 cursor-pointer"
-                            title={language === 'he' ? 'יחידה' : 'Unit'}
-                          >
-                            {UNITS.map(u => (
-                              <option key={u.value} value={u.value}>
+                          <select value={item.unit || 'units'} onChange={e => {
+                  setNotepadItems(prev => prev.map(i => i.id === item.id ? {
+                    ...i,
+                    unit: e.target.value as Unit
+                  } : i));
+                }} className="w-14 md:w-20 h-7 md:h-8 text-xs rounded border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-slate-200 focus:border-yellow-400 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] transition-all flex-shrink-0 cursor-pointer" title={language === 'he' ? 'יחידה' : 'Unit'}>
+                            {UNITS.map(u => <option key={u.value} value={u.value}>
                                 {language === 'he' ? u.labelHe : u.labelEn}
-                              </option>
-                            ))}
+                              </option>)}
                           </select>
                         </div>
 
                         {/* Delete Button */}
-                        <button
-                          onClick={() => setNotepadItems(prev => prev.filter(i => i.id !== item.id))}
-                          className="p-2 text-gray-500 hover:text-red-600 dark:hover:text-red-400 transition-colors hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg flex-shrink-0"
-                          title={language === 'he' ? 'מחק' : 'Delete'}
-                        >
+                        <button onClick={() => setNotepadItems(prev => prev.filter(i => i.id !== item.id))} className="p-2 text-gray-500 hover:text-red-600 dark:hover:text-red-400 transition-colors hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg flex-shrink-0" title={language === 'he' ? 'מחק' : 'Delete'}>
                           <Trash2 className="h-4 w-4" />
                         </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                      </div>)}
+                  </div>}
               </div>
 
               {/* Sort Mode Toggle - Only visible when items exist */}
-              {notepadItems.length > 0 && (
-                <div className="mt-4 mb-2 px-2 animate-fade-in relative">
+              {notepadItems.length > 0 && <div className="mt-4 mb-2 px-2 animate-fade-in relative">
                   {/* Smart Sort Feature Discovery Hint */}
-                  {showSortHint && (
-                    <div className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-3 animate-fade-in-up">
+                  {showSortHint && <div className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-3 animate-fade-in-up">
                       {/* Hint Bubble */}
                       <div className="relative">
                         {/* Main bubble */}
@@ -2250,78 +1849,48 @@ export const ShoppingList = () => {
                         {/* Arrow pointing down to the button */}
                         <div className="absolute left-1/2 transform -translate-x-1/2 top-full w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-blue-500 dark:border-t-blue-400"></div>
                       </div>
-                    </div>
-                  )}
+                    </div>}
                   
                   {/* Sort Toggle with pulse effect when hint is visible */}
                   <div className={showSortHint ? 'animate-pulse-glow' : ''}>
-                    <SortModeToggle
-                      isSmartSort={isSmartSort}
-                      onToggle={(enabled) => {
-                        setIsSmartSort(enabled);
-                        // Dismiss hint on click
-                        setShowSortHint(false);
-                        // Re-sort notepad items
-                        if (enabled) {
-                          const sorted = sortByCategory(notepadItems);
-                          setNotepadItems(sorted);
-                          toast.success(language === 'he' ? 'הפריטים מסודרים לפי קטגוריה' : 'Items sorted by category');
-                        }
-                      }}
-                      language={language}
-                    />
+                    <SortModeToggle isSmartSort={isSmartSort} onToggle={enabled => {
+              setIsSmartSort(enabled);
+              // Dismiss hint on click
+              setShowSortHint(false);
+              // Re-sort notepad items
+              if (enabled) {
+                const sorted = sortByCategory(notepadItems);
+                setNotepadItems(sorted);
+                toast.success(language === 'he' ? 'הפריטים מסודרים לפי קטגוריה' : 'Items sorted by category');
+              }
+            }} language={language} />
                   </div>
-                </div>
-              )}
+                </div>}
 
               <div className="flex flex-col sm:flex-row gap-2 mt-4 w-full justify-center items-center transition-all duration-300 ease-in-out relative z-10">
                 {/* Secondary buttons */}
                 <div className={`flex gap-2 overflow-hidden p-1 transition-all duration-300 ease-in-out ${notepadItems.length > 0 ? 'w-full sm:w-1/3 opacity-100' : 'w-0 opacity-0'}`}>
-                  <Button
-                    onClick={() => setNotepadItems([])}
-                    variant="ghost"
-                    className="flex-1 text-gray-700 dark:text-slate-400 hover:bg-gray-200 hover:text-red-700 h-11 text-base font-medium rounded-full flex items-center justify-center"
-                  >
+                  <Button onClick={() => setNotepadItems([])} variant="ghost" className="flex-1 text-gray-700 dark:text-slate-400 hover:bg-gray-200 hover:text-red-700 h-11 text-base font-medium rounded-full flex items-center justify-center">
                     <Trash2 className="mr-2 h-5 w-5" />
                     {t.clearAllButton}
                   </Button>
                 </div>
                 {/* Two action buttons */}
                 <div className={`flex flex-col sm:flex-row gap-3 w-full sm:w-auto justify-center items-center ${notepadItems.length > 0 ? '' : 'pt-2'}`}>
-                  <StartShoppingButton
-                    onClick={handlePaste}
-                    language={language}
-                    disabled={notepadItems.length === 0}
-                  />
-                  <SaveListButton
-                    onClick={handleSaveList}
-                    language={language}
-                    disabled={notepadItems.length === 0}
-                  />
+                  <StartShoppingButton onClick={handlePaste} language={language} disabled={notepadItems.length === 0} />
+                  <SaveListButton onClick={handleSaveList} language={language} disabled={notepadItems.length === 0} />
                 </div>
               </div>
-            </div>
-          )
-        }
+            </div>}
 
         {/* Quick Start Templates */}
-        {items.length === 0 && (
-          <SortableTemplates
-            systemTemplates={currentTemplates}
-            language={language}
-            onTemplateClick={handleTemplateClick}
-            onCreateNew={() => setIsCreateTemplateDialogOpen(true)}
-          />
-        )}
+        {items.length === 0 && <SortableTemplates systemTemplates={currentTemplates} language={language} onTemplateClick={handleTemplateClick} onCreateNew={() => setIsCreateTemplateDialogOpen(true)} />}
 
         {/* Dashboard - Saved Lists & Completed Trips */}
-        {
-          items.length === 0 && (savedLists.length > 0 || shoppingHistory.length > 0) && (
-            <div className="mb-12 border-t-2 border-black/5 pt-8 max-w-5xl mx-auto px-4 space-y-10">
+        {items.length === 0 && (savedLists.length > 0 || shoppingHistory.length > 0) && <div className="mb-12 border-t-2 border-black/5 pt-8 max-w-5xl mx-auto px-4 space-y-10">
               
               {/* Active/Pending Lists Section */}
-              {savedLists.length > 0 && (
-                <div>
+              {savedLists.length > 0 && <div>
                   <div className="flex justify-between items-center mb-6 px-2">
                     <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                       <ClipboardList className="h-5 w-5 text-yellow-500" />
@@ -2330,54 +1899,38 @@ export const ShoppingList = () => {
                         {savedLists.length}
                       </span>
                     </h3>
-                    <Button
-                      variant="ghost"
-                      onClick={() => navigate("/notebook")}
-                      className="text-sm font-bold text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/20"
-                    >
+                    <Button variant="ghost" onClick={() => navigate("/notebook")} className="text-sm font-bold text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/20">
                       {t.viewAllListsButton}
                       {language === 'he' ? <div className="mr-1 rotate-180">➜</div> : <div className="ml-1">➜</div>}
                     </Button>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
-                    {savedLists
-                      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-                      .slice(0, 4)
-                      .map((list, index) => (
-                        <SavedListCard
-                          key={list.id}
-                          list={list}
-                          index={index}
-                          language={language}
-                          t={t}
-                          onLoad={handleLoadList}
-                          onDelete={(id) => {
-                            if (deleteSavedList(id)) {
-                              setSavedLists(getSavedLists());
-                              toast.success(t.toasts.listDeleted);
-                            }
-                          }}
-                          onToggleItem={(listId, itemId) => {
-                            const list = savedLists.find(l => l.id === listId);
-                            if (!list) return;
-                            const updatedItems = list.items.map(item =>
-                              item.id === itemId ? { ...item, checked: !item.checked } : item
-                            );
-                            const updatedList = { ...list, items: updatedItems };
-                            if (updateSavedList(updatedList)) {
-                              setSavedLists(getSavedLists());
-                            }
-                          }}
-                        />
-                      ))}
+                    {savedLists.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 4).map((list, index) => <SavedListCard key={list.id} list={list} index={index} language={language} t={t} onLoad={handleLoadList} onDelete={id => {
+              if (deleteSavedList(id)) {
+                setSavedLists(getSavedLists());
+                toast.success(t.toasts.listDeleted);
+              }
+            }} onToggleItem={(listId, itemId) => {
+              const list = savedLists.find(l => l.id === listId);
+              if (!list) return;
+              const updatedItems = list.items.map(item => item.id === itemId ? {
+                ...item,
+                checked: !item.checked
+              } : item);
+              const updatedList = {
+                ...list,
+                items: updatedItems
+              };
+              if (updateSavedList(updatedList)) {
+                setSavedLists(getSavedLists());
+              }
+            }} />)}
                   </div>
-                </div>
-              )}
+                </div>}
 
               {/* Completed Trips Section */}
-              {shoppingHistory.length > 0 && (
-                <div>
+              {shoppingHistory.length > 0 && <div>
                   <div className="flex justify-between items-center mb-6 px-2">
                     <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                       <CheckCircle2 className="h-5 w-5 text-emerald-500" />
@@ -2386,179 +1939,102 @@ export const ShoppingList = () => {
                         {shoppingHistory.length}
                       </span>
                     </h3>
-                    <Button
-                      variant="ghost"
-                      onClick={() => navigate("/history")}
-                      className="text-sm font-bold text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:text-emerald-300 dark:hover:bg-emerald-900/20"
-                    >
+                    <Button variant="ghost" onClick={() => navigate("/history")} className="text-sm font-bold text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:text-emerald-300 dark:hover:bg-emerald-900/20">
                       {language === 'he' ? 'צפה בהכל' : 'View All'}
                       {language === 'he' ? <div className="mr-1 rotate-180">➜</div> : <div className="ml-1">➜</div>}
                     </Button>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
-                    {shoppingHistory
-                      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                      .slice(0, 4)
-                      .map((trip, index) => (
-                        <CompletedTripCard
-                          key={trip.id}
-                          trip={trip}
-                          index={index}
-                          language={language}
-                          onViewDetails={(trip) => {
-                            setSelectedTrip(trip);
-                            setIsHistoryModalOpen(true);
-                          }}
-                          onDelete={(id) => {
-                            if (deleteShoppingHistory(id)) {
-                              setShoppingHistory(getShoppingHistory());
-                              toast.success(language === 'he' ? 'הקנייה נמחקה' : 'Trip deleted');
-                            }
-                          }}
-                        />
-                      ))}
+                    {shoppingHistory.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 4).map((trip, index) => <CompletedTripCard key={trip.id} trip={trip} index={index} language={language} onViewDetails={trip => {
+              setSelectedTrip(trip);
+              setIsHistoryModalOpen(true);
+            }} onDelete={id => {
+              if (deleteShoppingHistory(id)) {
+                setShoppingHistory(getShoppingHistory());
+                toast.success(language === 'he' ? 'הקנייה נמחקה' : 'Trip deleted');
+              }
+            }} />)}
                   </div>
-                </div>
-              )}
-            </div>
-          )
-        }
+                </div>}
+            </div>}
 
         {/* Secondary Action Bar */}
-        {
-          items && items.length > 0 && (
-            <div className="flex flex-col gap-3 mb-4">
+        {items && items.length > 0 && <div className="flex flex-col gap-3 mb-4">
               {/* Sort Toggle */}
-              <SortModeToggle
-                isSmartSort={isSmartSort}
-                onToggle={(enabled) => {
-                  setIsSmartSort(enabled);
-                  // Re-sort items when toggling
-                  if (enabled) {
-                    setItems(sortByCategory(items));
-                    toast.success(language === 'he' ? 'הפריטים מסודרים לפי קטגוריה' : 'Items sorted by category');
-                  }
-                }}
-                language={language}
-              />
+              <SortModeToggle isSmartSort={isSmartSort} onToggle={enabled => {
+          setIsSmartSort(enabled);
+          // Re-sort items when toggling
+          if (enabled) {
+            setItems(sortByCategory(items));
+            toast.success(language === 'he' ? 'הפריטים מסודרים לפי קטגוריה' : 'Items sorted by category');
+          }
+        }} language={language} />
               
               {/* Reset checks button */}
               <div className="flex justify-start">
-                <button
-                  onClick={() => {
-                    if (items && items.length > 0) {
-                      setItems(items.map(item => ({ ...item, checked: false })));
-                      toast.success(language === 'he' ? 'כל הסימונים אופסו' : 'All checks reset');
-                    }
-                  }}
-                  className="text-sm text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                >
+                <button onClick={() => {
+            if (items && items.length > 0) {
+              setItems(items.map(item => ({
+                ...item,
+                checked: false
+              })));
+              toast.success(language === 'he' ? 'כל הסימונים אופסו' : 'All checks reset');
+            }
+          }} className="text-sm text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                   <RotateCcw className="w-4 h-4" />
                   <span>{language === 'he' ? 'אפס סימונים' : 'Reset Checks'}</span>
                 </button>
               </div>
-            </div>
-          )
-        }
+            </div>}
 
         {/* Items List */}
-        {
-          items && items.length > 0 && (
-            isSmartSort ? (
-              // Grouped List View with Category Headers
-              <GroupedShoppingList
-                items={items}
-                language={language}
-                onToggle={toggleItem}
-                onDelete={deleteItem}
-                onQuantityChange={updateItemQuantity}
-                onUnitChange={updateItemUnit}
-              />
-            ) : (
-              // Flat List View (Original)
-              <div className="space-y-4 sm:space-y-5">
+        {items && items.length > 0 && (isSmartSort ?
+      // Grouped List View with Category Headers
+      <GroupedShoppingList items={items} language={language} onToggle={toggleItem} onDelete={deleteItem} onQuantityChange={updateItemQuantity} onUnitChange={updateItemUnit} /> :
+      // Flat List View (Original)
+      <div className="space-y-4 sm:space-y-5">
                 {/* Pending Items */}
                 <div className="space-y-3 sm:space-y-4">
-                  {items.filter(item => !item.checked).map((item, index) => (
-                    <div 
-                      key={item.id} 
-                      className="animate-fade-in"
-                      style={{ animationDelay: `${index * 50}ms` }}
-                    >
-                      <ShoppingListItem
-                        item={item}
-                        onToggle={toggleItem}
-                        onDelete={deleteItem}
-                        onQuantityChange={updateItemQuantity}
-                        onUnitChange={updateItemUnit}
-                      />
-                    </div>
-                  ))}
+                  {items.filter(item => !item.checked).map((item, index) => <div key={item.id} className="animate-fade-in" style={{
+            animationDelay: `${index * 50}ms`
+          }}>
+                      <ShoppingListItem item={item} onToggle={toggleItem} onDelete={deleteItem} onQuantityChange={updateItemQuantity} onUnitChange={updateItemUnit} />
+                    </div>)}
                 </div>
 
                 {/* Completed Items Separator */}
-                {items.filter(item => item.checked).length > 0 && (
-                  <div className="flex items-center gap-4 py-4">
+                {items.filter(item => item.checked).length > 0 && <div className="flex items-center gap-4 py-4">
                     <div className="h-px flex-1 bg-gradient-to-r from-transparent via-success/40 to-transparent" />
                     <span className="text-sm font-bold text-success flex items-center gap-2.5 px-4 py-2 bg-success/15 rounded-full shadow-sm shadow-success/20 border border-success/20">
                       <Check className="h-4 w-4" strokeWidth={3} />
                       {language === 'he' ? `נרכשו ${items.filter(item => item.checked).length}` : `Completed ${items.filter(item => item.checked).length}`}
                     </span>
                     <div className="h-px flex-1 bg-gradient-to-r from-transparent via-success/40 to-transparent" />
-                  </div>
-                )}
+                  </div>}
 
                 {/* Completed Items */}
-                {items.filter(item => item.checked).length > 0 && (
-                  <div className="space-y-3 sm:space-y-4">
-                    {items.filter(item => item.checked).map((item) => (
-                      <ShoppingListItem
-                        key={item.id}
-                        item={item}
-                        onToggle={toggleItem}
-                        onDelete={deleteItem}
-                        onQuantityChange={updateItemQuantity}
-                        onUnitChange={updateItemUnit}
-                        isCompleted={true}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            )
-          )
-        }
-        {
-          items && items.length > 0 && (
-            <div className="fixed bottom-0 left-0 right-0 z-[60] glass-strong border-t border-border/50 shadow-[0_-8px_30px_-5px_rgba(0,0,0,0.15)] p-4 sm:p-5 safe-area-inset-bottom">
+                {items.filter(item => item.checked).length > 0 && <div className="space-y-3 sm:space-y-4">
+                    {items.filter(item => item.checked).map(item => <ShoppingListItem key={item.id} item={item} onToggle={toggleItem} onDelete={deleteItem} onQuantityChange={updateItemQuantity} onUnitChange={updateItemUnit} isCompleted={true} />)}
+                  </div>}
+              </div>)}
+        {items && items.length > 0 && <div className="fixed bottom-0 left-0 right-0 z-[60] glass-strong border-t border-border/50 shadow-[0_-8px_30px_-5px_rgba(0,0,0,0.15)] p-4 sm:p-5 safe-area-inset-bottom">
               <div className="max-w-3xl mx-auto">
                 <div className="flex flex-row gap-3 sm:gap-4">
                   {(() => {
-                    const isSavedList = activeListId && savedLists.some(list => list.id === activeListId);
-                    return (
-                      <Button 
-                        variant="outline" 
-                        onClick={handleSaveList} 
-                        className="flex-1 h-14 sm:h-16 font-bold text-base sm:text-lg touch-manipulation rounded-2xl glass border-2 border-border/50 hover:border-primary/50 hover:bg-primary/5 active:scale-95 transition-all duration-200"
-                      >
+              const isSavedList = activeListId && savedLists.some(list => list.id === activeListId);
+              return <Button variant="outline" onClick={handleSaveList} className="flex-1 h-14 sm:h-16 font-bold text-base sm:text-lg touch-manipulation rounded-2xl glass border-2 border-border/50 hover:border-primary/50 hover:bg-primary/5 active:scale-95 transition-all duration-200">
                         <Save className={`h-5 w-5 sm:h-6 sm:w-6 ${language === 'he' ? 'ml-2 sm:ml-3' : 'mr-2 sm:mr-3'}`} />
                         <span className="truncate">{isSavedList ? t.saveChangesButton : t.saveListButton}</span>
-                      </Button>
-                    );
-                  })()}
-                  <Button 
-                    onClick={openFinishDialog} 
-                    className="flex-1 h-14 sm:h-16 font-bold text-base sm:text-lg touch-manipulation rounded-2xl bg-gradient-to-br from-foreground to-foreground/90 text-background hover:opacity-90 shadow-xl hover:shadow-2xl active:scale-95 transition-all duration-200"
-                  >
+                      </Button>;
+            })()}
+                  <Button onClick={openFinishDialog} className="flex-1 h-14 sm:h-16 font-bold text-base sm:text-lg touch-manipulation rounded-2xl bg-gradient-to-br from-foreground to-foreground/90 text-background hover:opacity-90 shadow-xl hover:shadow-2xl active:scale-95 transition-all duration-200">
                     <ClipboardList className={`h-5 w-5 sm:h-6 sm:w-6 ${language === 'he' ? 'ml-2 sm:ml-3' : 'mr-2 sm:mr-3'}`} />
                     <span className="truncate">{t.summarizeButton}</span>
                   </Button>
                 </div>
               </div>
-            </div>
-          )
-        }
+            </div>}
 
         <Dialog open={isFinishDialogOpen} onOpenChange={setIsFinishDialogOpen}>
           <DialogContent className="sm:max-w-[500px]">
@@ -2628,13 +2104,7 @@ export const ShoppingList = () => {
                   {t.saveDialog.nameLabel}
                 </Label>
                 <div className="flex gap-2">
-                  <Input
-                    id="listName"
-                    value={listName}
-                    onChange={e => setListName(e.target.value)}
-                    placeholder={t.saveDialog.namePlaceholder}
-                    className="h-11 text-lg"
-                  />
+                  <Input id="listName" value={listName} onChange={e => setListName(e.target.value)} placeholder={t.saveDialog.namePlaceholder} className="h-11 text-lg" />
                   <Button onClick={confirmSaveList} className="h-11 px-6 bg-primary hover:bg-primary/90 font-bold shrink-0">
                     <Save className="mr-2 h-4 w-4" />
                     {t.saveDialog.saveButton}
@@ -2686,12 +2156,7 @@ export const ShoppingList = () => {
               <DialogTitle>{t.renameDialog.title}</DialogTitle>
             </DialogHeader>
             <div className="py-4">
-              <Input
-                value={renamingListName}
-                onChange={(e) => setRenamingListName(e.target.value)}
-                className="h-11 text-lg"
-                onKeyDown={(e) => e.key === "Enter" && confirmRenameList()}
-              />
+              <Input value={renamingListName} onChange={e => setRenamingListName(e.target.value)} className="h-11 text-lg" onKeyDown={e => e.key === "Enter" && confirmRenameList()} />
             </div>
             <DialogFooter className="gap-2">
               <Button variant="outline" onClick={() => setIsRenameDialogOpen(false)}>
@@ -2719,13 +2184,7 @@ export const ShoppingList = () => {
                 <Label htmlFor="templateName" className="text-base font-semibold">
                   {language === 'he' ? 'שם התבנית' : 'Template Name'}
                 </Label>
-                <Input
-                  id="templateName"
-                  value={newTemplateName}
-                  onChange={(e) => setNewTemplateName(e.target.value)}
-                  placeholder={language === 'he' ? 'למשל: הקנייה הקבועה שלי' : 'e.g., My Regular Shopping'}
-                  className="h-11 text-lg"
-                />
+                <Input id="templateName" value={newTemplateName} onChange={e => setNewTemplateName(e.target.value)} placeholder={language === 'he' ? 'למשל: הקנייה הקבועה שלי' : 'e.g., My Regular Shopping'} className="h-11 text-lg" />
               </div>
 
               {/* Template Items */}
@@ -2733,13 +2192,7 @@ export const ShoppingList = () => {
                 <Label htmlFor="templateItems" className="text-base font-semibold">
                   {language === 'he' ? 'פריטי התבנית' : 'Template Items'}
                 </Label>
-                <StandardizedTextarea
-                  id="templateItems"
-                  value={newTemplateItems}
-                  onChange={(e) => setNewTemplateItems(e.target.value)}
-                  placeholder={language === 'he' ? 'הדבק או הקלד את רשימת הקניות שלך, כל פריט בשורה נפרדת' : 'Paste or type your shopping list, one item per line'}
-                  className="min-h-[120px] text-base"
-                />
+                <StandardizedTextarea id="templateItems" value={newTemplateItems} onChange={e => setNewTemplateItems(e.target.value)} placeholder={language === 'he' ? 'הדבק או הקלד את רשימת הקניות שלך, כל פריט בשורה נפרדת' : 'Paste or type your shopping list, one item per line'} className="min-h-[120px] text-base" />
               </div>
             </div>
 
@@ -2755,25 +2208,13 @@ export const ShoppingList = () => {
           </DialogContent>
         </Dialog>
 
-        {isHandwritingOpen && (
-          <HandwritingCanvas
-            onSubmit={handleHandwritingSubmit}
-            onCancel={() => setIsHandwritingOpen(false)}
-            language={language}
-          />
-        )}
+        {isHandwritingOpen && <HandwritingCanvas onSubmit={handleHandwritingSubmit} onCancel={() => setIsHandwritingOpen(false)} language={language} />}
 
         {/* History Detail Modal */}
-        <HistoryDetailModal
-          trip={selectedTrip}
-          isOpen={isHistoryModalOpen}
-          onClose={() => {
-            setIsHistoryModalOpen(false);
-            setSelectedTrip(null);
-          }}
-          language={language}
-        />
+        <HistoryDetailModal trip={selectedTrip} isOpen={isHistoryModalOpen} onClose={() => {
+        setIsHistoryModalOpen(false);
+        setSelectedTrip(null);
+      }} language={language} />
       </div>
-    </div>
-  );
+    </div>;
 };

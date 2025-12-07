@@ -137,6 +137,8 @@ export const ShoppingList = () => {
   const [isSmartSort, setIsSmartSort] = useState(true); // Default to smart sort
   const [collapsedNotepadCategories, setCollapsedNotepadCategories] = useState<Set<CategoryKey>>(new Set());
   const [bulkPreviewItems, setBulkPreviewItems] = useState<Array<{ id: string; text: string; category: CategoryKey }>>([]);
+  const [showSortHint, setShowSortHint] = useState(false); // Feature discovery hint visibility
+  const sortHintTimeoutRef = useRef<NodeJS.Timeout | null>(null); // Hint auto-dismiss timeout
 
   // Shopping History States
   const [shoppingHistory, setShoppingHistory] = useState<ShoppingHistory[]>([]);
@@ -153,6 +155,33 @@ export const ShoppingList = () => {
   useEffect(() => {
     notepadInputRefs.current = notepadInputRefs.current.slice(0, notepadItems.length);
   }, [notepadItems]);
+
+  // Feature Discovery: Show Smart Sort hint once per user
+  useEffect(() => {
+    const hasSeenHint = localStorage.getItem('hasSeenSortHint');
+    
+    // Show hint if: items exist AND Smart Sort is ON AND user hasn't seen it before
+    if (notepadItems.length > 0 && isSmartSort && !hasSeenHint) {
+      setShowSortHint(true);
+      
+      // Mark as seen
+      localStorage.setItem('hasSeenSortHint', 'true');
+      
+      // Auto-dismiss after 6 seconds
+      if (sortHintTimeoutRef.current) {
+        clearTimeout(sortHintTimeoutRef.current);
+      }
+      sortHintTimeoutRef.current = setTimeout(() => {
+        setShowSortHint(false);
+      }, 6000);
+    }
+    
+    return () => {
+      if (sortHintTimeoutRef.current) {
+        clearTimeout(sortHintTimeoutRef.current);
+      }
+    };
+  }, [notepadItems.length, isSmartSort]);
   const hasContent = inputText.trim().length > 0 || items.length > 0 || notepadItems.length > 0;
   const showPaste = notepadItems.length === 0 || (notepadItems.length === 1 && notepadItems[0].text === '');
   const titleInputRef = useRef<HTMLInputElement>(null);
@@ -2187,20 +2216,43 @@ export const ShoppingList = () => {
 
               {/* Sort Mode Toggle - Only visible when items exist */}
               {notepadItems.length > 0 && (
-                <div className="mt-4 mb-2 px-2 animate-fade-in">
-                  <SortModeToggle
-                    isSmartSort={isSmartSort}
-                    onToggle={(enabled) => {
-                      setIsSmartSort(enabled);
-                      // Re-sort notepad items
-                      if (enabled) {
-                        const sorted = sortByCategory(notepadItems);
-                        setNotepadItems(sorted);
-                        toast.success(language === 'he' ? 'הפריטים מסודרים לפי קטגוריה' : 'Items sorted by category');
-                      }
-                    }}
-                    language={language}
-                  />
+                <div className="mt-4 mb-2 px-2 animate-fade-in relative">
+                  {/* Smart Sort Feature Discovery Hint */}
+                  {showSortHint && (
+                    <div className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-3 animate-fade-in-up">
+                      {/* Hint Bubble */}
+                      <div className="relative">
+                        {/* Main bubble */}
+                        <div className="bg-white dark:bg-slate-800 border-2 border-blue-500 dark:border-blue-400 rounded-xl px-4 py-3 shadow-lg whitespace-nowrap">
+                          <p className="text-sm font-bold text-blue-700 dark:text-blue-300 text-center">
+                            {language === 'he' ? 'מעדיפים את הסדר שלכם? לחצו כאן לביטול המיון האוטומטי.' : 'Prefer your own order? Click here to disable auto-sort.'}
+                          </p>
+                        </div>
+                        
+                        {/* Arrow pointing down to the button */}
+                        <div className="absolute left-1/2 transform -translate-x-1/2 top-full w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-blue-500 dark:border-t-blue-400"></div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Sort Toggle with pulse effect when hint is visible */}
+                  <div className={showSortHint ? 'animate-pulse-glow' : ''}>
+                    <SortModeToggle
+                      isSmartSort={isSmartSort}
+                      onToggle={(enabled) => {
+                        setIsSmartSort(enabled);
+                        // Dismiss hint on click
+                        setShowSortHint(false);
+                        // Re-sort notepad items
+                        if (enabled) {
+                          const sorted = sortByCategory(notepadItems);
+                          setNotepadItems(sorted);
+                          toast.success(language === 'he' ? 'הפריטים מסודרים לפי קטגוריה' : 'Items sorted by category');
+                        }
+                      }}
+                      language={language}
+                    />
+                  </div>
                 </div>
               )}
 

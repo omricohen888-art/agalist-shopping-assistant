@@ -8,6 +8,13 @@ import { useSoundSettings } from "@/hooks/use-sound-settings.tsx";
 import { useHaptics } from "@/hooks/use-haptics";
 import { ConfettiEffect } from "./ConfettiEffect";
 
+// Unit type categories for smart behavior
+// SCENARIO A: Discrete Units (whole numbers, stepper-only)
+const DISCRETE_UNITS: Unit[] = ['units', 'package', 'packs', 'cans', 'bottles', 'boxes'];
+
+// SCENARIO B: Weight/Measurements (decimal, input + stepper)
+const WEIGHT_UNITS: Unit[] = ['kg', 'g', 'liters', 'ml', 'oz', 'lbs'];
+
 interface QuantityStepperProps {
   value: number;
   onChange: (val: number) => void;
@@ -15,98 +22,298 @@ interface QuantityStepperProps {
   isCompleted?: boolean;
 }
 
+// Check if a unit is discrete (whole numbers) or continuous (decimal)
+const isDiscreteUnit = (unit: Unit): boolean => DISCRETE_UNITS.includes(unit);
+
 const QuantityStepper = ({ value, onChange, unit, isCompleted }: QuantityStepperProps) => {
-  const step = unit === 'units' ? 1 : 0.5;
-  const minValue = unit === 'units' ? 1 : 0.1;
+  const [inputValue, setInputValue] = useState(String(value));
+  const inputRef = useRef<HTMLInputElement>(null);
+  
+  // Different behavior based on unit type
+  const isDiscrete = isDiscreteUnit(unit);
+  
+  // Smarter step values based on unit type
+  let step = 0.1;
+  let minValue = 0.1;
+  
+  if (isDiscrete) {
+    step = 1;
+    minValue = 1;
+  } else if (unit === 'g') {
+    // Grams: step by 50g (0.05kg)
+    step = 0.05;
+    minValue = 0.05;
+  } else if (unit === 'kg') {
+    // Kilograms: step by 0.25kg
+    step = 0.25;
+    minValue = 0.1;
+  } else if (unit === 'ml') {
+    // Milliliters: step by 100ml
+    step = 0.1;
+    minValue = 0.1;
+  } else if (unit === 'liters') {
+    // Liters: step by 0.25L
+    step = 0.25;
+    minValue = 0.1;
+  }
+  
   const { lightTap } = useHaptics();
   
   const handleIncrement = useCallback(() => {
     lightTap();
-    const newValue = Math.round((value + step) * 10) / 10;
+    let newValue: number;
+    
+    if (isDiscrete) {
+      // For units: whole numbers only (fast, clicker-game style)
+      newValue = value + 1;
+    } else {
+      // For weights: precise decimal increments with smart rounding
+      newValue = Math.round((value + step) * 100) / 100;
+    }
+    
     onChange(newValue);
-  }, [value, step, onChange, lightTap]);
+  }, [value, step, isDiscrete, onChange, lightTap]);
 
   const handleDecrement = useCallback(() => {
     lightTap();
-    const newValue = Math.max(minValue, Math.round((value - step) * 10) / 10);
+    let newValue: number;
+    
+    if (isDiscrete) {
+      // For units: whole numbers only, min 1 (can't go below)
+      newValue = Math.max(minValue, value - 1);
+    } else {
+      // For weights: precise decimal decrements with min check
+      newValue = Math.max(minValue, Math.round((value - step) * 100) / 100);
+    }
+    
     onChange(newValue);
-  }, [value, step, minValue, onChange, lightTap]);
+  }, [value, step, minValue, isDiscrete, onChange, lightTap]);
 
-  const displayValue = unit === 'units' ? Math.round(value) : value;
+  // Handle manual input for weight units
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setInputValue(val);
+  };
 
+  const handleInputBlur = () => {
+    let numValue = parseFloat(inputValue);
+    
+    // Validate the parsed value
+    if (isNaN(numValue) || numValue < minValue) {
+      numValue = minValue;
+    }
+    
+    // For discrete units: round to integer
+    if (isDiscrete) {
+      numValue = Math.round(numValue);
+    } else {
+      // For weights: round to 2 decimal places for consistency
+      numValue = Math.round(numValue * 100) / 100;
+    }
+    
+    onChange(numValue);
+    setInputValue(String(numValue));
+  };
+
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleInputBlur();
+    }
+  };
+
+  // Display value depends on unit type
+  // Discrete units: always integer
+  // Weight units: show decimal based on unit
+  let displayValue: string;
+  if (isDiscrete) {
+    displayValue = Math.round(value).toString();
+  } else {
+    // For weights, show 1-2 decimals based on the value
+    if (value >= 1) {
+      displayValue = value.toFixed(1);
+    } else {
+      displayValue = value.toFixed(2);
+    }
+  }
+
+  // SCENARIO A: Discrete Units (units, packages, cans) - Read-only stepper (clicker-style)
+  if (isDiscrete) {
+    return (
+      <div 
+        className={`
+          inline-flex items-center gap-0
+          rounded-2xl 
+          overflow-hidden
+          transition-all duration-300 ease-out
+          shadow-sm
+          bg-gradient-to-br from-primary/10 to-primary/5
+          border border-primary/20
+          ${isCompleted 
+            ? 'bg-muted/50 opacity-50 border-muted/30' 
+            : 'hover:shadow-md hover:shadow-primary/15'
+          }
+        `}
+      >
+        {/* Minus Button - Large for easy tapping */}
+        <button
+          type="button"
+          onClick={handleDecrement}
+          disabled={isCompleted || value <= minValue}
+          className={`
+            flex items-center justify-center
+            w-12 h-12 sm:w-14 sm:h-14
+            transition-all duration-150
+            touch-manipulation
+            active:scale-75 active:bg-primary/20
+            ${isCompleted || value <= minValue
+              ? 'text-muted-foreground/40 cursor-not-allowed'
+              : 'text-primary/70 hover:bg-primary/15 hover:text-primary active:text-primary'
+            }
+          `}
+          aria-label="Decrease quantity"
+          title="Tap to decrease"
+        >
+          <Minus className="h-5 w-5 sm:h-6 sm:w-6" strokeWidth={3} />
+        </button>
+
+        {/* Value Display - READ ONLY FOR DISCRETE UNITS (prominent for clicker feel) */}
+        <div 
+          className={`
+            min-w-[4rem] sm:min-w-[4.5rem] 
+            text-center 
+            font-black
+            text-2xl sm:text-3xl
+            tabular-nums
+            select-none
+            py-2
+            cursor-not-allowed
+            transition-all duration-200
+            ${isCompleted 
+              ? 'text-muted-foreground/50' 
+              : 'text-primary/80'
+            }
+          `}
+        >
+          {displayValue}
+        </div>
+
+        {/* Plus Button - Large for easy tapping */}
+        <button
+          type="button"
+          onClick={handleIncrement}
+          disabled={isCompleted}
+          className={`
+            flex items-center justify-center
+            w-12 h-12 sm:w-14 sm:h-14
+            transition-all duration-150
+            touch-manipulation
+            active:scale-75 active:bg-primary/20
+            ${isCompleted
+              ? 'text-muted-foreground/40 cursor-not-allowed'
+              : 'text-primary/70 hover:bg-primary/15 hover:text-primary active:text-primary'
+            }
+          `}
+          aria-label="Increase quantity"
+          title="Tap to increase"
+        >
+          <Plus className="h-5 w-5 sm:h-6 sm:w-6" strokeWidth={3} />
+        </button>
+      </div>
+    );
+  }
+
+  // SCENARIO B: Weight/Measurements (kg, g, liters, ml) - Input + fine-tuning buttons
   return (
     <div 
       className={`
-        inline-flex items-center 
+        inline-flex items-center gap-1.5 sm:gap-2
         rounded-2xl 
         overflow-hidden
         transition-all duration-300 ease-out
         shadow-sm
+        border border-border/60
         ${isCompleted 
-          ? 'bg-muted/50 opacity-50' 
-          : 'glass hover:shadow-md hover:shadow-primary/10'
+          ? 'bg-muted/40 opacity-50 border-muted/30' 
+          : 'bg-gradient-to-br from-accent/10 to-accent/5 hover:shadow-md hover:shadow-accent/15'
         }
       `}
     >
-      {/* Minus Button */}
+      {/* Minus Button - Small for fine-tuning weights */}
       <button
         type="button"
         onClick={handleDecrement}
         disabled={isCompleted || value <= minValue}
         className={`
           flex items-center justify-center
-          w-12 h-12 sm:w-14 sm:h-14
-          transition-all duration-200
+          h-10 w-10 sm:h-11 sm:w-11
+          transition-all duration-150
           touch-manipulation
-          active:scale-90 active:bg-primary/10
+          active:scale-75 active:bg-accent/20
+          rounded-lg
           ${isCompleted || value <= minValue
             ? 'text-muted-foreground/40 cursor-not-allowed'
-            : 'text-foreground/70 hover:bg-primary/10 hover:text-primary'
+            : 'text-accent/70 hover:bg-accent/15 hover:text-accent active:text-accent'
           }
         `}
         aria-label="Decrease quantity"
+        title="Fine-tune down"
       >
-        <Minus className="h-5 w-5 sm:h-6 sm:w-6" strokeWidth={2.5} />
+        <Minus className="h-4 w-4 sm:h-5 sm:w-5" strokeWidth={2.5} />
       </button>
 
-      {/* Value Display */}
-      <div 
+      {/* Input Field - EDITABLE FOR WEIGHT UNITS (precise decimal input) */}
+      <input
+        ref={inputRef}
+        type="text"
+        inputMode="decimal"
+        value={inputValue}
+        onChange={handleInputChange}
+        onBlur={handleInputBlur}
+        onKeyDown={handleInputKeyDown}
+        disabled={isCompleted}
+        placeholder={String(minValue)}
         className={`
-          min-w-[3.5rem] sm:min-w-[4rem] 
-          text-center 
-          font-bold 
-          text-xl sm:text-2xl
+          w-16 sm:w-18
+          px-2 sm:px-3
+          text-center
+          font-bold
+          text-base sm:text-lg
+          bg-transparent
+          border-0
+          focus:outline-none
+          focus:ring-2 focus:ring-accent/40 focus:ring-inset
+          rounded-lg
           tabular-nums
-          select-none
-          py-2
+          selection:bg-accent/30
+          transition-all duration-200
           ${isCompleted 
-            ? 'text-muted-foreground/50' 
-            : 'text-foreground'
+            ? 'text-muted-foreground/50 cursor-not-allowed' 
+            : 'text-accent/80'
           }
         `}
-      >
-        {displayValue}
-      </div>
+      />
 
-      {/* Plus Button */}
+      {/* Plus Button - Small for fine-tuning weights */}
       <button
         type="button"
         onClick={handleIncrement}
         disabled={isCompleted}
         className={`
           flex items-center justify-center
-          w-12 h-12 sm:w-14 sm:h-14
-          transition-all duration-200
+          h-10 w-10 sm:h-11 sm:w-11
+          transition-all duration-150
           touch-manipulation
-          active:scale-90 active:bg-primary/10
+          active:scale-75 active:bg-accent/20
+          rounded-lg
           ${isCompleted
             ? 'text-muted-foreground/40 cursor-not-allowed'
-            : 'text-foreground/70 hover:bg-primary/10 hover:text-primary'
+            : 'text-accent/70 hover:bg-accent/15 hover:text-accent active:text-accent'
           }
         `}
         aria-label="Increase quantity"
+        title="Fine-tune up"
       >
-        <Plus className="h-5 w-5 sm:h-6 sm:w-6" strokeWidth={2.5} />
+        <Plus className="h-4 w-4 sm:h-5 sm:w-5" strokeWidth={2.5} />
       </button>
     </div>
   );

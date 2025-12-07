@@ -18,7 +18,7 @@ import { StandardizedTextarea } from "@/components/ui/standardized-textarea";
 import { HandwritingCanvas } from "@/components/HandwritingCanvas";
 import { toast } from "sonner";
 import { ShoppingItem, ShoppingHistory, ISRAELI_STORES, UNITS, Unit, SavedList } from "@/types/shopping";
-import { ShoppingListItem } from "@/components/ShoppingListItem";
+import { ShoppingListItem, QuantityStepper } from "@/components/ShoppingListItem";
 import { GroupedShoppingList } from "@/components/GroupedShoppingList";
 import { SortableTemplates } from "@/components/SortableTemplates";
 import { SortModeToggle } from "@/components/SortModeToggle";
@@ -246,7 +246,12 @@ export const ShoppingList = () => {
   useEffect(() => {
     if (location.state?.loadList) {
       handleLoadList(location.state.loadList);
-      // Clear state to avoid reloading on refresh - optional, but good practice
+      window.history.replaceState({}, document.title);
+    } else if (location.state?.editList) {
+      handleEditList(location.state.editList);
+      window.history.replaceState({}, document.title);
+    } else if (location.state?.quickShop) {
+      handleQuickShop(location.state.quickShop);
       window.history.replaceState({}, document.title);
     }
   }, [location.state]);
@@ -1464,6 +1469,15 @@ export const ShoppingList = () => {
   // Handle deleting item from edit modal
   const handleDeleteEditItem = (itemId: string) => {
     setEditListItems(prev => prev.filter(item => item.id !== itemId));
+  };
+
+  // Handle updating item quantity in edit modal
+  const handleUpdateEditItemQuantity = (itemId: string, newQuantity: number) => {
+    setEditListItems(prev => 
+      prev.map(item => 
+        item.id === itemId ? { ...item, quantity: newQuantity } : item
+      )
+    );
   };
 
   // Handle adding new item to edit modal
@@ -2907,9 +2921,13 @@ export const ShoppingList = () => {
                       >
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium truncate">{item.text}</p>
-                          <p className="text-xs text-gray-500">
-                            {item.quantity} {item.unit}
-                          </p>
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <QuantityStepper 
+                            value={item.quantity}
+                            onChange={(newQty) => handleUpdateEditItemQuantity(item.id, newQty)}
+                            unit={item.unit}
+                          />
                         </div>
                         <Button
                           variant="ghost"

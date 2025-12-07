@@ -116,7 +116,7 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
 
     return (
         <div
-            className={`${colorClass} dark:bg-slate-800 border-2 border-black dark:border-slate-600 rounded-xl p-4 sm:p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-3px] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all duration-200 group relative flex flex-col h-auto min-h-[260px] overflow-hidden ${rotation}`}
+            className={`${colorClass} dark:bg-slate-800 border-2 border-black dark:border-slate-600 rounded-xl p-4 sm:p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-3px] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all duration-200 group relative flex flex-col h-[450px] overflow-hidden ${rotation}`}
             dir={direction}
             style={theme !== 'dark' ? {
                 backgroundImage: 'repeating-linear-gradient(transparent, transparent 31px, #e5e7eb 31px, #e5e7eb 32px)'
@@ -143,15 +143,6 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
 
                 {/* Actions */}
                 <div className="flex items-center gap-1.5 flex-shrink-0">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={(e) => { e.stopPropagation(); onLoad(list); }}
-                        className="h-7 w-7 sm:h-8 sm:w-8 text-gray-700 dark:text-slate-400 hover:text-black dark:hover:text-slate-100 hover:bg-black/5 dark:hover:bg-slate-700 rounded-full p-0"
-                        title={language === 'he' ? 'ערוך רשימה' : 'Edit List'}
-                    >
-                        <Pencil className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
-                    </Button>
                     <Button
                         variant="ghost"
                         size="icon"

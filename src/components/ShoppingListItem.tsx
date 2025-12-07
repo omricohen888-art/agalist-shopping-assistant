@@ -329,8 +329,6 @@ interface ShoppingListItemProps {
   isCompleted?: boolean;
 }
 
-export { QuantityStepper };
-
 export const ShoppingListItem = ({
   item,
   onToggle,

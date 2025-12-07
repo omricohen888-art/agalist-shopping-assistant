@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
-import { Share2, Trash2, Plus, Minus, CheckCircle2, History, BarChart3, Globe, Save, ClipboardList, Book, Square, CheckSquare, Printer, Mail, FileSpreadsheet, Copy, Pencil, X, ClipboardPaste, Info, ShoppingCart, Check, Volume2, RotateCcw, Mic, Camera, PenLine, Search, User, ChevronDown, Sparkles } from "lucide-react";
+import { Share2, Trash2, Plus, Minus, CheckCircle2, History, BarChart3, Globe, Save, ClipboardList, Book, Square, CheckSquare, Printer, Mail, FileSpreadsheet, Copy, Pencil, X, ClipboardPaste, Info, ShoppingCart, Check, Volume2, RotateCcw, Mic, Camera, PenLine, Search, User, ChevronDown } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import { SmartAutocompleteInput, SmartAutocompleteInputRef } from "@/components/SmartAutocompleteInput";
 import { SavedListCard } from "@/components/SavedListCard";
@@ -18,7 +18,7 @@ import { StandardizedTextarea } from "@/components/ui/standardized-textarea";
 import { HandwritingCanvas } from "@/components/HandwritingCanvas";
 import { toast } from "sonner";
 import { ShoppingItem, ShoppingHistory, ISRAELI_STORES, UNITS, Unit, SavedList } from "@/types/shopping";
-import { ShoppingListItem, QuantityStepper } from "@/components/ShoppingListItem";
+import { ShoppingListItem } from "@/components/ShoppingListItem";
 import { GroupedShoppingList } from "@/components/GroupedShoppingList";
 import { SortableTemplates } from "@/components/SortableTemplates";
 import { SortModeToggle } from "@/components/SortModeToggle";
@@ -125,8 +125,7 @@ export const ShoppingList = () => {
   const [singleItemQuantity, setSingleItemQuantity] = useState("1");
   const [singleItemUnit, setSingleItemUnit] = useState<Unit>('units');
   const [activeListId, setActiveListId] = useState<string | null>(null);
-  const [inputMode, setInputMode] = useState<'single' | 'bulk'>('single'); // Tab mode: single vs bulk
-  const [showInputHint, setShowInputHint] = useState(true); // Reminder banner visibility
+  const [showBulkInput, setShowBulkInput] = useState(false); // NEW STATE
   const [bulkInputText, setBulkInputText] = useState(""); // Textarea content
   const bulkInputRef = useRef<HTMLTextAreaElement>(null); // Textarea ref
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -151,20 +150,6 @@ export const ShoppingList = () => {
   const [isProcessingImage, setIsProcessingImage] = useState(false);
   const [isHandwritingOpen, setIsHandwritingOpen] = useState(false);
   const cameraInputRef = useRef<HTMLInputElement>(null);
-
-  // Shopping Mode and Onboarding States
-  const [isShoppingMode, setIsShoppingMode] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(false);
-
-  // Quick Edit Popup State
-  const [editingList, setEditingList] = useState<SavedList | null>(null);
-  const [editListName, setEditListName] = useState('');
-  const [editListItems, setEditListItems] = useState<ShoppingItem[]>([]);
-
-  // Modal Input State for Smart Quantity Controls
-  const [modalItemName, setModalItemName] = useState('');
-  const [modalQuantity, setModalQuantity] = useState('1');
-  const [modalUnit, setModalUnit] = useState<Unit>('units');
 
   // Update refs array when notepadItems changes
   useEffect(() => {
@@ -246,12 +231,7 @@ export const ShoppingList = () => {
   useEffect(() => {
     if (location.state?.loadList) {
       handleLoadList(location.state.loadList);
-      window.history.replaceState({}, document.title);
-    } else if (location.state?.editList) {
-      handleEditList(location.state.editList);
-      window.history.replaceState({}, document.title);
-    } else if (location.state?.quickShop) {
-      handleQuickShop(location.state.quickShop);
+      // Clear state to avoid reloading on refresh - optional, but good practice
       window.history.replaceState({}, document.title);
     }
   }, [location.state]);
@@ -290,7 +270,7 @@ export const ShoppingList = () => {
       setItems(prev => [...newItems, ...prev]);
       setBulkInputText(""); // Clear textarea
       setBulkPreviewItems([]); // Clear preview
-      setInputMode('single'); // Return to single item mode
+      setShowBulkInput(false); // Close section
       toast.success(
         language === 'he' 
           ? `נוספו ${lines.length} פריטים לרשימה!` 
@@ -894,27 +874,6 @@ export const ShoppingList = () => {
     toast.success(t.toasts.listLoaded);
   };
 
-  // Handle Edit: Open quick edit popup modal
-  const handleEditList = (list: SavedList) => {
-    setEditingList(list);
-    setEditListName(list.name);
-    setEditListItems([...list.items]);
-  };
-
-  // Handle Quick Shop: Load list and trigger Shopping Mode flow
-  const handleQuickShop = (list: SavedList) => {
-    setItems(list.items);
-    setActiveListId(list.id);
-    setListName(list.name);
-    // CRITICAL: Trigger Shopping Flow
-    if (localStorage.getItem('hasSeenShoppingGuide')) {
-      setIsShoppingMode(true);
-    } else {
-      setShowOnboarding(true);
-    }
-    toast.success(language === 'he' ? 'הרשימה מוכנה לקנייה!' : 'List ready for shopping!');
-  };
-
   const exitEditMode = () => {
     // Stop TTS if active
     if (isSpeaking) {
@@ -1447,56 +1406,6 @@ export const ShoppingList = () => {
   const completedCount = items.filter(item => item.checked).length;
   const progressPercentage = items.length > 0 ? completedCount / items.length * 100 : 0;
 
-  // Handle saving edited list
-  const handleSaveEditedList = () => {
-    if (!editingList) return;
-    
-    const updatedList: SavedList = {
-      ...editingList,
-      name: editListName,
-      items: editListItems
-    };
-    
-    if (updateSavedList(updatedList)) {
-      setSavedLists(getSavedLists());
-      toast.success(language === 'he' ? 'הרשימה עודכנה בהצלחה' : 'List updated successfully');
-      setEditingList(null);
-    } else {
-      toast.error(language === 'he' ? 'שגיאה בעדכון הרשימה' : 'Error updating list');
-    }
-  };
-
-  // Handle deleting item from edit modal
-  const handleDeleteEditItem = (itemId: string) => {
-    setEditListItems(prev => prev.filter(item => item.id !== itemId));
-  };
-
-  // Handle updating item quantity in edit modal
-  const handleUpdateEditItemQuantity = (itemId: string, newQuantity: number) => {
-    setEditListItems(prev => 
-      prev.map(item => 
-        item.id === itemId ? { ...item, quantity: newQuantity } : item
-      )
-    );
-  };
-
-  // Handle adding new item to edit modal
-  const handleAddEditItem = () => {
-    if (!modalItemName.trim()) return;
-    const newItem: ShoppingItem = {
-      id: `${Date.now()}`,
-      text: modalItemName.trim(),
-      checked: false,
-      quantity: parseFloat(modalQuantity) || 1,
-      unit: modalUnit
-    };
-    setEditListItems(prev => [...prev, newItem]);
-    // Reset modal inputs
-    setModalItemName('');
-    setModalQuantity('1');
-    setModalUnit('units');
-  };
-
   return (
     <div className="min-h-screen bg-white dark:bg-slate-900 pb-32 transition-colors duration-150" dir={direction} lang={language}>
       {/* List Creation Confirmation Animation */}
@@ -1578,7 +1487,7 @@ export const ShoppingList = () => {
                 setInputText('');
                 setNotepadItems([]);
                 setBulkInputText('');
-                setInputMode('single');
+                setShowBulkInput(false);
               }}
               className="flex items-center gap-2 sm:gap-3 flex-shrink-0 hover:opacity-80 active:scale-95 transition-all duration-200 touch-manipulation"
             >
@@ -1679,9 +1588,9 @@ export const ShoppingList = () => {
         </div>
       </div>
 
-      {/* Progress Bar - Part of sticky header - ONLY in Shopping Mode */}
+      {/* Progress Bar - Part of sticky header */}
       {
-        isShoppingMode && items.length > 0 && <div className="glass-strong px-4 sm:px-6 pb-4 sm:pb-5 sticky top-[60px] sm:top-[72px] z-40 border-b border-border/30 transition-all duration-200">
+        items.length > 0 && <div className="glass-strong px-4 sm:px-6 pb-4 sm:pb-5 sticky top-[60px] sm:top-[72px] z-40 border-b border-border/30 transition-all duration-200">
           <div className="max-w-3xl mx-auto">
             <div className="space-y-2 sm:space-y-3">
               {/* Progress bar with gradient */}
@@ -1735,12 +1644,13 @@ export const ShoppingList = () => {
           activeListId && (
             <div className="glass-strong rounded-2xl p-4 sm:p-5 mb-4 sm:mb-6 border border-border/30">
               <div className="flex items-center gap-3 sm:gap-4">
-                <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                  <Pencil className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground flex-shrink-0" />
                   <input
                     ref={titleInputRef}
                     value={listName}
                     onChange={(e) => setListName(e.target.value)}
-                    className="w-full bg-transparent text-lg sm:text-xl md:text-2xl font-bold border-none outline-none px-2 py-1 select-text focus:cursor-text hover:cursor-text transition-all border-b-2 border-transparent focus:border-primary hover:border-primary/50 rounded-lg truncate placeholder:text-muted-foreground/50"
+                    className="flex-1 bg-transparent text-lg sm:text-xl md:text-2xl font-bold border-none outline-none px-2 py-1 select-text focus:cursor-text hover:cursor-text transition-all border-b-2 border-transparent focus:border-primary hover:border-primary/50 rounded-lg truncate placeholder:text-muted-foreground/50"
                     placeholder={language === 'he' ? 'שם הרשימה...' : 'List name...'}
                     style={{ minWidth: 0 }}
                   />
@@ -1767,166 +1677,59 @@ export const ShoppingList = () => {
         {
           activeListId ? (
             <>
-
-              {/* Unified Input Card - Single & Bulk Mode Switcher */}
-              <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-gray-200 dark:border-slate-700 mb-6 w-full overflow-hidden">
-                
-                {/* Reminder Banner */}
-                {showInputHint && (
-                  <div className="animate-in slide-in-from-top-2 fade-in duration-500 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border-b border-black/5 dark:border-white/5 px-4 sm:px-6 py-2.5 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Sparkles className="h-5 w-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0" />
-                      <p className="text-sm sm:text-base text-gray-800 dark:text-gray-200 font-medium">
-                        {language === 'he' ? 'שכחתם פריט או שניים? זה המקום להוסיף אותם!' : 'Forgot an item or two? Add them here!'}
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setShowInputHint(false)}
-                      className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors flex-shrink-0 ml-2"
-                      aria-label={language === 'he' ? 'סגור' : 'Close'}
-                    >
-                      <X className="h-5 w-5" />
-                    </button>
+              {/* Trigger Button for Bulk Input */}
+              <button
+                type="button"
+                className="w-full glass-strong rounded-2xl p-4 sm:p-5 mb-4 sm:mb-6 flex items-center justify-between hover:shadow-lg hover:border-primary/30 border border-border/30 transition-all duration-200 active:scale-[0.99] touch-manipulation group"
+                onClick={() => setShowBulkInput(v => !v)}
+                aria-expanded={showBulkInput}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                    <ClipboardPaste className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                   </div>
-                )}
-                
-                <div className="p-4 sm:p-6">
-                {/* Tab Switcher */}
-                <div className="flex items-center gap-2 mb-6 bg-gray-100 dark:bg-slate-800 p-1 rounded-xl w-fit">
-                  <button
-                    type="button"
-                    onClick={() => setInputMode('single')}
-                    className={`px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg font-semibold text-sm sm:text-base transition-all duration-200 ${
-                      inputMode === 'single'
-                        ? 'bg-white dark:bg-slate-700 text-gray-900 dark:text-white shadow-md'
-                        : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200'
-                    }`}
-                  >
-                    {language === 'he' ? 'פריט בודד' : 'Single Item'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setInputMode('bulk')}
-                    className={`px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg font-semibold text-sm sm:text-base transition-all duration-200 flex items-center gap-2 ${
-                      inputMode === 'bulk'
-                        ? 'bg-white dark:bg-slate-700 text-gray-900 dark:text-white shadow-md'
-                        : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200'
-                    }`}
-                  >
-                    <ClipboardPaste className="h-4 w-4 sm:h-5 sm:w-5" />
-                    {language === 'he' ? 'רשימה מלאה' : 'Paste List'}
-                  </button>
+                  <div className={`text-${language === 'he' ? 'right' : 'left'}`}>
+                    <span className="block text-sm sm:text-base font-bold text-foreground">
+                      {language === "he" ? "הדבק רשימה ארוכה" : "Paste Multiple Items"}
+                    </span>
+                    <span className="block text-xs sm:text-sm text-muted-foreground">
+                      {language === "he" ? "הדבק טקסט מ-WhatsApp או מקור אחר" : "Paste text from WhatsApp or other source"}
+                    </span>
+                  </div>
                 </div>
+                <Plus className={`h-5 w-5 sm:h-6 sm:w-6 text-muted-foreground transition-transform duration-200 ${showBulkInput ? 'rotate-45' : ''}`} />
+              </button>
 
-                {/* SINGLE ITEM MODE */}
-                {inputMode === 'single' && (
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
-                        {language === 'he' ? 'שם הפריט' : 'Item Name'}
-                      </label>
-                      <StandardizedInput
-                        variant="single-item"
-                        ref={singleItemInputRef}
-                        placeholder={t.addItemPlaceholder}
-                        value={singleItemInput}
-                        onChange={(e) => setSingleItemInput(e.target.value)}
-                        onKeyDown={e => e.key === "Enter" && handleAddSingleItem()}
-                        className="w-full h-12 sm:h-14 text-base sm:text-lg px-4 sm:px-5 rounded-lg border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:border-primary focus:ring-2 focus:ring-primary/20 placeholder:text-gray-400 dark:placeholder:text-slate-500 touch-manipulation"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-3">
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
-                          {language === 'he' ? 'כמות' : 'Qty'}
-                        </label>
-                        <Input
-                          type="number"
-                          min="0"
-                          step={singleItemUnit === 'units' ? "1" : "0.1"}
-                          value={singleItemQuantity}
-                          onChange={(e) => setSingleItemQuantity(e.target.value)}
-                          className="w-full h-12 sm:h-14 text-center text-base sm:text-lg font-semibold rounded-lg border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:border-primary focus:ring-2 focus:ring-primary/20 touch-manipulation"
-                          onBlur={() => {
-                            let val = parseFloat(singleItemQuantity);
-                            if (singleItemUnit === 'units' && !isNaN(val)) {
-                              setSingleItemQuantity(Math.round(val).toString());
-                            }
-                          }}
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
-                          {language === 'he' ? 'יחידה' : 'Unit'}
-                        </label>
-                        <Select
-                          value={singleItemUnit}
-                          onValueChange={(val: Unit) => {
-                            setSingleItemUnit(val);
-                            if (val === 'units') {
-                              const currentQty = parseFloat(singleItemQuantity);
-                              if (!isNaN(currentQty)) {
-                                setSingleItemQuantity(Math.round(currentQty).toString());
-                              }
-                            }
-                          }}
-                        >
-                          <SelectTrigger className="w-full h-12 sm:h-14 text-sm sm:text-base font-semibold rounded-lg border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:border-primary focus:ring-2 focus:ring-primary/20 [&>svg]:hidden touch-manipulation">
-                            <span className="truncate text-center">
-                              {(() => {
-                                const u = UNITS.find(u => u.value === (singleItemUnit || 'units'));
-                                return u ? (language === 'he' ? u.labelHe : u.labelEn) : '';
-                              })()}
-                            </span>
-                          </SelectTrigger>
-                          <SelectContent className="bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-gray-200 dark:border-slate-700">
-                            {UNITS.map(u => (
-                              <SelectItem key={u.value} value={u.value} className="text-base py-3 rounded-lg mx-1 text-gray-900 dark:text-white">
-                                {language === 'he' ? u.labelHe : u.labelEn}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="flex items-end">
-                        <Button
-                          onClick={handleAddSingleItem}
-                          disabled={!singleItemInput.trim()}
-                          className="w-full h-12 sm:h-14 p-0 grid place-items-center bg-gradient-to-br from-primary to-primary/90 text-primary-foreground rounded-lg hover:opacity-90 shadow-lg shadow-primary/20 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation font-semibold text-sm sm:text-base"
-                        >
-                          <Plus className="h-6 w-6 hidden sm:block" strokeWidth={2.5} />
-                          <span className="sm:hidden">{language === 'he' ? 'הוסף' : 'Add'}</span>
-                        </Button>
-                      </div>
-                    </div>
+              {/* Bulk Input Card - Glassmorphism Style */}
+              {showBulkInput && (
+                <div className="glass-strong rounded-3xl p-4 sm:p-6 mb-4 sm:mb-6 border border-border/30 shadow-xl animate-fade-in overflow-hidden">
+                  
+                  {/* Header */}
+                  <div className="mb-4 sm:mb-5">
+                    <h3 className="text-base sm:text-lg font-bold text-foreground mb-1">
+                      {language === 'he' ? 'הדבק את הרשימה שלך' : 'Paste Your List'}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      {language === 'he' 
+                        ? 'כל שורה תהפוך לפריט. אתה יכול להדביק טקסט או להקליד ישירות.'
+                        : 'Each line becomes an item. You can paste text or type directly.'}
+                    </p>
                   </div>
-                )}
 
-                {/* BULK LIST MODE */}
-                {inputMode === 'bulk' && (
-                  <div className="space-y-4">
-                    <div>
-                      <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-1">
-                        {language === 'he' ? 'הדבק רשימה' : 'Paste Your List'}
-                      </h3>
-                      <p className="text-sm text-gray-600 dark:text-slate-400">
-                        {language === 'he' 
-                          ? 'כל שורה תהפוך לפריט. הדבק טקסט או הקלד ישירות.'
-                          : 'Each line becomes an item. Paste text or type directly.'}
-                      </p>
-                    </div>
-
+                  {/* Textarea with Smart Auto-Bullet Logic */}
+                  <div className="relative mb-4 sm:mb-5">
                     <textarea
                       ref={bulkInputRef}
                       value={bulkInputText}
-                      onChange={(e) => setBulkInputText(e.target.value)}
+                      onChange={(e) => {
+                        // Just accept the text as-is (bullets are handled by other events)
+                        setBulkInputText(e.target.value);
+                      }}
                       onFocus={(e) => {
+                        // On focus, if empty, add first bullet
                         if (bulkInputText.trim().length === 0) {
                           setBulkInputText('• ');
+                          // Set cursor after the bullet and space
                           setTimeout(() => {
                             e.currentTarget.selectionStart = 2;
                             e.currentTarget.selectionEnd = 2;
@@ -1934,43 +1737,63 @@ export const ShoppingList = () => {
                         }
                       }}
                       onKeyDown={(e) => {
+                        // Handle Enter key: insert newline + bullet
                         if (e.key === 'Enter') {
                           e.preventDefault();
                           const textarea = e.currentTarget;
                           const start = textarea.selectionStart;
                           const end = textarea.selectionEnd;
                           const text = bulkInputText;
+                          
+                          // Insert newline and bullet point
                           const newText = text.slice(0, start) + '\n• ' + text.slice(end);
                           setBulkInputText(newText);
+                          
+                          // Restore cursor position after new bullet
                           setTimeout(() => {
-                            textarea.selectionStart = textarea.selectionEnd = start + 3;
+                            textarea.selectionStart = textarea.selectionEnd = start + 3; // \n + • + space
                           }, 0);
                         }
                       }}
                       onPaste={(e) => {
+                        // Handle paste event: format clipboard content
                         e.preventDefault();
+                        
                         const pastedText = e.clipboardData?.getData('text') || '';
                         if (!pastedText.trim()) return;
+                        
                         const textarea = e.currentTarget;
                         const start = textarea.selectionStart;
                         const end = textarea.selectionEnd;
                         const text = bulkInputText;
+                        
+                        // Split pasted text by newlines or commas
                         const lines = pastedText
                           .split(/[\n,]/)
                           .map(line => line.trim())
                           .filter(line => line.length > 0);
+                        
                         if (lines.length === 0) return;
+                        
+                        // Format: add bullets to each line
                         const bulletedLines = lines.map(line => {
+                          // Remove existing bullets if present
                           const cleanLine = line.replace(/^•\s*/, '');
                           return `• ${cleanLine}`;
                         });
+                        
+                        // Insert at cursor position
                         const formattedPaste = bulletedLines.join('\n');
                         const newText = text.slice(0, start) + formattedPaste + text.slice(end);
                         setBulkInputText(newText);
+                        
+                        // Move cursor to end of pasted content
                         setTimeout(() => {
                           const newCursorPos = start + formattedPaste.length;
                           textarea.selectionStart = textarea.selectionEnd = newCursorPos;
                         }, 0);
+                        
+                        // Show success feedback
                         toast.success(
                           language === 'he' 
                             ? `הודבקו ${lines.length} פריטים` 
@@ -1978,97 +1801,176 @@ export const ShoppingList = () => {
                         );
                       }}
                       placeholder={language === 'he' 
-                        ? 'הדבק כאן רשימה (חלב, לחם...)' 
-                        : 'Paste list here (milk, bread...)'}
-                      className="w-full min-h-[140px] sm:min-h-[160px] p-4 sm:p-5 text-base sm:text-lg rounded-lg border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none transition-all resize-none placeholder:text-gray-400 dark:placeholder:text-slate-500 font-mono leading-relaxed touch-manipulation"
+                        ? 'כאן תופיע הרשימה שלך עם בולים...' 
+                        : 'Your list will appear here with bullets...'}
+                      className="w-full min-h-[140px] sm:min-h-[160px] p-4 sm:p-5 text-base sm:text-lg glass rounded-2xl border border-border/50 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none transition-all resize-none placeholder:text-muted-foreground/50 font-mono leading-relaxed touch-manipulation"
                       dir={language === 'he' ? 'rtl' : 'ltr'}
                     />
+                  </div>
 
-                    {bulkPreviewItems.length > 0 && (
-                      <div className="animate-fade-in">
-                        <SortModeToggle
-                          isSmartSort={isSmartSort}
-                          onToggle={setIsSmartSort}
-                          language={language}
-                        />
+                  {/* Sort Mode Toggle - Pill Shaped */}
+                  {bulkPreviewItems.length > 0 && (
+                    <div className="mb-4 sm:mb-5 animate-fade-in">
+                      <SortModeToggle
+                        isSmartSort={isSmartSort}
+                        onToggle={setIsSmartSort}
+                        language={language}
+                      />
+                    </div>
+                  )}
+
+                  {/* Live Preview - Animated List */}
+                  {bulkPreviewItems.length > 0 && (
+                    <div className="mb-4 sm:mb-5 glass rounded-2xl border border-border/30 overflow-hidden">
+                      <div className="px-4 py-3 border-b border-border/20 flex items-center justify-between">
+                        <span className="text-sm font-semibold text-foreground">
+                          {language === 'he' ? 'תצוגה מקדימה' : 'Preview'}
+                        </span>
+                        <span className="text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded-full">
+                          {bulkPreviewItems.length} {language === 'he' ? 'פריטים' : 'items'}
+                        </span>
                       </div>
-                    )}
-
-                    {bulkPreviewItems.length > 0 && (
-                      <div className="bg-gray-50 dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 overflow-hidden">
-                        <div className="px-4 py-3 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between bg-gray-100 dark:bg-slate-700">
-                          <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                            {language === 'he' ? 'תצוגה מקדימה' : 'Preview'}
-                          </span>
-                          <span className="text-xs font-semibold text-gray-600 dark:text-slate-400 bg-white dark:bg-slate-800 px-2 py-1 rounded">
-                            {bulkPreviewItems.length} {language === 'he' ? 'פריטים' : 'items'}
-                          </span>
-                        </div>
-                        <div className="max-h-[200px] overflow-y-auto p-2">
-                          <div className="space-y-1">
-                            {bulkPreviewItems.map((item, index) => {
-                              const categoryInfo = getCategoryInfo(item.category);
-                              return (
-                                <div
-                                  key={item.id}
-                                  className="flex items-center gap-3 px-3 py-2 rounded-lg bg-white dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 transition-all duration-300 animate-fade-in border border-gray-200 dark:border-slate-700"
-                                  style={{ 
-                                    animationDelay: `${index * 30}ms`,
-                                    animationFillMode: 'backwards'
-                                  }}
-                                >
-                                  <span className="text-lg flex-shrink-0">{categoryInfo.icon}</span>
-                                  <span className="text-sm font-medium text-gray-900 dark:text-white flex-1 truncate" dir={language === 'he' ? 'rtl' : 'ltr'}>
-                                    {item.text}
+                      <div className="max-h-[200px] overflow-y-auto p-2">
+                        <div className="space-y-1">
+                          {bulkPreviewItems.map((item, index) => {
+                            const categoryInfo = getCategoryInfo(item.category);
+                            return (
+                              <div
+                                key={item.id}
+                                className="flex items-center gap-3 px-3 py-2 rounded-xl bg-background/50 hover:bg-background/80 transition-all duration-300 animate-fade-in"
+                                style={{ 
+                                  animationDelay: `${index * 30}ms`,
+                                  animationFillMode: 'backwards'
+                                }}
+                              >
+                                <span className="text-lg flex-shrink-0">{categoryInfo.icon}</span>
+                                <span className="text-sm font-medium text-foreground flex-1 truncate" dir={language === 'he' ? 'rtl' : 'ltr'}>
+                                  {item.text}
+                                </span>
+                                {isSmartSort && (
+                                  <span className="text-xs text-muted-foreground bg-muted/30 px-2 py-0.5 rounded-full flex-shrink-0">
+                                    {language === 'he' ? categoryInfo.nameHe : categoryInfo.nameEn}
                                   </span>
-                                  {isSmartSort && (
-                                    <span className="text-xs font-semibold text-gray-600 dark:text-slate-400 bg-gray-200 dark:bg-slate-700 px-2 py-0.5 rounded flex-shrink-0">
-                                      {language === 'he' ? categoryInfo.nameHe : categoryInfo.nameEn}
-                                    </span>
-                                  )}
-                                </div>
-                              );
-                            })}
-                          </div>
+                                )}
+                              </div>
+                            );
+                          })}
                         </div>
-                      </div>
-                    )}
-
-                    <div className="flex flex-col gap-3 w-full">
-                      <Button
-                        onClick={handleAddBulkItems}
-                        disabled={bulkInputText.trim().length === 0}
-                        className="w-full h-12 sm:h-14 text-base sm:text-lg font-bold bg-gradient-to-br from-primary to-primary/90 text-primary-foreground hover:opacity-90 rounded-lg shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
-                      >
-                        <ShoppingCart className="h-5 w-5 sm:h-6 sm:w-6" />
-                        {language === 'he' ? 'הוסף לרשימה' : 'Add Items to List'}
-                      </Button>
-
-                      <div className="flex gap-3">
-                        <Button
-                          onClick={handlePasteFromClipboard}
-                          variant="outline"
-                          className="flex-1 h-12 sm:h-14 text-sm sm:text-base font-semibold rounded-lg border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-slate-700 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 touch-manipulation"
-                        >
-                          <ClipboardPaste className="h-4 w-4 sm:h-5 sm:w-5" />
-                          {language === 'he' ? 'הדבק' : 'Paste'}
-                        </Button>
-
-                        <Button
-                          onClick={() => setBulkInputText('')}
-                          disabled={bulkInputText.trim().length === 0}
-                          variant="outline"
-                          className="flex-1 h-12 sm:h-14 text-sm sm:text-base font-semibold rounded-lg border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-white hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 hover:border-red-300 dark:hover:border-red-600 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
-                        >
-                          <Trash2 className="h-4 w-4 sm:h-5 sm:w-5" />
-                          {language === 'he' ? 'מחק' : 'Clear'}
-                        </Button>
                       </div>
                     </div>
+                  )}
+
+                  {/* Action Buttons - Mobile Optimized */}
+                  <div className="flex flex-col gap-3 w-full">
+                    {/* Primary: Add Items - Full Width */}
+                    <Button
+                      onClick={handleAddBulkItems}
+                      disabled={bulkInputText.trim().length === 0}
+                      className="w-full h-14 sm:h-16 text-base sm:text-lg font-bold bg-gradient-to-br from-primary to-primary/90 text-primary-foreground hover:opacity-90 rounded-2xl shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
+                    >
+                      <ShoppingCart className="h-5 w-5 sm:h-6 sm:w-6" />
+                      {language === 'he' ? 'הוסף לרשימה' : 'Add Items to List'}
+                    </Button>
+
+                    <div className="flex gap-3">
+                      {/* Secondary: Paste from Clipboard */}
+                      <Button
+                        onClick={handlePasteFromClipboard}
+                        variant="outline"
+                        className="flex-1 h-12 sm:h-14 text-sm sm:text-base font-semibold rounded-xl glass border border-border/50 hover:bg-muted/50 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 touch-manipulation"
+                      >
+                        <ClipboardPaste className="h-4 w-4 sm:h-5 sm:w-5" />
+                        {language === 'he' ? 'הדבק' : 'Paste'}
+                      </Button>
+
+                      {/* Tertiary: Clear */}
+                      <Button
+                        onClick={() => setBulkInputText('')}
+                        disabled={bulkInputText.trim().length === 0}
+                        variant="outline"
+                        className="flex-1 h-12 sm:h-14 text-sm sm:text-base font-semibold rounded-xl glass border border-border/50 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
+                      >
+                        <Trash2 className="h-4 w-4 sm:h-5 sm:w-5" />
+                        {language === 'he' ? 'מחק' : 'Clear'}
+                      </Button>
+                    </div>
                   </div>
-                )}
+                </div>
+              )}
+
+              {/* Single Item Row - Glassmorphism Style */}
+              <div className="glass-strong rounded-3xl p-4 sm:p-5 md:p-6 mb-6 w-full border border-border/30 shadow-lg hover:shadow-xl transition-all duration-300">
+                <div className={`flex flex-col sm:flex-row w-full gap-3 sm:gap-4 ${language === 'he' ? 'sm:flex-row-reverse' : ''}`}>
+                  {/* Item Name Input - Full Width on Mobile */}
+                  <div className="flex-1 min-w-0">
+                    <StandardizedInput
+                      variant="single-item"
+                      ref={singleItemInputRef}
+                      placeholder={t.addItemPlaceholder}
+                      value={singleItemInput}
+                      onChange={(e) => setSingleItemInput(e.target.value)}
+                      onKeyDown={e => e.key === "Enter" && handleAddSingleItem()}
+                      className="w-full h-14 sm:h-16 text-base sm:text-lg px-4 sm:px-5 rounded-2xl glass border border-border/50 focus:border-primary focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground/50 touch-manipulation"
+                    />
+                  </div>
+
+                  {/* Quantity + Unit + Add Button Row */}
+                  <div className={`flex items-center gap-2 sm:gap-3 ${language === 'he' ? 'flex-row-reverse' : ''}`}>
+                    <Input
+                      type="number"
+                      min="0"
+                      step={singleItemUnit === 'units' ? "1" : "0.1"}
+                      value={singleItemQuantity}
+                      onChange={(e) => setSingleItemQuantity(e.target.value)}
+                      className="w-16 sm:w-20 h-12 sm:h-14 text-center text-base sm:text-lg font-semibold rounded-xl glass border border-border/50 focus:border-primary focus:ring-2 focus:ring-primary/20 shrink-0 touch-manipulation"
+                      onBlur={() => {
+                        let val = parseFloat(singleItemQuantity);
+                        if (singleItemUnit === 'units' && !isNaN(val)) {
+                          setSingleItemQuantity(Math.round(val).toString());
+                        }
+                      }}
+                    />
+                    <Select
+                      value={singleItemUnit}
+                      onValueChange={(val: Unit) => {
+                        setSingleItemUnit(val);
+                        if (val === 'units') {
+                          const currentQty = parseFloat(singleItemQuantity);
+                          if (!isNaN(currentQty)) {
+                            setSingleItemQuantity(Math.round(currentQty).toString());
+                          }
+                        }
+                      }}
+                    >
+                      <SelectTrigger className="w-20 sm:w-24 h-12 sm:h-14 text-sm sm:text-base font-semibold rounded-xl shrink-0 glass border border-border/50 focus:ring-2 focus:ring-primary/20 text-center justify-center [&>span]:w-full [&>span]:text-center [&>svg]:hidden touch-manipulation">
+                        <span className="truncate w-full text-center">
+                          {(() => {
+                            const u = UNITS.find(u => u.value === (singleItemUnit || 'units'));
+                            return u ? (language === 'he' ? u.labelHe : u.labelEn) : '';
+                          })()}
+                        </span>
+                      </SelectTrigger>
+                      <SelectContent className="glass-strong rounded-2xl shadow-2xl border-0">
+                        {UNITS.map(u => (
+                          <SelectItem key={u.value} value={u.value} className="text-base py-3 rounded-xl mx-1">
+                            {language === 'he' ? u.labelHe : u.labelEn}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    
+                    {/* Add Button */}
+                    <Button
+                      onClick={handleAddSingleItem}
+                      disabled={!singleItemInput.trim()}
+                      className="w-14 h-12 sm:w-16 sm:h-14 p-0 shrink-0 grid place-items-center bg-gradient-to-br from-primary to-primary/90 text-primary-foreground rounded-xl hover:opacity-90 shadow-lg shadow-primary/20 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
+                    >
+                      <Plus className="h-6 w-6 sm:h-7 sm:w-7" strokeWidth={2.5} />
+                    </Button>
+                  </div>
                 </div>
               </div>
+
 
             </>
           ) : (
@@ -2457,7 +2359,6 @@ export const ShoppingList = () => {
                           language={language}
                           t={t}
                           onLoad={handleLoadList}
-                          onEdit={handleEditList}
                           onDelete={(id) => {
                             if (deleteSavedList(id)) {
                               setSavedLists(getSavedLists());
@@ -2475,7 +2376,6 @@ export const ShoppingList = () => {
                               setSavedLists(getSavedLists());
                             }
                           }}
-                          onQuickShop={handleQuickShop}
                         />
                       ))}
                   </div>
@@ -2532,9 +2432,9 @@ export const ShoppingList = () => {
           )
         }
 
-        {/* Secondary Action Bar - ONLY in Shopping Mode */}
+        {/* Secondary Action Bar */}
         {
-          isShoppingMode && items && items.length > 0 && (
+          items && items.length > 0 && (
             <div className="flex flex-col gap-3 mb-4">
               {/* Sort Toggle */}
               <SortModeToggle
@@ -2569,9 +2469,9 @@ export const ShoppingList = () => {
           )
         }
 
-        {/* Items List - ONLY in Shopping Mode */}
+        {/* Items List */}
         {
-          isShoppingMode && items && items.length > 0 && (
+          items && items.length > 0 && (
             isSmartSort ? (
               // Grouped List View with Category Headers
               <GroupedShoppingList
@@ -2637,7 +2537,7 @@ export const ShoppingList = () => {
           )
         }
         {
-          (activeListId || isShoppingMode) && items && items.length > 0 && (
+          items && items.length > 0 && (
             <div className="fixed bottom-0 left-0 right-0 z-[60] glass-strong border-t border-border/50 shadow-[0_-8px_30px_-5px_rgba(0,0,0,0.15)] p-4 sm:p-5 safe-area-inset-bottom">
               <div className="max-w-3xl mx-auto">
                 <div className="flex flex-row gap-3 sm:gap-4">
@@ -2880,171 +2780,6 @@ export const ShoppingList = () => {
           }}
           language={language}
         />
-
-        {/* Quick Edit List Modal */}
-        <Dialog open={!!editingList} onOpenChange={(open) => !open && setEditingList(null)}>
-          <DialogContent className="sm:max-w-[600px]">
-            <DialogHeader>
-              <DialogTitle className="text-2xl">{language === 'he' ? 'עריכת רשימה' : 'Edit List'}</DialogTitle>
-            </DialogHeader>
-
-            <div className="space-y-4">
-              {/* List Name Input */}
-              <div className="space-y-2">
-                <Label htmlFor="editListName" className="font-bold">
-                  {language === 'he' ? 'שם הרשימה' : 'List Name'}
-                </Label>
-                <Input
-                  id="editListName"
-                  value={editListName}
-                  onChange={(e) => setEditListName(e.target.value)}
-                  placeholder={language === 'he' ? 'שם הרשימה' : 'List name'}
-                  className="h-10 text-base"
-                />
-              </div>
-
-              {/* Items List */}
-              <div className="space-y-2 max-h-[400px] overflow-y-auto">
-                <Label className="font-bold">
-                  {language === 'he' ? 'פריטים' : 'Items'} ({editListItems.length})
-                </Label>
-                {editListItems.length === 0 ? (
-                  <p className="text-sm text-gray-500 py-4 text-center">
-                    {language === 'he' ? 'אין פריטים ברשימה' : 'No items in list'}
-                  </p>
-                ) : (
-                  <div className="space-y-2">
-                    {editListItems.map((item) => (
-                      <div
-                        key={item.id}
-                        className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700"
-                      >
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">{item.text}</p>
-                        </div>
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          <QuantityStepper 
-                            value={item.quantity}
-                            onChange={(newQty) => handleUpdateEditItemQuantity(item.id, newQty)}
-                            unit={item.unit}
-                          />
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeleteEditItem(item.id)}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Add New Item with Smart Quantity Controls */}
-              <div className="space-y-2 border-t pt-4">
-                <Label className="font-bold">
-                  {language === 'he' ? 'הוספת פריט' : 'Add Item'}
-                </Label>
-
-                {/* Item Name Input */}
-                <Input
-                  value={modalItemName}
-                  onChange={(e) => setModalItemName(e.target.value)}
-                  placeholder={language === 'he' ? 'שם הפריט...' : 'Item name...'}
-                  className="h-10 text-base"
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
-                      handleAddEditItem();
-                    }
-                  }}
-                />
-
-                {/* Smart Quantity Controls Row */}
-                <div className="flex gap-2 items-center bg-gray-100 dark:bg-slate-700 p-3 rounded-lg">
-                  {/* Quantity Stepper */}
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <button
-                      onClick={() => {
-                        const qty = parseFloat(modalQuantity) || 1;
-                        const step = modalUnit === 'units' ? 1 : 0.5;
-                        setModalQuantity(Math.max(0.1, qty - step).toString());
-                      }}
-                      className="h-8 w-8 rounded-md bg-white dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-600 flex items-center justify-center font-bold text-gray-900 dark:text-white transition-colors"
-                    >
-                      −
-                    </button>
-
-                    <input
-                      type={modalUnit === 'units' ? 'text' : 'number'}
-                      value={modalQuantity}
-                      onChange={(e) => {
-                        if (modalUnit !== 'units') {
-                          setModalQuantity(e.target.value);
-                        }
-                      }}
-                      readOnly={modalUnit === 'units'}
-                      step={modalUnit === 'units' ? '1' : '0.5'}
-                      min="0.1"
-                      className="w-16 h-8 text-center font-bold rounded-md bg-white dark:bg-slate-800 border-2 border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white"
-                    />
-
-                    <button
-                      onClick={() => {
-                        const qty = parseFloat(modalQuantity) || 1;
-                        const step = modalUnit === 'units' ? 1 : 0.5;
-                        setModalQuantity((qty + step).toString());
-                      }}
-                      className="h-8 w-8 rounded-md bg-white dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-600 flex items-center justify-center font-bold text-gray-900 dark:text-white transition-colors"
-                    >
-                      +
-                    </button>
-                  </div>
-
-                  {/* Unit Selector */}
-                  <Select value={modalUnit} onValueChange={(value) => setModalUnit(value as Unit)}>
-                    <SelectTrigger className="w-32 h-8 text-sm bg-white dark:bg-slate-800 border-2 border-gray-300 dark:border-slate-600">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {UNITS.map(unit => (
-                        <SelectItem key={unit.value} value={unit.value}>
-                          {language === 'he' ? unit.labelHe : unit.labelEn}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  {/* Add Button */}
-                  <Button
-                    onClick={handleAddEditItem}
-                    className="ml-auto bg-primary hover:bg-primary/90 h-8 px-3"
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            <DialogFooter className="gap-2 pt-4">
-              <Button
-                variant="outline"
-                onClick={() => setEditingList(null)}
-              >
-                {t.cancel}
-              </Button>
-              <Button
-                onClick={handleSaveEditedList}
-                className="bg-success hover:bg-success/90"
-              >
-                <Check className="h-4 w-4 mr-2" />
-                {language === 'he' ? 'שמור שינויים' : 'Save Changes'}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
       </div>
     </div>
   );

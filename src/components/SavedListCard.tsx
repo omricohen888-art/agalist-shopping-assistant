@@ -13,10 +13,11 @@ interface SavedListCardProps {
     language: 'he' | 'en';
     t: any;
     onLoad: (list: SavedList) => void;
+    onEdit?: (list: SavedList) => void;
     onDelete: (id: string) => void;
     onToggleItem: (listId: string, itemId: string) => void;
     onUpdateItem?: (listId: string, item: ShoppingItem) => void;
-    onGoShopping?: (list: SavedList) => void;
+    onQuickShop?: (list: SavedList) => void;
 }
 
 export const SavedListCard: React.FC<SavedListCardProps> = ({
@@ -25,10 +26,11 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
     language,
     t,
     onLoad,
+    onEdit,
     onDelete,
     onToggleItem,
     onUpdateItem,
-    onGoShopping
+    onQuickShop
 }) => {
     const { theme } = useTheme();
     const { language: userLanguage } = useGlobalLanguage();
@@ -290,24 +292,55 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
                 </div>
             )}
 
-            {/* Footer - Date and Action Button */}
-            <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t-2 border-black/5 dark:border-slate-700/30 flex justify-between items-center gap-2 sm:gap-3">
-                <span className="text-[8px] sm:text-xs font-bold text-gray-500 dark:text-slate-500 uppercase tracking-wider flex-shrink-0">
-                    {new Date(list.createdAt || new Date().toISOString()).toLocaleDateString(language === 'he' ? 'he-IL' : 'en-US', {
-                        month: 'short',
-                        day: 'numeric'
-                    })}
-                </span>
-                {onGoShopping && (
-                    <Button
-                        size="sm"
-                        onClick={(e) => { e.stopPropagation(); onGoShopping(list); }}
-                        className="h-8 sm:h-9 px-3 sm:px-4 bg-green-500 hover:bg-green-600 text-white font-bold text-xs sm:text-sm rounded-lg flex items-center gap-1 shadow-md hover:shadow-lg transition-all"
-                        title={language === 'he' ? 'צא לקנייה' : 'Go Shopping'}
-                    >
-                        🛒 {language === 'he' ? 'קנייה' : 'Shop'}
-                    </Button>
-                )}
+            {/* Footer - Action Bar */}
+            <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t-2 border-black/5 dark:border-slate-700/30">
+                <div className="flex items-center justify-between gap-2">
+                    {/* Date */}
+                    <span className="text-[8px] sm:text-xs font-bold text-gray-500 dark:text-slate-500 uppercase tracking-wider flex-shrink-0">
+                        {new Date(list.createdAt || new Date().toISOString()).toLocaleDateString(language === 'he' ? 'he-IL' : 'en-US', {
+                            month: 'short',
+                            day: 'numeric'
+                        })}
+                    </span>
+
+                    {/* Action Buttons */}
+                    <div className="flex items-center gap-2 flex-1 justify-end">
+                        {/* Edit Button */}
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                if (onEdit) {
+                                    onEdit(list);
+                                } else {
+                                    onLoad(list);
+                                }
+                            }}
+                            className="h-8 sm:h-9 px-3 sm:px-4 text-xs sm:text-sm font-semibold rounded-lg flex items-center gap-1.5 border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-slate-700 transition-all shadow-sm"
+                            title={language === 'he' ? 'ערוך רשימה' : 'Edit List'}
+                        >
+                            <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                            <span className="hidden sm:inline">{language === 'he' ? 'עריכה' : 'Edit'}</span>
+                        </Button>
+
+                        {/* Shop Now Button */}
+                        {onQuickShop && (
+                            <Button
+                                size="sm"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onQuickShop(list);
+                                }}
+                                className="h-8 sm:h-9 px-3 sm:px-4 text-xs sm:text-sm font-bold rounded-lg flex items-center gap-1.5 bg-gradient-to-r from-yellow-400 to-orange-400 hover:from-yellow-500 hover:to-orange-500 text-gray-900 dark:text-gray-900 shadow-md hover:shadow-lg transition-all active:scale-95"
+                                title={language === 'he' ? 'קנייה עכשיו' : 'Shop Now'}
+                            >
+                                <ShoppingCart className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                                <span className="hidden sm:inline">{language === 'he' ? 'קנייה' : 'Shop'}</span>
+                            </Button>
+                        )}
+                    </div>
+                </div>
             </div>
         </div>
     );

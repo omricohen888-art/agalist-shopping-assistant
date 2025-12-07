@@ -152,6 +152,20 @@ export const ShoppingList = () => {
   const [isHandwritingOpen, setIsHandwritingOpen] = useState(false);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
+  // Shopping Mode and Onboarding States
+  const [isShoppingMode, setIsShoppingMode] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  // Quick Edit Popup State
+  const [editingList, setEditingList] = useState<SavedList | null>(null);
+  const [editListName, setEditListName] = useState('');
+  const [editListItems, setEditListItems] = useState<ShoppingItem[]>([]);
+
+  // Modal Input State for Smart Quantity Controls
+  const [modalItemName, setModalItemName] = useState('');
+  const [modalQuantity, setModalQuantity] = useState('1');
+  const [modalUnit, setModalUnit] = useState<Unit>('units');
+
   // Update refs array when notepadItems changes
   useEffect(() => {
     notepadInputRefs.current = notepadInputRefs.current.slice(0, notepadItems.length);
@@ -875,6 +889,27 @@ export const ShoppingList = () => {
     toast.success(t.toasts.listLoaded);
   };
 
+  // Handle Edit: Open quick edit popup modal
+  const handleEditList = (list: SavedList) => {
+    setEditingList(list);
+    setEditListName(list.name);
+    setEditListItems([...list.items]);
+  };
+
+  // Handle Quick Shop: Load list and trigger Shopping Mode flow
+  const handleQuickShop = (list: SavedList) => {
+    setItems(list.items);
+    setActiveListId(list.id);
+    setListName(list.name);
+    // CRITICAL: Trigger Shopping Flow
+    if (localStorage.getItem('hasSeenShoppingGuide')) {
+      setIsShoppingMode(true);
+    } else {
+      setShowOnboarding(true);
+    }
+    toast.success(language === 'he' ? 'הרשימה מוכנה לקנייה!' : 'List ready for shopping!');
+  };
+
   const exitEditMode = () => {
     // Stop TTS if active
     if (isSpeaking) {
@@ -1407,6 +1442,47 @@ export const ShoppingList = () => {
   const completedCount = items.filter(item => item.checked).length;
   const progressPercentage = items.length > 0 ? completedCount / items.length * 100 : 0;
 
+  // Handle saving edited list
+  const handleSaveEditedList = () => {
+    if (!editingList) return;
+    
+    const updatedList: SavedList = {
+      ...editingList,
+      name: editListName,
+      items: editListItems
+    };
+    
+    if (updateSavedList(updatedList)) {
+      setSavedLists(getSavedLists());
+      toast.success(language === 'he' ? 'הרשימה עודכנה בהצלחה' : 'List updated successfully');
+      setEditingList(null);
+    } else {
+      toast.error(language === 'he' ? 'שגיאה בעדכון הרשימה' : 'Error updating list');
+    }
+  };
+
+  // Handle deleting item from edit modal
+  const handleDeleteEditItem = (itemId: string) => {
+    setEditListItems(prev => prev.filter(item => item.id !== itemId));
+  };
+
+  // Handle adding new item to edit modal
+  const handleAddEditItem = () => {
+    if (!modalItemName.trim()) return;
+    const newItem: ShoppingItem = {
+      id: `${Date.now()}`,
+      text: modalItemName.trim(),
+      checked: false,
+      quantity: parseFloat(modalQuantity) || 1,
+      unit: modalUnit
+    };
+    setEditListItems(prev => [...prev, newItem]);
+    // Reset modal inputs
+    setModalItemName('');
+    setModalQuantity('1');
+    setModalUnit('units');
+  };
+
   return (
     <div className="min-h-screen bg-white dark:bg-slate-900 pb-32 transition-colors duration-150" dir={direction} lang={language}>
       {/* List Creation Confirmation Animation */}
@@ -1589,9 +1665,9 @@ export const ShoppingList = () => {
         </div>
       </div>
 
-      {/* Progress Bar - Part of sticky header */}
+      {/* Progress Bar - Part of sticky header - ONLY in Shopping Mode */}
       {
-        items.length > 0 && <div className="glass-strong px-4 sm:px-6 pb-4 sm:pb-5 sticky top-[60px] sm:top-[72px] z-40 border-b border-border/30 transition-all duration-200">
+        isShoppingMode && items.length > 0 && <div className="glass-strong px-4 sm:px-6 pb-4 sm:pb-5 sticky top-[60px] sm:top-[72px] z-40 border-b border-border/30 transition-all duration-200">
           <div className="max-w-3xl mx-auto">
             <div className="space-y-2 sm:space-y-3">
               {/* Progress bar with gradient */}
@@ -1645,13 +1721,12 @@ export const ShoppingList = () => {
           activeListId && (
             <div className="glass-strong rounded-2xl p-4 sm:p-5 mb-4 sm:mb-6 border border-border/30">
               <div className="flex items-center gap-3 sm:gap-4">
-                <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-                  <Pencil className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground flex-shrink-0" />
+                <div className="flex-1 min-w-0">
                   <input
                     ref={titleInputRef}
                     value={listName}
                     onChange={(e) => setListName(e.target.value)}
-                    className="flex-1 bg-transparent text-lg sm:text-xl md:text-2xl font-bold border-none outline-none px-2 py-1 select-text focus:cursor-text hover:cursor-text transition-all border-b-2 border-transparent focus:border-primary hover:border-primary/50 rounded-lg truncate placeholder:text-muted-foreground/50"
+                    className="w-full bg-transparent text-lg sm:text-xl md:text-2xl font-bold border-none outline-none px-2 py-1 select-text focus:cursor-text hover:cursor-text transition-all border-b-2 border-transparent focus:border-primary hover:border-primary/50 rounded-lg truncate placeholder:text-muted-foreground/50"
                     placeholder={language === 'he' ? 'שם הרשימה...' : 'List name...'}
                     style={{ minWidth: 0 }}
                   />
@@ -2368,6 +2443,7 @@ export const ShoppingList = () => {
                           language={language}
                           t={t}
                           onLoad={handleLoadList}
+                          onEdit={handleEditList}
                           onDelete={(id) => {
                             if (deleteSavedList(id)) {
                               setSavedLists(getSavedLists());
@@ -2385,6 +2461,7 @@ export const ShoppingList = () => {
                               setSavedLists(getSavedLists());
                             }
                           }}
+                          onQuickShop={handleQuickShop}
                         />
                       ))}
                   </div>
@@ -2441,9 +2518,9 @@ export const ShoppingList = () => {
           )
         }
 
-        {/* Secondary Action Bar */}
+        {/* Secondary Action Bar - ONLY in Shopping Mode */}
         {
-          items && items.length > 0 && (
+          isShoppingMode && items && items.length > 0 && (
             <div className="flex flex-col gap-3 mb-4">
               {/* Sort Toggle */}
               <SortModeToggle
@@ -2478,9 +2555,9 @@ export const ShoppingList = () => {
           )
         }
 
-        {/* Items List */}
+        {/* Items List - ONLY in Shopping Mode */}
         {
-          items && items.length > 0 && (
+          isShoppingMode && items && items.length > 0 && (
             isSmartSort ? (
               // Grouped List View with Category Headers
               <GroupedShoppingList
@@ -2546,7 +2623,7 @@ export const ShoppingList = () => {
           )
         }
         {
-          items && items.length > 0 && (
+          (activeListId || isShoppingMode) && items && items.length > 0 && (
             <div className="fixed bottom-0 left-0 right-0 z-[60] glass-strong border-t border-border/50 shadow-[0_-8px_30px_-5px_rgba(0,0,0,0.15)] p-4 sm:p-5 safe-area-inset-bottom">
               <div className="max-w-3xl mx-auto">
                 <div className="flex flex-row gap-3 sm:gap-4">
@@ -2789,6 +2866,167 @@ export const ShoppingList = () => {
           }}
           language={language}
         />
+
+        {/* Quick Edit List Modal */}
+        <Dialog open={!!editingList} onOpenChange={(open) => !open && setEditingList(null)}>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle className="text-2xl">{language === 'he' ? 'עריכת רשימה' : 'Edit List'}</DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              {/* List Name Input */}
+              <div className="space-y-2">
+                <Label htmlFor="editListName" className="font-bold">
+                  {language === 'he' ? 'שם הרשימה' : 'List Name'}
+                </Label>
+                <Input
+                  id="editListName"
+                  value={editListName}
+                  onChange={(e) => setEditListName(e.target.value)}
+                  placeholder={language === 'he' ? 'שם הרשימה' : 'List name'}
+                  className="h-10 text-base"
+                />
+              </div>
+
+              {/* Items List */}
+              <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                <Label className="font-bold">
+                  {language === 'he' ? 'פריטים' : 'Items'} ({editListItems.length})
+                </Label>
+                {editListItems.length === 0 ? (
+                  <p className="text-sm text-gray-500 py-4 text-center">
+                    {language === 'he' ? 'אין פריטים ברשימה' : 'No items in list'}
+                  </p>
+                ) : (
+                  <div className="space-y-2">
+                    {editListItems.map((item) => (
+                      <div
+                        key={item.id}
+                        className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{item.text}</p>
+                          <p className="text-xs text-gray-500">
+                            {item.quantity} {item.unit}
+                          </p>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteEditItem(item.id)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Add New Item with Smart Quantity Controls */}
+              <div className="space-y-2 border-t pt-4">
+                <Label className="font-bold">
+                  {language === 'he' ? 'הוספת פריט' : 'Add Item'}
+                </Label>
+
+                {/* Item Name Input */}
+                <Input
+                  value={modalItemName}
+                  onChange={(e) => setModalItemName(e.target.value)}
+                  placeholder={language === 'he' ? 'שם הפריט...' : 'Item name...'}
+                  className="h-10 text-base"
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      handleAddEditItem();
+                    }
+                  }}
+                />
+
+                {/* Smart Quantity Controls Row */}
+                <div className="flex gap-2 items-center bg-gray-100 dark:bg-slate-700 p-3 rounded-lg">
+                  {/* Quantity Stepper */}
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <button
+                      onClick={() => {
+                        const qty = parseFloat(modalQuantity) || 1;
+                        const step = modalUnit === 'units' ? 1 : 0.5;
+                        setModalQuantity(Math.max(0.1, qty - step).toString());
+                      }}
+                      className="h-8 w-8 rounded-md bg-white dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-600 flex items-center justify-center font-bold text-gray-900 dark:text-white transition-colors"
+                    >
+                      −
+                    </button>
+
+                    <input
+                      type={modalUnit === 'units' ? 'text' : 'number'}
+                      value={modalQuantity}
+                      onChange={(e) => {
+                        if (modalUnit !== 'units') {
+                          setModalQuantity(e.target.value);
+                        }
+                      }}
+                      readOnly={modalUnit === 'units'}
+                      step={modalUnit === 'units' ? '1' : '0.5'}
+                      min="0.1"
+                      className="w-16 h-8 text-center font-bold rounded-md bg-white dark:bg-slate-800 border-2 border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white"
+                    />
+
+                    <button
+                      onClick={() => {
+                        const qty = parseFloat(modalQuantity) || 1;
+                        const step = modalUnit === 'units' ? 1 : 0.5;
+                        setModalQuantity((qty + step).toString());
+                      }}
+                      className="h-8 w-8 rounded-md bg-white dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-600 flex items-center justify-center font-bold text-gray-900 dark:text-white transition-colors"
+                    >
+                      +
+                    </button>
+                  </div>
+
+                  {/* Unit Selector */}
+                  <Select value={modalUnit} onValueChange={(value) => setModalUnit(value as Unit)}>
+                    <SelectTrigger className="w-32 h-8 text-sm bg-white dark:bg-slate-800 border-2 border-gray-300 dark:border-slate-600">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {UNITS.map(unit => (
+                        <SelectItem key={unit.value} value={unit.value}>
+                          {language === 'he' ? unit.labelHe : unit.labelEn}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  {/* Add Button */}
+                  <Button
+                    onClick={handleAddEditItem}
+                    className="ml-auto bg-primary hover:bg-primary/90 h-8 px-3"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter className="gap-2 pt-4">
+              <Button
+                variant="outline"
+                onClick={() => setEditingList(null)}
+              >
+                {t.cancel}
+              </Button>
+              <Button
+                onClick={handleSaveEditedList}
+                className="bg-success hover:bg-success/90"
+              >
+                <Check className="h-4 w-4 mr-2" />
+                {language === 'he' ? 'שמור שינויים' : 'Save Changes'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

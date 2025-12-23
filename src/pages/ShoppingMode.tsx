@@ -158,14 +158,36 @@ export const ShoppingMode = () => {
 
   return (
     <div 
-      className="min-h-screen pb-28 transition-all duration-500"
+      className="min-h-screen pb-24 sm:pb-28 transition-all duration-500 relative overflow-hidden"
       dir={direction}
-      style={{
-        background: progress === 100 
-          ? 'linear-gradient(135deg, hsl(var(--success) / 0.1) 0%, hsl(var(--background)) 50%, hsl(var(--primary) / 0.1) 100%)'
-          : 'linear-gradient(180deg, hsl(var(--primary) / 0.08) 0%, hsl(var(--background)) 30%)'
-      }}
     >
+      {/* Colorful Background */}
+      <div 
+        className="fixed inset-0 -z-10"
+        style={{
+          background: progress === 100 
+            ? 'linear-gradient(135deg, hsl(142, 76%, 90%) 0%, hsl(48, 96%, 89%) 50%, hsl(142, 76%, 85%) 100%)'
+            : 'linear-gradient(160deg, hsl(48, 96%, 93%) 0%, hsl(45, 93%, 87%) 30%, hsl(38, 92%, 85%) 60%, hsl(32, 95%, 88%) 100%)'
+        }}
+      />
+      
+      {/* Decorative Shopping Cart - Background */}
+      <div className="fixed inset-0 -z-5 pointer-events-none overflow-hidden">
+        {/* Large cart in bottom right */}
+        <ShoppingCart 
+          className="absolute -bottom-10 -right-10 sm:-bottom-16 sm:-right-16 h-48 w-48 sm:h-72 sm:w-72 text-black/[0.04] rotate-12" 
+          strokeWidth={1}
+        />
+        {/* Small cart top left */}
+        <ShoppingCart 
+          className="absolute -top-6 -left-6 sm:-top-10 sm:-left-10 h-24 w-24 sm:h-36 sm:w-36 text-black/[0.03] -rotate-12" 
+          strokeWidth={1}
+        />
+        {/* Floating sparkles */}
+        <Sparkles className="absolute top-1/4 right-8 sm:right-16 h-8 w-8 sm:h-12 sm:w-12 text-primary/10 animate-pulse" />
+        <Star className="absolute top-1/3 left-6 sm:left-12 h-6 w-6 sm:h-10 sm:w-10 text-primary/10 animate-pulse" style={{ animationDelay: '0.5s' }} />
+        <Zap className="absolute bottom-1/3 right-12 sm:right-24 h-6 w-6 sm:h-8 sm:w-8 text-success/10 animate-pulse" style={{ animationDelay: '1s' }} />
+      </div>
       {/* Full-screen Confetti for Mission Complete */}
       {showConfetti && (
         <div className="fixed inset-0 pointer-events-none z-50">
@@ -173,29 +195,29 @@ export const ShoppingMode = () => {
         </div>
       )}
 
-      {/* Mission Header - Gamified */}
-      <div className="sticky top-0 z-40 glass-strong border-b border-border/30 shadow-lg">
-        <div className="max-w-3xl mx-auto px-4 py-4 sm:py-5">
+      {/* Mission Header - Gamified & Mobile-Optimized */}
+      <div className="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-black/10 shadow-lg">
+        <div className="max-w-3xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
           {/* Top Row: Exit + Title + Home */}
-          <div className={`flex items-center justify-between mb-4 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
+          <div className={`flex items-center justify-between mb-3 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
             {/* Exit Button */}
             <Button
               variant="ghost"
               onClick={handleExit}
-              className="h-12 w-12 sm:h-14 sm:w-14 rounded-2xl glass hover:bg-destructive/10 hover:text-destructive transition-all active:scale-95 touch-manipulation"
+              className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 transition-all active:scale-95 touch-manipulation"
             >
-              <X className="h-6 w-6 sm:h-7 sm:w-7" />
+              <X className="h-5 w-5 sm:h-6 sm:w-6" />
             </Button>
 
             {/* Dynamic Title */}
             <div className="text-center flex-1 px-2">
-              <div className="flex items-center justify-center gap-2 mb-1">
-                <span className="text-2xl sm:text-3xl">{motivationalText.emoji}</span>
-                <h1 className="text-xl sm:text-2xl font-black text-foreground">
+              <div className="flex items-center justify-center gap-1.5 sm:gap-2 mb-0.5">
+                <span className="text-xl sm:text-2xl">{motivationalText.emoji}</span>
+                <h1 className="text-lg sm:text-xl font-black text-gray-900 dark:text-white">
                   {motivationalText.title}
                 </h1>
               </div>
-              <p className="text-sm sm:text-base text-muted-foreground font-medium">
+              <p className="text-xs sm:text-sm text-gray-600 dark:text-slate-400 font-medium">
                 {motivationalText.subtitle}
               </p>
             </div>
@@ -204,48 +226,48 @@ export const ShoppingMode = () => {
             <Button
               variant="ghost"
               onClick={() => navigate("/")}
-              className="h-12 w-12 sm:h-14 sm:w-14 rounded-2xl glass hover:bg-primary/10 transition-all active:scale-95 touch-manipulation"
+              className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-slate-800 dark:hover:bg-slate-700 transition-all active:scale-95 touch-manipulation"
             >
-              <Home className="h-6 w-6 sm:h-7 sm:w-7" />
+              <Home className="h-5 w-5 sm:h-6 sm:w-6 text-gray-700 dark:text-slate-300" />
             </Button>
           </div>
 
-          {/* Progress Section */}
-          <div className="space-y-3">
+          {/* Progress Section - Compact */}
+          <div className="space-y-2">
             {/* Progress Bar - Juicy */}
-            <div className="relative h-5 sm:h-6 bg-muted/30 rounded-full overflow-hidden shadow-inner">
+            <div className="relative h-4 sm:h-5 bg-black/10 rounded-full overflow-hidden shadow-inner">
               <div 
                 className={`
                   absolute inset-y-0 left-0 rounded-full transition-all duration-700 ease-out
                   ${progress === 100 
-                    ? 'bg-gradient-to-r from-success via-primary to-success animate-pulse' 
-                    : 'bg-gradient-to-r from-primary via-primary to-primary/80'
+                    ? 'bg-gradient-to-r from-green-400 via-emerald-500 to-green-400 animate-pulse' 
+                    : 'bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500'
                   }
                 `}
                 style={{ width: `${progress}%` }}
               />
               {/* Animated shine */}
               <div 
-                className="absolute inset-y-0 left-0 bg-gradient-to-r from-transparent via-white/40 to-transparent rounded-full transition-all duration-700"
+                className="absolute inset-y-0 left-0 bg-gradient-to-r from-transparent via-white/50 to-transparent rounded-full transition-all duration-700"
                 style={{ width: `${progress}%`, transform: 'translateX(-100%)', animation: progress > 0 ? 'shine 2s ease-in-out infinite' : 'none' }}
               />
             </div>
 
-            {/* Counter Pills */}
+            {/* Counter Pills - Compact */}
             <div className={`flex items-center justify-between ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
-              <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-success/15 text-success rounded-full">
-                  <Check className="h-4 w-4" strokeWidth={3} />
-                  <span className="font-bold text-sm">{completedCount}</span>
+              <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-full">
+                  <Check className="h-3.5 w-3.5" strokeWidth={3} />
+                  <span className="font-bold text-xs sm:text-sm">{completedCount}</span>
                 </div>
-                <span className="text-muted-foreground">/</span>
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-muted/50 rounded-full">
-                  <ShoppingCart className="h-4 w-4" />
-                  <span className="font-bold text-sm">{totalCount}</span>
+                <span className="text-gray-400 text-sm">/</span>
+                <div className="flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-slate-700 rounded-full">
+                  <ShoppingCart className="h-3.5 w-3.5 text-gray-600 dark:text-slate-300" />
+                  <span className="font-bold text-xs sm:text-sm text-gray-700 dark:text-slate-200">{totalCount}</span>
                 </div>
               </div>
               
-              <span className="text-lg sm:text-xl font-black text-foreground">
+              <span className="text-base sm:text-lg font-black text-gray-900 dark:text-white">
                 {progress}%
               </span>
             </div>
@@ -253,22 +275,22 @@ export const ShoppingMode = () => {
         </div>
       </div>
 
-      {/* Items List */}
-      <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
+      {/* Items List - Mobile-Optimized */}
+      <div className="max-w-3xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6">
         {/* Active Items */}
         {activeItems.length > 0 && (
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 px-2">
-              <Zap className="h-5 w-5 text-primary" />
-              <h2 className="text-base sm:text-lg font-bold text-foreground">
+          <div className="space-y-2 sm:space-y-3">
+            <div className="flex items-center gap-2 px-1">
+              <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-orange-500" />
+              <h2 className="text-sm sm:text-base font-bold text-gray-800 dark:text-white">
                 {language === 'he' ? 'צריך לאסוף' : 'To Collect'}
               </h2>
-              <span className="ml-auto px-2.5 py-1 bg-primary/15 text-primary rounded-full text-sm font-bold">
+              <span className="ml-auto px-2 py-0.5 bg-orange-100 text-orange-600 rounded-full text-xs font-bold">
                 {activeItems.length}
               </span>
             </div>
             
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3">
               {activeItems.map((item) => {
                 const isAnimating = animatingItemId === item.id;
                 const unitLabel = UNITS.find(u => u.value === item.unit)?.[language === 'he' ? 'labelHe' : 'labelEn'] || '';
@@ -279,46 +301,46 @@ export const ShoppingMode = () => {
                     onClick={() => toggleItem(item.id)}
                     className={`
                       w-full text-${direction === 'rtl' ? 'right' : 'left'}
-                      glass-strong rounded-3xl p-4 sm:p-5
+                      bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-2xl p-3 sm:p-4
                       border-2 transition-all duration-300
-                      touch-manipulation
+                      touch-manipulation shadow-sm
                       ${isAnimating 
-                        ? 'border-success bg-success/10 scale-[0.97] shadow-xl shadow-success/20' 
-                        : 'border-transparent hover:border-primary/30 hover:shadow-xl hover:scale-[1.01] active:scale-[0.98]'
+                        ? 'border-green-400 bg-green-50/90 scale-[0.97] shadow-lg shadow-green-200/50' 
+                        : 'border-transparent hover:border-orange-300 hover:shadow-md active:scale-[0.98]'
                       }
                     `}
                   >
-                    <div className={`flex items-center gap-4 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
+                    <div className={`flex items-center gap-3 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
                       {/* Checkbox */}
                       <div 
                         className={`
-                          flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-2xl
+                          flex-shrink-0 w-11 h-11 sm:w-14 sm:h-14 rounded-xl
                           flex items-center justify-center
                           border-2 transition-all duration-300
                           ${isAnimating 
-                            ? 'bg-success border-success text-success-foreground scale-110' 
-                            : 'bg-card border-border hover:border-success/50'
+                            ? 'bg-green-500 border-green-500 text-white scale-110' 
+                            : 'bg-white border-gray-300 dark:bg-slate-700 dark:border-slate-600'
                           }
                         `}
                       >
                         {isAnimating && (
-                          <Check className="h-8 w-8 sm:h-9 sm:w-9 animate-check-bounce" strokeWidth={3} />
+                          <Check className="h-6 w-6 sm:h-7 sm:w-7 animate-check-bounce" strokeWidth={3} />
                         )}
                       </div>
 
                       {/* Content */}
                       <div className="flex-1 min-w-0">
-                        <p className="text-lg sm:text-xl font-semibold text-foreground truncate">
+                        <p className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate">
                           {item.text}
                         </p>
-                        <p className="text-sm sm:text-base text-muted-foreground font-medium">
+                        <p className="text-xs sm:text-sm text-gray-500 dark:text-slate-400 font-medium">
                           {item.quantity} {unitLabel}
                         </p>
                       </div>
 
                       {/* Tap indicator */}
-                      <div className="flex-shrink-0 opacity-50">
-                        <Sparkles className="h-5 w-5 text-muted-foreground" />
+                      <div className="flex-shrink-0 opacity-40">
+                        <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-orange-400" />
                       </div>
                     </div>
                   </button>
@@ -330,18 +352,18 @@ export const ShoppingMode = () => {
 
         {/* Completed Items */}
         {completedItems.length > 0 && (
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 px-2">
-              <Trophy className="h-5 w-5 text-success" />
-              <h2 className="text-base sm:text-lg font-bold text-success">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 px-1">
+              <Trophy className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
+              <h2 className="text-sm sm:text-base font-bold text-green-600">
                 {language === 'he' ? 'נאסף!' : 'Collected!'}
               </h2>
-              <span className="ml-auto px-2.5 py-1 bg-success/15 text-success rounded-full text-sm font-bold">
+              <span className="ml-auto px-2 py-0.5 bg-green-100 text-green-600 rounded-full text-xs font-bold">
                 {completedItems.length}
               </span>
             </div>
             
-            <div className="space-y-2">
+            <div className="space-y-1.5 sm:space-y-2">
               {completedItems.map((item) => {
                 const unitLabel = UNITS.find(u => u.value === item.unit)?.[language === 'he' ? 'labelHe' : 'labelEn'] || '';
                 
@@ -351,24 +373,24 @@ export const ShoppingMode = () => {
                     onClick={() => toggleItem(item.id)}
                     className={`
                       w-full text-${direction === 'rtl' ? 'right' : 'left'}
-                      glass rounded-2xl p-3 sm:p-4
-                      opacity-60 hover:opacity-80
+                      bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm rounded-xl p-2.5 sm:p-3
+                      opacity-70 hover:opacity-90
                       transition-all duration-200
                       touch-manipulation active:scale-[0.98]
                     `}
                   >
-                    <div className={`flex items-center gap-3 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
+                    <div className={`flex items-center gap-2.5 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
                       {/* Checked indicator */}
-                      <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-success/20 flex items-center justify-center">
-                        <Check className="h-5 w-5 sm:h-6 sm:w-6 text-success" strokeWidth={3} />
+                      <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-green-100 flex items-center justify-center">
+                        <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" strokeWidth={3} />
                       </div>
 
                       {/* Content */}
                       <div className="flex-1 min-w-0">
-                        <p className="text-base sm:text-lg font-medium text-muted-foreground line-through truncate">
+                        <p className="text-sm sm:text-base font-medium text-gray-500 line-through truncate">
                           {item.text}
                         </p>
-                        <p className="text-xs sm:text-sm text-muted-foreground/70">
+                        <p className="text-xs text-gray-400">
                           {item.quantity} {unitLabel}
                         </p>
                       </div>
@@ -382,11 +404,11 @@ export const ShoppingMode = () => {
 
         {/* Empty State */}
         {items.length === 0 && (
-          <div className="text-center py-16 px-4">
-            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-muted/50 flex items-center justify-center">
-              <ShoppingCart className="h-10 w-10 text-muted-foreground" />
+          <div className="text-center py-12 px-4">
+            <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-orange-100 flex items-center justify-center">
+              <ShoppingCart className="h-8 w-8 text-orange-400" />
             </div>
-            <p className="text-lg text-muted-foreground font-medium">
+            <p className="text-base text-gray-600 font-medium">
               {language === 'he' ? 'אין פריטים ברשימה' : 'No items in list'}
             </p>
           </div>
@@ -394,47 +416,47 @@ export const ShoppingMode = () => {
 
         {/* Mission Complete Celebration */}
         {showMissionComplete && progress === 100 && (
-          <div className="glass-strong rounded-3xl p-6 sm:p-8 text-center border-2 border-success/30 shadow-xl shadow-success/10 animate-bounce-in">
-            <div className="text-5xl sm:text-6xl mb-4">🎉</div>
-            <h3 className="text-2xl sm:text-3xl font-black text-foreground mb-2">
+          <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-2xl p-5 sm:p-6 text-center border-2 border-green-300 shadow-xl shadow-green-100/50 animate-bounce-in">
+            <div className="text-4xl sm:text-5xl mb-3">🎉</div>
+            <h3 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white mb-1">
               {language === 'he' ? 'כל הכבוד!' : 'Amazing!'}
             </h3>
-            <p className="text-muted-foreground mb-4">
+            <p className="text-sm sm:text-base text-gray-600 dark:text-slate-400 mb-3">
               {language === 'he' ? 'אספת את כל הפריטים!' : 'You collected everything!'}
             </p>
-            <div className="flex justify-center gap-2">
-              <Star className="h-6 w-6 text-primary animate-pulse" fill="currentColor" />
-              <Star className="h-6 w-6 text-primary animate-pulse" fill="currentColor" style={{ animationDelay: '0.1s' }} />
-              <Star className="h-6 w-6 text-primary animate-pulse" fill="currentColor" style={{ animationDelay: '0.2s' }} />
+            <div className="flex justify-center gap-1.5">
+              <Star className="h-5 w-5 text-yellow-400 animate-pulse" fill="currentColor" />
+              <Star className="h-5 w-5 text-yellow-400 animate-pulse" fill="currentColor" style={{ animationDelay: '0.1s' }} />
+              <Star className="h-5 w-5 text-yellow-400 animate-pulse" fill="currentColor" style={{ animationDelay: '0.2s' }} />
             </div>
           </div>
         )}
       </div>
 
-      {/* Sticky Footer - Finish Button */}
-      <div className="fixed bottom-0 left-0 right-0 glass-strong border-t border-border/30 p-4 sm:p-5 shadow-2xl z-40">
+      {/* Sticky Footer - Finish Button - Compact */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-t border-black/10 p-3 sm:p-4 shadow-2xl z-40">
         <div className="max-w-3xl mx-auto">
           <Button
             onClick={handleFinishShopping}
             disabled={completedCount === 0}
             className={`
-              w-full h-14 sm:h-16 text-base sm:text-lg font-bold rounded-2xl
+              w-full h-12 sm:h-14 text-sm sm:text-base font-bold rounded-xl
               transition-all duration-300 touch-manipulation
               ${progress === 100 
-                ? 'bg-gradient-to-r from-success to-success/80 text-success-foreground shadow-xl shadow-success/30 hover:shadow-2xl hover:shadow-success/40' 
-                : 'bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30'
+                ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg shadow-green-200/50 hover:shadow-xl hover:shadow-green-300/50' 
+                : 'bg-gradient-to-r from-orange-400 to-yellow-400 text-white shadow-lg shadow-orange-200/50 hover:shadow-xl hover:shadow-orange-300/50'
               }
               active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed
             `}
           >
             {progress === 100 ? (
               <>
-                <PartyPopper className={`h-6 w-6 ${direction === 'rtl' ? 'ml-2' : 'mr-2'}`} />
+                <PartyPopper className={`h-5 w-5 ${direction === 'rtl' ? 'ml-2' : 'mr-2'}`} />
                 {language === 'he' ? 'סיום מושלם!' : 'Perfect Finish!'}
               </>
             ) : (
               <>
-                <CheckCircle2 className={`h-6 w-6 ${direction === 'rtl' ? 'ml-2' : 'mr-2'}`} />
+                <CheckCircle2 className={`h-5 w-5 ${direction === 'rtl' ? 'ml-2' : 'mr-2'}`} />
                 {language === 'he' ? 'סיים קניות' : 'Finish Shopping'}
               </>
             )}

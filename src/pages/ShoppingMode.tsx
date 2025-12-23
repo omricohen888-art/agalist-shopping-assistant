@@ -1,16 +1,32 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ShoppingItem, Unit, UNITS } from "@/types/shopping";
+import { ShoppingItem, Unit, UNITS, ISRAELI_STORES } from "@/types/shopping";
 import { Button } from "@/components/ui/button";
 import { 
   ArrowRight, CheckCircle2, Home, X, Check, Sparkles, 
-  Trophy, Zap, Star, PartyPopper, ShoppingCart, Timer
+  Trophy, Zap, Star, PartyPopper, ShoppingCart, Timer, Store
 } from "lucide-react";
 import { useGlobalLanguage } from "@/context/LanguageContext";
 import { useSoundSettings } from "@/hooks/use-sound-settings.tsx";
 import { useHaptics } from "@/hooks/use-haptics";
 import { ConfettiEffect } from "@/components/ConfettiEffect";
 import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 // Dynamic motivational messages
 const getMotivationalText = (
@@ -59,6 +75,9 @@ export const ShoppingMode = () => {
   const [animatingItemId, setAnimatingItemId] = useState<string | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showMissionComplete, setShowMissionComplete] = useState(false);
+  const [showFinishDialog, setShowFinishDialog] = useState(false);
+  const [totalAmount, setTotalAmount] = useState("");
+  const [selectedStore, setSelectedStore] = useState("");
   const direction = language === 'he' ? 'rtl' : 'ltr';
 
   // Stopwatch state
@@ -152,6 +171,12 @@ export const ShoppingMode = () => {
 
   const handleFinishShopping = () => {
     if (!id) return;
+    // Open dialog to enter amount and store
+    setShowFinishDialog(true);
+  };
+
+  const confirmFinishShopping = () => {
+    if (!id) return;
 
     // Stop timer
     setIsTimerRunning(false);
@@ -160,8 +185,8 @@ export const ShoppingMode = () => {
       id: Date.now().toString(),
       date: new Date().toISOString(),
       items: items,
-      totalAmount: 0,
-      store: "",
+      totalAmount: parseFloat(totalAmount) || 0,
+      store: selectedStore || (language === 'he' ? 'לא צוין' : 'Not specified'),
       completedItems: completedCount,
       totalItems: totalCount,
       shoppingDuration: elapsedTime,
@@ -172,8 +197,9 @@ export const ShoppingMode = () => {
     localStorage.setItem('shoppingHistory', JSON.stringify(savedHistory));
     localStorage.removeItem(`activeList_${id}`);
 
+    setShowFinishDialog(false);
     toast.success(language === 'he' ? 'הקניות הושלמו!' : 'Shopping completed!');
-    navigate("/");
+    navigate("/history");
   };
 
   const handleSaveForLater = () => {
@@ -542,6 +568,84 @@ export const ShoppingMode = () => {
           </Button>
         </div>
       </div>
+
+      {/* Finish Shopping Dialog */}
+      <Dialog open={showFinishDialog} onOpenChange={setShowFinishDialog}>
+        <DialogContent className="sm:max-w-md" dir={direction}>
+          <DialogHeader>
+            <DialogTitle className="text-center text-xl font-bold">
+              {language === 'he' ? '🛒 סיום קנייה' : '🛒 Finish Shopping'}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            {/* Store Selection */}
+            <div className="space-y-2">
+              <Label htmlFor="store" className="text-sm font-medium">
+                {language === 'he' ? 'רשת שיווק' : 'Store'}
+              </Label>
+              <Select value={selectedStore} onValueChange={setSelectedStore}>
+                <SelectTrigger className="w-full h-12 text-base">
+                  <Store className="h-4 w-4 opacity-50" />
+                  <SelectValue placeholder={language === 'he' ? 'בחר רשת' : 'Select store'} />
+                </SelectTrigger>
+                <SelectContent>
+                  {ISRAELI_STORES.map((store) => (
+                    <SelectItem key={store} value={store} className="text-base">
+                      {store}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Total Amount */}
+            <div className="space-y-2">
+              <Label htmlFor="amount" className="text-sm font-medium">
+                {language === 'he' ? 'סכום הקנייה (₪)' : 'Total Amount ($)'}
+              </Label>
+              <Input
+                id="amount"
+                type="number"
+                inputMode="decimal"
+                placeholder={language === 'he' ? 'לדוגמה: 250' : 'e.g., 250'}
+                value={totalAmount}
+                onChange={(e) => setTotalAmount(e.target.value)}
+                className="h-12 text-base text-center"
+              />
+            </div>
+
+            {/* Shopping Summary */}
+            <div className="bg-muted/50 rounded-xl p-4 space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">{language === 'he' ? 'פריטים שנאספו:' : 'Items collected:'}</span>
+                <span className="font-bold text-success">{completedCount}/{totalCount}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">{language === 'he' ? 'זמן קנייה:' : 'Shopping time:'}</span>
+                <span className="font-bold font-mono">{formatTime(elapsedTime)}</span>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className={`flex gap-2 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
+            <Button
+              variant="outline"
+              onClick={() => setShowFinishDialog(false)}
+              className="flex-1"
+            >
+              {language === 'he' ? 'ביטול' : 'Cancel'}
+            </Button>
+            <Button
+              onClick={confirmFinishShopping}
+              className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white"
+            >
+              <CheckCircle2 className="h-4 w-4 mr-2" />
+              {language === 'he' ? 'שמור וסיים' : 'Save & Finish'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

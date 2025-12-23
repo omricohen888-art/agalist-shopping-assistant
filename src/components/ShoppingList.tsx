@@ -1701,22 +1701,66 @@ export const ShoppingList = () => {
 
               {/* Notepad Items List */}
               <div className="min-h-[140px]" dir={language === 'he' ? 'rtl' : 'ltr'}>
-                {notepadItems.length === 0 ? <div className={`py-8 text-gray-600 dark:text-slate-400 font-hand text-lg font-normal leading-relaxed whitespace-pre-line cursor-pointer ${language === 'he' ? 'text-center' : 'text-center'}`} onClick={() => {
-            const newItem: NotepadItem = {
-              id: `notepad-${Date.now()}`,
-              text: '',
-              isChecked: false
-            };
-            setNotepadItems([newItem]);
-            // Focus the first input
-            setTimeout(() => {
-              if (notepadInputRefs.current[0]) {
-                notepadInputRefs.current[0]!.focus();
-              }
-            }, 0);
-          }}>
-                    {t.textareaPlaceholder}
-                  </div> : isSmartSort ?
+                {notepadItems.length === 0 ? 
+                  // Empty state - show single input to start
+                  <div className="space-y-2">
+                    <input
+                      type="text"
+                      autoFocus
+                      placeholder={language === 'he' ? 'הקלד פריט ולחץ Enter...' : 'Type an item and press Enter...'}
+                      className="w-full bg-transparent outline-none text-base md:text-lg font-bold font-hand text-black dark:text-slate-200 placeholder:text-gray-400 dark:placeholder:text-slate-500 py-3"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          const value = (e.target as HTMLInputElement).value.trim();
+                          if (value) {
+                            // Create first item with the entered text
+                            const firstItem: NotepadItem = {
+                              id: `notepad-${Date.now()}`,
+                              text: value,
+                              isChecked: false,
+                              quantity: 1,
+                              unit: 'units'
+                            };
+                            // Create empty second item for continued input
+                            const secondItem: NotepadItem = {
+                              id: `notepad-${Date.now() + 1}`,
+                              text: '',
+                              isChecked: false,
+                              quantity: 1,
+                              unit: 'units'
+                            };
+                            setNotepadItems([firstItem, secondItem]);
+                            // Focus the second (empty) input
+                            setTimeout(() => {
+                              if (notepadInputRefs.current[1]) {
+                                notepadInputRefs.current[1]!.focus();
+                              }
+                            }, 50);
+                          } else {
+                            // Even if empty, create the first item structure
+                            const newItem: NotepadItem = {
+                              id: `notepad-${Date.now()}`,
+                              text: '',
+                              isChecked: false,
+                              quantity: 1,
+                              unit: 'units'
+                            };
+                            setNotepadItems([newItem]);
+                            setTimeout(() => {
+                              if (notepadInputRefs.current[0]) {
+                                notepadInputRefs.current[0]!.focus();
+                              }
+                            }, 50);
+                          }
+                        }
+                      }}
+                    />
+                    <p className="text-sm text-gray-500 dark:text-slate-400 text-center">
+                      {language === 'he' ? 'לחץ Enter להוספת שורה חדשה' : 'Press Enter to add a new line'}
+                    </p>
+                  </div>
+                : isSmartSort ?
           // Grouped view
           renderGroupedNotepadItems() :
           // Flat list view

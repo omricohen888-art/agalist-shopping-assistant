@@ -10,10 +10,10 @@ import { ConfettiEffect } from "./ConfettiEffect";
 
 // Unit type categories for smart behavior
 // SCENARIO A: Discrete Units (whole numbers, stepper-only)
-const DISCRETE_UNITS: Unit[] = ['units', 'package', 'packs', 'cans', 'bottles', 'boxes'];
+const DISCRETE_UNITS: Unit[] = ['units', 'package'];
 
 // SCENARIO B: Weight/Measurements (decimal, input + stepper)
-const WEIGHT_UNITS: Unit[] = ['kg', 'g', 'liters', 'ml', 'oz', 'lbs'];
+const WEIGHT_UNITS: Unit[] = ['kg', 'g'];
 
 interface QuantityStepperProps {
   value: number;
@@ -45,14 +45,6 @@ const QuantityStepper = ({ value, onChange, unit, isCompleted }: QuantityStepper
     minValue = 0.05;
   } else if (unit === 'kg') {
     // Kilograms: step by 0.25kg
-    step = 0.25;
-    minValue = 0.1;
-  } else if (unit === 'ml') {
-    // Milliliters: step by 100ml
-    step = 0.1;
-    minValue = 0.1;
-  } else if (unit === 'liters') {
-    // Liters: step by 0.25L
     step = 0.25;
     minValue = 0.1;
   }

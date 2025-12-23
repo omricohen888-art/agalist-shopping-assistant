@@ -1142,135 +1142,89 @@ export const ShoppingList = () => {
         groups.delete(key);
       }
     }
-    return <div className="space-y-4 sm:space-y-5" dir={language === 'he' ? 'rtl' : 'ltr'}>
-        {Array.from(groups.entries()).map(([categoryKey, categoryItems], groupIndex) => {
+    return <div dir={language === 'he' ? 'rtl' : 'ltr'}>
+        {Array.from(groups.entries()).map(([categoryKey, categoryItems]) => {
         const categoryInfo = getCategoryInfo(categoryKey);
         const isCollapsed = collapsedNotepadCategories.has(categoryKey);
-        return <div key={categoryKey} className="animate-fade-in" style={{
-          animationDelay: `${groupIndex * 50}ms`
-        }}>
-              {/* Category Header */}
-              <div className="sticky top-0 z-20 mb-2 cursor-pointer select-none" onClick={() => {
-            const newSet = new Set(collapsedNotepadCategories);
-            if (newSet.has(categoryKey)) {
-              newSet.delete(categoryKey);
-            } else {
-              newSet.add(categoryKey);
-            }
-            setCollapsedNotepadCategories(newSet);
-          }}>
-                <div className="glass rounded-2xl border border-border/40 shadow-md hover:shadow-lg transition-all duration-200 hover:border-border/60 overflow-hidden group">
-                  <div className="bg-gradient-to-r from-primary/8 to-primary/5 dark:from-primary/15 dark:to-primary/10 px-4 sm:px-5 py-3 sm:py-4 flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <span className="text-2xl sm:text-3xl flex-shrink-0">{categoryInfo.icon}</span>
-                      <h3 className="text-base sm:text-lg font-bold text-foreground truncate group-hover:text-primary transition-colors">
-                        {language === 'he' ? categoryInfo.nameHe : categoryInfo.nameEn}
-                      </h3>
-                    </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <span className="bg-primary/20 text-primary dark:bg-primary/30 dark:text-primary/90 text-xs sm:text-sm font-bold px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full whitespace-nowrap">
-                        {categoryItems.length}
-                      </span>
-                    </div>
-                    <div className="flex-shrink-0 p-1">
-                      <ChevronDown className={`h-5 w-5 sm:h-6 sm:w-6 text-foreground/60 group-hover:text-primary transition-all duration-300 ${isCollapsed ? '-rotate-90' : ''}`} strokeWidth={2.5} />
-                    </div>
-                  </div>
-                </div>
+        return <div key={categoryKey}>
+              {/* Minimal Category Header */}
+              <div 
+                className="flex items-center gap-1 py-0.5 px-1 cursor-pointer select-none"
+                onClick={() => {
+                  const newSet = new Set(collapsedNotepadCategories);
+                  if (newSet.has(categoryKey)) {
+                    newSet.delete(categoryKey);
+                  } else {
+                    newSet.add(categoryKey);
+                  }
+                  setCollapsedNotepadCategories(newSet);
+                }}
+              >
+                <ChevronDown className={`h-2.5 w-2.5 text-muted-foreground/40 transition-transform ${isCollapsed ? '-rotate-90' : ''}`} strokeWidth={2} />
+                <span className="text-[10px]">{categoryInfo.icon}</span>
+                <span className="text-[10px] font-medium text-muted-foreground">
+                  {language === 'he' ? categoryInfo.nameHe : categoryInfo.nameEn}
+                </span>
+                <span className="text-[9px] text-primary/70 font-semibold">({categoryItems.length})</span>
               </div>
 
-              {/* Category Items */}
-              {!isCollapsed && <div className="space-y-2 sm:space-y-3 mt-2 sm:mt-3 animate-fade-in">
-                  {categoryItems.map((item, itemIndex) => {
-              const actualIndex = notepadItems.findIndex(i => i.id === item.id);
-              return <div key={item.id} className="flex items-center gap-4 py-3 w-full overflow-hidden ml-2 sm:ml-4 animate-fade-in" style={{
-                animationDelay: `${itemIndex * 30}ms`
-              }}>
-                        {/* Checkbox + Text Input */}
-                        <div className="flex items-center gap-3 flex-1 min-w-0">
-                          <Checkbox checked={item.isChecked} onCheckedChange={() => toggleNotepadItem(item.id)} size="lg" className="flex-shrink-0" />
-                          <StandardizedInput variant="notepad" isChecked={item.isChecked} ref={el => {
-                    notepadInputRefs.current[actualIndex] = el;
-                  }} type="text" value={item.text} onChange={e => {
-                    const newText = e.target.value;
-                    setNotepadItems(prev => prev.map(i => i.id === item.id ? {
-                      ...i,
-                      text: newText
-                    } : i));
-                  }} onKeyDown={e => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      const newItem: NotepadItem = {
-                        id: `notepad-${Date.now()}`,
-                        text: '',
-                        isChecked: false,
-                        quantity: 1,
-                        unit: 'units'
-                      };
-                      setNotepadItems(prev => {
-                        const newItems = [...prev];
-                        newItems.splice(actualIndex + 1, 0, newItem);
-                        return newItems;
-                      });
-                      setTimeout(() => {
-                        if (notepadInputRefs.current[actualIndex + 1]) {
-                          notepadInputRefs.current[actualIndex + 1]!.focus();
-                        }
-                      }, 0);
-                    } else if (e.key === 'Backspace') {
-                      if (item.text === '' && actualIndex > 0) {
+              {/* Ultra Minimal Items */}
+              {!isCollapsed && categoryItems.map((item) => {
+                const actualIndex = notepadItems.findIndex(i => i.id === item.id);
+                return <div key={item.id} className="flex items-center gap-1 py-0.5 px-0.5">
+                  <Checkbox 
+                    checked={item.isChecked} 
+                    onCheckedChange={() => toggleNotepadItem(item.id)} 
+                    className="h-4 w-4 flex-shrink-0" 
+                  />
+                  <input
+                    ref={el => { notepadInputRefs.current[actualIndex] = el; }}
+                    type="text"
+                    value={item.text}
+                    onChange={e => {
+                      const newText = e.target.value;
+                      setNotepadItems(prev => prev.map(i => i.id === item.id ? { ...i, text: newText } : i));
+                    }}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const newItem: NotepadItem = { id: `notepad-${Date.now()}`, text: '', isChecked: false, quantity: 1, unit: 'units' };
+                        setNotepadItems(prev => {
+                          const newItems = [...prev];
+                          newItems.splice(actualIndex + 1, 0, newItem);
+                          return newItems;
+                        });
+                        setTimeout(() => { notepadInputRefs.current[actualIndex + 1]?.focus(); }, 0);
+                      } else if (e.key === 'Backspace' && item.text === '' && actualIndex > 0) {
                         e.preventDefault();
                         setNotepadItems(prev => prev.filter(i => i.id !== item.id));
                         setTimeout(() => {
-                          if (notepadInputRefs.current[actualIndex - 1]) {
-                            notepadInputRefs.current[actualIndex - 1]!.focus();
-                            const input = notepadInputRefs.current[actualIndex - 1]!;
-                            input.setSelectionRange(input.value.length, input.value.length);
-                          }
+                          const input = notepadInputRefs.current[actualIndex - 1];
+                          if (input) { input.focus(); input.setSelectionRange(input.value.length, input.value.length); }
                         }, 0);
                       }
-                    } else if (e.key === 'ArrowUp') {
-                      e.preventDefault();
-                      if (actualIndex > 0 && notepadInputRefs.current[actualIndex - 1]) {
-                        notepadInputRefs.current[actualIndex - 1]!.focus();
-                      }
-                    } else if (e.key === 'ArrowDown') {
-                      e.preventDefault();
-                      if (actualIndex < notepadItems.length - 1 && notepadInputRefs.current[actualIndex + 1]) {
-                        notepadInputRefs.current[actualIndex + 1]!.focus();
-                      }
-                    }
-                  }} placeholder={language === 'he' ? 'הקלד פריט...' : 'Type an item...'} />
-                        </div>
-
-                        {/* Quantity + Unit */}
-                        <div className="flex items-center gap-1.5 flex-shrink-0">
-                          <input type="number" min="0.1" step="0.1" value={item.quantity || 1} onChange={e => {
-                    const qty = parseFloat(e.target.value) || 1;
-                    setNotepadItems(prev => prev.map(i => i.id === item.id ? {
-                      ...i,
-                      quantity: Math.max(0.1, qty)
-                    } : i));
-                  }} className="w-12 md:w-16 h-7 md:h-8 text-center text-xs rounded-xl border border-border/50 bg-muted/30 text-foreground focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all flex-shrink-0" title={language === 'he' ? 'כמות' : 'Quantity'} />
-                          <select value={item.unit || 'units'} onChange={e => {
-                    setNotepadItems(prev => prev.map(i => i.id === item.id ? {
-                      ...i,
-                      unit: e.target.value as Unit
-                    } : i));
-                  }} className="w-14 md:w-20 h-7 md:h-8 text-xs rounded-xl border border-border/50 bg-muted/30 text-foreground focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all flex-shrink-0 cursor-pointer" title={language === 'he' ? 'יחידה' : 'Unit'}>
-                            {UNITS.map(u => <option key={u.value} value={u.value}>
-                                {language === 'he' ? u.labelHe : u.labelEn}
-                              </option>)}
-                          </select>
-                        </div>
-
-                        {/* Delete Button */}
-                        <button onClick={() => setNotepadItems(prev => prev.filter(i => i.id !== item.id))} className="p-2 text-muted-foreground hover:text-destructive transition-all hover:bg-destructive/10 rounded-xl flex-shrink-0" title={language === 'he' ? 'מחק' : 'Delete'}>
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>;
-            })}
-                </div>}
+                    }}
+                    placeholder={language === 'he' ? 'פריט...' : 'Item...'}
+                    className={`flex-1 text-[11px] bg-transparent border-0 p-0 focus:outline-none focus:ring-0 ${item.isChecked ? 'line-through text-muted-foreground/50' : 'text-foreground'}`}
+                  />
+                  {/* Inline quantity */}
+                  <div className="flex items-center text-[10px] text-muted-foreground/50">
+                    <button onClick={() => setNotepadItems(prev => prev.map(i => i.id === item.id ? { ...i, quantity: Math.max(1, (i.quantity || 1) - 1) } : i))} className="w-4 h-4 flex items-center justify-center">
+                      <Minus className="h-2 w-2" />
+                    </button>
+                    <span className="min-w-[12px] text-center font-medium">{item.quantity || 1}</span>
+                    <button onClick={() => setNotepadItems(prev => prev.map(i => i.id === item.id ? { ...i, quantity: (i.quantity || 1) + 1 } : i))} className="w-4 h-4 flex items-center justify-center">
+                      <Plus className="h-2 w-2" />
+                    </button>
+                  </div>
+                  <span className="text-[9px] text-muted-foreground/40 min-w-[18px]">
+                    {UNITS.find(u => u.value === (item.unit || 'units'))?.[language === 'he' ? 'labelHe' : 'labelEn'] || ''}
+                  </span>
+                  <button onClick={() => setNotepadItems(prev => prev.filter(i => i.id !== item.id))} className="w-4 h-4 flex items-center justify-center text-muted-foreground/20 hover:text-destructive">
+                    <Trash2 className="h-2 w-2" />
+                  </button>
+                </div>;
+              })}
             </div>;
       })}
       </div>;

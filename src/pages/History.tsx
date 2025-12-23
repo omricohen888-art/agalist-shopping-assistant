@@ -118,7 +118,7 @@ const historyTranslations: Record<
 const History = () => {
   const navigate = useNavigate();
   const [history, setHistory] = useState<ShoppingHistoryType[]>([]);
-  const { language, setLanguage } = useGlobalLanguage();
+  const { language } = useGlobalLanguage();
   const t = historyTranslations[language];
   const direction = language === "he" ? "rtl" : "ltr";
   const locale = language === "he" ? "he-IL" : "en-US";
@@ -188,14 +188,6 @@ const History = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setLanguage(language === 'he' ? 'en' : 'he')}
-              className="hidden sm:flex h-9 rounded-xl"
-            >
-              {t.languageLabel}
-            </Button>
             {history.length > 0 && (
               <Button
                 variant="default"

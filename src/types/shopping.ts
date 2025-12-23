@@ -26,6 +26,7 @@ export interface SmartItem {
 export interface ShoppingHistory {
   id: string;
   date: string;
+  listName?: string;
   items: ShoppingItem[];
   totalAmount: number;
   store: string;

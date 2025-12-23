@@ -191,6 +191,7 @@ export const ShoppingMode = () => {
     const history: ShoppingHistory = {
       id: Date.now().toString(),
       date: new Date().toISOString(),
+      listName: listName.trim() || undefined,
       items: items,
       totalAmount: parseFloat(totalAmount) || 0,
       store: selectedStore || (language === 'he' ? 'לא צוין' : 'Not specified'),
@@ -310,9 +311,15 @@ export const ShoppingMode = () => {
                   {motivationalText.title}
                 </h1>
               </div>
-              <p className="text-xs sm:text-sm text-gray-600 dark:text-slate-400 font-medium">
-                {motivationalText.subtitle}
-              </p>
+              {/* Editable List Name */}
+              <input
+                type="text"
+                value={listName}
+                onChange={(e) => setListName(e.target.value)}
+                placeholder={language === 'he' ? 'שם הרשימה...' : 'List name...'}
+                className="w-full max-w-[200px] text-center text-xs sm:text-sm text-gray-600 dark:text-slate-400 font-medium bg-transparent border-b border-dashed border-gray-300 dark:border-slate-600 focus:border-primary focus:outline-none px-2 py-0.5 transition-colors"
+                dir={direction}
+              />
             </div>
 
             {/* Home Button */}

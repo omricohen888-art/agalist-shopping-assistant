@@ -829,6 +829,55 @@ export const ShoppingList = () => {
     setListName(list.name);
     toast.success(t.toasts.listLoaded);
   };
+
+  const handleCopyAllItems = async () => {
+    if (items.length === 0) return;
+
+    const getQuantityUnit = (item: ShoppingItem) => {
+      if (item.quantity <= 1 && item.unit === 'units') return '';
+      const unitLabel = UNITS.find(u => u.value === item.unit);
+      const unitText = language === 'he' ? unitLabel?.labelHe : unitLabel?.labelEn;
+      return `${item.quantity} ${unitText}`;
+    };
+
+    const checkedItems = items.filter(item => item.checked);
+    const uncheckedItems = items.filter(item => !item.checked);
+
+    const formatItem = (item: ShoppingItem) => {
+      const checkbox = item.checked ? '✓' : '☐';
+      const quantityUnit = getQuantityUnit(item);
+      const quantityText = quantityUnit ? ` (${quantityUnit})` : '';
+      return `${checkbox} ${item.text}${quantityText}`;
+    };
+
+    let listText = '';
+    
+    if (uncheckedItems.length > 0) {
+      listText += uncheckedItems.map(formatItem).join('\n');
+    }
+    
+    if (checkedItems.length > 0) {
+      if (uncheckedItems.length > 0) {
+        listText += '\n\n' + (language === 'he' ? '── הושלמו ──' : '── Done ──') + '\n';
+      }
+      listText += checkedItems.map(formatItem).join('\n');
+    }
+
+    const header = `📋 ${listName || (language === 'he' ? 'רשימת קניות' : 'Shopping List')}`;
+    const divider = '─'.repeat(20);
+    const summary = language === 'he' 
+      ? `\n\n📊 סה"כ: ${items.length} פריטים | ✓ ${checkedItems.length} הושלמו`
+      : `\n\n📊 Total: ${items.length} items | ✓ ${checkedItems.length} done`;
+
+    const fullText = `${header}\n${divider}\n${listText}${summary}`;
+
+    try {
+      await navigator.clipboard.writeText(fullText);
+      toast.success(language === 'he' ? 'הרשימה הועתקה ללוח' : 'List copied to clipboard');
+    } catch (err) {
+      toast.error(language === 'he' ? 'לא ניתן להעתיק' : 'Could not copy');
+    }
+  };
   const exitEditMode = () => {
     // Stop TTS if active
     if (isSpeaking) {
@@ -1451,17 +1500,29 @@ export const ShoppingList = () => {
           {/* Subtle gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none rounded-2xl" />
 
-          {/* Quick Paste Button */}
-          {showPaste && (
-            <button 
-              onClick={handleQuickPaste} 
-              className={`absolute top-4 ${language === 'he' ? 'left-4' : 'right-4'} flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/80 hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer z-10 text-sm font-medium`} 
-              title={language === 'he' ? 'הדבק מהלוח' : 'Paste from clipboard'}
-            >
-              <ClipboardPaste className="h-4 w-4" />
-              <span>{language === 'he' ? 'הדבק' : 'Paste'}</span>
-            </button>
-          )}
+          {/* Quick Paste & Copy Buttons */}
+          <div className={`absolute top-4 ${language === 'he' ? 'left-4' : 'right-4'} flex items-center gap-2 z-10`}>
+            {showPaste && (
+              <button 
+                onClick={handleQuickPaste} 
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/80 hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer text-sm font-medium" 
+                title={language === 'he' ? 'הדבק מהלוח' : 'Paste from clipboard'}
+              >
+                <ClipboardPaste className="h-4 w-4" />
+                <span>{language === 'he' ? 'הדבק' : 'Paste'}</span>
+              </button>
+            )}
+            {items.length > 0 && (
+              <button 
+                onClick={handleCopyAllItems} 
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/80 hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer text-sm font-medium" 
+                title={language === 'he' ? 'העתק רשימה' : 'Copy list'}
+              >
+                <Copy className="h-4 w-4" />
+                <span>{language === 'he' ? 'העתק' : 'Copy'}</span>
+              </button>
+            )}
+          </div>
 
           {/* Paste Feedback Animation */}
           {showPasteFeedback && (

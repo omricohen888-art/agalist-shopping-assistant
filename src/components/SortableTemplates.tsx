@@ -89,7 +89,7 @@ const SortableTemplateItem = ({
     <div
       ref={setNodeRef}
       style={style}
-      className={`relative ${isEditMode ? 'animate-pulse' : ''}`}
+      className={`relative ${isEditMode ? 'animate-wiggle' : ''}`}
     >
       {isEditMode && (
         <>
@@ -98,7 +98,7 @@ const SortableTemplateItem = ({
               e.stopPropagation();
               onDelete(template.id);
             }}
-            className="absolute -top-2 -right-2 z-10 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg transition-colors"
+            className="absolute -top-2 -right-2 z-10 w-6 h-6 bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-full flex items-center justify-center shadow-lg transition-colors"
             aria-label={language === 'he' ? 'מחק תבנית' : 'Delete template'}
           >
             <X className="w-3.5 h-3.5" />
@@ -107,7 +107,7 @@ const SortableTemplateItem = ({
           <div
             {...listeners}
             {...attributes}
-            className="absolute -top-2 -left-2 z-10 w-6 h-6 bg-gray-700 dark:bg-gray-600 text-white rounded-full flex items-center justify-center shadow-lg cursor-grab active:cursor-grabbing"
+            className="absolute -top-2 -left-2 z-10 w-6 h-6 bg-muted-foreground text-background rounded-full flex items-center justify-center shadow-lg cursor-grab active:cursor-grabbing"
           >
             <GripVertical className="w-3.5 h-3.5" />
           </div>
@@ -117,11 +117,18 @@ const SortableTemplateItem = ({
       <button
         onClick={() => !isEditMode && onClick(template.items)}
         disabled={isEditMode}
-        className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg bg-white dark:bg-slate-700 text-black dark:text-slate-200 text-xs sm:text-sm font-bold border-2 border-black dark:border-slate-600 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all touch-manipulation active:scale-95 ${
-          isEditMode
-            ? 'cursor-default border-yellow-500 dark:border-yellow-500'
-            : 'hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:hover:bg-slate-600'
-        }`}
+        className={`
+          w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl 
+          bg-card text-foreground 
+          text-xs sm:text-sm font-semibold 
+          border border-border/50 
+          shadow-sm
+          transition-all duration-200 touch-manipulation 
+          ${isEditMode
+            ? 'cursor-default ring-2 ring-primary/50'
+            : 'hover:bg-muted/50 hover:shadow-md hover:border-primary/30 active:scale-95'
+          }
+        `}
       >
         {template.name}
       </button>
@@ -253,25 +260,25 @@ export const SortableTemplates = ({
   const title = language === 'he' ? 'תבניות מהירות' : 'Quick Templates';
   const editLabel = language === 'he' ? 'עריכה' : 'Edit';
   const doneLabel = language === 'he' ? 'סיום' : 'Done';
-  const createLabel = language === 'he' ? 'צור תבנית' : 'Create Template';
+  const createLabel = language === 'he' ? 'צור חדש' : 'Create New';
 
   return (
-    <div className="mb-2 md:mb-7">
+    <div className="mb-4 md:mb-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4 px-2">
+      <div className="flex items-center justify-between mb-4 px-1">
         <div className="flex items-center gap-2">
-          <h3 className="text-sm font-bold text-foreground">
+          <h3 className="text-sm font-semibold text-muted-foreground">
             {title}
           </h3>
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="p-1 hover:bg-gray-100 dark:hover:bg-slate-800 rounded transition-colors"
+            className="p-1.5 hover:bg-muted rounded-lg transition-colors"
             aria-label={isExpanded ? 'Collapse' : 'Expand'}
           >
             {isExpanded ? (
-              <ChevronUp className="w-4 h-4 text-gray-600 dark:text-slate-400" />
+              <ChevronUp className="w-4 h-4 text-muted-foreground" />
             ) : (
-              <ChevronDown className="w-4 h-4 text-gray-600 dark:text-slate-400" />
+              <ChevronDown className="w-4 h-4 text-muted-foreground" />
             )}
           </button>
         </div>
@@ -281,9 +288,9 @@ export const SortableTemplates = ({
             onClick={toggleEditMode}
             variant="ghost"
             size="sm"
-            className="h-7 px-2 text-xs font-bold"
+            className="h-8 px-3 text-xs font-medium text-muted-foreground hover:text-foreground"
           >
-            <Edit3 className="w-3.5 h-3.5 mr-1" />
+            <Edit3 className="w-3.5 h-3.5 mr-1.5" />
             {isEditMode ? doneLabel : editLabel}
           </Button>
         )}
@@ -300,7 +307,7 @@ export const SortableTemplates = ({
             items={activeTemplateIds}
             strategy={verticalListSortingStrategy}
           >
-            <div className="flex flex-wrap justify-center gap-2.5">
+            <div className="flex flex-wrap justify-center gap-2">
               {activeTemplates.map((template) => (
                 <SortableTemplateItem
                   key={template.id}
@@ -316,13 +323,20 @@ export const SortableTemplates = ({
               <button
                 onClick={onCreateNew}
                 disabled={isEditMode}
-                className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg bg-yellow-400 text-black text-xs sm:text-sm font-bold border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all touch-manipulation flex items-center gap-1.5 sm:gap-2 active:scale-95 ${
-                  isEditMode
+                className={`
+                  px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl 
+                  bg-primary/10 text-primary 
+                  text-xs sm:text-sm font-semibold 
+                  border border-primary/20
+                  transition-all duration-200 touch-manipulation 
+                  flex items-center gap-1.5 
+                  ${isEditMode
                     ? 'opacity-50 cursor-not-allowed'
-                    : 'hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]'
-                }`}
+                    : 'hover:bg-primary/20 hover:border-primary/40 active:scale-95'
+                  }
+                `}
               >
-                <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <Plus className="h-4 w-4" />
                 {createLabel}
               </button>
             </div>

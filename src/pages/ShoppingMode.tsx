@@ -87,6 +87,7 @@ export const ShoppingMode = () => {
   const [showAddItemInput, setShowAddItemInput] = useState(false);
   const [newItemText, setNewItemText] = useState("");
   const [isSmartSort, setIsSmartSort] = useState(false);
+  const [showExitDialog, setShowExitDialog] = useState(false);
   const direction = language === 'he' ? 'rtl' : 'ltr';
 
   // Stopwatch state
@@ -239,14 +240,13 @@ export const ShoppingMode = () => {
   };
 
   const handleExit = () => {
-    if (completedCount > 0 && completedCount < totalCount) {
-      const confirmExit = window.confirm(
-        language === 'he' 
-          ? 'יש פריטים שעדיין לא נלקחו. האם לצאת בכל זאת?' 
-          : 'Some items are not collected. Exit anyway?'
-      );
-      if (!confirmExit) return;
-    }
+    // Show exit dialog to ask about saving
+    setShowExitDialog(true);
+  };
+
+  const confirmExit = () => {
+    setShowExitDialog(false);
+    localStorage.removeItem(`activeList_${id}`);
     navigate("/");
   };
 
@@ -399,7 +399,7 @@ export const ShoppingMode = () => {
       {/* Mission Header - Gamified & Mobile-Optimized */}
       <div className="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-black/10 shadow-lg">
         <div className="max-w-3xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
-          {/* Top Row: Exit + Title + Home */}
+          {/* Top Row: Exit + Title */}
           <div className={`flex items-center justify-between mb-3 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
             {/* Exit Button */}
             <Button
@@ -429,14 +429,8 @@ export const ShoppingMode = () => {
               />
             </div>
 
-            {/* Home Button */}
-            <Button
-              variant="ghost"
-              onClick={() => navigate("/")}
-              className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-slate-800 dark:hover:bg-slate-700 transition-all active:scale-95 touch-manipulation"
-            >
-              <Home className="h-5 w-5 sm:h-6 sm:w-6 text-gray-700 dark:text-slate-300" />
-            </Button>
+            {/* Spacer to balance layout */}
+            <div className="h-10 w-10 sm:h-12 sm:w-12" />
           </div>
 
           {/* Progress Section - Compact */}
@@ -855,6 +849,45 @@ export const ShoppingMode = () => {
             >
               <CheckCircle2 className="h-4 w-4 mr-2" />
               {language === 'he' ? 'שמור וסיים' : 'Save & Finish'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Exit Confirmation Dialog */}
+      <Dialog open={showExitDialog} onOpenChange={setShowExitDialog}>
+        <DialogContent className="sm:max-w-md" dir={direction}>
+          <DialogHeader>
+            <DialogTitle className="text-center text-xl font-bold">
+              {language === 'he' ? '🛒 לצאת מהקנייה?' : '🛒 Exit Shopping?'}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="py-4 text-center">
+            <p className="text-muted-foreground">
+              {language === 'he' 
+                ? 'האם לשמור את הרשימה לפני היציאה?' 
+                : 'Would you like to save the list before exiting?'
+              }
+            </p>
+          </div>
+
+          <DialogFooter className="flex flex-col gap-2 sm:flex-col">
+            <Button
+              onClick={() => {
+                setShowExitDialog(false);
+                handleSaveForLater();
+              }}
+              className="w-full h-12 text-base font-bold bg-primary hover:bg-primary/90"
+            >
+              {language === 'he' ? '💾 שמור לאחר כך' : '💾 Save for Later'}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={confirmExit}
+              className="w-full h-12 text-base font-medium text-muted-foreground hover:text-destructive hover:border-destructive/50"
+            >
+              {language === 'he' ? 'כן, אני בטוח' : "Yes, I'm sure"}
             </Button>
           </DialogFooter>
         </DialogContent>

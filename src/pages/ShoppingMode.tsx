@@ -141,6 +141,27 @@ export const ShoppingMode = () => {
     navigate("/");
   };
 
+  const handleSaveForLater = () => {
+    if (!id) return;
+
+    // Save to savedLists
+    const savedLists = JSON.parse(localStorage.getItem('savedLists') || '[]');
+    const newSavedList = {
+      id: Date.now().toString(),
+      name: listName,
+      items: items,
+      createdAt: new Date().toISOString(),
+    };
+    savedLists.push(newSavedList);
+    localStorage.setItem('savedLists', JSON.stringify(savedLists));
+    
+    // Remove active list
+    localStorage.removeItem(`activeList_${id}`);
+
+    toast.success(language === 'he' ? 'הרשימה נשמרה!' : 'List saved!');
+    navigate("/");
+  };
+
   const handleExit = () => {
     if (completedCount > 0 && completedCount < totalCount) {
       const confirmExit = window.confirm(
@@ -433,20 +454,29 @@ export const ShoppingMode = () => {
         )}
       </div>
 
-      {/* Sticky Footer - Finish Button - Compact */}
+      {/* Sticky Footer - Two Buttons */}
       <div className="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-t border-black/10 p-3 sm:p-4 shadow-2xl z-40">
-        <div className="max-w-3xl mx-auto">
+        <div className={`max-w-3xl mx-auto flex gap-2 sm:gap-3 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
+          {/* Save for Later Button */}
+          <Button
+            onClick={handleSaveForLater}
+            variant="outline"
+            className="flex-1 h-12 sm:h-14 text-sm sm:text-base font-bold rounded-xl bg-white dark:bg-slate-800 border-2 border-gray-300 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all touch-manipulation active:scale-[0.98]"
+          >
+            {language === 'he' ? 'שמור לאחר כך' : 'Save for Later'}
+          </Button>
+          
+          {/* Finish Shopping Button */}
           <Button
             onClick={handleFinishShopping}
-            disabled={completedCount === 0}
             className={`
-              w-full h-12 sm:h-14 text-sm sm:text-base font-bold rounded-xl
+              flex-1 h-12 sm:h-14 text-sm sm:text-base font-bold rounded-xl
               transition-all duration-300 touch-manipulation
               ${progress === 100 
                 ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg shadow-green-200/50 hover:shadow-xl hover:shadow-green-300/50' 
                 : 'bg-gradient-to-r from-orange-400 to-yellow-400 text-white shadow-lg shadow-orange-200/50 hover:shadow-xl hover:shadow-orange-300/50'
               }
-              active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed
+              active:scale-[0.98]
             `}
           >
             {progress === 100 ? (
@@ -457,7 +487,7 @@ export const ShoppingMode = () => {
             ) : (
               <>
                 <CheckCircle2 className={`h-5 w-5 ${direction === 'rtl' ? 'ml-2' : 'mr-2'}`} />
-                {language === 'he' ? 'סיים קניות' : 'Finish Shopping'}
+                {language === 'he' ? 'סיום קנייה' : 'Finish Shopping'}
               </>
             )}
           </Button>

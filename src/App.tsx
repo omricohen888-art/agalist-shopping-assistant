@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { SoundSettingsProvider } from "@/hooks/use-sound-settings.tsx";
 import { LanguageProvider } from "@/context/LanguageContext";
@@ -22,6 +22,10 @@ const queryClient = new QueryClient();
 
 const AppContent = () => {
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const location = useLocation();
+  
+  // Hide navigation on shopping mode
+  const isShoppingMode = location.pathname.startsWith('/shopping/');
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -37,13 +41,17 @@ const AppContent = () => {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
-      <Navigation onSettingsClick={() => setIsSettingsModalOpen(true)} />
+      {!isShoppingMode && (
+        <Navigation onSettingsClick={() => setIsSettingsModalOpen(true)} />
+      )}
       <SettingsModal open={isSettingsModalOpen} onOpenChange={setIsSettingsModalOpen} />
-      <footer className="w-full py-6 pb-8 text-center">
-        <p className="text-[11px] text-gray-400 dark:text-slate-700 font-medium">
-          © 2025 Agalist™ • v0.1.0 (Beta) • Dev by OC
-        </p>
-      </footer>
+      {!isShoppingMode && (
+        <footer className="w-full py-6 pb-8 text-center">
+          <p className="text-[11px] text-gray-400 dark:text-slate-700 font-medium">
+            © 2025 Agalist™ • v0.1.0 (Beta) • Dev by OC
+          </p>
+        </footer>
+      )}
     </div>
   );
 };

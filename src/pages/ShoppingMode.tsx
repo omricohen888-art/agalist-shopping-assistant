@@ -179,7 +179,7 @@ export const ShoppingMode = () => {
 
   return (
     <div 
-      className="min-h-screen pb-40 sm:pb-44 transition-all duration-500 relative overflow-hidden"
+      className="min-h-screen pb-28 sm:pb-32 transition-all duration-500 relative overflow-hidden"
       dir={direction}
     >
       {/* Colorful Background */}

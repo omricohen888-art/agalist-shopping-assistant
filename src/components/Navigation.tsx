@@ -12,7 +12,7 @@ interface NavigationProps {
 export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { language, setLanguage } = useGlobalLanguage();
+  const { language } = useGlobalLanguage();
   const t = translations[language];
   const direction = language === 'he' ? 'rtl' : 'ltr';
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -82,31 +82,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
 
             {/* Menu */}
             <div className="absolute bottom-20 right-4 left-4 bg-card border border-border shadow-xl rounded-2xl z-50">
-              <div className="p-4 space-y-3">
-                {/* Language Toggle */}
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setLanguage('he')}
-                    className={`flex-1 px-3 py-2.5 rounded-xl font-medium text-sm transition-all active:scale-95 ${
-                      language === 'he'
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                    }`}
-                  >
-                    עברית
-                  </button>
-                  <button
-                    onClick={() => setLanguage('en')}
-                    className={`flex-1 px-3 py-2.5 rounded-xl font-medium text-sm transition-all active:scale-95 ${
-                      language === 'en'
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                    }`}
-                  >
-                    English
-                  </button>
-                </div>
-
+              <div className="p-4">
                 {/* Settings Button */}
                 <button
                   onClick={() => {
@@ -146,32 +122,8 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
             ))}
           </div>
 
-          {/* Right Section - Settings & Language */}
+          {/* Right Section - Settings */}
           <div className="flex items-center gap-2">
-            {/* Language Toggle */}
-            <div className="flex items-center gap-1 bg-muted rounded-xl p-1">
-              <button
-                onClick={() => setLanguage('he')}
-                className={`px-3 py-1.5 rounded-lg font-medium text-xs transition-all active:scale-95 ${
-                  language === 'he'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:bg-muted/80'
-                }`}
-              >
-                עברית
-              </button>
-              <button
-                onClick={() => setLanguage('en')}
-                className={`px-3 py-1.5 rounded-lg font-medium text-xs transition-all active:scale-95 ${
-                  language === 'en'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:bg-muted/80'
-                }`}
-              >
-                EN
-              </button>
-            </div>
-
             {/* Settings Button */}
             <button
               onClick={() => onSettingsClick?.()}

@@ -38,6 +38,9 @@ export interface SavedList {
   name: string;
   items: ShoppingItem[];
   createdAt: string;
+  isShoppingComplete?: boolean;
+  shoppingCompletedAt?: string;
+  shoppingDuration?: number; // in seconds
 }
 
 export const ISRAELI_STORES = [

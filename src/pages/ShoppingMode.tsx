@@ -11,7 +11,8 @@ import { useSoundSettings } from "@/hooks/use-sound-settings.tsx";
 import { useHaptics } from "@/hooks/use-haptics";
 import { ConfettiEffect } from "@/components/ConfettiEffect";
 import { toast } from "sonner";
-import { saveShoppingHistory } from "@/utils/storage";
+import { saveShoppingHistory, saveList } from "@/utils/storage";
+import { SavedList } from "@/types/shopping";
 import {
   Dialog,
   DialogContent,
@@ -208,8 +209,7 @@ export const ShoppingMode = () => {
     setIsTimerRunning(false);
 
     // Save to savedLists with shopping status
-    const savedLists = JSON.parse(localStorage.getItem('savedLists') || '[]');
-    const newSavedList = {
+    const newSavedList: SavedList = {
       id: Date.now().toString(),
       name: listName,
       items: items,
@@ -218,8 +218,9 @@ export const ShoppingMode = () => {
       shoppingCompletedAt: completedCount === totalCount && totalCount > 0 ? new Date().toISOString() : undefined,
       shoppingDuration: elapsedTime,
     };
-    savedLists.push(newSavedList);
-    localStorage.setItem('savedLists', JSON.stringify(savedLists));
+    
+    // Use storage utility function to save with correct key
+    saveList(newSavedList);
     
     // Remove active list
     localStorage.removeItem(`activeList_${id}`);

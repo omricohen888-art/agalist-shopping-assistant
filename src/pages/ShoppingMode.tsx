@@ -32,7 +32,7 @@ import {
 } from "@/components/ui/select";
 import { sanitizeInput } from "@/utils/security";
 import { SortModeToggle } from "@/components/SortModeToggle";
-import { sortByCategory } from "@/utils/categorySort";
+import { sortByCategory, groupByCategory, getCategoryInfo, CategoryKey } from "@/utils/categorySort";
 
 // Dynamic motivational messages
 const getMotivationalText = (
@@ -260,16 +260,102 @@ export const ShoppingMode = () => {
   }, [lightTap]);
 
   // Sorted items with pinned first, then smart sort if enabled
-  const sortedActiveItems = useMemo(() => {
+  const { pinnedItems, groupedItems, flatSortedItems } = useMemo(() => {
     const active = items.filter(item => !item.checked);
-    const pinnedItems = active.filter(item => item.pinned);
-    const unpinnedItems = active.filter(item => !item.pinned);
+    const pinned = active.filter(item => item.pinned);
+    const unpinned = active.filter(item => !item.pinned);
     
-    const sortedUnpinned = isSmartSort ? sortByCategory(unpinnedItems) : unpinnedItems;
-    return [...pinnedItems, ...sortedUnpinned];
+    if (isSmartSort) {
+      const grouped = groupByCategory(unpinned);
+      return { pinnedItems: pinned, groupedItems: grouped, flatSortedItems: [] };
+    } else {
+      return { pinnedItems: pinned, groupedItems: null, flatSortedItems: unpinned };
+    }
   }, [items, isSmartSort]);
 
+  const activeItemsCount = items.filter(item => !item.checked).length;
+
   const completedItems = items.filter(item => item.checked);
+
+  // Render a single item
+  const renderItem = (item: ShoppingItem) => {
+    const isAnimating = animatingItemId === item.id;
+    const unitLabel = UNITS.find(u => u.value === item.unit)?.[language === 'he' ? 'labelHe' : 'labelEn'] || '';
+    
+    return (
+      <div
+        key={item.id}
+        className={`
+          relative w-full
+          bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-2xl p-3 sm:p-4
+          border-2 transition-all duration-300
+          shadow-sm
+          ${item.pinned ? 'border-red-300 bg-red-50/50 dark:bg-red-900/20' : 'border-transparent'}
+          ${isAnimating 
+            ? 'border-green-400 bg-green-50/90 scale-[0.97] shadow-lg shadow-green-200/50' 
+            : ''
+          }
+        `}
+      >
+        <div className={`flex items-center gap-3 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
+          {/* Checkbox */}
+          <button
+            onClick={() => toggleItem(item.id)}
+            className={`
+              flex-shrink-0 w-11 h-11 sm:w-14 sm:h-14 rounded-xl
+              flex items-center justify-center
+              border-2 transition-all duration-300
+              touch-manipulation active:scale-95
+              ${isAnimating 
+                ? 'bg-green-500 border-green-500 text-white scale-110' 
+                : 'bg-white border-gray-300 dark:bg-slate-700 dark:border-slate-600 hover:border-primary'
+              }
+            `}
+          >
+            {isAnimating && (
+              <Check className="h-6 w-6 sm:h-7 sm:w-7 animate-check-bounce" strokeWidth={3} />
+            )}
+          </button>
+
+          {/* Content */}
+          <button
+            onClick={() => toggleItem(item.id)}
+            className={`flex-1 min-w-0 text-${direction === 'rtl' ? 'right' : 'left'} touch-manipulation`}
+          >
+            <p className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate">
+              {item.text}
+            </p>
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-slate-400 font-medium">
+              {item.quantity} {unitLabel}
+            </p>
+          </button>
+
+          {/* Pin button */}
+          <button
+            onClick={(e) => togglePin(item.id, e)}
+            className={`
+              flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center
+              transition-all duration-200 touch-manipulation active:scale-90
+              ${item.pinned 
+                ? 'bg-red-100 text-red-600 hover:bg-red-200' 
+                : 'bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600 dark:bg-slate-700 dark:hover:bg-slate-600'
+              }
+            `}
+            title={item.pinned 
+              ? (language === 'he' ? 'הסר נעיצה' : 'Unpin') 
+              : (language === 'he' ? 'נעץ פריט דחוף' : 'Pin urgent')
+            }
+          >
+            {item.pinned ? (
+              <PinOff className="h-4 w-4" />
+            ) : (
+              <Pin className="h-4 w-4" />
+            )}
+          </button>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div 
@@ -502,7 +588,7 @@ export const ShoppingMode = () => {
       {/* Items List - Mobile-Optimized */}
       <div className="max-w-3xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6">
         {/* Sort Toggle */}
-        {sortedActiveItems.length > 0 && (
+        {activeItemsCount > 0 && (
           <div className="mb-2">
             <SortModeToggle 
               isSmartSort={isSmartSort} 
@@ -513,105 +599,63 @@ export const ShoppingMode = () => {
         )}
 
         {/* Active Items */}
-        {sortedActiveItems.length > 0 && (
-          <div className="space-y-2 sm:space-y-3">
+        {activeItemsCount > 0 && (
+          <div className="space-y-3 sm:space-y-4">
             <div className="flex items-center gap-2 px-1">
               <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-orange-500" />
               <h2 className="text-sm sm:text-base font-bold text-gray-800 dark:text-white">
                 {language === 'he' ? 'צריך לאסוף' : 'To Collect'}
               </h2>
               <span className="ml-auto px-2 py-0.5 bg-orange-100 text-orange-600 rounded-full text-xs font-bold">
-                {sortedActiveItems.length}
+                {activeItemsCount}
               </span>
             </div>
             
-            <div className="space-y-2 sm:space-y-3">
-              {sortedActiveItems.map((item) => {
-                const isAnimating = animatingItemId === item.id;
-                const unitLabel = UNITS.find(u => u.value === item.unit)?.[language === 'he' ? 'labelHe' : 'labelEn'] || '';
-                
-                return (
-                  <div
-                    key={item.id}
-                    className={`
-                      relative w-full
-                      bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-2xl p-3 sm:p-4
-                      border-2 transition-all duration-300
-                      shadow-sm
-                      ${item.pinned ? 'border-red-300 bg-red-50/50 dark:bg-red-900/20' : 'border-transparent'}
-                      ${isAnimating 
-                        ? 'border-green-400 bg-green-50/90 scale-[0.97] shadow-lg shadow-green-200/50' 
-                        : ''
-                      }
-                    `}
-                  >
-                    {/* Pin indicator */}
-                    {item.pinned && (
-                      <div className="absolute top-1 right-1 sm:top-2 sm:right-2">
-                        <Pin className="h-3 w-3 text-red-500 fill-red-500" />
+            {/* Pinned Items Section */}
+            {pinnedItems.length > 0 && (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 px-1">
+                  <Pin className="h-3.5 w-3.5 text-red-500 fill-red-500" />
+                  <span className="text-xs font-bold text-red-600">
+                    {language === 'he' ? 'פריטים דחופים' : 'Urgent Items'}
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  {pinnedItems.map((item) => renderItem(item))}
+                </div>
+              </div>
+            )}
+
+            {/* Smart Sort with Categories */}
+            {isSmartSort && groupedItems && (
+              <div className="space-y-4">
+                {Array.from(groupedItems.entries()).map(([categoryKey, categoryItems]) => {
+                  if (categoryItems.length === 0) return null;
+                  const categoryInfo = getCategoryInfo(categoryKey);
+                  return (
+                    <div key={categoryKey} className="space-y-2">
+                      <div className="flex items-center gap-2 px-1">
+                        <span className="text-base">{categoryInfo.icon}</span>
+                        <span className="text-xs font-bold text-gray-600 dark:text-gray-400">
+                          {language === 'he' ? categoryInfo.nameHe : categoryInfo.nameEn}
+                        </span>
+                        <span className="text-xs text-gray-400">({categoryItems.length})</span>
                       </div>
-                    )}
-                    
-                    <div className={`flex items-center gap-3 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
-                      {/* Checkbox - clickable for toggle */}
-                      <button
-                        onClick={() => toggleItem(item.id)}
-                        className={`
-                          flex-shrink-0 w-11 h-11 sm:w-14 sm:h-14 rounded-xl
-                          flex items-center justify-center
-                          border-2 transition-all duration-300
-                          touch-manipulation active:scale-95
-                          ${isAnimating 
-                            ? 'bg-green-500 border-green-500 text-white scale-110' 
-                            : 'bg-white border-gray-300 dark:bg-slate-700 dark:border-slate-600 hover:border-primary'
-                          }
-                        `}
-                      >
-                        {isAnimating && (
-                          <Check className="h-6 w-6 sm:h-7 sm:w-7 animate-check-bounce" strokeWidth={3} />
-                        )}
-                      </button>
-
-                      {/* Content - clickable for toggle */}
-                      <button
-                        onClick={() => toggleItem(item.id)}
-                        className={`flex-1 min-w-0 text-${direction === 'rtl' ? 'right' : 'left'} touch-manipulation`}
-                      >
-                        <p className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate">
-                          {item.text}
-                        </p>
-                        <p className="text-xs sm:text-sm text-gray-500 dark:text-slate-400 font-medium">
-                          {item.quantity} {unitLabel}
-                        </p>
-                      </button>
-
-                      {/* Pin button */}
-                      <button
-                        onClick={(e) => togglePin(item.id, e)}
-                        className={`
-                          flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center
-                          transition-all duration-200 touch-manipulation active:scale-90
-                          ${item.pinned 
-                            ? 'bg-red-100 text-red-600 hover:bg-red-200' 
-                            : 'bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600 dark:bg-slate-700 dark:hover:bg-slate-600'
-                          }
-                        `}
-                        title={item.pinned 
-                          ? (language === 'he' ? 'הסר נעיצה' : 'Unpin') 
-                          : (language === 'he' ? 'נעץ פריט דחוף' : 'Pin urgent')
-                        }
-                      >
-                        {item.pinned ? (
-                          <PinOff className="h-4 w-4" />
-                        ) : (
-                          <Pin className="h-4 w-4" />
-                        )}
-                      </button>
+                      <div className="space-y-2">
+                        {categoryItems.map((item) => renderItem(item))}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Original Order (flat list) */}
+            {!isSmartSort && flatSortedItems.length > 0 && (
+              <div className="space-y-2">
+                {flatSortedItems.map((item) => renderItem(item))}
+              </div>
+            )}
           </div>
         )}
 

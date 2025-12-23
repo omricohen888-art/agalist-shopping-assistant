@@ -1456,26 +1456,38 @@ export const ShoppingList = () => {
           {/* Subtle gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none rounded-2xl" />
 
-          {/* Quick Paste & Copy Buttons */}
-          <div className={`absolute top-4 ${language === 'he' ? 'left-4' : 'right-4'} flex items-center gap-2 z-10`}>
-            <button 
-              onClick={handleQuickPaste} 
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/80 hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer text-sm font-medium" 
-              title={language === 'he' ? 'הדבק מהלוח' : 'Paste from clipboard'}
-            >
-              <ClipboardPaste className="h-4 w-4" />
-              <span>{language === 'he' ? 'הדבק' : 'Paste'}</span>
-            </button>
-            {notepadItems.filter(item => item.text.trim() !== '').length > 0 && (
+          {/* List Name Input + Quick Actions */}
+          <div className="flex items-center gap-3 mb-4">
+            {/* List Name */}
+            <input
+              type="text"
+              value={listName}
+              onChange={(e) => setListName(e.target.value)}
+              placeholder={language === 'he' ? 'שם הרשימה...' : 'List name...'}
+              className="flex-1 bg-transparent border-0 text-lg font-semibold text-foreground placeholder:text-muted-foreground/50 focus:outline-none"
+            />
+            
+            {/* Quick Paste & Copy Buttons */}
+            <div className="flex items-center gap-2">
               <button 
-                onClick={handleCopyAllItems} 
+                onClick={handleQuickPaste} 
                 className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/80 hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer text-sm font-medium" 
-                title={language === 'he' ? 'העתק רשימה' : 'Copy list'}
+                title={language === 'he' ? 'הדבק מהלוח' : 'Paste from clipboard'}
               >
-                <Copy className="h-4 w-4" />
-                <span>{language === 'he' ? 'העתק' : 'Copy'}</span>
+                <ClipboardPaste className="h-4 w-4" />
+                <span>{language === 'he' ? 'הדבק' : 'Paste'}</span>
               </button>
-            )}
+              {notepadItems.filter(item => item.text.trim() !== '').length > 0 && (
+                <button 
+                  onClick={handleCopyAllItems} 
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/80 hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer text-sm font-medium" 
+                  title={language === 'he' ? 'העתק רשימה' : 'Copy list'}
+                >
+                  <Copy className="h-4 w-4" />
+                  <span>{language === 'he' ? 'העתק' : 'Copy'}</span>
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Paste Feedback Animation */}
@@ -1485,41 +1497,8 @@ export const ShoppingList = () => {
             </div>
           )}
 
-          {/* Smart Input Toolbar */}
-          <div className={`flex gap-2 text-muted-foreground mb-4 ${language === 'en' ? 'flex-row-reverse justify-end' : ''}`}>
-            {/* Voice Dictation Button */}
-            <button 
-              onClick={handleVoiceDictation} 
-              className={`p-2.5 rounded-xl bg-muted/50 hover:bg-muted transition-all hover:scale-105 active:scale-95 ${isVoiceRecording ? 'text-destructive animate-pulse bg-destructive/10' : 'hover:text-foreground'}`} 
-              title={language === 'he' ? 'הקלטת קול' : 'Voice Dictation'} 
-              disabled={isProcessingImage}
-            >
-              <Mic className="h-5 w-5" />
-            </button>
-
-            {/* Camera OCR Button */}
-            <button 
-              onClick={() => cameraInputRef.current?.click()} 
-              className={`p-2.5 rounded-xl bg-muted/50 hover:bg-muted transition-all hover:scale-105 active:scale-95 ${isProcessingImage ? 'text-primary animate-pulse bg-primary/10' : 'hover:text-foreground'}`} 
-              title={language === 'he' ? 'סריקת רשימה' : 'Scan List'} 
-              disabled={isVoiceRecording}
-            >
-              <Camera className="h-5 w-5" />
-            </button>
-
-            {/* Handwriting Button */}
-            <button 
-              onClick={() => setIsHandwritingOpen(true)} 
-              className={`p-2.5 rounded-xl bg-muted/50 hover:bg-muted transition-all hover:scale-105 active:scale-95 ${isProcessingImage ? 'text-primary animate-pulse bg-primary/10' : 'hover:text-foreground'}`} 
-              title={language === 'he' ? 'כתב יד' : 'Handwriting'} 
-              disabled={isVoiceRecording}
-            >
-              <PenLine className="h-5 w-5" />
-            </button>
-
-            {/* Hidden File Input for Camera */}
-            <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleCameraOCR} className="hidden" />
-          </div>
+          {/* Hidden File Input for Camera (kept for future use) */}
+          <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleCameraOCR} className="hidden" />
 
           {/* Items List */}
           <div className="min-h-[140px]" dir={language === 'he' ? 'rtl' : 'ltr'}>

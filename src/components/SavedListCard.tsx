@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Trash2, Pencil, ShoppingCart, X, ChevronDown, CheckCircle2, Clock } from "lucide-react";
+import { Trash2, Pencil, ShoppingCart, X, ChevronDown, CheckCircle2, Clock, Copy } from "lucide-react";
+import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
 import { SavedList, ShoppingItem, Unit, UNITS } from "@/types/shopping";
 import { useGlobalLanguage } from "@/context/LanguageContext";
@@ -106,6 +107,22 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
         return `${item.quantity} ${unitText}`;
     };
 
+    const handleCopyList = async () => {
+        const listText = items.map(item => {
+            const quantityUnit = getDisplayQuantityUnit(item);
+            return quantityUnit ? `${item.text} - ${quantityUnit}` : item.text;
+        }).join('\n');
+
+        const fullText = `${list.name}\n${'─'.repeat(20)}\n${listText}`;
+
+        try {
+            await navigator.clipboard.writeText(fullText);
+            toast.success(language === 'he' ? 'הרשימה הועתקה ללוח' : 'List copied to clipboard');
+        } catch (err) {
+            toast.error(language === 'he' ? 'לא ניתן להעתיק' : 'Could not copy');
+        }
+    };
+
     const visibleItems = isExpanded ? items : items.slice(0, 5);
     const hasMoreItems = items.length > 5;
 
@@ -123,6 +140,15 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
 
                 {/* Actions */}
                 <div className="flex items-center gap-1 flex-shrink-0">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => { e.stopPropagation(); handleCopyList(); }}
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl"
+                        title={language === 'he' ? 'העתק רשימה' : 'Copy List'}
+                    >
+                        <Copy className="h-4 w-4" />
+                    </Button>
                     <Button
                         variant="ghost"
                         size="icon"

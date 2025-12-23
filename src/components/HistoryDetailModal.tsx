@@ -71,12 +71,15 @@ export const HistoryDetailModal: React.FC<HistoryDetailModalProps> = ({
             </div>
             <div className="flex-1">
               <DialogTitle className="text-xl font-bold flex items-center gap-2">
-                {trip.store}
+                {trip.listName || trip.store}
                 <CheckCircle2 className="h-5 w-5 text-emerald-500" />
               </DialogTitle>
               <p className="text-sm text-muted-foreground flex items-center gap-1.5 mt-0.5">
                 <Calendar className="h-3.5 w-3.5" />
                 {formatDate(trip.date)} • {formatTime(trip.date)}
+                {trip.listName && trip.store && (
+                  <span className="text-xs bg-muted px-2 py-0.5 rounded ml-2">{trip.store}</span>
+                )}
               </p>
             </div>
           </div>

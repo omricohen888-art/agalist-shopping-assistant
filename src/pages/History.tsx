@@ -265,10 +265,15 @@ const History = () => {
                           <ShoppingCart className="h-6 w-6 text-primary" />
                         </div>
                         <div>
-                          <h3 className="text-lg font-semibold text-foreground">{item.store || t.noHistory}</h3>
+                          <h3 className="text-lg font-semibold text-foreground">
+                            {item.listName || item.store || t.noHistory}
+                          </h3>
                           <div className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
                             <Calendar className="h-4 w-4" />
                             {formatDate(item.date)}
+                            {item.listName && item.store && (
+                              <span className="text-xs bg-muted px-2 py-0.5 rounded-lg">{item.store}</span>
+                            )}
                           </div>
                         </div>
                       </div>

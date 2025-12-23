@@ -375,59 +375,48 @@ export const ShoppingList = () => {
       toast.error(language === 'he' ? 'שגיאה בהדבקה מלוח הזיכרון' : 'Error reading clipboard');
     }
   };
-  const handlePaste = () => {
-    // Convert notepad items to main shopping items, preserving checked status and quantity
-    let newItems: ShoppingItem[] = notepadItems.map((notepadItem, index) => ({
-      id: `${Date.now()}-${index}`,
-      text: notepadItem.text,
-      checked: notepadItem.isChecked,
-      // Preserve the checked status!
-      quantity: notepadItem.quantity || 1,
-      unit: (notepadItem.unit || 'units') as Unit
-    }));
+  const handleStartShopping = () => {
+    // Convert notepad items to shopping items
+    let newItems: ShoppingItem[] = notepadItems
+      .filter(item => item.text.trim() !== '')
+      .map((notepadItem, index) => ({
+        id: `${Date.now()}-${index}`,
+        text: notepadItem.text,
+        checked: notepadItem.isChecked,
+        quantity: notepadItem.quantity || 1,
+        unit: (notepadItem.unit || 'units') as Unit
+      }));
 
     // Apply smart sort if enabled
     if (isSmartSort) {
       newItems = sortByCategory(newItems);
     }
-    if (activeListId) {
-      // Edit Mode: Prepend items, clear input, NO success animation
-      setItems(prev => [...newItems, ...prev]);
-      setInputText("");
-      setNotepadItems([]);
-      // Optional: Scroll to top to see new items
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      });
-      // Show success toast
-      toast.success(language === 'he' ? "נוסף בהצלחה לרשימה!" : "Added successfully!");
-    } else {
-      // Home Page Mode: Create new list, show success animation
-      setItems([...items, ...newItems]);
-      setInputText("");
-      setNotepadItems([]);
 
-      // Show success animation
-      setShowListSuccess(true);
-      setTimeout(() => setShowListSuccess(false), 1000);
-
-      // Transition to Edit Mode
-      const newListId = Date.now().toString();
-      const currentDate = new Date().toLocaleDateString(language === 'he' ? 'he-IL' : 'en-US', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-      });
-      const defaultListName = language === 'he' ? `רשימה חדשה - ${currentDate}` : `New List - ${currentDate}`;
-      setActiveListId(newListId);
-      setListName(defaultListName);
-
-      // Auto-focus the title input after a short delay to allow state update
-      setTimeout(() => {
-        titleInputRef.current?.focus?.();
-      }, 100);
+    if (newItems.length === 0) {
+      toast.error(language === 'he' ? 'אנא הוסף פריטים לרשימה' : 'Please add items to the list');
+      return;
     }
+
+    // Generate unique list ID
+    const newListId = Date.now().toString();
+    const currentDate = new Date().toLocaleDateString(language === 'he' ? 'he-IL' : 'en-US', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+    const defaultListName = listName || (language === 'he' ? `רשימת קניות - ${currentDate}` : `Shopping List - ${currentDate}`);
+
+    // Save list data to localStorage for ShoppingMode to access
+    const listData = {
+      id: newListId,
+      name: defaultListName,
+      items: newItems,
+      createdAt: new Date().toISOString()
+    };
+    localStorage.setItem(`activeList_${newListId}`, JSON.stringify(listData));
+
+    // Navigate to shopping mode
+    navigate(`/shopping/${newListId}`);
   };
   const toggleNotepadItem = (id: string) => {
     setNotepadItems(prev => prev.map(item => item.id === id ? {
@@ -1921,7 +1910,7 @@ export const ShoppingList = () => {
                 </div>
                 {/* Two action buttons */}
                 <div className={`flex flex-col sm:flex-row gap-3 w-full sm:w-auto justify-center items-center ${notepadItems.length > 0 ? '' : 'pt-2'}`}>
-                  <StartShoppingButton onClick={handlePaste} language={language} disabled={notepadItems.length === 0} />
+                  <StartShoppingButton onClick={handleStartShopping} language={language} disabled={notepadItems.length === 0} />
                   <SaveListButton onClick={handleSaveList} language={language} disabled={notepadItems.length === 0} />
                 </div>
               </div>

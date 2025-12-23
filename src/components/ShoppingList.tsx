@@ -738,11 +738,48 @@ export const ShoppingList = () => {
       return;
     }
 
-    // New draft - open modal to ask for name (listName should already be set from edit mode)
-    console.log("Branch: Creating new list - opening save dialog...");
-    // Store converted items temporarily for confirmSaveList
-    setItems(convertedItems);
-    setIsSaveDialogOpen(true);
+    // New draft - save directly without opening dialog
+    console.log("Branch: Creating new list - saving directly...");
+    
+    // Create list with auto-generated name (date)
+    const autoName = listName || new Date().toLocaleDateString(language === 'he' ? 'he-IL' : 'en-US', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long'
+    });
+    
+    const newList: SavedList = {
+      id: Date.now().toString(),
+      name: autoName,
+      items: convertedItems,
+      createdAt: new Date().toISOString()
+    };
+    
+    console.log("New list object being saved:", newList);
+    if (saveList(newList)) {
+      console.log("✓ saveList returned true - save successful");
+      setSavedLists(getSavedLists());
+      setItems([]);
+      setInputText("");
+      setActiveListId(null);
+      setListName("");
+      toast.success(language === 'he' ? '✓ הרשימה נשמרה בפנקס שלי!' : '✓ List saved to My Notebook!');
+      
+      // Show confirmation animation
+      setShowConfirmation(true);
+      setTimeout(() => setShowConfirmation(false), 1200);
+      
+      // Smooth scroll to My Notebook section
+      setTimeout(() => {
+        const notebookSection = document.getElementById('my-notebooks');
+        if (notebookSection) {
+          notebookSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 300);
+    } else {
+      console.error("✗ saveList returned false - save failed");
+      toast.error(language === 'he' ? 'שגיאה בשמירת הרשימה' : 'Error saving list');
+    }
   };
   const confirmSaveList = () => {
     console.log("=== CONFIRM SAVE LIST DEBUG ===");

@@ -13,51 +13,11 @@ export default {
   		}
   	},
   	extend: {
-  		fontFamily: {
-  			rubik: [
-  				'Rubik',
-  				'system-ui',
-  				'sans-serif'
-  			],
-  			handwriting: [
-  				'Kalam',
-  				'cursive'
-  			],
-  			hand: [
-  				'Varela Round',
-  				'sans-serif'
-  			],
-  			sans: [
-  				'Source Sans Pro',
-  				'ui-sans-serif',
-  				'system-ui',
-  				'sans-serif',
-  				'Apple Color Emoji',
-  				'Segoe UI Emoji',
-  				'Segoe UI Symbol',
-  				'Noto Color Emoji'
-  			],
-  			serif: [
-  				'Source Serif Pro',
-  				'ui-serif',
-  				'Georgia',
-  				'Cambria',
-  				'Times New Roman',
-  				'Times',
-  				'serif'
-  			],
-  			mono: [
-  				'Source Code Pro',
-  				'ui-monospace',
-  				'SFMono-Regular',
-  				'Menlo',
-  				'Monaco',
-  				'Consolas',
-  				'Liberation Mono',
-  				'Courier New',
-  				'monospace'
-  			]
-  		},
+		fontFamily: {
+			heebo: ['Heebo', 'system-ui', 'sans-serif'],
+			inter: ['Inter', 'system-ui', 'sans-serif'],
+			sans: ['Heebo', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+		},
   		colors: {
   			border: 'hsl(var(--border))',
   			input: 'hsl(var(--input))',

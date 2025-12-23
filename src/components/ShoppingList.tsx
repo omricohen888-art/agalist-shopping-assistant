@@ -1704,11 +1704,15 @@ export const ShoppingList = () => {
                   </div>
                 </div>}
 
-              <div className="flex flex-col sm:flex-row gap-2 mt-4 w-full justify-center items-center transition-all duration-300 ease-in-out relative z-10">
+              <div className="flex flex-col sm:flex-row gap-3 mt-6 w-full justify-center items-center transition-all duration-300 ease-in-out relative z-10">
                 {/* Secondary buttons */}
-                <div className={`flex gap-2 overflow-hidden p-1 transition-all duration-300 ease-in-out ${notepadItems.length > 0 ? 'w-full sm:w-1/3 opacity-100' : 'w-0 opacity-0'}`}>
-                  <Button onClick={() => setNotepadItems([])} variant="ghost" className="flex-1 text-gray-700 dark:text-slate-400 hover:bg-gray-200 hover:text-red-700 h-11 text-base font-medium rounded-full flex items-center justify-center">
-                    <Trash2 className="mr-2 h-5 w-5" />
+                <div className={`flex gap-2 overflow-hidden transition-all duration-300 ease-in-out ${notepadItems.length > 0 ? 'w-full sm:w-auto opacity-100' : 'w-0 opacity-0'}`}>
+                  <Button 
+                    onClick={() => setNotepadItems([])} 
+                    variant="ghost" 
+                    className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-11 px-4 text-sm font-medium rounded-xl flex items-center justify-center transition-all"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
                     {t.clearAllButton}
                   </Button>
                 </div>
@@ -1724,19 +1728,19 @@ export const ShoppingList = () => {
         {items.length === 0 && <SortableTemplates systemTemplates={currentTemplates} language={language} onTemplateClick={handleTemplateClick} onCreateNew={() => setIsCreateTemplateDialogOpen(true)} />}
 
         {/* Dashboard - Saved Lists & Completed Trips */}
-        {items.length === 0 && (savedLists.length > 0 || shoppingHistory.length > 0) && <div className="mb-12 border-t-2 border-black/5 pt-8 max-w-5xl mx-auto px-4 space-y-10">
+        {items.length === 0 && (savedLists.length > 0 || shoppingHistory.length > 0) && <div className="mb-12 border-t border-border/30 pt-8 max-w-5xl mx-auto space-y-10">
               
               {/* Active/Pending Lists Section */}
               {savedLists.length > 0 && <div>
-                  <div className="flex justify-between items-center mb-6 px-2">
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                      <ClipboardList className="h-5 w-5 text-yellow-500" />
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                      <ClipboardList className="h-5 w-5 text-primary" />
                       {language === 'he' ? 'רשימות מוכנות' : 'Ready to Shop'}
-                      <span className="text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 px-2 py-0.5 rounded-full font-semibold">
+                      <span className="text-xs bg-primary/10 text-primary px-2.5 py-1 rounded-full font-semibold">
                         {savedLists.length}
                       </span>
                     </h3>
-                    <Button variant="ghost" onClick={() => navigate("/notebook")} className="text-sm font-bold text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/20">
+                    <Button variant="ghost" onClick={() => navigate("/notebook")} className="text-sm font-semibold text-primary hover:text-primary/80 hover:bg-primary/10">
                       {t.viewAllListsButton}
                       {language === 'he' ? <div className="mr-1 rotate-180">➜</div> : <div className="ml-1">➜</div>}
                     </Button>
@@ -1768,15 +1772,15 @@ export const ShoppingList = () => {
 
               {/* Completed Trips Section */}
               {shoppingHistory.length > 0 && <div>
-                  <div className="flex justify-between items-center mb-6 px-2">
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                      <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                      <CheckCircle2 className="h-5 w-5 text-success" />
                       {language === 'he' ? 'קניות שהושלמו' : 'Completed Trips'}
-                      <span className="text-xs bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-full font-semibold">
+                      <span className="text-xs bg-success/10 text-success px-2.5 py-1 rounded-full font-semibold">
                         {shoppingHistory.length}
                       </span>
                     </h3>
-                    <Button variant="ghost" onClick={() => navigate("/history")} className="text-sm font-bold text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:text-emerald-300 dark:hover:bg-emerald-900/20">
+                    <Button variant="ghost" onClick={() => navigate("/history")} className="text-sm font-semibold text-success hover:text-success/80 hover:bg-success/10">
                       {language === 'he' ? 'צפה בהכל' : 'View All'}
                       {language === 'he' ? <div className="mr-1 rotate-180">➜</div> : <div className="ml-1">➜</div>}
                     </Button>
@@ -1818,7 +1822,7 @@ export const ShoppingList = () => {
               })));
               toast.success(language === 'he' ? 'כל הסימונים אופסו' : 'All checks reset');
             }
-          }} className="text-sm text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+          }} className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1.5 px-3 py-2 rounded-xl hover:bg-muted transition-all">
                   <RotateCcw className="w-4 h-4" />
                   <span>{language === 'he' ? 'אפס סימונים' : 'Reset Checks'}</span>
                 </button>

@@ -18,6 +18,7 @@ export const translations: Record<Language, {
         list: string;
         history: string;
         compare: string;
+        insights: string;
         notebook: string;
         about: string;
     };
@@ -106,6 +107,7 @@ export const translations: Record<Language, {
             list: "רשימה חדשה",
             history: "היסטוריה",
             compare: "השוואת קניות",
+            insights: "תובנות",
             notebook: "הפנקס שלי",
             about: "אודות"
         },
@@ -194,6 +196,7 @@ export const translations: Record<Language, {
             list: "New List",
             history: "History",
             compare: "Compare prices",
+            insights: "Insights",
             notebook: "My Notebook",
             about: "About"
         },

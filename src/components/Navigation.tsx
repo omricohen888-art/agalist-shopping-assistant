@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Menu, X, Plus, Book, History, BarChart3, Info, Settings } from 'lucide-react';
+import { Menu, X, Plus, Book, History, BarChart3, Lightbulb, Info, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useGlobalLanguage } from '@/context/LanguageContext';
 import { translations } from '@/utils/translations';
@@ -21,7 +21,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
     { path: '/', icon: Plus, label: t.navigation.list, id: 'list' },
     { path: '/notebook', icon: Book, label: t.navigation.notebook, id: 'notebook' },
     { path: '/history', icon: History, label: t.navigation.history, id: 'history' },
-    { path: '/compare', icon: BarChart3, label: t.navigation.compare, id: 'compare' },
+    { path: '/insights', icon: Lightbulb, label: t.navigation.insights, id: 'insights' },
     { path: '/about', icon: Info, label: t.navigation.about, id: 'about' },
   ];
 

@@ -1488,39 +1488,39 @@ export const ShoppingList = () => {
 
 
 
-        {/* Modern Input Card */}
-        <div className="relative bg-card dark:bg-slate-800/90 border border-border/50 rounded-2xl p-4 md:p-6 mb-6 shadow-lg hover:shadow-xl focus-within:shadow-xl transition-all duration-300 overflow-hidden backdrop-blur-sm">
+        {/* Modern Input Card - Mobile Optimized with Bold Black Borders */}
+        <div className="relative bg-card dark:bg-slate-800/90 border-2 border-foreground/80 dark:border-foreground/60 rounded-2xl p-3 sm:p-4 md:p-6 mb-4 sm:mb-6 shadow-lg hover:shadow-xl focus-within:shadow-xl transition-all duration-300 overflow-hidden backdrop-blur-sm">
           {/* Subtle gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none rounded-2xl" />
 
-          {/* List Name Input + Quick Actions */}
-          <div className="flex items-center gap-3 mb-4">
+          {/* List Name Input + Quick Actions - Mobile Optimized */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
             {/* List Name */}
             <input
               type="text"
               value={listName}
               onChange={(e) => setListName(e.target.value)}
               placeholder={language === 'he' ? 'שם הרשימה...' : 'List name...'}
-              className="flex-1 bg-transparent border-0 text-lg font-semibold text-foreground placeholder:text-muted-foreground/50 focus:outline-none"
+              className="flex-1 bg-transparent border-0 text-base sm:text-lg font-semibold text-foreground placeholder:text-muted-foreground/50 focus:outline-none py-1"
             />
             
             {/* Quick Paste & Copy Buttons */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-shrink-0">
               <button 
                 onClick={handleQuickPaste} 
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/80 hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer text-sm font-medium" 
+                className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-lg bg-muted/80 hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer text-xs sm:text-sm font-medium border border-foreground/20" 
                 title={language === 'he' ? 'הדבק מהלוח' : 'Paste from clipboard'}
               >
-                <ClipboardPaste className="h-4 w-4" />
+                <ClipboardPaste className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 <span>{language === 'he' ? 'הדבק' : 'Paste'}</span>
               </button>
               {notepadItems.filter(item => item.text.trim() !== '').length > 0 && (
                 <button 
                   onClick={handleCopyAllItems} 
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/80 hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer text-sm font-medium" 
+                  className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-lg bg-muted/80 hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer text-xs sm:text-sm font-medium border border-foreground/20" 
                   title={language === 'he' ? 'העתק רשימה' : 'Copy list'}
                 >
-                  <Copy className="h-4 w-4" />
+                  <Copy className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   <span>{language === 'he' ? 'העתק' : 'Copy'}</span>
                 </button>
               )}
@@ -1537,16 +1537,16 @@ export const ShoppingList = () => {
           {/* Hidden File Input for Camera (kept for future use) */}
           <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleCameraOCR} className="hidden" />
 
-          {/* Items List */}
-          <div className="min-h-[140px]" dir={language === 'he' ? 'rtl' : 'ltr'}>
+          {/* Items List - Mobile Optimized */}
+          <div className="min-h-[120px] sm:min-h-[140px]" dir={language === 'he' ? 'rtl' : 'ltr'}>
             {notepadItems.length === 0 ? 
               // Empty state - show single input to start
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 <input
                   type="text"
                   autoFocus
-                  placeholder={language === 'he' ? 'הקלד פריט ולחץ Enter, או הדבק רשימה...' : 'Type an item and press Enter, or paste a list...'}
-                  className="w-full bg-muted/30 hover:bg-muted/50 focus:bg-muted/50 outline-none text-base md:text-lg font-medium text-foreground placeholder:text-muted-foreground py-3 px-4 rounded-xl border border-border/50 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all"
+                  placeholder={language === 'he' ? 'הקלד פריט ולחץ Enter...' : 'Type an item and press Enter...'}
+                  className="w-full bg-muted/30 hover:bg-muted/50 focus:bg-muted/50 outline-none text-base md:text-lg font-medium text-foreground placeholder:text-muted-foreground py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl border-2 border-foreground/30 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                           e.preventDefault();
@@ -1693,22 +1693,22 @@ export const ShoppingList = () => {
                   </div>
                 </div>}
 
-              <div className="flex flex-col sm:flex-row gap-3 mt-6 w-full justify-center items-center transition-all duration-300 ease-in-out relative z-10">
-                {/* Secondary buttons */}
-                <div className={`flex gap-2 overflow-hidden transition-all duration-300 ease-in-out ${notepadItems.length > 0 ? 'w-full sm:w-auto opacity-100' : 'w-0 opacity-0'}`}>
+              <div className="flex flex-col gap-2 sm:gap-3 mt-4 sm:mt-6 w-full justify-center items-center transition-all duration-300 ease-in-out relative z-10">
+                {/* Two action buttons - Mobile Optimized */}
+                <div className={`flex flex-col sm:flex-row gap-2 sm:gap-3 w-full justify-center items-center ${notepadItems.length > 0 ? '' : 'pt-2'}`}>
+                  <StartShoppingButton onClick={handleStartShopping} language={language} disabled={notepadItems.length === 0} />
+                  <SaveListButton onClick={handleSaveList} language={language} disabled={notepadItems.length === 0} />
+                </div>
+                {/* Clear button - Mobile Optimized */}
+                <div className={`overflow-hidden transition-all duration-300 ease-in-out ${notepadItems.length > 0 ? 'opacity-100' : 'opacity-0 h-0'}`}>
                   <Button 
                     onClick={() => setNotepadItems([])} 
                     variant="ghost" 
-                    className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-11 px-4 text-sm font-medium rounded-xl flex items-center justify-center transition-all"
+                    className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-9 sm:h-11 px-3 sm:px-4 text-xs sm:text-sm font-medium rounded-xl flex items-center justify-center transition-all"
                   >
-                    <Trash2 className="mr-2 h-4 w-4" />
+                    <Trash2 className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     {t.clearAllButton}
                   </Button>
-                </div>
-                {/* Two action buttons */}
-                <div className={`flex flex-col sm:flex-row gap-3 w-full sm:w-auto justify-center items-center ${notepadItems.length > 0 ? '' : 'pt-2'}`}>
-                  <StartShoppingButton onClick={handleStartShopping} language={language} disabled={notepadItems.length === 0} />
-                  <SaveListButton onClick={handleSaveList} language={language} disabled={notepadItems.length === 0} />
                 </div>
               </div>
             </div>

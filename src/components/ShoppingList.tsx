@@ -1529,7 +1529,7 @@ export const ShoppingList = () => {
                 <input
                   type="text"
                   autoFocus
-                  placeholder={language === 'he' ? 'הקלד פריט ולחץ Enter...' : 'Type an item and press Enter...'}
+                  placeholder={language === 'he' ? 'הקלד פריט ולחץ Enter, או הדבק רשימה...' : 'Type an item and press Enter, or paste a list...'}
                   className="w-full bg-muted/30 hover:bg-muted/50 focus:bg-muted/50 outline-none text-base md:text-lg font-medium text-foreground placeholder:text-muted-foreground py-3 px-4 rounded-xl border border-border/50 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all"
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {

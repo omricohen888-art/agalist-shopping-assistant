@@ -34,21 +34,21 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
 
   return (
     <nav 
-      className="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-slate-800 shadow-2xl z-50"
+      className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-xl border-t border-border shadow-lg z-50"
     >
       {/* Mobile Bottom Navigation */}
       <div className="md:hidden">
         <div className="flex items-center justify-center h-20 px-3">
           {/* Navigation Items - Centered */}
-          <div className="flex items-center justify-center gap-2">
+          <div className="flex items-center justify-center gap-1.5">
             {navigationItems.map(({ path, icon: Icon, label, id }) => (
               <button
                 key={id}
                 onClick={() => handleNavigate(path)}
                 className={`flex items-center justify-center w-14 h-14 rounded-xl transition-all flex-shrink-0 active:scale-95 ${
                   isActive(path)
-                    ? 'bg-yellow-400 text-black shadow-lg shadow-yellow-400/50'
-                    : 'text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800'
+                    ? 'bg-primary text-primary-foreground shadow-md'
+                    : 'text-muted-foreground hover:bg-muted'
                 }`}
                 title={label}
               >
@@ -60,13 +60,13 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
           {/* Menu Toggle Button */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="h-14 w-14 flex items-center justify-center text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors ml-2 flex-shrink-0 active:scale-95"
+            className="h-14 w-14 flex items-center justify-center text-muted-foreground hover:bg-muted rounded-xl transition-colors ml-2 flex-shrink-0 active:scale-95"
             aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
           >
             {isMenuOpen ? (
-              <X className="h-7 w-7" strokeWidth={2} />
+              <X className="h-6 w-6" strokeWidth={2} />
             ) : (
-              <Menu className="h-7 w-7" strokeWidth={2} />
+              <Menu className="h-6 w-6" strokeWidth={2} />
             )}
           </button>
         </div>
@@ -76,31 +76,31 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
           <>
             {/* Backdrop */}
             <div
-              className="fixed inset-0 bg-black/30 z-40"
+              className="fixed inset-0 bg-background/60 backdrop-blur-sm z-40"
               onClick={() => setIsMenuOpen(false)}
             />
 
             {/* Menu */}
-            <div className="absolute bottom-16 right-0 left-0 bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-slate-800 shadow-lg z-50">
-              <div className="p-4 space-y-2 max-h-96 overflow-y-auto">
+            <div className="absolute bottom-20 right-4 left-4 bg-card border border-border shadow-xl rounded-2xl z-50">
+              <div className="p-4 space-y-3">
                 {/* Language Toggle */}
-                <div className="flex gap-2 mb-4 flex-row">
+                <div className="flex gap-2">
                   <button
                     onClick={() => setLanguage('he')}
-                    className={`flex-1 px-3 py-2.5 rounded-lg font-bold text-sm transition-all active:scale-95 ${
+                    className={`flex-1 px-3 py-2.5 rounded-xl font-medium text-sm transition-all active:scale-95 ${
                       language === 'he'
-                        ? 'bg-yellow-400 text-black'
-                        : 'bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
                     }`}
                   >
                     עברית
                   </button>
                   <button
                     onClick={() => setLanguage('en')}
-                    className={`flex-1 px-3 py-2.5 rounded-lg font-bold text-sm transition-all active:scale-95 ${
+                    className={`flex-1 px-3 py-2.5 rounded-xl font-medium text-sm transition-all active:scale-95 ${
                       language === 'en'
-                        ? 'bg-yellow-400 text-black'
-                        : 'bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
                     }`}
                   >
                     English
@@ -113,10 +113,10 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
                     onSettingsClick?.();
                     setIsMenuOpen(false);
                   }}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors active:scale-95"
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-muted text-foreground hover:bg-muted/80 transition-colors active:scale-95"
                 >
                   <Settings className="h-5 w-5 flex-shrink-0" strokeWidth={1.5} />
-                  <span className="font-semibold text-sm">{language === 'he' ? 'הגדרות' : 'Settings'}</span>
+                  <span className="font-medium text-sm">{language === 'he' ? 'הגדרות' : 'Settings'}</span>
                 </button>
               </div>
             </div>
@@ -133,10 +133,10 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
               <button
                 key={id}
                 onClick={() => handleNavigate(path)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all font-semibold active:scale-95 ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-medium active:scale-95 ${
                   isActive(path)
-                    ? 'bg-yellow-400 text-black shadow-md'
-                    : 'text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800'
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'text-muted-foreground hover:bg-muted'
                 }`}
                 title={label}
               >
@@ -147,25 +147,25 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
           </div>
 
           {/* Right Section - Settings & Language */}
-          <div className="flex items-center gap-2 flex-row">
+          <div className="flex items-center gap-2">
             {/* Language Toggle */}
-            <div className="flex items-center gap-1 bg-gray-100 dark:bg-slate-800 rounded-lg p-1">
+            <div className="flex items-center gap-1 bg-muted rounded-xl p-1">
               <button
                 onClick={() => setLanguage('he')}
-                className={`px-3 py-1.5 rounded font-bold text-xs transition-all active:scale-95 ${
+                className={`px-3 py-1.5 rounded-lg font-medium text-xs transition-all active:scale-95 ${
                   language === 'he'
-                    ? 'bg-yellow-400 text-black'
-                    : 'text-gray-700 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:bg-muted/80'
                 }`}
               >
                 עברית
               </button>
               <button
                 onClick={() => setLanguage('en')}
-                className={`px-3 py-1.5 rounded font-bold text-xs transition-all active:scale-95 ${
+                className={`px-3 py-1.5 rounded-lg font-medium text-xs transition-all active:scale-95 ${
                   language === 'en'
-                    ? 'bg-yellow-400 text-black'
-                    : 'text-gray-700 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:bg-muted/80'
                 }`}
               >
                 EN
@@ -175,7 +175,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
             {/* Settings Button */}
             <button
               onClick={() => onSettingsClick?.()}
-              className="p-2 rounded-lg text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors active:scale-95"
+              className="p-2 rounded-xl text-muted-foreground hover:bg-muted transition-colors active:scale-95"
               title={language === 'he' ? 'הגדרות' : 'Settings'}
             >
               <Settings className="h-5 w-5 flex-shrink-0" strokeWidth={1.5} />

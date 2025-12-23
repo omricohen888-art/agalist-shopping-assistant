@@ -13,6 +13,7 @@ export interface ShoppingItem {
   checked: boolean;
   quantity: number;
   unit: Unit;
+  pinned?: boolean;
 }
 
 export interface SmartItem {

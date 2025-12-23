@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ShoppingItem, Unit, UNITS, ISRAELI_STORES, ShoppingHistory } from "@/types/shopping";
+import { ShoppingItem, Unit, UNITS, ShoppingHistory, ShoppingType, SHOPPING_TYPES, STORES_BY_TYPE } from "@/types/shopping";
 import { Button } from "@/components/ui/button";
 import { 
   ArrowRight, CheckCircle2, Home, X, Check, Sparkles, 
@@ -33,6 +33,7 @@ import {
 import { sanitizeInput } from "@/utils/security";
 import { SortModeToggle } from "@/components/SortModeToggle";
 import { sortByCategory, groupByCategory, getCategoryInfo, CategoryKey } from "@/utils/categorySort";
+import { getStoreLogo } from "@/data/storeLogos";
 
 // Dynamic motivational messages
 const getMotivationalText = (
@@ -84,6 +85,7 @@ export const ShoppingMode = () => {
   const [showFinishDialog, setShowFinishDialog] = useState(false);
   const [totalAmount, setTotalAmount] = useState("");
   const [selectedStore, setSelectedStore] = useState("");
+  const [selectedShoppingType, setSelectedShoppingType] = useState<ShoppingType>("supermarket");
   const [showAddItemInput, setShowAddItemInput] = useState(false);
   const [newItemText, setNewItemText] = useState("");
   const [isSmartSort, setIsSmartSort] = useState(false);
@@ -201,6 +203,7 @@ export const ShoppingMode = () => {
       store: selectedStore || (language === 'he' ? 'לא צוין' : 'Not specified'),
       completedItems: completedCount,
       totalItems: totalCount,
+      shoppingType: selectedShoppingType,
     };
 
     // Use storage utility function to save with correct key
@@ -786,20 +789,60 @@ export const ShoppingMode = () => {
           </DialogHeader>
           
           <div className="space-y-4 py-4">
+            {/* Shopping Type Selection */}
+            <div className="space-y-2">
+              <Label htmlFor="shoppingType" className="text-sm font-medium">
+                {language === 'he' ? 'סוג קנייה' : 'Shopping Type'}
+              </Label>
+              <Select 
+                value={selectedShoppingType} 
+                onValueChange={(value: ShoppingType) => {
+                  setSelectedShoppingType(value);
+                  setSelectedStore(""); // Reset store when type changes
+                }}
+              >
+                <SelectTrigger className="w-full h-12 text-base">
+                  <SelectValue placeholder={language === 'he' ? 'בחר סוג' : 'Select type'} />
+                </SelectTrigger>
+                <SelectContent className="bg-background border border-border z-50">
+                  {SHOPPING_TYPES.map((type) => (
+                    <SelectItem key={type.value} value={type.value} className="text-base">
+                      <span className="flex items-center gap-2">
+                        <span>{type.icon}</span>
+                        <span>{language === 'he' ? type.labelHe : type.labelEn}</span>
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             {/* Store Selection */}
             <div className="space-y-2">
               <Label htmlFor="store" className="text-sm font-medium">
-                {language === 'he' ? 'רשת שיווק' : 'Store'}
+                {language === 'he' ? 'רשת/חנות' : 'Store'}
               </Label>
               <Select value={selectedStore} onValueChange={setSelectedStore}>
                 <SelectTrigger className="w-full h-12 text-base">
-                  <Store className="h-4 w-4 opacity-50" />
-                  <SelectValue placeholder={language === 'he' ? 'בחר רשת' : 'Select store'} />
+                  {selectedStore ? (
+                    <span className="flex items-center gap-2">
+                      <span className="w-5 h-5 text-foreground">{getStoreLogo(selectedStore)}</span>
+                      <span>{selectedStore}</span>
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-2">
+                      <Store className="h-4 w-4 opacity-50" />
+                      <span>{language === 'he' ? 'בחר חנות' : 'Select store'}</span>
+                    </span>
+                  )}
                 </SelectTrigger>
-                <SelectContent>
-                  {ISRAELI_STORES.map((store) => (
+                <SelectContent className="bg-background border border-border z-50">
+                  {STORES_BY_TYPE[selectedShoppingType].map((store) => (
                     <SelectItem key={store} value={store} className="text-base">
-                      {store}
+                      <span className="flex items-center gap-2">
+                        <span className="w-5 h-5 text-foreground">{getStoreLogo(store)}</span>
+                        <span>{store}</span>
+                      </span>
                     </SelectItem>
                   ))}
                 </SelectContent>

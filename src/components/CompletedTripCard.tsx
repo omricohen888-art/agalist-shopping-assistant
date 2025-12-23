@@ -1,7 +1,8 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Trash2, CheckCircle2, MapPin, Receipt, Store, ChevronRight } from "lucide-react";
-import { ShoppingHistory } from "@/types/shopping";
+import { ShoppingHistory, SHOPPING_TYPES } from "@/types/shopping";
+import { getStoreLogo } from "@/data/storeLogos";
 
 interface CompletedTripCardProps {
   trip: ShoppingHistory;
@@ -52,17 +53,24 @@ export const CompletedTripCard: React.FC<CompletedTripCardProps> = ({
 
       {/* Header with Store Name */}
       <div className="flex items-start gap-3 mb-4 pt-1">
-        <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center flex-shrink-0">
-          <Store className="h-5 w-5 text-muted-foreground" />
+        <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center flex-shrink-0 text-foreground">
+          {getStoreLogo(trip.store)}
         </div>
         <div className="flex-1 min-w-0">
           <h4 className="font-semibold text-base sm:text-lg text-foreground truncate">
             {trip.store}
           </h4>
-          <p className="text-xs text-muted-foreground flex items-center gap-1">
-            <MapPin className="h-3 w-3" />
-            {formatDate(trip.date)}
-          </p>
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className="text-xs text-muted-foreground flex items-center gap-1">
+              <MapPin className="h-3 w-3" />
+              {formatDate(trip.date)}
+            </p>
+            {trip.shoppingType && (
+              <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                {SHOPPING_TYPES.find(t => t.value === trip.shoppingType)?.icon}
+              </span>
+            )}
+          </div>
         </div>
       </div>
 

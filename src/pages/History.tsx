@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowRight, Trash2, Calendar, ShoppingCart, DollarSign, TrendingUp } from "lucide-react";
 import { getShoppingHistory, deleteShoppingHistory, clearAllHistory } from "@/utils/storage";
-import { ShoppingHistory as ShoppingHistoryType } from "@/types/shopping";
+import { ShoppingHistory as ShoppingHistoryType, SHOPPING_TYPES } from "@/types/shopping";
 import { toast } from "sonner";
 import { useGlobalLanguage, Language } from "@/context/LanguageContext";
+import { getStoreLogo } from "@/data/storeLogos";
 
 const historyTranslations: Record<
   Language,
@@ -253,8 +254,8 @@ const History = () => {
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div className="flex-1 space-y-3">
                       <div className="flex items-center gap-3">
-                        <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                          <ShoppingCart className="h-6 w-6 text-primary" />
+                        <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center shrink-0 text-foreground">
+                          {getStoreLogo(item.store)}
                         </div>
                         <div>
                           <h3 className="text-lg font-semibold text-foreground">
@@ -263,8 +264,16 @@ const History = () => {
                           <div className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
                             <Calendar className="h-4 w-4" />
                             {formatDate(item.date)}
+                            {item.shoppingType && (
+                              <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-lg">
+                                {SHOPPING_TYPES.find(t => t.value === item.shoppingType)?.icon} {language === 'he' ? SHOPPING_TYPES.find(t => t.value === item.shoppingType)?.labelHe : SHOPPING_TYPES.find(t => t.value === item.shoppingType)?.labelEn}
+                              </span>
+                            )}
                             {item.listName && item.store && (
-                              <span className="text-xs bg-muted px-2 py-0.5 rounded-lg">{item.store}</span>
+                              <span className="text-xs bg-muted px-2 py-0.5 rounded-lg flex items-center gap-1">
+                                <span className="w-4 h-4">{getStoreLogo(item.store)}</span>
+                                {item.store}
+                              </span>
                             )}
                           </div>
                         </div>

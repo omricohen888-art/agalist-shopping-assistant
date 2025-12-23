@@ -391,8 +391,8 @@ export const ShoppingMode = () => {
         </div>
       </div>
 
-      {/* Quick Add Item Bar */}
-      <div className="sticky top-[140px] z-30 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border-b border-black/5 px-3 py-2">
+      {/* Quick Add Item Bar - Enhanced & Prominent */}
+      <div className="sticky top-[140px] z-30 bg-gradient-to-b from-white/90 to-white/70 dark:from-slate-900/90 dark:to-slate-900/70 backdrop-blur-md border-b border-primary/10 px-3 py-3">
         <div className="max-w-3xl mx-auto">
           {showAddItemInput ? (
             <div className="flex items-center gap-2">
@@ -421,7 +421,7 @@ export const ShoppingMode = () => {
                   }
                 }}
                 placeholder={language === 'he' ? 'הקלד פריט או הדבק רשימה...' : 'Type item or paste list...'}
-                className="flex-1 h-10 px-3 text-sm bg-white dark:bg-slate-800 border border-border/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/30"
+                className="flex-1 h-12 px-4 text-base bg-white dark:bg-slate-800 border-2 border-primary/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary shadow-sm"
                 autoFocus
               />
               <Button
@@ -447,18 +447,18 @@ export const ShoppingMode = () => {
                     toast.error(language === 'he' ? 'לא ניתן לקרוא מהלוח' : 'Cannot read clipboard');
                   }
                 }}
-                className="h-10 px-3 bg-primary/10 hover:bg-primary/20 text-primary"
+                className="h-12 px-4 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20"
                 variant="ghost"
               >
-                <ClipboardPaste className="h-4 w-4" />
+                <ClipboardPaste className="h-5 w-5" />
               </Button>
               <Button
                 size="sm"
                 onClick={() => { setShowAddItemInput(false); setNewItemText(""); }}
                 variant="ghost"
-                className="h-10 w-10 text-muted-foreground"
+                className="h-12 w-12 text-muted-foreground hover:bg-muted"
               >
-                <X className="h-4 w-4" />
+                <X className="h-5 w-5" />
               </Button>
             </div>
           ) : (
@@ -467,9 +467,11 @@ export const ShoppingMode = () => {
                 setShowAddItemInput(true);
                 setTimeout(() => addItemInputRef.current?.focus(), 100);
               }}
-              className="w-full flex items-center justify-center gap-2 h-10 bg-white/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-700 border border-dashed border-primary/30 rounded-xl text-sm text-primary font-medium transition-all active:scale-[0.98]"
+              className="w-full flex items-center justify-center gap-3 h-14 bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 hover:from-primary/20 hover:via-primary/10 hover:to-primary/20 border-2 border-dashed border-primary/40 hover:border-primary/60 rounded-2xl text-base font-bold text-primary transition-all active:scale-[0.98] shadow-sm hover:shadow-md"
             >
-              <Plus className="h-4 w-4" />
+              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                <Plus className="h-5 w-5" />
+              </div>
               {language === 'he' ? 'הוסף פריט או הדבק רשימה' : 'Add item or paste list'}
             </button>
           )}

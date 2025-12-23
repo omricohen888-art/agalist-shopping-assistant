@@ -4,7 +4,7 @@ import { ShoppingItem, Unit, UNITS } from "@/types/shopping";
 import { Button } from "@/components/ui/button";
 import { 
   ArrowRight, CheckCircle2, Home, X, Check, Sparkles, 
-  Trophy, Zap, Star, PartyPopper, ShoppingCart
+  Trophy, Zap, Star, PartyPopper, ShoppingCart, Timer
 } from "lucide-react";
 import { useGlobalLanguage } from "@/context/LanguageContext";
 import { useSoundSettings } from "@/hooks/use-sound-settings.tsx";
@@ -60,6 +60,37 @@ export const ShoppingMode = () => {
   const [showConfetti, setShowConfetti] = useState(false);
   const [showMissionComplete, setShowMissionComplete] = useState(false);
   const direction = language === 'he' ? 'rtl' : 'ltr';
+
+  // Stopwatch state
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const [isTimerRunning, setIsTimerRunning] = useState(true);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const startTimeRef = useRef<number>(Date.now());
+
+  // Timer effect
+  useEffect(() => {
+    if (isTimerRunning) {
+      timerRef.current = setInterval(() => {
+        setElapsedTime(Math.floor((Date.now() - startTimeRef.current) / 1000));
+      }, 1000);
+    }
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, [isTimerRunning]);
+
+  // Format time as MM:SS or HH:MM:SS
+  const formatTime = (seconds: number): string => {
+    const hrs = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    if (hrs > 0) {
+      return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
 
   useEffect(() => {
     if (!id) {
@@ -122,6 +153,9 @@ export const ShoppingMode = () => {
   const handleFinishShopping = () => {
     if (!id) return;
 
+    // Stop timer
+    setIsTimerRunning(false);
+
     const history = {
       id: Date.now().toString(),
       date: new Date().toISOString(),
@@ -130,6 +164,7 @@ export const ShoppingMode = () => {
       store: "",
       completedItems: completedCount,
       totalItems: totalCount,
+      shoppingDuration: elapsedTime,
     };
 
     const savedHistory = JSON.parse(localStorage.getItem('shoppingHistory') || '[]');
@@ -144,13 +179,19 @@ export const ShoppingMode = () => {
   const handleSaveForLater = () => {
     if (!id) return;
 
-    // Save to savedLists
+    // Stop timer
+    setIsTimerRunning(false);
+
+    // Save to savedLists with shopping status
     const savedLists = JSON.parse(localStorage.getItem('savedLists') || '[]');
     const newSavedList = {
       id: Date.now().toString(),
       name: listName,
       items: items,
       createdAt: new Date().toISOString(),
+      isShoppingComplete: completedCount === totalCount && totalCount > 0,
+      shoppingCompletedAt: completedCount === totalCount && totalCount > 0 ? new Date().toISOString() : undefined,
+      shoppingDuration: elapsedTime,
     };
     savedLists.push(newSavedList);
     localStorage.setItem('savedLists', JSON.stringify(savedLists));
@@ -158,8 +199,8 @@ export const ShoppingMode = () => {
     // Remove active list
     localStorage.removeItem(`activeList_${id}`);
 
-    toast.success(language === 'he' ? 'הרשימה נשמרה!' : 'List saved!');
-    navigate("/");
+    toast.success(language === 'he' ? 'הרשימה נשמרה בפנקס שלי!' : 'List saved to My Notebook!');
+    navigate("/notebook");
   };
 
   const handleExit = () => {
@@ -274,7 +315,7 @@ export const ShoppingMode = () => {
               />
             </div>
 
-            {/* Counter Pills - Compact */}
+            {/* Counter Pills + Timer - Compact */}
             <div className={`flex items-center justify-between ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
               <div className="flex items-center gap-1.5">
                 <div className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-full">
@@ -286,6 +327,14 @@ export const ShoppingMode = () => {
                   <ShoppingCart className="h-3.5 w-3.5 text-gray-600 dark:text-slate-300" />
                   <span className="font-bold text-xs sm:text-sm text-gray-700 dark:text-slate-200">{totalCount}</span>
                 </div>
+              </div>
+              
+              {/* Stopwatch */}
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary rounded-full">
+                <Timer className="h-4 w-4" />
+                <span className="font-mono font-bold text-sm sm:text-base tabular-nums">
+                  {formatTime(elapsedTime)}
+                </span>
               </div>
               
               <span className="text-base sm:text-lg font-black text-gray-900 dark:text-white">

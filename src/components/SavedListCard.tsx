@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Trash2, Pencil, ShoppingCart, X, ChevronDown } from "lucide-react";
+import { Trash2, Pencil, ShoppingCart, X, ChevronDown, CheckCircle2, Clock } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { SavedList, ShoppingItem, Unit, UNITS } from "@/types/shopping";
 import { useGlobalLanguage } from "@/context/LanguageContext";
@@ -47,6 +47,19 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
         'bg-orange-500',
     ];
     const indicatorColor = indicatorColors[index % indicatorColors.length];
+
+    // Format duration
+    const formatDuration = (seconds?: number): string => {
+        if (!seconds) return '';
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        if (mins >= 60) {
+            const hrs = Math.floor(mins / 60);
+            const remainingMins = mins % 60;
+            return `${hrs}:${remainingMins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    };
 
     const handleStartEditItem = (item: ShoppingItem) => {
         setEditingItemId(item.id);
@@ -101,8 +114,16 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
             className="bg-card border border-border/50 rounded-2xl p-4 sm:p-5 shadow-sm hover:shadow-lg transition-all duration-300 group relative flex flex-col h-auto min-h-[260px] overflow-hidden"
             dir={direction}
         >
+            {/* Shopping Status Badge */}
+            {list.isShoppingComplete && (
+                <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-success/10 text-success px-2.5 py-1 rounded-full text-xs font-semibold z-10">
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    <span>{language === 'he' ? 'בוצעה קנייה' : 'Shopping Done'}</span>
+                </div>
+            )}
+            
             {/* Card Header */}
-            <div className="flex justify-between items-start mb-4 pb-3 border-b border-border/30 gap-3">
+            <div className={`flex justify-between items-start mb-4 pb-3 border-b border-border/30 gap-3 ${list.isShoppingComplete ? 'pt-6' : ''}`}>
                 <div className="flex items-center gap-2.5 flex-1 min-w-0">
                     <div className={`w-3 h-3 rounded-full ${indicatorColor} flex-shrink-0`} />
                     <h4 className="font-semibold text-base sm:text-lg text-foreground truncate flex-1">{list.name}</h4>
@@ -256,12 +277,20 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
 
             {/* Footer */}
             <div className="mt-3 pt-3 border-t border-border/30 flex justify-between items-center gap-3">
-                <span className="text-xs font-medium text-muted-foreground">
-                    {new Date(list.createdAt || new Date().toISOString()).toLocaleDateString(language === 'he' ? 'he-IL' : 'en-US', {
-                        month: 'short',
-                        day: 'numeric'
-                    })}
-                </span>
+                <div className="flex items-center gap-2">
+                    <span className="text-xs font-medium text-muted-foreground">
+                        {new Date(list.createdAt || new Date().toISOString()).toLocaleDateString(language === 'he' ? 'he-IL' : 'en-US', {
+                            month: 'short',
+                            day: 'numeric'
+                        })}
+                    </span>
+                    {list.shoppingDuration && (
+                        <span className="flex items-center gap-1 text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                            <Clock className="h-3 w-3" />
+                            {formatDuration(list.shoppingDuration)}
+                        </span>
+                    )}
+                </div>
                 {onGoShopping && (
                     <Button
                         size="sm"

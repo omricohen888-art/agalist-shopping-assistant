@@ -1502,16 +1502,14 @@ export const ShoppingList = () => {
 
           {/* Quick Paste & Copy Buttons */}
           <div className={`absolute top-4 ${language === 'he' ? 'left-4' : 'right-4'} flex items-center gap-2 z-10`}>
-            {showPaste && (
-              <button 
-                onClick={handleQuickPaste} 
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/80 hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer text-sm font-medium" 
-                title={language === 'he' ? 'הדבק מהלוח' : 'Paste from clipboard'}
-              >
-                <ClipboardPaste className="h-4 w-4" />
-                <span>{language === 'he' ? 'הדבק' : 'Paste'}</span>
-              </button>
-            )}
+            <button 
+              onClick={handleQuickPaste} 
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/80 hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer text-sm font-medium" 
+              title={language === 'he' ? 'הדבק מהלוח' : 'Paste from clipboard'}
+            >
+              <ClipboardPaste className="h-4 w-4" />
+              <span>{language === 'he' ? 'הדבק' : 'Paste'}</span>
+            </button>
             {items.length > 0 && (
               <button 
                 onClick={handleCopyAllItems} 

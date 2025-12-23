@@ -115,10 +115,15 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
             dir={direction}
         >
             {/* Shopping Status Badge */}
-            {list.isShoppingComplete && (
+            {list.isShoppingComplete ? (
                 <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-success/10 text-success px-2.5 py-1 rounded-full text-xs font-semibold z-10">
                     <CheckCircle2 className="h-3.5 w-3.5" />
                     <span>{language === 'he' ? 'בוצעה קנייה' : 'Shopping Done'}</span>
+                </div>
+            ) : (
+                <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-warning/10 text-warning px-2.5 py-1 rounded-full text-xs font-semibold z-10">
+                    <Clock className="h-3.5 w-3.5" />
+                    <span>{language === 'he' ? 'ממתין לקנייה' : 'Pending'}</span>
                 </div>
             )}
             
@@ -291,7 +296,7 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
                         </span>
                     )}
                 </div>
-                {onGoShopping && (
+                {onGoShopping && !list.isShoppingComplete && (
                     <Button
                         size="sm"
                         onClick={(e) => { e.stopPropagation(); onGoShopping(list); }}
@@ -299,7 +304,7 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
                         title={language === 'he' ? 'צא לקנייה' : 'Go Shopping'}
                     >
                         <ShoppingCart className="h-3.5 w-3.5" />
-                        {language === 'he' ? 'קנייה' : 'Shop'}
+                        {language === 'he' ? 'צא לקנייה' : 'Go Shop'}
                     </Button>
                 )}
             </div>

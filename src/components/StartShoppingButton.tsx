@@ -21,10 +21,10 @@ export const StartShoppingButton: React.FC<StartShoppingButtonProps> = ({
       onClick={onClick}
       disabled={disabled}
       className={`
-        group relative overflow-hidden
+        group relative overflow-hidden w-full sm:w-auto
         ${isCompact 
-          ? 'h-12 sm:h-14 px-6 sm:px-8 rounded-2xl' 
-          : 'h-16 sm:h-18 px-8 sm:px-12 rounded-full'
+          ? 'h-11 sm:h-14 px-4 sm:px-8 rounded-xl sm:rounded-2xl' 
+          : 'h-14 sm:h-18 px-6 sm:px-12 rounded-xl sm:rounded-full'
         }
         font-bold text-white
         transition-all duration-300 ease-out
@@ -32,6 +32,9 @@ export const StartShoppingButton: React.FC<StartShoppingButtonProps> = ({
         
         /* Gradient background */
         bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500
+        
+        /* Bold black border */
+        border-2 border-foreground/80
         
         /* Glow effect */
         shadow-[0_0_20px_rgba(16,185,129,0.4),0_8px_32px_rgba(16,185,129,0.3)]
@@ -113,17 +116,17 @@ export const SaveListButton: React.FC<{
       onClick={onClick}
       disabled={disabled}
       className={`
-        h-12 sm:h-14 px-5 sm:px-6 rounded-2xl
+        h-11 sm:h-14 px-4 sm:px-6 rounded-xl sm:rounded-2xl w-full sm:w-auto
         font-semibold
         bg-card/80 backdrop-blur-sm
-        border-2 border-border/50
+        border-2 border-foreground/60
         text-foreground
         transition-all duration-200
         touch-manipulation
-        hover:bg-card hover:border-primary/30 hover:shadow-lg
+        hover:bg-card hover:border-primary hover:shadow-lg
         active:scale-95
         disabled:opacity-50 disabled:cursor-not-allowed
-        flex items-center gap-2
+        flex items-center justify-center gap-2
       `}
     >
       <svg 

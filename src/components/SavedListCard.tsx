@@ -193,7 +193,7 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
 
     return (
         <div
-            className="bg-card border border-border/50 rounded-2xl p-4 sm:p-5 shadow-sm hover:shadow-lg transition-all duration-300 group relative flex flex-col h-auto min-h-[260px] overflow-hidden"
+            className="bg-card border-2 border-foreground/50 dark:border-foreground/40 rounded-2xl p-3 sm:p-4 md:p-5 shadow-sm hover:shadow-lg transition-all duration-300 group relative flex flex-col h-auto min-h-[220px] sm:min-h-[260px] overflow-hidden"
             dir={direction}
         >
             {/* Card Header */}

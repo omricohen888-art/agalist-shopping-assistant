@@ -121,12 +121,12 @@ const SortableTemplateItem = ({
           w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl 
           bg-card text-foreground 
           text-xs sm:text-sm font-semibold 
-          border border-border/50 
+          border-2 border-foreground/50 dark:border-foreground/40
           shadow-sm
           transition-all duration-200 touch-manipulation 
           ${isEditMode
             ? 'cursor-default ring-2 ring-primary/50'
-            : 'hover:bg-muted/50 hover:shadow-md hover:border-primary/30 active:scale-95'
+            : 'hover:bg-muted/50 hover:shadow-md hover:border-primary active:scale-95'
           }
         `}
       >

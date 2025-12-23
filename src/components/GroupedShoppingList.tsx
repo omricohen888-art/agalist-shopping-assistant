@@ -71,22 +71,22 @@ export const GroupedShoppingList: React.FC<GroupedShoppingListProps> = ({
   };
 
   return (
-    <div className="space-y-4 sm:space-y-5">
-      {/* Overall Progress Summary */}
+    <div className="space-y-2">
+      {/* Overall Progress Summary - Compact */}
       {totalCompleted > 0 && (
-        <div className="flex items-center gap-4 py-3 px-4 glass rounded-2xl border border-border/30 bg-success/5">
-          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-success/40 to-transparent" />
-          <span className="text-sm font-bold text-success flex items-center gap-2.5">
-            <Check className="h-4 w-4" strokeWidth={3} />
+        <div className="flex items-center gap-3 py-1.5 px-3 rounded-xl border border-success/20 bg-success/5">
+          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-success/30 to-transparent" />
+          <span className="text-xs font-bold text-success flex items-center gap-1.5">
+            <Check className="h-3 w-3" strokeWidth={3} />
             {language === "he"
               ? `נרכשו ${totalCompleted}`
               : `Completed ${totalCompleted}`}
           </span>
-          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-success/40 to-transparent" />
+          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-success/30 to-transparent" />
         </div>
       )}
 
-      {/* Category Groups */}
+      {/* Category Groups - Compact */}
       {groupedItems.map((group, groupIndex) => {
         const isCollapsed = collapsedCategories.has(group.categoryKey);
         const pendingItems = group.items.filter((item) => !item.checked);
@@ -96,9 +96,9 @@ export const GroupedShoppingList: React.FC<GroupedShoppingListProps> = ({
           <div
             key={group.categoryKey}
             className="animate-fade-in"
-            style={{ animationDelay: `${groupIndex * 50}ms` }}
+            style={{ animationDelay: `${groupIndex * 30}ms` }}
           >
-            {/* Category Header */}
+            {/* Category Header - Compact */}
             <CategoryHeader
               category={group.categoryInfo}
               itemCount={group.items.length}
@@ -108,17 +108,17 @@ export const GroupedShoppingList: React.FC<GroupedShoppingListProps> = ({
               language={language}
             />
 
-            {/* Category Items - Animated Collapse/Expand */}
+            {/* Category Items */}
             {!isCollapsed && (
-              <div className="space-y-2 sm:space-y-3 mt-2 sm:mt-3 animate-fade-in">
-                {/* Pending Items in this Category */}
+              <div className="space-y-1 mt-1 animate-fade-in">
+                {/* Pending Items */}
                 {pendingItems.length > 0 && (
-                  <div className="space-y-2 sm:space-y-3">
+                  <div className="space-y-1">
                     {pendingItems.map((item, itemIndex) => (
                       <div
                         key={item.id}
-                        className="animate-fade-in ml-2 sm:ml-4"
-                        style={{ animationDelay: `${itemIndex * 30}ms` }}
+                        className="animate-fade-in ml-1"
+                        style={{ animationDelay: `${itemIndex * 20}ms` }}
                       >
                         <ShoppingListItem
                           item={item}
@@ -132,14 +132,11 @@ export const GroupedShoppingList: React.FC<GroupedShoppingListProps> = ({
                   </div>
                 )}
 
-                {/* Completed Items in this Category */}
+                {/* Completed Items */}
                 {completedItems.length > 0 && (
-                  <div className="space-y-2 sm:space-y-3 pt-2 sm:pt-3 border-t border-success/20">
+                  <div className="space-y-1 pt-1 border-t border-success/10">
                     {completedItems.map((item) => (
-                      <div
-                        key={item.id}
-                        className="ml-2 sm:ml-4"
-                      >
+                      <div key={item.id} className="ml-1">
                         <ShoppingListItem
                           item={item}
                           onToggle={onToggle}

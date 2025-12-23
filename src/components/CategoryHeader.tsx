@@ -25,33 +25,28 @@ export const CategoryHeader: React.FC<CategoryHeaderProps> = ({
 
   return (
     <div
-      className="sticky top-0 z-20 mb-2 cursor-pointer select-none"
+      className="sticky top-0 z-20 cursor-pointer select-none"
       onClick={() => onCollapsedChange(!isCollapsed)}
     >
-      <div className="glass rounded-2xl border border-border/40 shadow-md hover:shadow-lg transition-all duration-200 hover:border-border/60 overflow-hidden group">
-        {/* Header Background with gradient */}
-        <div className="bg-gradient-to-r from-primary/8 to-primary/5 dark:from-primary/15 dark:to-primary/10 px-4 sm:px-5 py-3 sm:py-4 flex items-center justify-between gap-3">
+      <div className="rounded-xl border border-border/30 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden group bg-card/80 backdrop-blur-sm">
+        <div className="bg-gradient-to-r from-primary/5 to-transparent px-3 py-2 flex items-center justify-between gap-2">
           {/* Left: Icon and Category Name */}
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            <span className="text-2xl sm:text-3xl flex-shrink-0">
-              {category.icon}
-            </span>
-            <div className="flex-1 min-w-0">
-              <h3 className="text-base sm:text-lg font-bold text-foreground truncate group-hover:text-primary transition-colors">
-                {categoryName}
-              </h3>
-            </div>
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <span className="text-lg flex-shrink-0">{category.icon}</span>
+            <h3 className="text-sm font-bold text-foreground truncate group-hover:text-primary transition-colors">
+              {categoryName}
+            </h3>
           </div>
 
           {/* Middle: Item Counts */}
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex items-center gap-1.5 flex-shrink-0">
             {pendingCount > 0 && (
-              <span className="bg-primary/20 text-primary dark:bg-primary/30 dark:text-primary/90 text-xs sm:text-sm font-bold px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full whitespace-nowrap">
+              <span className="bg-primary/15 text-primary text-xs font-bold px-2 py-0.5 rounded-full">
                 {pendingCount}
               </span>
             )}
             {completedCount > 0 && (
-              <span className="bg-success/20 text-success dark:bg-success/30 dark:text-success/90 text-xs sm:text-sm font-bold px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full whitespace-nowrap flex items-center gap-1">
+              <span className="bg-success/15 text-success text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-0.5">
                 <span>✓</span>
                 {completedCount}
               </span>
@@ -59,18 +54,13 @@ export const CategoryHeader: React.FC<CategoryHeaderProps> = ({
           </div>
 
           {/* Right: Collapse Toggle Icon */}
-          <div className="flex-shrink-0 p-1">
-            <ChevronDown
-              className={`h-5 w-5 sm:h-6 sm:w-6 text-foreground/60 group-hover:text-primary transition-all duration-300 ${
-                isCollapsed ? "-rotate-90" : ""
-              }`}
-              strokeWidth={2.5}
-            />
-          </div>
+          <ChevronDown
+            className={`h-4 w-4 text-muted-foreground group-hover:text-primary transition-all duration-200 ${
+              isCollapsed ? "-rotate-90" : ""
+            }`}
+            strokeWidth={2}
+          />
         </div>
-
-        {/* Optional: Subtle divider at bottom */}
-        <div className="h-px bg-gradient-to-r from-transparent via-border/30 to-transparent" />
       </div>
     </div>
   );

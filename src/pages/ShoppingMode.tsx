@@ -4,7 +4,8 @@ import { ShoppingItem, Unit, UNITS, ISRAELI_STORES, ShoppingHistory } from "@/ty
 import { Button } from "@/components/ui/button";
 import { 
   ArrowRight, CheckCircle2, Home, X, Check, Sparkles, 
-  Trophy, Zap, Star, PartyPopper, ShoppingCart, Timer, Store
+  Trophy, Zap, Star, PartyPopper, ShoppingCart, Timer, Store,
+  Plus, ClipboardPaste, Clock
 } from "lucide-react";
 import { useGlobalLanguage } from "@/context/LanguageContext";
 import { useSoundSettings } from "@/hooks/use-sound-settings.tsx";
@@ -29,6 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { sanitizeInput } from "@/utils/security";
 
 // Dynamic motivational messages
 const getMotivationalText = (
@@ -80,6 +82,8 @@ export const ShoppingMode = () => {
   const [showFinishDialog, setShowFinishDialog] = useState(false);
   const [totalAmount, setTotalAmount] = useState("");
   const [selectedStore, setSelectedStore] = useState("");
+  const [showAddItemInput, setShowAddItemInput] = useState(false);
+  const [newItemText, setNewItemText] = useState("");
   const direction = language === 'he' ? 'rtl' : 'ltr';
 
   // Stopwatch state
@@ -87,6 +91,7 @@ export const ShoppingMode = () => {
   const [isTimerRunning, setIsTimerRunning] = useState(true);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number>(Date.now());
+  const addItemInputRef = useRef<HTMLInputElement>(null);
 
   // Timer effect
   useEffect(() => {
@@ -355,12 +360,20 @@ export const ShoppingMode = () => {
                 </div>
               </div>
               
-              {/* Stopwatch */}
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary rounded-full">
-                <Timer className="h-4 w-4" />
-                <span className="font-mono font-bold text-sm sm:text-base tabular-nums">
-                  {formatTime(elapsedTime)}
-                </span>
+              {/* Timer - Fun & Inviting */}
+              <div className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-cyan-50 to-sky-50 dark:from-cyan-900/30 dark:to-sky-900/30 rounded-xl border border-cyan-200/50 dark:border-cyan-700/50 shadow-sm">
+                <div className="relative">
+                  <Clock className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
+                  <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-cyan-400 rounded-full animate-pulse" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-mono font-black text-base sm:text-lg tabular-nums text-cyan-700 dark:text-cyan-300">
+                    {formatTime(elapsedTime)}
+                  </span>
+                  <span className="text-[9px] text-cyan-600/70 dark:text-cyan-400/70 font-medium -mt-0.5">
+                    {language === 'he' ? 'זמן קנייה' : 'Shopping time'}
+                  </span>
+                </div>
               </div>
               
               <span className="text-base sm:text-lg font-black text-gray-900 dark:text-white">
@@ -368,6 +381,91 @@ export const ShoppingMode = () => {
               </span>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Quick Add Item Bar */}
+      <div className="sticky top-[140px] z-30 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border-b border-black/5 px-3 py-2">
+        <div className="max-w-3xl mx-auto">
+          {showAddItemInput ? (
+            <div className="flex items-center gap-2">
+              <input
+                ref={addItemInputRef}
+                type="text"
+                value={newItemText}
+                onChange={(e) => setNewItemText(sanitizeInput(e.target.value))}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && newItemText.trim()) {
+                    // Check if multiple lines (pasted content)
+                    const lines = newItemText.split(/[\n,]/).map(l => l.trim()).filter(l => l.length > 0);
+                    const newItems: ShoppingItem[] = lines.map((text, i) => ({
+                      id: `${Date.now()}-${i}`,
+                      text: text.replace(/^•\s*/, ''),
+                      checked: false,
+                      quantity: 1,
+                      unit: 'units' as Unit
+                    }));
+                    setItems(prev => [...newItems, ...prev]);
+                    setNewItemText("");
+                    toast.success(language === 'he' ? `נוספו ${newItems.length} פריטים` : `Added ${newItems.length} items`);
+                  } else if (e.key === 'Escape') {
+                    setShowAddItemInput(false);
+                    setNewItemText("");
+                  }
+                }}
+                placeholder={language === 'he' ? 'הקלד פריט או הדבק רשימה...' : 'Type item or paste list...'}
+                className="flex-1 h-10 px-3 text-sm bg-white dark:bg-slate-800 border border-border/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/30"
+                autoFocus
+              />
+              <Button
+                size="sm"
+                onClick={async () => {
+                  try {
+                    const text = await navigator.clipboard.readText();
+                    if (text.trim()) {
+                      const lines = text.split(/[\n,]/).map(l => l.trim()).filter(l => l.length > 0);
+                      const newItems: ShoppingItem[] = lines.map((line, i) => ({
+                        id: `${Date.now()}-${i}`,
+                        text: sanitizeInput(line.replace(/^•\s*/, '')),
+                        checked: false,
+                        quantity: 1,
+                        unit: 'units' as Unit
+                      }));
+                      setItems(prev => [...newItems, ...prev]);
+                      setNewItemText("");
+                      setShowAddItemInput(false);
+                      toast.success(language === 'he' ? `הודבקו ${newItems.length} פריטים` : `Pasted ${newItems.length} items`);
+                    }
+                  } catch {
+                    toast.error(language === 'he' ? 'לא ניתן לקרוא מהלוח' : 'Cannot read clipboard');
+                  }
+                }}
+                className="h-10 px-3 bg-primary/10 hover:bg-primary/20 text-primary"
+                variant="ghost"
+              >
+                <ClipboardPaste className="h-4 w-4" />
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => { setShowAddItemInput(false); setNewItemText(""); }}
+                variant="ghost"
+                className="h-10 w-10 text-muted-foreground"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          ) : (
+            <button
+              onClick={() => {
+                setShowAddItemInput(true);
+                setTimeout(() => addItemInputRef.current?.focus(), 100);
+              }}
+              className="w-full flex items-center justify-center gap-2 h-10 bg-white/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-700 border border-dashed border-primary/30 rounded-xl text-sm text-primary font-medium transition-all active:scale-[0.98]"
+            >
+              <Plus className="h-4 w-4" />
+              {language === 'he' ? 'הוסף פריט או הדבק רשימה' : 'Add item or paste list'}
+            </button>
+          )}
         </div>
       </div>
 

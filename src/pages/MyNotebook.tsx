@@ -125,7 +125,7 @@ const MyNotebook = () => {
                                 index={index}
                                 language={language}
                                 t={t}
-                                onLoad={handleEditList}
+                                onEdit={handleEditList}
                                 onDelete={handleDeleteList}
                                 onToggleItem={handleToggleItemInList}
                                 onUpdateItem={handleUpdateItem}

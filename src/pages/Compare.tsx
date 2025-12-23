@@ -55,76 +55,76 @@ const Compare = () => {
   })() : [];
 
   return (
-    <div className="min-h-screen bg-background pb-20" dir="rtl">
+    <div className="min-h-screen bg-background pb-24" dir="rtl">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b-2 border-black dark:border-slate-700">
+      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-xl border-b border-border">
         <div className="w-full max-w-4xl mx-auto px-4 py-4 flex items-center gap-3">
           <Button
             variant="ghost"
             onClick={() => navigate("/history")}
-            className="h-10 w-10 p-0 rounded-full hover:bg-black/5 dark:hover:bg-white/10"
+            className="h-10 w-10 p-0 rounded-xl hover:bg-muted"
           >
-            <ArrowRight className="h-6 w-6" />
+            <ArrowRight className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-lg sm:text-2xl font-black text-foreground leading-none">📈 השוואת קניות</h1>
-            <p className="text-[10px] sm:text-sm text-muted-foreground font-bold">נתח את הרגלי הקנייה שלך</p>
+            <h1 className="text-lg sm:text-2xl font-bold text-foreground leading-none">📈 השוואת קניות</h1>
+            <p className="text-xs sm:text-sm text-muted-foreground">נתח את הרגלי הקנייה שלך</p>
           </div>
         </div>
       </div>
 
       <div className="w-full max-w-4xl mx-auto px-4 py-6 sm:py-8 space-y-6 sm:space-y-8">
         {history.length < 2 ? (
-          <div className="p-6 sm:p-10 text-center rounded-3xl border-2 border-dashed border-black/20 dark:border-white/20">
+          <div className="p-6 sm:p-10 text-center rounded-2xl border-2 border-dashed border-border bg-card/50">
             <div className="text-5xl sm:text-6xl mb-4 grayscale opacity-50">📊</div>
-            <h3 className="text-xl sm:text-2xl font-black mb-2 text-foreground">לא מספיק נתונים להשוואה</h3>
-            <p className="text-sm sm:text-base text-muted-foreground mb-6 font-medium">
+            <h3 className="text-xl sm:text-2xl font-bold mb-2 text-foreground">לא מספיק נתונים להשוואה</h3>
+            <p className="text-sm sm:text-base text-muted-foreground mb-6">
               בצע לפחות 2 קניות כדי לראות השוואות ותובנות
             </p>
-            <Button onClick={() => navigate("/")} className="h-10 sm:h-12 px-6 sm:px-8 text-sm sm:text-base font-bold border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all">
+            <Button onClick={() => navigate("/")} className="h-10 sm:h-12 px-6 sm:px-8 text-sm sm:text-base font-medium rounded-xl">
               חזרה לרשימת קניות
             </Button>
           </div>
         ) : (
-          <div className="space-y-8">
+          <div className="space-y-6">
             {mostExpensive && cheapest && storeComparison.length > 1 && (
-              <div className="p-6 sm:p-8 bg-white dark:bg-slate-900 border-2 border-black dark:border-slate-700 rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] space-y-6">
-                <h2 className="text-2xl sm:text-3xl font-black text-foreground">השוואת רשתות</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="p-6 rounded-xl bg-[#FFF1F2] dark:bg-slate-800 border-2 border-black dark:border-slate-700">
+              <div className="p-6 sm:p-8 bg-card border border-border rounded-2xl shadow-sm space-y-6">
+                <h2 className="text-xl sm:text-2xl font-bold text-foreground">השוואת רשתות</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-5 rounded-xl bg-destructive/5 border border-destructive/20">
                     <div className="flex items-center gap-2 mb-3">
-                      <div className="p-2 bg-red-400 rounded-lg border-2 border-black dark:border-slate-900">
-                        <TrendingUp className="h-5 w-5 text-black" />
+                      <div className="p-2 bg-destructive/10 rounded-xl">
+                        <TrendingUp className="h-5 w-5 text-destructive" />
                       </div>
-                      <h3 className="text-lg font-bold text-foreground">הכי יקר בממוצע</h3>
+                      <h3 className="text-base font-semibold text-foreground">הכי יקר בממוצע</h3>
                     </div>
-                    <p className="text-3xl font-black text-destructive mb-2">{mostExpensive.store}</p>
-                    <p className="text-lg font-bold text-muted-foreground">
+                    <p className="text-2xl font-bold text-destructive mb-1">{mostExpensive.store}</p>
+                    <p className="text-base text-muted-foreground">
                       ₪{mostExpensive.average.toFixed(2)} לקנייה
                     </p>
-                    <p className="text-sm font-medium text-muted-foreground mt-2">
+                    <p className="text-sm text-muted-foreground mt-2">
                       מבוסס על {mostExpensive.count} קניות
                     </p>
                   </div>
-                  <div className="p-6 rounded-xl bg-[#F0FDF4] dark:bg-slate-800 border-2 border-black dark:border-slate-700">
+                  <div className="p-5 rounded-xl bg-success/5 border border-success/20">
                     <div className="flex items-center gap-2 mb-3">
-                      <div className="p-2 bg-green-400 rounded-lg border-2 border-black dark:border-slate-900">
-                        <TrendingDown className="h-5 w-5 text-black" />
+                      <div className="p-2 bg-success/10 rounded-xl">
+                        <TrendingDown className="h-5 w-5 text-success" />
                       </div>
-                      <h3 className="text-lg font-bold text-foreground">הכי זול בממוצע</h3>
+                      <h3 className="text-base font-semibold text-foreground">הכי זול בממוצע</h3>
                     </div>
-                    <p className="text-3xl font-black text-success mb-2">{cheapest.store}</p>
-                    <p className="text-lg font-bold text-muted-foreground">
+                    <p className="text-2xl font-bold text-success mb-1">{cheapest.store}</p>
+                    <p className="text-base text-muted-foreground">
                       ₪{cheapest.average.toFixed(2)} לקנייה
                     </p>
-                    <p className="text-sm font-medium text-muted-foreground mt-2">
+                    <p className="text-sm text-muted-foreground mt-2">
                       מבוסס על {cheapest.count} קניות
                     </p>
                   </div>
                 </div>
                 {mostExpensive.store !== cheapest.store && (
-                  <div className="mt-4 p-4 bg-yellow-100 dark:bg-yellow-900/20 rounded-xl border-2 border-yellow-400 border-dashed">
-                    <p className="text-center font-bold text-yellow-700 dark:text-yellow-400">
+                  <div className="p-4 bg-warning/10 rounded-xl border border-warning/20">
+                    <p className="text-center font-medium text-warning-foreground">
                       💡 חיסכון פוטנציאלי: ₪
                       {(mostExpensive.average - cheapest.average).toFixed(2)} לקנייה אם תעבור ל
                       {cheapest.store}
@@ -134,23 +134,23 @@ const Compare = () => {
               </div>
             )}
 
-            <div className="p-6 sm:p-8 bg-white dark:bg-slate-900 border-2 border-black dark:border-slate-700 rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] space-y-6">
-              <h2 className="text-2xl sm:text-3xl font-black text-foreground">פירוט לפי רשת</h2>
-              <div className="space-y-4">
+            <div className="p-6 sm:p-8 bg-card border border-border rounded-2xl shadow-sm space-y-6">
+              <h2 className="text-xl sm:text-2xl font-bold text-foreground">פירוט לפי רשת</h2>
+              <div className="space-y-3">
                 {storeComparison.map((store) => (
                   <div
                     key={store.store}
-                    className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between p-4 sm:p-5 rounded-xl bg-muted/30 border-2 border-transparent hover:border-black dark:hover:border-slate-500 transition-all"
+                    className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between p-4 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors"
                   >
                     <div className="flex-1">
-                      <h3 className="text-lg font-black text-foreground">{store.store}</h3>
-                      <p className="text-sm font-medium text-muted-foreground">
+                      <h3 className="text-base font-semibold text-foreground">{store.store}</h3>
+                      <p className="text-sm text-muted-foreground">
                         {store.count} קניות | ממוצע: ₪{store.average.toFixed(2)}
                       </p>
                     </div>
                     <div className="text-left">
-                      <p className="text-xl font-black text-primary">₪{store.total.toFixed(2)}</p>
-                      <p className="text-xs font-bold text-muted-foreground">סה״כ</p>
+                      <p className="text-lg font-bold text-primary">₪{store.total.toFixed(2)}</p>
+                      <p className="text-xs text-muted-foreground">סה״כ</p>
                     </div>
                   </div>
                 ))}
@@ -158,17 +158,17 @@ const Compare = () => {
             </div>
 
             {commonItems.length > 0 && (
-              <div className="p-6 sm:p-8 bg-white dark:bg-slate-900 border-2 border-black dark:border-slate-700 rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] space-y-6">
-                <h2 className="text-2xl sm:text-3xl font-black text-foreground">הפריטים הנקנים ביותר</h2>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+              <div className="p-6 sm:p-8 bg-card border border-border rounded-2xl shadow-sm space-y-6">
+                <h2 className="text-xl sm:text-2xl font-bold text-foreground">הפריטים הנקנים ביותר</h2>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   {commonItems.map(([item, count], index) => (
                     <div
                       key={item}
-                      className="p-4 sm:p-5 rounded-xl bg-primary/5 border-2 border-primary/20 hover:border-primary transition-colors"
+                      className="p-4 rounded-xl bg-primary/5 border border-primary/20 hover:border-primary/40 transition-colors"
                     >
-                      <div className="text-2xl font-black text-primary mb-1">#{index + 1}</div>
-                      <p className="font-bold text-foreground mb-1">{item}</p>
-                      <p className="text-sm font-medium text-muted-foreground">{count} פעמים</p>
+                      <div className="text-xl font-bold text-primary mb-1">#{index + 1}</div>
+                      <p className="font-medium text-foreground mb-1 text-sm">{item}</p>
+                      <p className="text-xs text-muted-foreground">{count} פעמים</p>
                     </div>
                   ))}
                 </div>

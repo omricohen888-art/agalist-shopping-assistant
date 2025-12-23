@@ -11,7 +11,7 @@ interface SavedListCardProps {
     index: number;
     language: 'he' | 'en';
     t: any;
-    onLoad: (list: SavedList) => void;
+    onEdit: (list: SavedList) => void;
     onDelete: (id: string) => void;
     onToggleItem: (listId: string, itemId: string) => void;
     onUpdateItem?: (listId: string, item: ShoppingItem) => void;
@@ -23,7 +23,7 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
     index,
     language,
     t,
-    onLoad,
+    onEdit,
     onDelete,
     onToggleItem,
     onUpdateItem,
@@ -114,21 +114,8 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
             className="bg-card border border-border/50 rounded-2xl p-4 sm:p-5 shadow-sm hover:shadow-lg transition-all duration-300 group relative flex flex-col h-auto min-h-[260px] overflow-hidden"
             dir={direction}
         >
-            {/* Shopping Status Badge */}
-            {list.isShoppingComplete ? (
-                <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-success/10 text-success px-2.5 py-1 rounded-full text-xs font-semibold z-10">
-                    <CheckCircle2 className="h-3.5 w-3.5" />
-                    <span>{language === 'he' ? 'בוצעה קנייה' : 'Shopping Done'}</span>
-                </div>
-            ) : (
-                <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-warning/10 text-warning px-2.5 py-1 rounded-full text-xs font-semibold z-10">
-                    <Clock className="h-3.5 w-3.5" />
-                    <span>{language === 'he' ? 'ממתין לקנייה' : 'Pending'}</span>
-                </div>
-            )}
-            
             {/* Card Header */}
-            <div className={`flex justify-between items-start mb-4 pb-3 border-b border-border/30 gap-3 ${list.isShoppingComplete ? 'pt-6' : ''}`}>
+            <div className="flex justify-between items-start mb-4 pb-3 border-b border-border/30 gap-3">
                 <div className="flex items-center gap-2.5 flex-1 min-w-0">
                     <div className={`w-3 h-3 rounded-full ${indicatorColor} flex-shrink-0`} />
                     <h4 className="font-semibold text-base sm:text-lg text-foreground truncate flex-1">{list.name}</h4>
@@ -139,7 +126,7 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
                     <Button
                         variant="ghost"
                         size="icon"
-                        onClick={(e) => { e.stopPropagation(); onLoad(list); }}
+                        onClick={(e) => { e.stopPropagation(); onEdit(list); }}
                         className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl"
                         title={language === 'he' ? 'ערוך רשימה' : 'Edit List'}
                     >
@@ -296,17 +283,34 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
                         </span>
                     )}
                 </div>
-                {onGoShopping && !list.isShoppingComplete && (
-                    <Button
-                        size="sm"
-                        onClick={(e) => { e.stopPropagation(); onGoShopping(list); }}
-                        className="h-8 px-4 bg-success hover:bg-success/90 text-success-foreground font-semibold text-xs rounded-xl flex items-center gap-1.5 shadow-sm"
-                        title={language === 'he' ? 'צא לקנייה' : 'Go Shopping'}
-                    >
-                        <ShoppingCart className="h-3.5 w-3.5" />
-                        {language === 'he' ? 'צא לקנייה' : 'Go Shop'}
-                    </Button>
-                )}
+                
+                {/* Shopping Status Badge + Action */}
+                <div className="flex items-center gap-2">
+                    {list.isShoppingComplete ? (
+                        <div className="flex items-center gap-1.5 bg-success/10 text-success px-2.5 py-1 rounded-full text-xs font-semibold">
+                            <CheckCircle2 className="h-3.5 w-3.5" />
+                            <span>{language === 'he' ? 'הושלמה' : 'Done'}</span>
+                        </div>
+                    ) : (
+                        <>
+                            <div className="flex items-center gap-1.5 bg-warning/10 text-warning px-2.5 py-1 rounded-full text-xs font-semibold">
+                                <Clock className="h-3.5 w-3.5" />
+                                <span>{language === 'he' ? 'לא הושלמה' : 'Pending'}</span>
+                            </div>
+                            {onGoShopping && (
+                                <Button
+                                    size="sm"
+                                    onClick={(e) => { e.stopPropagation(); onGoShopping(list); }}
+                                    className="h-8 px-4 bg-success hover:bg-success/90 text-success-foreground font-semibold text-xs rounded-xl flex items-center gap-1.5 shadow-sm"
+                                    title={language === 'he' ? 'צא לקנייה' : 'Go Shopping'}
+                                >
+                                    <ShoppingCart className="h-3.5 w-3.5" />
+                                    {language === 'he' ? 'צא לקנייה' : 'Go Shop'}
+                                </Button>
+                            )}
+                        </>
+                    )}
+                </div>
             </div>
         </div>
     );

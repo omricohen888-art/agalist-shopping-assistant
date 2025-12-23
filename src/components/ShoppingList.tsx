@@ -1747,7 +1747,7 @@ export const ShoppingList = () => {
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
-                    {savedLists.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 4).map((list, index) => <SavedListCard key={list.id} list={list} index={index} language={language} t={t} onLoad={handleLoadList} onDelete={id => {
+                    {savedLists.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 4).map((list, index) => <SavedListCard key={list.id} list={list} index={index} language={language} t={t} onEdit={handleLoadList} onDelete={id => {
               if (deleteSavedList(id)) {
                 setSavedLists(getSavedLists());
                 toast.success(t.toasts.listDeleted);

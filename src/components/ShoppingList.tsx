@@ -831,20 +831,25 @@ export const ShoppingList = () => {
   };
 
   const handleCopyAllItems = async () => {
-    if (items.length === 0) return;
+    // Use notepadItems for the main list view
+    const itemsToCopy = notepadItems.filter(item => item.text.trim() !== '');
+    if (itemsToCopy.length === 0) {
+      toast.error(language === 'he' ? 'אין פריטים להעתקה' : 'No items to copy');
+      return;
+    }
 
-    const getQuantityUnit = (item: ShoppingItem) => {
-      if (item.quantity <= 1 && item.unit === 'units') return '';
+    const getQuantityUnit = (item: NotepadItem) => {
+      if (!item.quantity || (item.quantity <= 1 && item.unit === 'units')) return '';
       const unitLabel = UNITS.find(u => u.value === item.unit);
       const unitText = language === 'he' ? unitLabel?.labelHe : unitLabel?.labelEn;
       return `${item.quantity} ${unitText}`;
     };
 
-    const checkedItems = items.filter(item => item.checked);
-    const uncheckedItems = items.filter(item => !item.checked);
+    const checkedItems = itemsToCopy.filter(item => item.isChecked);
+    const uncheckedItems = itemsToCopy.filter(item => !item.isChecked);
 
-    const formatItem = (item: ShoppingItem) => {
-      const checkbox = item.checked ? '✓' : '☐';
+    const formatItem = (item: NotepadItem) => {
+      const checkbox = item.isChecked ? '✓' : '☐';
       const quantityUnit = getQuantityUnit(item);
       const quantityText = quantityUnit ? ` (${quantityUnit})` : '';
       return `${checkbox} ${item.text}${quantityText}`;
@@ -866,8 +871,8 @@ export const ShoppingList = () => {
     const header = `📋 ${listName || (language === 'he' ? 'רשימת קניות' : 'Shopping List')}`;
     const divider = '─'.repeat(20);
     const summary = language === 'he' 
-      ? `\n\n📊 סה"כ: ${items.length} פריטים | ✓ ${checkedItems.length} הושלמו`
-      : `\n\n📊 Total: ${items.length} items | ✓ ${checkedItems.length} done`;
+      ? `\n\n📊 סה"כ: ${itemsToCopy.length} פריטים | ✓ ${checkedItems.length} הושלמו`
+      : `\n\n📊 Total: ${itemsToCopy.length} items | ✓ ${checkedItems.length} done`;
 
     const fullText = `${header}\n${divider}\n${listText}${summary}`;
 
@@ -1510,7 +1515,7 @@ export const ShoppingList = () => {
               <ClipboardPaste className="h-4 w-4" />
               <span>{language === 'he' ? 'הדבק' : 'Paste'}</span>
             </button>
-            {items.length > 0 && (
+            {notepadItems.filter(item => item.text.trim() !== '').length > 0 && (
               <button 
                 onClick={handleCopyAllItems} 
                 className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/80 hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer text-sm font-medium" 

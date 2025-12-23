@@ -35,7 +35,6 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
   return (
     <nav 
       className="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-slate-800 shadow-2xl z-50"
-      dir={direction}
     >
       {/* Mobile Bottom Navigation */}
       <div className="md:hidden">

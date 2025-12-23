@@ -1182,13 +1182,13 @@ export const ShoppingList = () => {
                       ...i,
                       quantity: Math.max(0.1, qty)
                     } : i));
-                  }} className="w-12 md:w-16 h-7 md:h-8 text-center text-xs rounded border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-slate-200 focus:border-yellow-400 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] transition-all flex-shrink-0" title={language === 'he' ? 'כמות' : 'Quantity'} />
+                  }} className="w-12 md:w-16 h-7 md:h-8 text-center text-xs rounded-xl border border-border/50 bg-muted/30 text-foreground focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all flex-shrink-0" title={language === 'he' ? 'כמות' : 'Quantity'} />
                           <select value={item.unit || 'units'} onChange={e => {
                     setNotepadItems(prev => prev.map(i => i.id === item.id ? {
                       ...i,
                       unit: e.target.value as Unit
                     } : i));
-                  }} className="w-14 md:w-20 h-7 md:h-8 text-xs rounded border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-slate-200 focus:border-yellow-400 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] transition-all flex-shrink-0 cursor-pointer" title={language === 'he' ? 'יחידה' : 'Unit'}>
+                  }} className="w-14 md:w-20 h-7 md:h-8 text-xs rounded-xl border border-border/50 bg-muted/30 text-foreground focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all flex-shrink-0 cursor-pointer" title={language === 'he' ? 'יחידה' : 'Unit'}>
                             {UNITS.map(u => <option key={u.value} value={u.value}>
                                 {language === 'he' ? u.labelHe : u.labelEn}
                               </option>)}
@@ -1196,7 +1196,7 @@ export const ShoppingList = () => {
                         </div>
 
                         {/* Delete Button */}
-                        <button onClick={() => setNotepadItems(prev => prev.filter(i => i.id !== item.id))} className="p-2 text-gray-500 hover:text-red-600 dark:hover:text-red-400 transition-colors hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg flex-shrink-0" title={language === 'he' ? 'מחק' : 'Delete'}>
+                        <button onClick={() => setNotepadItems(prev => prev.filter(i => i.id !== item.id))} className="p-2 text-muted-foreground hover:text-destructive transition-all hover:bg-destructive/10 rounded-xl flex-shrink-0" title={language === 'he' ? 'מחק' : 'Delete'}>
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>;
@@ -1431,62 +1431,76 @@ export const ShoppingList = () => {
 
 
 
-        {/* Notebook Style Input (Dashboard/Home View) */}
-        <div className="relative bg-[#FEFCE8] dark:bg-slate-800 border-2 border-black dark:border-slate-700 rounded-xl p-4 md:p-6 mb-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] focus-within:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] hover:border-yellow-400 focus-within:border-yellow-400 transition-all duration-200 hover:-translate-y-1 focus-within:-translate-y-1 overflow-hidden" style={theme !== 'dark' ? {
-          backgroundImage: 'repeating-linear-gradient(transparent, transparent 31px, #e5e7eb 31px, #e5e7eb 32px)'
-        } : {}}>
-              {/* Spiral Binding Effect */}
-              <div className={`absolute top-0 bottom-4 ${language === 'he' ? '-right-3' : '-left-3'} w-8 flex flex-col justify-evenly py-2 z-20 pointer-events-none ${theme === 'dark' ? 'hidden' : ''}`}>
-                {[...Array(12)].map((_, i) => <div key={i} className="relative h-4 w-full">
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-[#1a1a1a] rounded-full shadow-inner" />
-                    <div className={`absolute top-1/2 ${language === 'he' ? 'left-1/2' : 'right-1/2'} w-6 h-1.5 bg-zinc-400 rounded-full transform ${language === 'he' ? '-translate-x-1/2 rotate-12' : 'translate-x-1/2 -rotate-12'} shadow-sm`} />
-                  </div>)}
-              </div>
+        {/* Modern Input Card */}
+        <div className="relative bg-card dark:bg-slate-800/90 border border-border/50 rounded-2xl p-4 md:p-6 mb-6 shadow-lg hover:shadow-xl focus-within:shadow-xl transition-all duration-300 overflow-hidden backdrop-blur-sm">
+          {/* Subtle gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none rounded-2xl" />
 
-              {/* Quick Paste Button */}
-              {showPaste && <button onClick={handleQuickPaste} className={`absolute top-4 ${language === 'he' ? 'left-4' : 'right-4'} flex items-center gap-2 text-gray-600 hover:text-black dark:text-slate-300 dark:hover:text-white transition-colors cursor-pointer z-10`} title={language === 'he' ? 'הדבק מהלוח' : 'Paste from clipboard'}>
-                  <ClipboardPaste className="h-5 w-5" />
-                  <span className="text-sm font-medium">
-                    {language === 'he' ? 'הדבק' : 'Paste'}
-                  </span>
-                </button>}
+          {/* Quick Paste Button */}
+          {showPaste && (
+            <button 
+              onClick={handleQuickPaste} 
+              className={`absolute top-4 ${language === 'he' ? 'left-4' : 'right-4'} flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/80 hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer z-10 text-sm font-medium`} 
+              title={language === 'he' ? 'הדבק מהלוח' : 'Paste from clipboard'}
+            >
+              <ClipboardPaste className="h-4 w-4" />
+              <span>{language === 'he' ? 'הדבק' : 'Paste'}</span>
+            </button>
+          )}
 
-              {/* Paste Feedback Animation */}
-              {showPasteFeedback && <div className={`absolute top-4 ${language === 'he' ? 'left-20' : 'right-20'} bg-green-500 text-white px-3 py-1 rounded-lg shadow-lg text-sm font-medium animate-in fade-in slide-in-from-right-2 duration-300`}>
-                  {language === 'he' ? 'הודבק!' : 'Pasted!'}
-                </div>}
+          {/* Paste Feedback Animation */}
+          {showPasteFeedback && (
+            <div className={`absolute top-4 ${language === 'he' ? 'left-28' : 'right-28'} bg-success text-success-foreground px-3 py-1.5 rounded-lg shadow-lg text-sm font-medium animate-in fade-in slide-in-from-right-2 duration-300`}>
+              {language === 'he' ? 'הודבק!' : 'Pasted!'}
+            </div>
+          )}
 
-              {/* Smart Input Toolbar */}
-              <div className={`flex gap-4 text-gray-500 mb-4 px-2 ${language === 'en' ? 'flex-row-reverse justify-end' : ''}`}>
-                {/* Voice Dictation Button */}
-                <button onClick={handleVoiceDictation} className={`p-2 rounded-lg hover:text-black dark:hover:text-white transition-colors hover:bg-gray-100 dark:hover:bg-slate-700 ${isVoiceRecording ? 'text-red-500 animate-pulse' : ''}`} title={language === 'he' ? 'הקלטת קול' : 'Voice Dictation'} disabled={isProcessingImage}>
-                  <Mic className="h-5 w-5" />
-                </button>
+          {/* Smart Input Toolbar */}
+          <div className={`flex gap-2 text-muted-foreground mb-4 ${language === 'en' ? 'flex-row-reverse justify-end' : ''}`}>
+            {/* Voice Dictation Button */}
+            <button 
+              onClick={handleVoiceDictation} 
+              className={`p-2.5 rounded-xl bg-muted/50 hover:bg-muted transition-all hover:scale-105 active:scale-95 ${isVoiceRecording ? 'text-destructive animate-pulse bg-destructive/10' : 'hover:text-foreground'}`} 
+              title={language === 'he' ? 'הקלטת קול' : 'Voice Dictation'} 
+              disabled={isProcessingImage}
+            >
+              <Mic className="h-5 w-5" />
+            </button>
 
-                {/* Camera OCR Button */}
-                <button onClick={() => cameraInputRef.current?.click()} className={`p-2 rounded-lg hover:text-black dark:hover:text-white transition-colors hover:bg-gray-100 dark:hover:bg-slate-700 ${isProcessingImage ? 'text-blue-500 animate-pulse' : ''}`} title={language === 'he' ? 'סריקת רשימה' : 'Scan List'} disabled={isVoiceRecording}>
-                  <Camera className="h-5 w-5" />
-                </button>
+            {/* Camera OCR Button */}
+            <button 
+              onClick={() => cameraInputRef.current?.click()} 
+              className={`p-2.5 rounded-xl bg-muted/50 hover:bg-muted transition-all hover:scale-105 active:scale-95 ${isProcessingImage ? 'text-primary animate-pulse bg-primary/10' : 'hover:text-foreground'}`} 
+              title={language === 'he' ? 'סריקת רשימה' : 'Scan List'} 
+              disabled={isVoiceRecording}
+            >
+              <Camera className="h-5 w-5" />
+            </button>
 
-                {/* Handwriting Button */}
-                <button onClick={() => setIsHandwritingOpen(true)} className={`p-2 rounded-lg hover:text-black dark:hover:text-white transition-colors hover:bg-gray-100 dark:hover:bg-slate-700 ${isProcessingImage ? 'text-blue-500 animate-pulse' : ''}`} title={language === 'he' ? 'כתב יד' : 'Handwriting'} disabled={isVoiceRecording}>
-                  <PenLine className="h-5 w-5" />
-                </button>
+            {/* Handwriting Button */}
+            <button 
+              onClick={() => setIsHandwritingOpen(true)} 
+              className={`p-2.5 rounded-xl bg-muted/50 hover:bg-muted transition-all hover:scale-105 active:scale-95 ${isProcessingImage ? 'text-primary animate-pulse bg-primary/10' : 'hover:text-foreground'}`} 
+              title={language === 'he' ? 'כתב יד' : 'Handwriting'} 
+              disabled={isVoiceRecording}
+            >
+              <PenLine className="h-5 w-5" />
+            </button>
 
-                {/* Hidden File Input for Camera */}
-                <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleCameraOCR} className="hidden" />
-              </div>
+            {/* Hidden File Input for Camera */}
+            <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleCameraOCR} className="hidden" />
+          </div>
 
-              {/* Notepad Items List */}
-              <div className="min-h-[140px]" dir={language === 'he' ? 'rtl' : 'ltr'}>
-                {notepadItems.length === 0 ? 
-                  // Empty state - show single input to start
-                  <div className="space-y-2">
-                    <input
-                      type="text"
-                      autoFocus
-                      placeholder={language === 'he' ? 'הקלד פריט ולחץ Enter...' : 'Type an item and press Enter...'}
-                      className="w-full bg-transparent outline-none text-base md:text-lg font-bold font-hand text-black dark:text-slate-200 placeholder:text-gray-400 dark:placeholder:text-slate-500 py-3"
+          {/* Items List */}
+          <div className="min-h-[140px]" dir={language === 'he' ? 'rtl' : 'ltr'}>
+            {notepadItems.length === 0 ? 
+              // Empty state - show single input to start
+              <div className="space-y-3">
+                <input
+                  type="text"
+                  autoFocus
+                  placeholder={language === 'he' ? 'הקלד פריט ולחץ Enter...' : 'Type an item and press Enter...'}
+                  className="w-full bg-muted/30 hover:bg-muted/50 focus:bg-muted/50 outline-none text-base md:text-lg font-medium text-foreground placeholder:text-muted-foreground py-3 px-4 rounded-xl border border-border/50 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all"
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                           e.preventDefault();
@@ -1534,10 +1548,11 @@ export const ShoppingList = () => {
                         }
                       }}
                     />
-                    <p className="text-sm text-gray-500 dark:text-slate-400 text-center">
-                      {language === 'he' ? 'לחץ Enter להוספת שורה חדשה' : 'Press Enter to add a new line'}
-                    </p>
-                  </div>
+                <p className="text-sm text-muted-foreground text-center flex items-center justify-center gap-2">
+                  <span className="inline-flex items-center justify-center px-2 py-0.5 rounded bg-muted text-xs font-medium">Enter</span>
+                  {language === 'he' ? 'להוספת פריט חדש' : 'to add a new item'}
+                </p>
+              </div>
                 : isSmartSort ?
           // Grouped view
           renderGroupedNotepadItems() :
@@ -1608,20 +1623,20 @@ export const ShoppingList = () => {
 
                         {/* Quantity + Unit */}
                         <div className="flex items-center gap-1.5 flex-shrink-0">
-                          {/* Custom Stepper Container - No Keyboard Trigger */}
-                          <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-slate-700 border border-gray-300 dark:border-slate-600">
+                          {/* Custom Stepper Container */}
+                          <div className="flex items-center gap-1 px-2 py-1 rounded-xl bg-muted/50 border border-border/50">
                             {/* Minus Button */}
                             <button onClick={() => {
                     setNotepadItems(prev => prev.map(i => i.id === item.id ? {
                       ...i,
                       quantity: Math.max(0.1, (i.quantity || 1) - 1)
                     } : i));
-                  }} className="flex items-center justify-center h-6 w-6 rounded transition-colors hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-600 dark:text-slate-300 active:scale-90" title={language === 'he' ? 'הקטן' : 'Decrease'} type="button">
+                  }} className="flex items-center justify-center h-6 w-6 rounded-lg transition-all hover:bg-muted text-muted-foreground hover:text-foreground active:scale-90" title={language === 'he' ? 'הקטן' : 'Decrease'} type="button">
                               <Minus className="h-4 w-4" strokeWidth={2} />
                             </button>
                             
-                            {/* Quantity Display - Read-only for better mobile UX */}
-                            <span className="w-8 text-center text-xs font-semibold text-gray-900 dark:text-slate-100 tabular-nums">
+                            {/* Quantity Display */}
+                            <span className="w-8 text-center text-xs font-semibold text-foreground tabular-nums">
                               {(item.quantity || 1).toFixed(item.unit && ['kg', 'g', 'liters', 'ml', 'oz', 'lbs'].includes(item.unit) ? 2 : 0)}
                             </span>
                             
@@ -1631,7 +1646,7 @@ export const ShoppingList = () => {
                       ...i,
                       quantity: (i.quantity || 1) + 1
                     } : i));
-                  }} className="flex items-center justify-center h-6 w-6 rounded transition-colors hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-600 dark:text-slate-300 active:scale-90" title={language === 'he' ? 'הגדל' : 'Increase'} type="button">
+                  }} className="flex items-center justify-center h-6 w-6 rounded-lg transition-all hover:bg-muted text-muted-foreground hover:text-foreground active:scale-90" title={language === 'he' ? 'הגדל' : 'Increase'} type="button">
                               <Plus className="h-4 w-4" strokeWidth={2} />
                             </button>
                           </div>
@@ -1640,7 +1655,7 @@ export const ShoppingList = () => {
                     ...i,
                     unit: e.target.value as Unit
                   } : i));
-                }} className="w-14 md:w-20 h-7 md:h-8 text-xs rounded border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-slate-200 focus:border-yellow-400 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] transition-all flex-shrink-0 cursor-pointer" title={language === 'he' ? 'יחידה' : 'Unit'}>
+                }} className="w-14 md:w-20 h-7 md:h-8 text-xs rounded-xl border border-border/50 bg-muted/30 text-foreground focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all flex-shrink-0 cursor-pointer" title={language === 'he' ? 'יחידה' : 'Unit'}>
                             {UNITS.map(u => <option key={u.value} value={u.value}>
                                 {language === 'he' ? u.labelHe : u.labelEn}
                               </option>)}
@@ -1648,7 +1663,7 @@ export const ShoppingList = () => {
                         </div>
 
                         {/* Delete Button */}
-                        <button onClick={() => setNotepadItems(prev => prev.filter(i => i.id !== item.id))} className="p-2 text-gray-500 hover:text-red-600 dark:hover:text-red-400 transition-colors hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg flex-shrink-0" title={language === 'he' ? 'מחק' : 'Delete'}>
+                        <button onClick={() => setNotepadItems(prev => prev.filter(i => i.id !== item.id))} className="p-2 text-muted-foreground hover:text-destructive transition-all hover:bg-destructive/10 rounded-xl flex-shrink-0" title={language === 'he' ? 'מחק' : 'Delete'}>
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>)}

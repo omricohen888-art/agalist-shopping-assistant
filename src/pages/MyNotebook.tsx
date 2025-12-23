@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { SavedList } from "@/types/shopping";
+import { SavedList, ShoppingItem } from "@/types/shopping";
 import { getSavedLists, deleteSavedList, updateSavedList } from "@/utils/storage";
 import { SavedListCard } from "@/components/SavedListCard";
+import { EditListModal } from "@/components/EditListModal";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ArrowLeft, Plus, Book } from "lucide-react";
 import { useGlobalLanguage } from "@/context/LanguageContext";
@@ -14,6 +15,8 @@ const MyNotebook = () => {
     const t = translations[language];
     const direction = language === 'he' ? 'rtl' : 'ltr';
     const [savedLists, setSavedLists] = useState<SavedList[]>([]);
+    const [editingList, setEditingList] = useState<SavedList | null>(null);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
     useEffect(() => {
         setSavedLists(getSavedLists());
@@ -39,8 +42,31 @@ const MyNotebook = () => {
         setSavedLists(getSavedLists());
     };
 
-    const handleLoadList = (list: SavedList) => {
-        navigate('/', { state: { loadList: list } });
+    const handleEditList = (list: SavedList) => {
+        setEditingList(list);
+        setIsEditModalOpen(true);
+    };
+
+    const handleSaveList = (updatedList: SavedList) => {
+        setSavedLists(getSavedLists());
+    };
+
+    const handleUpdateItem = (listId: string, item: ShoppingItem) => {
+        const list = savedLists.find(l => l.id === listId);
+        if (!list) return;
+
+        const updatedItems = list.items.map(i => i.id === item.id ? item : i);
+        const updatedList = { ...list, items: updatedItems };
+        updateSavedList(updatedList);
+        setSavedLists(getSavedLists());
+    };
+
+    const handleGoShopping = (list: SavedList) => {
+        // Reset all items to unchecked and navigate to shopping mode
+        const resetItems = list.items.map(item => ({ ...item, checked: false }));
+        const updatedList = { ...list, items: resetItems };
+        updateSavedList(updatedList);
+        navigate('/shopping', { state: { list: updatedList } });
     };
 
     return (
@@ -99,14 +125,28 @@ const MyNotebook = () => {
                                 index={index}
                                 language={language}
                                 t={t}
-                                onLoad={handleLoadList}
+                                onLoad={handleEditList}
                                 onDelete={handleDeleteList}
                                 onToggleItem={handleToggleItemInList}
+                                onUpdateItem={handleUpdateItem}
+                                onGoShopping={handleGoShopping}
                             />
                         ))}
                     </div>
                 )}
             </div>
+
+            {/* Edit List Modal */}
+            <EditListModal
+                list={editingList}
+                isOpen={isEditModalOpen}
+                onClose={() => {
+                    setIsEditModalOpen(false);
+                    setEditingList(null);
+                }}
+                onSave={handleSaveList}
+                language={language}
+            />
         </div>
     );
 };

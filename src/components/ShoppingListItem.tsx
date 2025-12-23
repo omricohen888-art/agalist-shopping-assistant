@@ -128,20 +128,15 @@ const QuantityStepper = ({ value, onChange, unit, isCompleted }: QuantityStepper
     }
   }
 
-  // SCENARIO A: Discrete Units (units, packages, cans) - Ultra compact stepper
+  // SCENARIO A: Discrete Units - Ultra minimal
   if (isDiscrete) {
     return (
       <div 
         className={`
-          inline-flex items-center gap-0
-          rounded-lg 
-          overflow-hidden
-          transition-all duration-150
-          border border-border/40
-          ${isCompleted 
-            ? 'bg-muted/30 opacity-50' 
-            : 'bg-muted/20'
-          }
+          inline-flex items-center
+          rounded
+          border border-border/30
+          ${isCompleted ? 'opacity-40' : ''}
         `}
       >
         <button
@@ -149,71 +144,40 @@ const QuantityStepper = ({ value, onChange, unit, isCompleted }: QuantityStepper
           onClick={handleDecrement}
           disabled={isCompleted || value <= minValue}
           className={`
-            flex items-center justify-center
-            w-6 h-6
-            transition-colors duration-100
-            touch-manipulation
-            active:bg-primary/20
-            ${isCompleted || value <= minValue
-              ? 'text-muted-foreground/30 cursor-not-allowed'
-              : 'text-foreground/60 hover:bg-primary/10'
-            }
+            w-5 h-5 flex items-center justify-center
+            touch-manipulation active:bg-primary/20
+            ${isCompleted || value <= minValue ? 'text-muted-foreground/20' : 'text-foreground/50'}
           `}
-          aria-label="Decrease quantity"
         >
-          <Minus className="h-3 w-3" strokeWidth={2} />
+          <Minus className="h-2.5 w-2.5" strokeWidth={2} />
         </button>
-
-        <div 
-          className={`
-            min-w-[1.25rem]
-            text-center 
-            font-semibold
-            text-xs
-            tabular-nums
-            select-none
-            ${isCompleted ? 'text-muted-foreground/50' : 'text-foreground/80'}
-          `}
-        >
+        <span className={`min-w-[1rem] text-center text-[11px] font-semibold tabular-nums ${isCompleted ? 'text-muted-foreground/40' : 'text-foreground/70'}`}>
           {displayValue}
-        </div>
-
+        </span>
         <button
           type="button"
           onClick={handleIncrement}
           disabled={isCompleted}
           className={`
-            flex items-center justify-center
-            w-6 h-6
-            transition-colors duration-100
-            touch-manipulation
-            active:bg-primary/20
-            ${isCompleted
-              ? 'text-muted-foreground/30 cursor-not-allowed'
-              : 'text-foreground/60 hover:bg-primary/10'
-            }
+            w-5 h-5 flex items-center justify-center
+            touch-manipulation active:bg-primary/20
+            ${isCompleted ? 'text-muted-foreground/20' : 'text-foreground/50'}
           `}
-          aria-label="Increase quantity"
         >
-          <Plus className="h-3 w-3" strokeWidth={2} />
+          <Plus className="h-2.5 w-2.5" strokeWidth={2} />
         </button>
       </div>
     );
   }
 
-  // SCENARIO B: Weight/Measurements (kg, g, liters, ml) - Ultra compact
+  // SCENARIO B: Weight/Measurements - Ultra minimal
   return (
     <div 
       className={`
-        inline-flex items-center gap-0
-        rounded-lg 
-        overflow-hidden
-        transition-all duration-150
-        border border-border/40
-        ${isCompleted 
-          ? 'bg-muted/30 opacity-50' 
-          : 'bg-muted/20'
-        }
+        inline-flex items-center
+        rounded
+        border border-border/30
+        ${isCompleted ? 'opacity-40' : ''}
       `}
     >
       <button
@@ -221,21 +185,13 @@ const QuantityStepper = ({ value, onChange, unit, isCompleted }: QuantityStepper
         onClick={handleDecrement}
         disabled={isCompleted || value <= minValue}
         className={`
-          flex items-center justify-center
-          h-6 w-6
-          transition-colors duration-100
-          touch-manipulation
-          active:bg-accent/20
-          ${isCompleted || value <= minValue
-            ? 'text-muted-foreground/30 cursor-not-allowed'
-            : 'text-foreground/60 hover:bg-accent/10'
-          }
+          w-5 h-5 flex items-center justify-center
+          touch-manipulation active:bg-accent/20
+          ${isCompleted || value <= minValue ? 'text-muted-foreground/20' : 'text-foreground/50'}
         `}
-        aria-label="Decrease quantity"
       >
-        <Minus className="h-3 w-3" strokeWidth={2} />
+        <Minus className="h-2.5 w-2.5" strokeWidth={2} />
       </button>
-
       <input
         ref={inputRef}
         type="text"
@@ -245,43 +201,23 @@ const QuantityStepper = ({ value, onChange, unit, isCompleted }: QuantityStepper
         onBlur={handleInputBlur}
         onKeyDown={handleInputKeyDown}
         disabled={isCompleted}
-        placeholder={String(minValue)}
         className={`
-          w-8
-          px-0.5
-          py-0
-          text-center
-          font-semibold
-          text-xs
-          bg-transparent
-          border-0
-          focus:outline-none
-          tabular-nums
-          ${isCompleted 
-            ? 'text-muted-foreground/50 cursor-not-allowed' 
-            : 'text-foreground/80'
-          }
+          w-6 text-center text-[11px] font-semibold bg-transparent border-0 p-0
+          focus:outline-none tabular-nums
+          ${isCompleted ? 'text-muted-foreground/40' : 'text-foreground/70'}
         `}
       />
-
       <button
         type="button"
         onClick={handleIncrement}
         disabled={isCompleted}
         className={`
-          flex items-center justify-center
-          h-6 w-6
-          transition-colors duration-100
-          touch-manipulation
-          active:bg-accent/20
-          ${isCompleted
-            ? 'text-muted-foreground/30 cursor-not-allowed'
-            : 'text-foreground/60 hover:bg-accent/10'
-          }
+          w-5 h-5 flex items-center justify-center
+          touch-manipulation active:bg-accent/20
+          ${isCompleted ? 'text-muted-foreground/20' : 'text-foreground/50'}
         `}
-        aria-label="Increase quantity"
       >
-        <Plus className="h-3 w-3" strokeWidth={2} />
+        <Plus className="h-2.5 w-2.5" strokeWidth={2} />
       </button>
     </div>
   );
@@ -352,42 +288,32 @@ export const ShoppingListItem = ({
   return (
     <div 
       className={`
-        relative overflow-hidden
-        rounded-lg 
-        transition-all duration-150
-        touch-manipulation
+        relative rounded
         ${isDimmed 
-          ? 'bg-muted/20 opacity-50' 
+          ? 'opacity-40' 
           : visualChecked 
-            ? 'bg-success/5 border border-success/20' 
-            : 'bg-card/50 border border-border/30'
+            ? 'bg-success/5' 
+            : ''
         }
       `}
       dir={direction}
     >
-      <ConfettiEffect isActive={showConfetti} origin={{ x: 15, y: 20 }} />
+      <ConfettiEffect isActive={showConfetti} origin={{ x: 10, y: 12 }} />
 
-      <div className="relative px-2 py-1.5 flex items-center gap-1.5">
-        {/* Ultra Compact Checkbox */}
+      <div className="flex items-center gap-1.5 py-1 px-1">
+        {/* Minimal Checkbox */}
         <button
           ref={checkboxRef}
           onClick={handleCheck}
           className={`
-            relative flex-shrink-0 
-            w-6 h-6 
-            rounded-md 
+            flex-shrink-0 w-5 h-5 rounded
             flex items-center justify-center
-            transition-all duration-150
             touch-manipulation
-            overflow-hidden
             ${visualChecked
               ? 'bg-success'
-              : isDimmed
-                ? 'bg-muted border border-muted-foreground/20'
-                : 'bg-card border border-border/60 hover:border-success/50 active:scale-95'
+              : 'border border-border/50 active:scale-95'
             }
           `}
-          aria-label={visualChecked ? 'Uncheck item' : 'Check item'}
         >
           {showRipple && (
             <span 
@@ -395,25 +321,20 @@ export const ShoppingListItem = ({
               style={{ left: ripplePos.x, top: ripplePos.y, transform: 'translate(-50%, -50%)' }}
             />
           )}
-          
-          {visualChecked && (
-            <Check className="h-3 w-3 text-success-foreground" strokeWidth={3} />
-          )}
+          {visualChecked && <Check className="h-3 w-3 text-success-foreground" strokeWidth={3} />}
         </button>
         
-        {/* Item Name - More compact */}
-        <div className="flex-1 min-w-0">
-          <span 
-            className={`
-              block text-xs font-medium leading-tight truncate
-              ${visualChecked ? "line-through text-muted-foreground" : "text-foreground"}
-            `}
-          >
-            {item.text}
-          </span>
-        </div>
+        {/* Item Name */}
+        <span 
+          className={`
+            flex-1 text-[11px] font-medium truncate
+            ${visualChecked ? "line-through text-muted-foreground/60" : "text-foreground"}
+          `}
+        >
+          {item.text}
+        </span>
 
-        {/* Quantity Stepper - Already ultra compact */}
+        {/* Quantity */}
         <QuantityStepper
           value={item.quantity || 1}
           onChange={(val) => onQuantityChange(item.id, val)}
@@ -421,24 +342,18 @@ export const ShoppingListItem = ({
           isCompleted={isDimmed}
         />
         
-        {/* Unit Select - Ultra compact */}
+        {/* Unit - Ultra minimal */}
         <Select
           value={item.unit || 'units'}
           onValueChange={(val: Unit) => onUnitChange(item.id, val)}
         >
           <SelectTrigger 
             className={`
-              h-6 px-1.5
+              h-5 px-1 min-w-[32px]
               text-[10px] font-medium
-              rounded-md transition-all
-              [&>svg]:h-2.5 [&>svg]:w-2.5
-              touch-manipulation
-              border border-border/40
-              min-w-[40px]
-              ${isDimmed 
-                ? 'bg-muted/30 text-muted-foreground/50 opacity-50' 
-                : 'bg-muted/20 text-foreground/70'
-              }
+              rounded border-border/30
+              [&>svg]:h-2 [&>svg]:w-2 [&>svg]:opacity-50
+              ${isDimmed ? 'opacity-40' : ''}
             `}
           >
             <span className="truncate">
@@ -448,34 +363,23 @@ export const ShoppingListItem = ({
               })()}
             </span>
           </SelectTrigger>
-          <SelectContent className="rounded-lg shadow-lg">
+          <SelectContent className="rounded-lg">
             {UNITS.map(u => (
-              <SelectItem 
-                key={u.value} 
-                value={u.value}
-                className="text-xs py-1.5 cursor-pointer rounded-md"
-              >
+              <SelectItem key={u.value} value={u.value} className="text-xs py-1">
                 {language === 'he' ? u.labelHe : u.labelEn}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
 
-        {/* Delete Button - Ultra compact */}
+        {/* Delete - Ultra minimal */}
         <Button
           variant="ghost"
           size="icon"
           onClick={() => onDelete(item.id)}
-          className={`
-            h-5 w-5 
-            rounded-md flex-shrink-0
-            text-muted-foreground/40
-            hover:bg-destructive/10 hover:text-destructive
-            active:scale-95
-            ${isDimmed ? 'opacity-30' : ''}
-          `}
+          className={`h-5 w-5 rounded text-muted-foreground/30 hover:text-destructive ${isDimmed ? 'opacity-30' : ''}`}
         >
-          <Trash2 className="h-3 w-3" />
+          <Trash2 className="h-2.5 w-2.5" />
         </Button>
       </div>
     </div>

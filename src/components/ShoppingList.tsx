@@ -11,6 +11,7 @@ import { Share2, Trash2, Plus, Minus, CheckCircle2, History, BarChart3, Globe, S
 import { FaWhatsapp } from "react-icons/fa";
 import { SmartAutocompleteInput, SmartAutocompleteInputRef } from "@/components/SmartAutocompleteInput";
 import { SavedListCard } from "@/components/SavedListCard";
+import { EditListModal } from "@/components/EditListModal";
 import { CompletedTripCard } from "@/components/CompletedTripCard";
 import { HistoryDetailModal } from "@/components/HistoryDetailModal";
 import { StandardizedInput } from "@/components/ui/standardized-input";
@@ -168,6 +169,10 @@ export const ShoppingList = () => {
   const [shoppingHistory, setShoppingHistory] = useState<ShoppingHistory[]>([]);
   const [selectedTrip, setSelectedTrip] = useState<ShoppingHistory | null>(null);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+
+  // Edit List Modal States
+  const [editingList, setEditingList] = useState<SavedList | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   // Smart Input States
   const [isVoiceRecording, setIsVoiceRecording] = useState(false);
@@ -808,6 +813,16 @@ export const ShoppingList = () => {
   const handlePrint = () => {
     window.print();
   };
+  const handleEditSavedList = (list: SavedList) => {
+    setEditingList(list);
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveEditedList = (updatedList: SavedList) => {
+    setSavedLists(getSavedLists());
+    toast.success(t.toasts.listSaved);
+  };
+
   const handleLoadList = (list: SavedList) => {
     setItems([...list.items]);
     setActiveListId(list.id);
@@ -1747,7 +1762,7 @@ export const ShoppingList = () => {
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
-                    {savedLists.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 4).map((list, index) => <SavedListCard key={list.id} list={list} index={index} language={language} t={t} onEdit={handleLoadList} onDelete={id => {
+                    {savedLists.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 4).map((list, index) => <SavedListCard key={list.id} list={list} index={index} language={language} t={t} onEdit={handleEditSavedList} onDelete={id => {
               if (deleteSavedList(id)) {
                 setSavedLists(getSavedLists());
                 toast.success(t.toasts.listDeleted);
@@ -2056,6 +2071,18 @@ export const ShoppingList = () => {
         setIsHistoryModalOpen(false);
         setSelectedTrip(null);
       }} language={language} />
+
+        {/* Edit List Modal */}
+        <EditListModal
+          list={editingList}
+          isOpen={isEditModalOpen}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setEditingList(null);
+          }}
+          onSave={handleSaveEditedList}
+          language={language}
+        />
       </div>
     </div>;
 };

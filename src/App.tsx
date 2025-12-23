@@ -13,6 +13,7 @@ import { useState } from "react";
 import Index from "./pages/Index";
 import History from "./pages/History";
 import Compare from "./pages/Compare";
+import Insights from "./pages/Insights";
 import MyNotebook from "./pages/MyNotebook";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
@@ -35,6 +36,7 @@ const AppContent = () => {
           <Route path="/shopping/:id" element={<ShoppingMode />} />
           <Route path="/history" element={<History />} />
           <Route path="/compare" element={<Compare />} />
+          <Route path="/insights" element={<Insights />} />
           <Route path="/notebook" element={<MyNotebook />} />
           <Route path="/about" element={<About />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

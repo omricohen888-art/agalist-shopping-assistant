@@ -71,18 +71,8 @@ export const GroupedShoppingList: React.FC<GroupedShoppingListProps> = ({
   };
 
   return (
-    <div className="space-y-0.5">
-      {/* Progress - Minimal */}
-      {totalCompleted > 0 && (
-        <div className="flex items-center justify-center py-0.5">
-          <span className="text-[9px] font-bold text-success flex items-center gap-0.5">
-            <Check className="h-2 w-2" strokeWidth={3} />
-            {language === "he" ? `נרכשו ${totalCompleted}` : `Done ${totalCompleted}`}
-          </span>
-        </div>
-      )}
-
-      {/* Categories */}
+    <div>
+      {/* Categories - No extra spacing */}
       {groupedItems.map((group) => {
         const isCollapsed = collapsedCategories.has(group.categoryKey);
         const pendingItems = group.items.filter((item) => !item.checked);
@@ -100,7 +90,7 @@ export const GroupedShoppingList: React.FC<GroupedShoppingListProps> = ({
             />
 
             {!isCollapsed && (
-              <div className="space-y-0">
+              <>
                 {pendingItems.map((item) => (
                   <ShoppingListItem
                     key={item.id}
@@ -111,23 +101,18 @@ export const GroupedShoppingList: React.FC<GroupedShoppingListProps> = ({
                     onUnitChange={onUnitChange}
                   />
                 ))}
-
-                {completedItems.length > 0 && (
-                  <div className="border-t border-success/10">
-                    {completedItems.map((item) => (
-                      <ShoppingListItem
-                        key={item.id}
-                        item={item}
-                        onToggle={onToggle}
-                        onDelete={onDelete}
-                        onQuantityChange={onQuantityChange}
-                        onUnitChange={onUnitChange}
-                        isCompleted={true}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
+                {completedItems.map((item) => (
+                  <ShoppingListItem
+                    key={item.id}
+                    item={item}
+                    onToggle={onToggle}
+                    onDelete={onDelete}
+                    onQuantityChange={onQuantityChange}
+                    onUnitChange={onUnitChange}
+                    isCompleted={true}
+                  />
+                ))}
+              </>
             )}
           </div>
         );

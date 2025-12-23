@@ -154,7 +154,7 @@ export const ShoppingList = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [showPasteFeedback, setShowPasteFeedback] = useState(false);
   const [notepadItems, setNotepadItems] = useState<NotepadItem[]>([]);
-  const [isSmartSort, setIsSmartSort] = useState(true); // Default to smart sort
+  const [isSmartSort, setIsSmartSort] = useState(false); // Default to original order
   const [collapsedNotepadCategories, setCollapsedNotepadCategories] = useState<Set<CategoryKey>>(new Set());
   const [bulkPreviewItems, setBulkPreviewItems] = useState<Array<{
     id: string;

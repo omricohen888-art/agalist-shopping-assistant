@@ -287,101 +287,54 @@ export const ShoppingListItem = ({
 
   return (
     <div 
-      className={`
-        relative rounded
-        ${isDimmed 
-          ? 'opacity-40' 
-          : visualChecked 
-            ? 'bg-success/5' 
-            : ''
-        }
-      `}
+      className={`flex items-center gap-1 py-0.5 px-0.5 ${isDimmed ? 'opacity-40' : ''}`}
       dir={direction}
     >
-      <ConfettiEffect isActive={showConfetti} origin={{ x: 10, y: 12 }} />
+      <ConfettiEffect isActive={showConfetti} origin={{ x: 8, y: 8 }} />
 
-      <div className="flex items-center gap-1.5 py-1 px-1">
-        {/* Minimal Checkbox */}
-        <button
-          ref={checkboxRef}
-          onClick={handleCheck}
-          className={`
-            flex-shrink-0 w-5 h-5 rounded
-            flex items-center justify-center
-            touch-manipulation
-            ${visualChecked
-              ? 'bg-success'
-              : 'border border-border/50 active:scale-95'
-            }
-          `}
-        >
-          {showRipple && (
-            <span 
-              className="absolute w-2 h-2 bg-success/30 rounded-full animate-ripple"
-              style={{ left: ripplePos.x, top: ripplePos.y, transform: 'translate(-50%, -50%)' }}
-            />
-          )}
-          {visualChecked && <Check className="h-3 w-3 text-success-foreground" strokeWidth={3} />}
+      {/* Checkbox */}
+      <button
+        ref={checkboxRef}
+        onClick={handleCheck}
+        className={`
+          flex-shrink-0 w-4 h-4 rounded-sm flex items-center justify-center touch-manipulation
+          ${visualChecked ? 'bg-success' : 'border border-border/40'}
+        `}
+      >
+        {visualChecked && <Check className="h-2.5 w-2.5 text-success-foreground" strokeWidth={3} />}
+      </button>
+      
+      {/* Name */}
+      <span className={`flex-1 text-[11px] truncate ${visualChecked ? "line-through text-muted-foreground/50" : "text-foreground"}`}>
+        {item.text}
+      </span>
+
+      {/* Quantity inline */}
+      <div className={`flex items-center text-[10px] text-muted-foreground/60 ${isDimmed ? 'opacity-50' : ''}`}>
+        <button onClick={() => onQuantityChange(item.id, Math.max(1, (item.quantity || 1) - 1))} className="w-4 h-4 flex items-center justify-center touch-manipulation">
+          <Minus className="h-2 w-2" />
         </button>
-        
-        {/* Item Name */}
-        <span 
-          className={`
-            flex-1 text-[11px] font-medium truncate
-            ${visualChecked ? "line-through text-muted-foreground/60" : "text-foreground"}
-          `}
-        >
-          {item.text}
-        </span>
-
-        {/* Quantity */}
-        <QuantityStepper
-          value={item.quantity || 1}
-          onChange={(val) => onQuantityChange(item.id, val)}
-          unit={item.unit}
-          isCompleted={isDimmed}
-        />
-        
-        {/* Unit - Ultra minimal */}
-        <Select
-          value={item.unit || 'units'}
-          onValueChange={(val: Unit) => onUnitChange(item.id, val)}
-        >
-          <SelectTrigger 
-            className={`
-              h-5 px-1 min-w-[32px]
-              text-[10px] font-medium
-              rounded border-border/30
-              [&>svg]:h-2 [&>svg]:w-2 [&>svg]:opacity-50
-              ${isDimmed ? 'opacity-40' : ''}
-            `}
-          >
-            <span className="truncate">
-              {(() => {
-                const u = UNITS.find(u => u.value === (item.unit || 'units'));
-                return u ? (language === 'he' ? u.labelHe : u.labelEn) : '';
-              })()}
-            </span>
-          </SelectTrigger>
-          <SelectContent className="rounded-lg">
-            {UNITS.map(u => (
-              <SelectItem key={u.value} value={u.value} className="text-xs py-1">
-                {language === 'he' ? u.labelHe : u.labelEn}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        {/* Delete - Ultra minimal */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => onDelete(item.id)}
-          className={`h-5 w-5 rounded text-muted-foreground/30 hover:text-destructive ${isDimmed ? 'opacity-30' : ''}`}
-        >
-          <Trash2 className="h-2.5 w-2.5" />
-        </Button>
+        <span className="min-w-[12px] text-center font-medium">{item.quantity || 1}</span>
+        <button onClick={() => onQuantityChange(item.id, (item.quantity || 1) + 1)} className="w-4 h-4 flex items-center justify-center touch-manipulation">
+          <Plus className="h-2 w-2" />
+        </button>
       </div>
+
+      {/* Unit - minimal text */}
+      <span className="text-[9px] text-muted-foreground/50 min-w-[20px]">
+        {(() => {
+          const u = UNITS.find(u => u.value === (item.unit || 'units'));
+          return u ? (language === 'he' ? u.labelHe : u.labelEn) : '';
+        })()}
+      </span>
+
+      {/* Delete */}
+      <button
+        onClick={() => onDelete(item.id)}
+        className="w-4 h-4 flex items-center justify-center text-muted-foreground/20 hover:text-destructive touch-manipulation"
+      >
+        <Trash2 className="h-2 w-2" />
+      </button>
     </div>
   );
 };

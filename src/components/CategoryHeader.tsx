@@ -25,37 +25,23 @@ export const CategoryHeader: React.FC<CategoryHeaderProps> = ({
 
   return (
     <div
-      className="sticky top-0 z-20 cursor-pointer select-none"
+      className="flex items-center gap-1 py-0.5 px-1 cursor-pointer select-none"
       onClick={() => onCollapsedChange(!isCollapsed)}
     >
-      <div className="rounded border border-border/15 bg-primary/5 backdrop-blur-sm">
-        <div className="px-2 py-0.5 flex items-center justify-between gap-1">
-          <div className="flex items-center gap-1 flex-1 min-w-0">
-            <span className="text-xs">{category.icon}</span>
-            <h3 className="text-[11px] font-semibold text-foreground truncate">
-              {categoryName}
-            </h3>
-          </div>
-
-          <div className="flex items-center gap-0.5 flex-shrink-0">
-            {pendingCount > 0 && (
-              <span className="bg-primary/10 text-primary text-[9px] font-bold px-1 py-0 rounded-full">
-                {pendingCount}
-              </span>
-            )}
-            {completedCount > 0 && (
-              <span className="bg-success/10 text-success text-[9px] font-bold px-1 py-0 rounded-full">
-                ✓{completedCount}
-              </span>
-            )}
-          </div>
-
-          <ChevronDown
-            className={`h-3 w-3 text-muted-foreground/50 transition-transform ${isCollapsed ? "-rotate-90" : ""}`}
-            strokeWidth={2}
-          />
-        </div>
-      </div>
+      <ChevronDown
+        className={`h-2.5 w-2.5 text-muted-foreground/40 transition-transform ${isCollapsed ? "-rotate-90" : ""}`}
+        strokeWidth={2}
+      />
+      <span className="text-[10px]">{category.icon}</span>
+      <span className="text-[10px] font-medium text-muted-foreground">
+        {categoryName}
+      </span>
+      {pendingCount > 0 && (
+        <span className="text-[9px] text-primary/70 font-semibold">({pendingCount})</span>
+      )}
+      {completedCount > 0 && (
+        <span className="text-[9px] text-success/70">✓{completedCount}</span>
+      )}
     </div>
   );
 };

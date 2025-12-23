@@ -16,6 +16,7 @@ import Compare from "./pages/Compare";
 import MyNotebook from "./pages/MyNotebook";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
+import { ShoppingMode } from "./pages/ShoppingMode";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ const AppContent = () => {
       <main className="flex-1">
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/shopping/:id" element={<ShoppingMode />} />
           <Route path="/history" element={<History />} />
           <Route path="/compare" element={<Compare />} />
           <Route path="/notebook" element={<MyNotebook />} />

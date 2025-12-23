@@ -28,25 +28,25 @@ export const CategoryHeader: React.FC<CategoryHeaderProps> = ({
       className="sticky top-0 z-20 cursor-pointer select-none"
       onClick={() => onCollapsedChange(!isCollapsed)}
     >
-      <div className="rounded-xl border border-border/30 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden group bg-card/80 backdrop-blur-sm">
-        <div className="bg-gradient-to-r from-primary/5 to-transparent px-3 py-2 flex items-center justify-between gap-2">
+      <div className="rounded-lg border border-border/20 overflow-hidden group bg-card/60 backdrop-blur-sm">
+        <div className="bg-gradient-to-r from-primary/5 to-transparent px-2 py-1 flex items-center justify-between gap-1.5">
           {/* Left: Icon and Category Name */}
-          <div className="flex items-center gap-2 flex-1 min-w-0">
-            <span className="text-lg flex-shrink-0">{category.icon}</span>
-            <h3 className="text-sm font-bold text-foreground truncate group-hover:text-primary transition-colors">
+          <div className="flex items-center gap-1.5 flex-1 min-w-0">
+            <span className="text-sm flex-shrink-0">{category.icon}</span>
+            <h3 className="text-xs font-semibold text-foreground truncate group-hover:text-primary transition-colors">
               {categoryName}
             </h3>
           </div>
 
           {/* Middle: Item Counts */}
-          <div className="flex items-center gap-1.5 flex-shrink-0">
+          <div className="flex items-center gap-1 flex-shrink-0">
             {pendingCount > 0 && (
-              <span className="bg-primary/15 text-primary text-xs font-bold px-2 py-0.5 rounded-full">
+              <span className="bg-primary/10 text-primary text-[10px] font-bold px-1.5 py-0.5 rounded-full">
                 {pendingCount}
               </span>
             )}
             {completedCount > 0 && (
-              <span className="bg-success/15 text-success text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-0.5">
+              <span className="bg-success/10 text-success text-[10px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
                 <span>✓</span>
                 {completedCount}
               </span>
@@ -55,7 +55,7 @@ export const CategoryHeader: React.FC<CategoryHeaderProps> = ({
 
           {/* Right: Collapse Toggle Icon */}
           <ChevronDown
-            className={`h-4 w-4 text-muted-foreground group-hover:text-primary transition-all duration-200 ${
+            className={`h-3 w-3 text-muted-foreground group-hover:text-primary transition-all duration-150 ${
               isCollapsed ? "-rotate-90" : ""
             }`}
             strokeWidth={2}

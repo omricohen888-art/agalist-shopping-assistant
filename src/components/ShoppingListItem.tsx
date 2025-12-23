@@ -128,123 +128,114 @@ const QuantityStepper = ({ value, onChange, unit, isCompleted }: QuantityStepper
     }
   }
 
-  // SCENARIO A: Discrete Units (units, packages, cans) - Read-only stepper (clicker-style)
+  // SCENARIO A: Discrete Units (units, packages, cans) - Ultra compact stepper
   if (isDiscrete) {
     return (
       <div 
         className={`
           inline-flex items-center gap-0
-          rounded-xl 
+          rounded-lg 
           overflow-hidden
-          transition-all duration-200
-          shadow-sm
-          bg-gradient-to-br from-primary/10 to-primary/5
-          border border-primary/20
+          transition-all duration-150
+          border border-border/40
           ${isCompleted 
-            ? 'bg-muted/50 opacity-50 border-muted/30' 
-            : 'hover:shadow-md'
+            ? 'bg-muted/30 opacity-50' 
+            : 'bg-muted/20'
           }
         `}
       >
-        {/* Minus Button - Compact */}
         <button
           type="button"
           onClick={handleDecrement}
           disabled={isCompleted || value <= minValue}
           className={`
             flex items-center justify-center
-            w-8 h-8
-            transition-all duration-150
+            w-6 h-6
+            transition-colors duration-100
             touch-manipulation
-            active:scale-90 active:bg-primary/20
+            active:bg-primary/20
             ${isCompleted || value <= minValue
-              ? 'text-muted-foreground/40 cursor-not-allowed'
-              : 'text-primary/70 hover:bg-primary/15 hover:text-primary'
+              ? 'text-muted-foreground/30 cursor-not-allowed'
+              : 'text-foreground/60 hover:bg-primary/10'
             }
           `}
           aria-label="Decrease quantity"
         >
-          <Minus className="h-3.5 w-3.5" strokeWidth={2.5} />
+          <Minus className="h-3 w-3" strokeWidth={2} />
         </button>
 
-        {/* Value Display */}
         <div 
           className={`
-            min-w-[2rem]
+            min-w-[1.25rem]
             text-center 
-            font-bold
-            text-base
+            font-semibold
+            text-xs
             tabular-nums
             select-none
-            ${isCompleted ? 'text-muted-foreground/50' : 'text-primary/80'}
+            ${isCompleted ? 'text-muted-foreground/50' : 'text-foreground/80'}
           `}
         >
           {displayValue}
         </div>
 
-        {/* Plus Button - Compact */}
         <button
           type="button"
           onClick={handleIncrement}
           disabled={isCompleted}
           className={`
             flex items-center justify-center
-            w-8 h-8
-            transition-all duration-150
+            w-6 h-6
+            transition-colors duration-100
             touch-manipulation
-            active:scale-90 active:bg-primary/20
+            active:bg-primary/20
             ${isCompleted
-              ? 'text-muted-foreground/40 cursor-not-allowed'
-              : 'text-primary/70 hover:bg-primary/15 hover:text-primary'
+              ? 'text-muted-foreground/30 cursor-not-allowed'
+              : 'text-foreground/60 hover:bg-primary/10'
             }
           `}
           aria-label="Increase quantity"
         >
-          <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
+          <Plus className="h-3 w-3" strokeWidth={2} />
         </button>
       </div>
     );
   }
 
-  // SCENARIO B: Weight/Measurements (kg, g, liters, ml) - Input + fine-tuning buttons
+  // SCENARIO B: Weight/Measurements (kg, g, liters, ml) - Ultra compact
   return (
     <div 
       className={`
-        inline-flex items-center gap-1
-        rounded-xl 
+        inline-flex items-center gap-0
+        rounded-lg 
         overflow-hidden
-        transition-all duration-200
-        shadow-sm
-        border border-border/60
+        transition-all duration-150
+        border border-border/40
         ${isCompleted 
-          ? 'bg-muted/40 opacity-50 border-muted/30' 
-          : 'bg-gradient-to-br from-accent/10 to-accent/5 hover:shadow-md'
+          ? 'bg-muted/30 opacity-50' 
+          : 'bg-muted/20'
         }
       `}
     >
-      {/* Minus Button */}
       <button
         type="button"
         onClick={handleDecrement}
         disabled={isCompleted || value <= minValue}
         className={`
           flex items-center justify-center
-          h-8 w-8
-          transition-all duration-150
+          h-6 w-6
+          transition-colors duration-100
           touch-manipulation
-          active:scale-90
-          rounded-lg
+          active:bg-accent/20
           ${isCompleted || value <= minValue
-            ? 'text-muted-foreground/40 cursor-not-allowed'
-            : 'text-accent/70 hover:bg-accent/15 hover:text-accent'
+            ? 'text-muted-foreground/30 cursor-not-allowed'
+            : 'text-foreground/60 hover:bg-accent/10'
           }
         `}
         aria-label="Decrease quantity"
       >
-        <Minus className="h-3.5 w-3.5" strokeWidth={2.5} />
+        <Minus className="h-3 w-3" strokeWidth={2} />
       </button>
 
-      {/* Input Field */}
       <input
         ref={inputRef}
         type="text"
@@ -256,45 +247,41 @@ const QuantityStepper = ({ value, onChange, unit, isCompleted }: QuantityStepper
         disabled={isCompleted}
         placeholder={String(minValue)}
         className={`
-          w-12
-          px-1
-          py-0.5
+          w-8
+          px-0.5
+          py-0
           text-center
-          font-bold
-          text-sm
-          bg-white dark:bg-slate-800
-          border border-border/50
+          font-semibold
+          text-xs
+          bg-transparent
+          border-0
           focus:outline-none
-          focus:ring-1 focus:ring-accent/40
-          rounded-lg
           tabular-nums
           ${isCompleted 
             ? 'text-muted-foreground/50 cursor-not-allowed' 
-            : 'text-gray-900 dark:text-slate-100'
+            : 'text-foreground/80'
           }
         `}
       />
 
-      {/* Plus Button */}
       <button
         type="button"
         onClick={handleIncrement}
         disabled={isCompleted}
         className={`
           flex items-center justify-center
-          h-8 w-8
-          transition-all duration-150
+          h-6 w-6
+          transition-colors duration-100
           touch-manipulation
-          active:scale-90
-          rounded-lg
+          active:bg-accent/20
           ${isCompleted
-            ? 'text-muted-foreground/40 cursor-not-allowed'
-            : 'text-accent/70 hover:bg-accent/15 hover:text-accent'
+            ? 'text-muted-foreground/30 cursor-not-allowed'
+            : 'text-foreground/60 hover:bg-accent/10'
           }
         `}
         aria-label="Increase quantity"
       >
-        <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
+        <Plus className="h-3 w-3" strokeWidth={2} />
       </button>
     </div>
   );
@@ -366,60 +353,59 @@ export const ShoppingListItem = ({
     <div 
       className={`
         relative overflow-hidden
-        rounded-xl 
-        transition-all duration-200
+        rounded-lg 
+        transition-all duration-150
         touch-manipulation
         ${isDimmed 
-          ? 'bg-muted/30 opacity-60' 
+          ? 'bg-muted/20 opacity-50' 
           : visualChecked 
-            ? 'bg-success/5 border border-success/30' 
-            : 'bg-card border border-border/40 hover:shadow-md'
+            ? 'bg-success/5 border border-success/20' 
+            : 'bg-card/50 border border-border/30'
         }
       `}
       dir={direction}
     >
-      {/* Confetti Effect */}
-      <ConfettiEffect isActive={showConfetti} origin={{ x: 15, y: 30 }} />
+      <ConfettiEffect isActive={showConfetti} origin={{ x: 15, y: 20 }} />
 
-      <div className="relative px-3 py-2 flex items-center gap-2">
-        {/* Compact Checkbox */}
+      <div className="relative px-2 py-1.5 flex items-center gap-1.5">
+        {/* Ultra Compact Checkbox */}
         <button
           ref={checkboxRef}
           onClick={handleCheck}
           className={`
             relative flex-shrink-0 
-            w-8 h-8 
-            rounded-lg 
+            w-6 h-6 
+            rounded-md 
             flex items-center justify-center
-            transition-all duration-200
+            transition-all duration-150
             touch-manipulation
             overflow-hidden
             ${visualChecked
-              ? 'bg-success shadow-sm'
+              ? 'bg-success'
               : isDimmed
                 ? 'bg-muted border border-muted-foreground/20'
-                : 'bg-card border-2 border-border hover:border-success/50 active:scale-95'
+                : 'bg-card border border-border/60 hover:border-success/50 active:scale-95'
             }
           `}
           aria-label={visualChecked ? 'Uncheck item' : 'Check item'}
         >
           {showRipple && (
             <span 
-              className="absolute w-3 h-3 bg-success/30 rounded-full animate-ripple"
+              className="absolute w-2 h-2 bg-success/30 rounded-full animate-ripple"
               style={{ left: ripplePos.x, top: ripplePos.y, transform: 'translate(-50%, -50%)' }}
             />
           )}
           
           {visualChecked && (
-            <Check className="h-4 w-4 text-success-foreground" strokeWidth={3} />
+            <Check className="h-3 w-3 text-success-foreground" strokeWidth={3} />
           )}
         </button>
         
-        {/* Item Name */}
+        {/* Item Name - More compact */}
         <div className="flex-1 min-w-0">
           <span 
             className={`
-              block text-sm font-medium leading-snug truncate
+              block text-xs font-medium leading-tight truncate
               ${visualChecked ? "line-through text-muted-foreground" : "text-foreground"}
             `}
           >
@@ -427,7 +413,7 @@ export const ShoppingListItem = ({
           </span>
         </div>
 
-        {/* Quantity Stepper */}
+        {/* Quantity Stepper - Already ultra compact */}
         <QuantityStepper
           value={item.quantity || 1}
           onChange={(val) => onQuantityChange(item.id, val)}
@@ -435,23 +421,23 @@ export const ShoppingListItem = ({
           isCompleted={isDimmed}
         />
         
-        {/* Unit Select - Compact */}
+        {/* Unit Select - Ultra compact */}
         <Select
           value={item.unit || 'units'}
           onValueChange={(val: Unit) => onUnitChange(item.id, val)}
         >
           <SelectTrigger 
             className={`
-              h-8 px-2
-              text-xs font-medium
-              rounded-lg transition-all
-              [&>svg]:h-3 [&>svg]:w-3
+              h-6 px-1.5
+              text-[10px] font-medium
+              rounded-md transition-all
+              [&>svg]:h-2.5 [&>svg]:w-2.5
               touch-manipulation
-              border border-border/50
-              min-w-[50px]
+              border border-border/40
+              min-w-[40px]
               ${isDimmed 
-                ? 'bg-muted/50 text-muted-foreground/50 opacity-50' 
-                : 'bg-white dark:bg-slate-800 text-foreground hover:shadow-sm'
+                ? 'bg-muted/30 text-muted-foreground/50 opacity-50' 
+                : 'bg-muted/20 text-foreground/70'
               }
             `}
           >
@@ -462,12 +448,12 @@ export const ShoppingListItem = ({
               })()}
             </span>
           </SelectTrigger>
-          <SelectContent className="rounded-xl shadow-lg">
+          <SelectContent className="rounded-lg shadow-lg">
             {UNITS.map(u => (
               <SelectItem 
                 key={u.value} 
                 value={u.value}
-                className="text-sm py-2 cursor-pointer rounded-lg"
+                className="text-xs py-1.5 cursor-pointer rounded-md"
               >
                 {language === 'he' ? u.labelHe : u.labelEn}
               </SelectItem>
@@ -475,21 +461,21 @@ export const ShoppingListItem = ({
           </SelectContent>
         </Select>
 
-        {/* Delete Button - Compact */}
+        {/* Delete Button - Ultra compact */}
         <Button
           variant="ghost"
           size="icon"
           onClick={() => onDelete(item.id)}
           className={`
-            h-7 w-7 
-            rounded-lg flex-shrink-0
-            text-muted-foreground/50
+            h-5 w-5 
+            rounded-md flex-shrink-0
+            text-muted-foreground/40
             hover:bg-destructive/10 hover:text-destructive
             active:scale-95
-            ${isDimmed ? 'opacity-40' : ''}
+            ${isDimmed ? 'opacity-30' : ''}
           `}
         >
-          <Trash2 className="h-3.5 w-3.5" />
+          <Trash2 className="h-3 w-3" />
         </Button>
       </div>
     </div>

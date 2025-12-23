@@ -279,54 +279,76 @@ const Insights = () => {
   const isOverBudget = budget ? monthlySpending > budget : false;
   const isNearBudget = budget ? monthlySpending > budget * 0.8 && !isOverBudget : false;
 
-  const handleGetAIAdvice = async () => {
+  const handleGetAIAdvice = () => {
     setIsLoadingAI(true);
     setAiAdvice(null);
 
-    // Prepare shopping data summary for AI
     const totalSpent = history.reduce((sum, item) => sum + item.totalAmount, 0);
     const avgPerTrip = history.length > 0 ? totalSpent / history.length : 0;
-    const stores = Object.entries(storeData);
-    const topItemsList = topItems.slice(0, 10);
 
-    const summaryData = {
-      totalTrips: history.length,
-      totalSpent,
-      avgPerTrip,
-      monthlySpending,
-      budget,
-      stores,
-      topItems: topItemsList,
-    };
+    // Generate local advice after a small delay for UX
+    setTimeout(() => {
+      const advice: string[] = [];
 
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/shopping-advisor`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
-          body: JSON.stringify({
-            shoppingData: summaryData,
-            language,
-          }),
+      // Budget analysis
+      if (budget && budget > 0) {
+        const budgetUsage = (monthlySpending / budget) * 100;
+        if (monthlySpending > budget) {
+          advice.push(`⚠️ חרגת מהתקציב ב-${(monthlySpending - budget).toFixed(0)}₪. שקול/י לצמצם קניות בחודש הבא.`);
+        } else if (budgetUsage > 80) {
+          advice.push(`💡 ניצלת ${budgetUsage.toFixed(0)}% מהתקציב. נשארו לך ${(budget - monthlySpending).toFixed(0)}₪.`);
+        } else {
+          advice.push(`✅ מצוין! ניצלת רק ${budgetUsage.toFixed(0)}% מהתקציב החודשי.`);
         }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to get advice");
       }
 
-      const data = await response.json();
-      setAiAdvice(data.advice);
-    } catch (error) {
-      console.error("AI advice error:", error);
-      setAiAdvice(t.ai.error);
-    } finally {
+      // Store comparison
+      if (pieData.length > 1) {
+        const sortedStores = [...pieData].sort((a, b) => b.value - a.value);
+        const mostExpensive = sortedStores[0];
+        const cheapest = sortedStores[sortedStores.length - 1];
+        if (mostExpensive.value > cheapest.value * 1.5) {
+          advice.push(`🏪 הוצאת הכי הרבה ב${mostExpensive.name} (${mostExpensive.value.toFixed(0)}₪). שקול/י להשוות מחירים עם ${cheapest.name}.`);
+        }
+      }
+
+      // Shopping frequency
+      if (history.length >= 3) {
+        advice.push(`🛒 ממוצע הוצאה לקנייה: ${avgPerTrip.toFixed(0)}₪. קניות גדולות יותר ופחות תכופות יכולות לחסוך זמן וכסף.`);
+      }
+
+      // Most purchased items
+      if (topItems.length > 0) {
+        const topItem = topItems[0];
+        advice.push(`📦 הפריט הנפוץ ביותר: ${topItem[0]} (${topItem[1]} פעמים). שקול/י לקנות באריזות גדולות יותר.`);
+      }
+
+      // Monthly trend
+      if (trendData.length >= 2) {
+        const lastMonth = trendData[trendData.length - 1];
+        const prevMonth = trendData[trendData.length - 2];
+        if (lastMonth && prevMonth) {
+          const change = ((lastMonth.amount - prevMonth.amount) / prevMonth.amount) * 100;
+          if (change > 20) {
+            advice.push(`📈 ההוצאות עלו ב-${change.toFixed(0)}% מהחודש הקודם. בדוק/י מה השתנה.`);
+          } else if (change < -10) {
+            advice.push(`📉 כל הכבוד! חסכת ${Math.abs(change).toFixed(0)}% מהחודש הקודם.`);
+          }
+        }
+      }
+
+      // Total spending insight
+      if (totalSpent > 0) {
+        advice.push(`💰 סה״כ הוצאת ${totalSpent.toFixed(0)}₪ ב-${history.length} קניות.`);
+      }
+
+      if (advice.length === 0) {
+        advice.push('📊 המשך/י לתעד קניות כדי לקבל תובנות מותאמות אישית!');
+      }
+
+      setAiAdvice(advice.join('\n\n'));
       setIsLoadingAI(false);
-    }
+    }, 800);
   };
 
   if (history.length === 0) {

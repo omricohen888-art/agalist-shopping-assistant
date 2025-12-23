@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ShoppingItem, Unit, UNITS, ISRAELI_STORES } from "@/types/shopping";
+import { ShoppingItem, Unit, UNITS, ISRAELI_STORES, ShoppingHistory } from "@/types/shopping";
 import { Button } from "@/components/ui/button";
 import { 
   ArrowRight, CheckCircle2, Home, X, Check, Sparkles, 
@@ -11,6 +11,7 @@ import { useSoundSettings } from "@/hooks/use-sound-settings.tsx";
 import { useHaptics } from "@/hooks/use-haptics";
 import { ConfettiEffect } from "@/components/ConfettiEffect";
 import { toast } from "sonner";
+import { saveShoppingHistory } from "@/utils/storage";
 import {
   Dialog,
   DialogContent,
@@ -181,7 +182,7 @@ export const ShoppingMode = () => {
     // Stop timer
     setIsTimerRunning(false);
 
-    const history = {
+    const history: ShoppingHistory = {
       id: Date.now().toString(),
       date: new Date().toISOString(),
       items: items,
@@ -189,12 +190,10 @@ export const ShoppingMode = () => {
       store: selectedStore || (language === 'he' ? 'לא צוין' : 'Not specified'),
       completedItems: completedCount,
       totalItems: totalCount,
-      shoppingDuration: elapsedTime,
     };
 
-    const savedHistory = JSON.parse(localStorage.getItem('shoppingHistory') || '[]');
-    savedHistory.push(history);
-    localStorage.setItem('shoppingHistory', JSON.stringify(savedHistory));
+    // Use storage utility function to save with correct key
+    saveShoppingHistory(history);
     localStorage.removeItem(`activeList_${id}`);
 
     setShowFinishDialog(false);

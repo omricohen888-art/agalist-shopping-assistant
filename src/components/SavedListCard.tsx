@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Trash2, Pencil, ShoppingCart, X, ChevronDown, CheckCircle2, Clock, Copy } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { Trash2, Pencil, ShoppingCart, X, ChevronDown, CheckCircle2, Clock, Copy, Play, RefreshCcw } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa";
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
 import { SavedList, ShoppingItem, Unit, UNITS } from "@/types/shopping";
@@ -17,6 +19,8 @@ interface SavedListCardProps {
     onToggleItem: (listId: string, itemId: string) => void;
     onUpdateItem?: (listId: string, item: ShoppingItem) => void;
     onGoShopping?: (list: SavedList) => void;
+    onDuplicate?: (list: SavedList) => void;
+    variant?: 'default' | 'in-progress' | 'completed';
 }
 
 export const SavedListCard: React.FC<SavedListCardProps> = ({
@@ -28,7 +32,9 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
     onDelete,
     onToggleItem,
     onUpdateItem,
-    onGoShopping
+    onGoShopping,
+    onDuplicate,
+    variant = 'default'
 }) => {
     const { language: userLanguage } = useGlobalLanguage();
     const [isExpanded, setIsExpanded] = useState(false);
@@ -37,6 +43,11 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
     const [editingQuantity, setEditingQuantity] = useState<number>(0);
     const [editingUnit, setEditingUnit] = useState<Unit>('units');
     const direction = userLanguage === 'he' ? 'rtl' : 'ltr';
+
+    // Calculate progress
+    const completedCount = items.filter(item => item.checked).length;
+    const totalCount = items.length;
+    const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
     // Indicator dot colors
     const indicatorColors = [
@@ -48,6 +59,36 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
         'bg-orange-500',
     ];
     const indicatorColor = indicatorColors[index % indicatorColors.length];
+
+    // Share to WhatsApp
+    const handleShareWhatsApp = () => {
+        const checkedItems = items.filter(item => item.checked);
+        const uncheckedItems = items.filter(item => !item.checked);
+
+        const formatItem = (item: ShoppingItem) => {
+            const checkbox = item.checked ? '✓' : '☐';
+            const quantityUnit = getDisplayQuantityUnit(item);
+            const quantityText = quantityUnit ? ` (${quantityUnit})` : '';
+            return `${checkbox} ${item.text}${quantityText}`;
+        };
+
+        let listText = '';
+        if (uncheckedItems.length > 0) {
+            listText += uncheckedItems.map(formatItem).join('\n');
+        }
+        if (checkedItems.length > 0) {
+            if (uncheckedItems.length > 0) {
+                listText += '\n\n' + (language === 'he' ? '── הושלמו ──' : '── Done ──') + '\n';
+            }
+            listText += checkedItems.map(formatItem).join('\n');
+        }
+
+        const header = `📋 ${list.name}`;
+        const fullText = `${header}\n${'─'.repeat(20)}\n${listText}`;
+        
+        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(fullText)}`;
+        window.open(whatsappUrl, '_blank');
+    };
 
     // Format duration
     const formatDuration = (seconds?: number): string => {
@@ -156,7 +197,7 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
             dir={direction}
         >
             {/* Card Header */}
-            <div className="flex justify-between items-start mb-4 pb-3 border-b border-border/30 gap-3">
+            <div className="flex justify-between items-start mb-3 pb-3 border-b border-border/30 gap-3">
                 <div className="flex items-center gap-2.5 flex-1 min-w-0">
                     <div className={`w-3 h-3 rounded-full ${indicatorColor} flex-shrink-0`} />
                     <h4 className="font-semibold text-base sm:text-lg text-foreground truncate flex-1">{list.name}</h4>
@@ -167,12 +208,32 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
                     <Button
                         variant="ghost"
                         size="icon"
+                        onClick={(e) => { e.stopPropagation(); handleShareWhatsApp(); }}
+                        className="h-8 w-8 text-muted-foreground hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-xl"
+                        title={language === 'he' ? 'שתף בוואטסאפ' : 'Share on WhatsApp'}
+                    >
+                        <FaWhatsapp className="h-4 w-4" />
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={(e) => { e.stopPropagation(); handleCopyList(); }}
                         className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl"
                         title={language === 'he' ? 'העתק רשימה' : 'Copy List'}
                     >
                         <Copy className="h-4 w-4" />
                     </Button>
+                    {onDuplicate && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={(e) => { e.stopPropagation(); onDuplicate(list); }}
+                            className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl"
+                            title={language === 'he' ? 'שכפל רשימה' : 'Duplicate List'}
+                        >
+                            <RefreshCcw className="h-4 w-4" />
+                        </Button>
+                    )}
                     <Button
                         variant="ghost"
                         size="icon"
@@ -193,6 +254,24 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
                     </Button>
                 </div>
             </div>
+
+            {/* Progress Bar - Only show when in progress */}
+            {variant === 'in-progress' && totalCount > 0 && (
+                <div className="mb-3 space-y-1.5">
+                    <div className="flex justify-between items-center text-xs">
+                        <span className="text-muted-foreground font-medium">
+                            {language === 'he' ? 'התקדמות' : 'Progress'}
+                        </span>
+                        <span className="font-semibold text-primary">
+                            {completedCount}/{totalCount} ({progressPercent}%)
+                        </span>
+                    </div>
+                    <Progress 
+                        value={progressPercent} 
+                        className="h-2 bg-muted"
+                    />
+                </div>
+            )}
 
             {/* Preview Items */}
             <div className={`flex-1 overflow-hidden relative ${isExpanded ? 'max-h-96 overflow-y-auto' : ''}`}>
@@ -334,24 +413,53 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
                     )}
                 </div>
                 
-                {/* Shopping Status Badge + Action */}
+                {/* Shopping Status Badge + Action - Based on Variant */}
                 <div className="flex items-center gap-2">
-                    {list.isShoppingComplete ? (
-                        <div className="flex items-center gap-1.5 bg-success/10 text-success px-2.5 py-1 rounded-full text-xs font-semibold">
-                            <CheckCircle2 className="h-3.5 w-3.5" />
-                            <span>{language === 'he' ? 'הושלמה' : 'Done'}</span>
-                        </div>
-                    ) : (
+                    {variant === 'completed' ? (
+                        <>
+                            <div className="flex items-center gap-1.5 bg-success/10 text-success px-2.5 py-1 rounded-full text-xs font-semibold">
+                                <CheckCircle2 className="h-3.5 w-3.5" />
+                                <span>{language === 'he' ? 'הושלמה' : 'Done'}</span>
+                            </div>
+                            {onDuplicate && (
+                                <Button
+                                    size="sm"
+                                    onClick={(e) => { e.stopPropagation(); onDuplicate(list); }}
+                                    className="h-8 px-3 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-xs rounded-xl flex items-center gap-1.5 shadow-sm"
+                                >
+                                    <RefreshCcw className="h-3.5 w-3.5" />
+                                    <span>{language === 'he' ? 'קנה שוב' : 'Shop Again'}</span>
+                                </Button>
+                            )}
+                        </>
+                    ) : variant === 'in-progress' ? (
                         <>
                             <div className="flex items-center gap-1.5 bg-warning/10 text-warning px-2.5 py-1 rounded-full text-xs font-semibold">
-                                <Clock className="h-3.5 w-3.5" />
-                                <span>{language === 'he' ? 'לא הושלמה' : 'Pending'}</span>
+                                <Play className="h-3.5 w-3.5" />
+                                <span>{language === 'he' ? 'בתהליך' : 'In Progress'}</span>
                             </div>
                             {onGoShopping && (
                                 <Button
                                     size="sm"
                                     onClick={(e) => { e.stopPropagation(); onGoShopping(list); }}
-                                    className="h-8 px-4 bg-success hover:bg-success/90 text-success-foreground font-semibold text-xs rounded-xl flex items-center gap-1.5 shadow-sm"
+                                    className="h-8 px-3 bg-warning hover:bg-warning/90 text-warning-foreground font-semibold text-xs rounded-xl flex items-center gap-1.5 shadow-sm"
+                                >
+                                    <Play className="h-3.5 w-3.5" />
+                                    <span>{language === 'he' ? 'המשך קנייה' : 'Continue'}</span>
+                                </Button>
+                            )}
+                        </>
+                    ) : (
+                        <>
+                            <div className="flex items-center gap-1.5 bg-primary/10 text-primary px-2.5 py-1 rounded-full text-xs font-semibold">
+                                <ShoppingCart className="h-3.5 w-3.5" />
+                                <span>{language === 'he' ? 'מוכנה' : 'Ready'}</span>
+                            </div>
+                            {onGoShopping && (
+                                <Button
+                                    size="sm"
+                                    onClick={(e) => { e.stopPropagation(); onGoShopping(list); }}
+                                    className="h-8 px-3 bg-success hover:bg-success/90 text-success-foreground font-semibold text-xs rounded-xl flex items-center gap-1.5 shadow-sm"
                                     title={language === 'he' ? 'צא לקנייה' : 'Go Shopping'}
                                 >
                                     <ShoppingCart className="h-3.5 w-3.5" />

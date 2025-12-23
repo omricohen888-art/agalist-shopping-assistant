@@ -1680,16 +1680,111 @@ export const ShoppingList = () => {
         {items.length === 0 && <SortableTemplates systemTemplates={currentTemplates} language={language} onTemplateClick={handleTemplateClick} onCreateNew={() => setIsCreateTemplateDialogOpen(true)} />}
 
         {/* Dashboard - Saved Lists & Completed Trips */}
-        {items.length === 0 && (savedLists.length > 0 || shoppingHistory.length > 0) && <div className="mb-12 border-t border-border/30 pt-8 max-w-5xl mx-auto space-y-10">
+        {items.length === 0 && (savedLists.length > 0 || shoppingHistory.length > 0) && (() => {
+          // Categorize lists
+          const inProgressLists = savedLists.filter(list => {
+            const completedCount = list.items.filter(item => item.checked).length;
+            return !list.isShoppingComplete && completedCount > 0;
+          });
+          const readyLists = savedLists.filter(list => {
+            const completedCount = list.items.filter(item => item.checked).length;
+            return !list.isShoppingComplete && completedCount === 0;
+          });
+          const completedLists = savedLists.filter(list => list.isShoppingComplete);
+
+          // Duplicate list handler
+          const handleDuplicateList = (list: SavedList) => {
+            const newList: SavedList = {
+              ...list,
+              id: Date.now().toString(),
+              name: language === 'he' ? `${list.name} (עותק)` : `${list.name} (copy)`,
+              createdAt: new Date().toISOString(),
+              isShoppingComplete: false,
+              shoppingCompletedAt: undefined,
+              shoppingDuration: undefined,
+              items: list.items.map(item => ({ ...item, checked: false }))
+            };
+            if (saveList(newList)) {
+              setSavedLists(getSavedLists());
+              toast.success(language === 'he' ? 'הרשימה שוכפלה!' : 'List duplicated!');
+            }
+          };
+
+          // Common handlers
+          const handleDelete = (id: string) => {
+            if (deleteSavedList(id)) {
+              setSavedLists(getSavedLists());
+              toast.success(t.toasts.listDeleted);
+            }
+          };
+
+          const handleToggle = (listId: string, itemId: string) => {
+            const list = savedLists.find(l => l.id === listId);
+            if (!list) return;
+            const updatedItems = list.items.map(item => item.id === itemId ? { ...item, checked: !item.checked } : item);
+            const updatedList = { ...list, items: updatedItems };
+            if (updateSavedList(updatedList)) {
+              setSavedLists(getSavedLists());
+            }
+          };
+
+          // Go shopping handler
+          const handleGoShopping = (list: SavedList) => {
+            // Save list data for shopping mode
+            localStorage.setItem(`shoppingList_${list.id}`, JSON.stringify({
+              id: list.id,
+              name: list.name,
+              items: list.items,
+              createdAt: list.createdAt
+            }));
+            navigate(`/shopping/${list.id}`);
+          };
+
+          return (
+            <div className="mb-12 border-t border-border/30 pt-8 max-w-5xl mx-auto space-y-10">
               
-              {/* Active/Pending Lists Section */}
-              {savedLists.length > 0 && <div>
+              {/* In Progress Section */}
+              {inProgressLists.length > 0 && (
+                <div>
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                      <ShoppingCart className="h-5 w-5 text-warning" />
+                      {language === 'he' ? 'ממשיכים מאיפה שעצרנו' : 'Continue Where You Left Off'}
+                      <span className="text-xs bg-warning/10 text-warning px-2.5 py-1 rounded-full font-semibold">
+                        {inProgressLists.length}
+                      </span>
+                    </h3>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
+                    {inProgressLists.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 4).map((list, index) => (
+                      <SavedListCard 
+                        key={list.id} 
+                        list={list} 
+                        index={index} 
+                        language={language} 
+                        t={t} 
+                        variant="in-progress"
+                        onEdit={handleEditSavedList} 
+                        onDelete={handleDelete}
+                        onToggleItem={handleToggle}
+                        onGoShopping={handleGoShopping}
+                        onDuplicate={handleDuplicateList}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Ready to Shop Section */}
+              {readyLists.length > 0 && (
+                <div>
                   <div className="flex justify-between items-center mb-6">
                     <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
                       <ClipboardList className="h-5 w-5 text-primary" />
-                      {language === 'he' ? 'רשימות מוכנות' : 'Ready to Shop'}
+                      {language === 'he' ? 'מוכנות לקנייה' : 'Ready to Shop'}
                       <span className="text-xs bg-primary/10 text-primary px-2.5 py-1 rounded-full font-semibold">
-                        {savedLists.length}
+                        {readyLists.length}
                       </span>
                     </h3>
                     <Button variant="ghost" onClick={() => navigate("/notebook")} className="text-sm font-semibold text-primary hover:text-primary/80 hover:bg-primary/10">
@@ -1699,58 +1794,103 @@ export const ShoppingList = () => {
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
-                    {savedLists.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 4).map((list, index) => <SavedListCard key={list.id} list={list} index={index} language={language} t={t} onEdit={handleEditSavedList} onDelete={id => {
-              if (deleteSavedList(id)) {
-                setSavedLists(getSavedLists());
-                toast.success(t.toasts.listDeleted);
-              }
-            }} onToggleItem={(listId, itemId) => {
-              const list = savedLists.find(l => l.id === listId);
-              if (!list) return;
-              const updatedItems = list.items.map(item => item.id === itemId ? {
-                ...item,
-                checked: !item.checked
-              } : item);
-              const updatedList = {
-                ...list,
-                items: updatedItems
-              };
-              if (updateSavedList(updatedList)) {
-                setSavedLists(getSavedLists());
-              }
-            }} />)}
+                    {readyLists.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 4).map((list, index) => (
+                      <SavedListCard 
+                        key={list.id} 
+                        list={list} 
+                        index={index} 
+                        language={language} 
+                        t={t} 
+                        variant="default"
+                        onEdit={handleEditSavedList} 
+                        onDelete={handleDelete}
+                        onToggleItem={handleToggle}
+                        onGoShopping={handleGoShopping}
+                        onDuplicate={handleDuplicateList}
+                      />
+                    ))}
                   </div>
-                </div>}
+                </div>
+              )}
 
-              {/* Completed Trips Section */}
-              {shoppingHistory.length > 0 && <div>
+              {/* Completed Lists Section */}
+              {completedLists.length > 0 && (
+                <div>
                   <div className="flex justify-between items-center mb-6">
                     <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
                       <CheckCircle2 className="h-5 w-5 text-success" />
-                      {language === 'he' ? 'קניות שהושלמו' : 'Completed Trips'}
+                      {language === 'he' ? 'קניות שהושלמו' : 'Completed Shopping'}
                       <span className="text-xs bg-success/10 text-success px-2.5 py-1 rounded-full font-semibold">
-                        {shoppingHistory.length}
+                        {completedLists.length}
                       </span>
                     </h3>
-                    <Button variant="ghost" onClick={() => navigate("/history")} className="text-sm font-semibold text-success hover:text-success/80 hover:bg-success/10">
+                    <Button variant="ghost" onClick={() => navigate("/notebook")} className="text-sm font-semibold text-success hover:text-success/80 hover:bg-success/10">
                       {language === 'he' ? 'צפה בהכל' : 'View All'}
                       {language === 'he' ? <div className="mr-1 rotate-180">➜</div> : <div className="ml-1">➜</div>}
                     </Button>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
-                    {shoppingHistory.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 4).map((trip, index) => <CompletedTripCard key={trip.id} trip={trip} index={index} language={language} onViewDetails={trip => {
-              setSelectedTrip(trip);
-              setIsHistoryModalOpen(true);
-            }} onDelete={id => {
-              if (deleteShoppingHistory(id)) {
-                setShoppingHistory(getShoppingHistory());
-                toast.success(language === 'he' ? 'הקנייה נמחקה' : 'Trip deleted');
-              }
-            }} />)}
+                    {completedLists.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 4).map((list, index) => (
+                      <SavedListCard 
+                        key={list.id} 
+                        list={list} 
+                        index={index} 
+                        language={language} 
+                        t={t} 
+                        variant="completed"
+                        onEdit={handleEditSavedList} 
+                        onDelete={handleDelete}
+                        onToggleItem={handleToggle}
+                        onDuplicate={handleDuplicateList}
+                      />
+                    ))}
                   </div>
-                </div>}
-            </div>}
+                </div>
+              )}
+
+              {/* Completed Trips from History Section */}
+              {shoppingHistory.length > 0 && (
+                <div>
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                      <History className="h-5 w-5 text-muted-foreground" />
+                      {language === 'he' ? 'היסטוריית קניות' : 'Shopping History'}
+                      <span className="text-xs bg-muted text-muted-foreground px-2.5 py-1 rounded-full font-semibold">
+                        {shoppingHistory.length}
+                      </span>
+                    </h3>
+                    <Button variant="ghost" onClick={() => navigate("/history")} className="text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-muted">
+                      {language === 'he' ? 'צפה בהכל' : 'View All'}
+                      {language === 'he' ? <div className="mr-1 rotate-180">➜</div> : <div className="ml-1">➜</div>}
+                    </Button>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
+                    {shoppingHistory.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 4).map((trip, index) => (
+                      <CompletedTripCard 
+                        key={trip.id} 
+                        trip={trip} 
+                        index={index} 
+                        language={language} 
+                        onViewDetails={trip => {
+                          setSelectedTrip(trip);
+                          setIsHistoryModalOpen(true);
+                        }} 
+                        onDelete={id => {
+                          if (deleteShoppingHistory(id)) {
+                            setShoppingHistory(getShoppingHistory());
+                            toast.success(language === 'he' ? 'הקנייה נמחקה' : 'Trip deleted');
+                          }
+                        }} 
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })()}
 
         {/* Secondary Action Bar */}
         {items && items.length > 0 && <div className="flex flex-col gap-3 mb-4">

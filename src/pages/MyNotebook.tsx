@@ -62,11 +62,8 @@ const MyNotebook = () => {
     };
 
     const handleGoShopping = (list: SavedList) => {
-        // Reset all items to unchecked and navigate to shopping mode
-        const resetItems = list.items.map(item => ({ ...item, checked: false }));
-        const updatedList = { ...list, items: resetItems };
-        updateSavedList(updatedList);
-        navigate('/shopping', { state: { list: updatedList } });
+        // Navigate to shopping mode with current item states preserved
+        navigate('/shopping', { state: { list } });
     };
 
     return (

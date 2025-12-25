@@ -441,7 +441,7 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
                             {onGoShopping && (
                                 <Button
                                     size="sm"
-                                    onClick={(e) => { e.stopPropagation(); onGoShopping(list); }}
+                                    onClick={(e) => { e.stopPropagation(); onGoShopping({ ...list, items }); }}
                                     className="h-8 px-3 bg-warning hover:bg-warning/90 text-warning-foreground font-semibold text-xs rounded-xl flex items-center gap-1.5 shadow-sm"
                                 >
                                     <Play className="h-3.5 w-3.5" />
@@ -458,7 +458,7 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
                             {onGoShopping && (
                                 <Button
                                     size="sm"
-                                    onClick={(e) => { e.stopPropagation(); onGoShopping(list); }}
+                                    onClick={(e) => { e.stopPropagation(); onGoShopping({ ...list, items }); }}
                                     className="h-8 px-3 bg-success hover:bg-success/90 text-success-foreground font-semibold text-xs rounded-xl flex items-center gap-1.5 shadow-sm"
                                     title={language === 'he' ? 'צא לקנייה' : 'Go Shopping'}
                                 >

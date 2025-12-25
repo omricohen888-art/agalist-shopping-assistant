@@ -1228,7 +1228,13 @@ export const ShoppingList = () => {
                           newItems.splice(actualIndex + 1, 0, newItem);
                           return newItems;
                         });
-                        setTimeout(() => { notepadInputRefs.current[actualIndex + 1]?.focus(); }, 0);
+                        setTimeout(() => { 
+                          const inputEl = notepadInputRefs.current[actualIndex + 1];
+                          if (inputEl) {
+                            inputEl.focus();
+                            inputEl.setSelectionRange(inputEl.value.length, inputEl.value.length);
+                          }
+                        }, 50);
                       } else if (e.key === 'Backspace' && item.text === '' && actualIndex > 0) {
                         e.preventDefault();
                         setNotepadItems(prev => prev.filter(i => i.id !== item.id));
@@ -1623,7 +1629,13 @@ export const ShoppingList = () => {
                       newItems.splice(currentIndex + 1, 0, newItem);
                       return newItems;
                     });
-                    setTimeout(() => { notepadInputRefs.current[currentIndex + 1]?.focus(); }, 0);
+                    setTimeout(() => { 
+                      const inputEl = notepadInputRefs.current[currentIndex + 1];
+                      if (inputEl) {
+                        inputEl.focus();
+                        inputEl.setSelectionRange(inputEl.value.length, inputEl.value.length);
+                      }
+                    }, 50);
                   } else if (e.key === 'Backspace' && item.text === '' && currentIndex > 0) {
                     e.preventDefault();
                     setNotepadItems(prev => prev.filter(i => i.id !== item.id));
@@ -1647,7 +1659,7 @@ export const ShoppingList = () => {
                         </div>
                         
                         {/* Unit - Compact */}
-                        <select value={item.unit || 'units'} onChange={e => setNotepadItems(prev => prev.map(i => i.id === item.id ? { ...i, unit: e.target.value as Unit } : i))} className="w-12 h-6 text-[10px] rounded-lg border border-border/30 bg-muted/30 text-foreground cursor-pointer flex-shrink-0">
+                        <select tabIndex={-1} value={item.unit || 'units'} onChange={e => setNotepadItems(prev => prev.map(i => i.id === item.id ? { ...i, unit: e.target.value as Unit } : i))} className="w-12 h-6 text-[10px] rounded-lg border border-border/30 bg-muted/30 text-foreground cursor-pointer flex-shrink-0">
                           {UNITS.map(u => <option key={u.value} value={u.value}>{language === 'he' ? u.labelHe : u.labelEn}</option>)}
                         </select>
 

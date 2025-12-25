@@ -62,8 +62,13 @@ const MyNotebook = () => {
     };
 
     const handleGoShopping = (list: SavedList) => {
-        // Navigate to shopping mode with current item states preserved
-        navigate('/shopping', { state: { list } });
+        // Save to localStorage with current item states and navigate
+        const activeId = Date.now().toString();
+        localStorage.setItem(`activeList_${activeId}`, JSON.stringify({
+            name: list.name,
+            items: list.items
+        }));
+        navigate(`/shopping/${activeId}`);
     };
 
     return (

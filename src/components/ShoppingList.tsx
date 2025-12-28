@@ -1792,19 +1792,21 @@ export const ShoppingList = () => {
           return (
             <div className="mb-12 border-t border-border/30 pt-8 max-w-5xl mx-auto space-y-10">
               
-              {/* In Progress Section */}
-              {inProgressLists.length > 0 && (
-                <div>
-                  <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
-                      <ShoppingCart className="h-5 w-5 text-warning" />
-                      {language === 'he' ? 'ממשיכים מאיפה שעצרנו' : 'Continue Where You Left Off'}
+              {/* In Progress Section - Always visible */}
+              <div>
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                    <ShoppingCart className="h-5 w-5 text-warning" />
+                    {language === 'he' ? 'ממשיכים מאיפה שעצרנו' : 'Continue Where You Left Off'}
+                    {inProgressLists.length > 0 && (
                       <span className="text-xs bg-warning/10 text-warning px-2.5 py-1 rounded-full font-semibold">
                         {inProgressLists.length}
                       </span>
-                    </h3>
-                  </div>
+                    )}
+                  </h3>
+                </div>
 
+                {inProgressLists.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
                     {inProgressLists.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 4).map((list, index) => (
                       <SavedListCard 
@@ -1822,26 +1824,38 @@ export const ShoppingList = () => {
                       />
                     ))}
                   </div>
-                </div>
-              )}
+                ) : (
+                  <div className="bg-muted/30 border border-dashed border-muted-foreground/30 rounded-xl p-8 text-center">
+                    <ShoppingCart className="h-10 w-10 text-muted-foreground/50 mx-auto mb-3" />
+                    <p className="text-muted-foreground">
+                      {language === 'he' ? 'אין כרגע קניות פעילות' : 'No active shopping trips'}
+                    </p>
+                    <p className="text-sm text-muted-foreground/70 mt-1">
+                      {language === 'he' ? 'כשתתחיל קנייה ותעצור באמצע, היא תופיע כאן' : 'Start shopping and pause midway to see it here'}
+                    </p>
+                  </div>
+                )}
+              </div>
 
-              {/* Ready to Shop Section */}
-              {readyLists.length > 0 && (
-                <div>
-                  <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
-                      <ClipboardList className="h-5 w-5 text-primary" />
-                      {language === 'he' ? 'מוכנות לקנייה' : 'Ready to Shop'}
+              {/* Ready to Shop Section - Always visible */}
+              <div>
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                    <ClipboardList className="h-5 w-5 text-primary" />
+                    {language === 'he' ? 'מוכנות לקנייה' : 'Ready to Shop'}
+                    {readyLists.length > 0 && (
                       <span className="text-xs bg-primary/10 text-primary px-2.5 py-1 rounded-full font-semibold">
                         {readyLists.length}
                       </span>
-                    </h3>
-                    <Button variant="ghost" onClick={() => navigate("/notebook")} className="text-sm font-semibold text-primary hover:text-primary/80 hover:bg-primary/10">
-                      {t.viewAllListsButton}
-                      {language === 'he' ? <div className="mr-1 rotate-180">➜</div> : <div className="ml-1">➜</div>}
-                    </Button>
-                  </div>
+                    )}
+                  </h3>
+                  <Button variant="ghost" onClick={() => navigate("/notebook")} className="text-sm font-semibold text-primary hover:text-primary/80 hover:bg-primary/10">
+                    {t.viewAllListsButton}
+                    {language === 'he' ? <div className="mr-1 rotate-180">➜</div> : <div className="ml-1">➜</div>}
+                  </Button>
+                </div>
 
+                {readyLists.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
                     {readyLists.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 4).map((list, index) => (
                       <SavedListCard 
@@ -1859,8 +1873,18 @@ export const ShoppingList = () => {
                       />
                     ))}
                   </div>
-                </div>
-              )}
+                ) : (
+                  <div className="bg-muted/30 border border-dashed border-muted-foreground/30 rounded-xl p-8 text-center">
+                    <ClipboardList className="h-10 w-10 text-muted-foreground/50 mx-auto mb-3" />
+                    <p className="text-muted-foreground">
+                      {language === 'he' ? 'אין רשימות ממתינות' : 'No lists waiting'}
+                    </p>
+                    <p className="text-sm text-muted-foreground/70 mt-1">
+                      {language === 'he' ? 'צור רשימה חדשה ושמור אותה כדי לראות אותה כאן' : 'Create and save a list to see it here'}
+                    </p>
+                  </div>
+                )}
+              </div>
 
               {/* Completed Lists Section */}
               {completedLists.length > 0 && (

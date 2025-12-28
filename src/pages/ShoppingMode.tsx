@@ -130,7 +130,12 @@ export const ShoppingMode = () => {
       return;
     }
 
-    const listData = localStorage.getItem(`activeList_${id}`);
+    // Try both key patterns for compatibility
+    let listData = localStorage.getItem(`shoppingList_${id}`);
+    if (!listData) {
+      listData = localStorage.getItem(`activeList_${id}`);
+    }
+    
     if (listData) {
       const list = JSON.parse(listData);
       setItems(list.items || []);
@@ -208,6 +213,7 @@ export const ShoppingMode = () => {
 
     // Use storage utility function to save with correct key
     saveShoppingHistory(history);
+    localStorage.removeItem(`shoppingList_${id}`);
     localStorage.removeItem(`activeList_${id}`);
 
     setShowFinishDialog(false);
@@ -236,6 +242,7 @@ export const ShoppingMode = () => {
     saveList(newSavedList);
     
     // Remove active list
+    localStorage.removeItem(`shoppingList_${id}`);
     localStorage.removeItem(`activeList_${id}`);
 
     toast.success(language === 'he' ? 'הרשימה נשמרה בפנקס שלי!' : 'List saved to My Notebook!');
@@ -249,6 +256,7 @@ export const ShoppingMode = () => {
 
   const confirmExit = () => {
     setShowExitDialog(false);
+    localStorage.removeItem(`shoppingList_${id}`);
     localStorage.removeItem(`activeList_${id}`);
     navigate("/");
   };

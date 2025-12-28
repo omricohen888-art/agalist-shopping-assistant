@@ -62,13 +62,14 @@ const MyNotebook = () => {
     };
 
     const handleGoShopping = (list: SavedList) => {
-        // Save to localStorage with current item states and navigate
-        const activeId = Date.now().toString();
-        localStorage.setItem(`activeList_${activeId}`, JSON.stringify({
+        // Save with same key pattern as ShoppingList.tsx for consistency
+        localStorage.setItem(`shoppingList_${list.id}`, JSON.stringify({
+            id: list.id,
             name: list.name,
-            items: list.items
+            items: list.items,
+            createdAt: list.createdAt
         }));
-        navigate(`/shopping/${activeId}`);
+        navigate(`/shopping/${list.id}`);
     };
 
     return (

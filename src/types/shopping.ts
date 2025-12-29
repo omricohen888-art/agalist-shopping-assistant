@@ -33,6 +33,7 @@ export const STORES_BY_TYPE: Record<ShoppingType, readonly string[]> = {
     "חצי חינם",
     "אושר עד",
     "סטופ מרקט",
+    "מכולת שכונתית",
     "אחר",
   ],
   online: [

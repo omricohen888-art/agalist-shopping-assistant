@@ -834,7 +834,7 @@ export const ShoppingMode = () => {
                 <SelectTrigger className="w-full h-12 text-base">
                   {selectedStore ? (
                     <span className="flex items-center gap-2">
-                      <span className="w-5 h-5 text-foreground">{getStoreLogo(selectedStore)}</span>
+                      <span className="w-5 h-5 flex-shrink-0 flex items-center justify-center text-foreground [&_svg]:w-5 [&_svg]:h-5 [&_svg]:max-w-5 [&_svg]:max-h-5">{getStoreLogo(selectedStore)}</span>
                       <span>{selectedStore}</span>
                     </span>
                   ) : (
@@ -848,7 +848,7 @@ export const ShoppingMode = () => {
                   {STORES_BY_TYPE[selectedShoppingType].map((store) => (
                     <SelectItem key={store} value={store} className="text-base">
                       <span className="flex items-center gap-2">
-                        <span className="w-5 h-5 text-foreground">{getStoreLogo(store)}</span>
+                        <span className="w-5 h-5 flex-shrink-0 flex items-center justify-center text-foreground [&_svg]:w-5 [&_svg]:h-5 [&_svg]:max-w-5 [&_svg]:max-h-5">{getStoreLogo(store)}</span>
                         <span>{store}</span>
                       </span>
                     </SelectItem>

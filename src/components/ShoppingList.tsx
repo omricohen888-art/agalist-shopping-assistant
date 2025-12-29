@@ -19,6 +19,7 @@ import { StandardizedTextarea } from "@/components/ui/standardized-textarea";
 import { HandwritingCanvas } from "@/components/HandwritingCanvas";
 import { toast } from "sonner";
 import { ShoppingItem, ShoppingHistory, ISRAELI_STORES, UNITS, Unit, SavedList } from "@/types/shopping";
+import { ISRAELI_PRODUCTS } from "@/data/israeliProducts";
 import { ShoppingListItem } from "@/components/ShoppingListItem";
 import { GroupedShoppingList } from "@/components/GroupedShoppingList";
 import { SortableTemplates } from "@/components/SortableTemplates";
@@ -429,6 +430,29 @@ export const ShoppingList = () => {
       isChecked: !item.isChecked
     } : item));
   };
+  // Smart split by spaces: only split if ALL words are known products
+  const smartSplitBySpaces = (line: string): string[] => {
+    const words = line.split(/\s+/).filter(w => w.length > 0);
+    
+    // If single word or empty, return as is
+    if (words.length <= 1) return [line.trim()];
+    
+    // Check if ALL words are known products (case-insensitive)
+    const allWordsAreKnown = words.every(word => 
+      ISRAELI_PRODUCTS.some(product => 
+        product.toLowerCase() === word.toLowerCase()
+      )
+    );
+    
+    // Only split if ALL words are known products
+    if (allWordsAreKnown) {
+      return words;
+    }
+    
+    // Otherwise keep as single item (e.g., "חלב תנובה 1 ליטר")
+    return [line.trim()];
+  };
+
   const handleQuickPaste = async () => {
     try {
       const clipboardText = await navigator.clipboard.readText();
@@ -436,15 +460,19 @@ export const ShoppingList = () => {
         // Split by newlines first
         const lines = clipboardText.split("\n").map(line => line.trim()).filter(line => line.length > 0);
 
-        // For each line, split by commas if they exist, otherwise keep as is
+        // For each line, split by commas if they exist, then apply smart space splitting
         const allItems: string[] = [];
         lines.forEach(line => {
           if (line.includes(',')) {
             // Split by comma and filter out empty items
             const commaItems = line.split(',').map(item => item.trim()).filter(item => item.length > 0);
-            allItems.push(...commaItems);
+            // Apply smart split to each comma-separated item
+            commaItems.forEach(item => {
+              allItems.push(...smartSplitBySpaces(item));
+            });
           } else {
-            allItems.push(line);
+            // Apply smart split to the whole line
+            allItems.push(...smartSplitBySpaces(line));
           }
         });
 

@@ -83,6 +83,7 @@ export const ShoppingMode = () => {
   const [showConfetti, setShowConfetti] = useState(false);
   const [showMissionComplete, setShowMissionComplete] = useState(false);
   const [showFinishDialog, setShowFinishDialog] = useState(false);
+  const [showUncollectedWarning, setShowUncollectedWarning] = useState(false);
   const [totalAmount, setTotalAmount] = useState("");
   const [selectedStore, setSelectedStore] = useState("");
   const [selectedShoppingType, setSelectedShoppingType] = useState<ShoppingType>("supermarket");
@@ -189,7 +190,20 @@ export const ShoppingMode = () => {
 
   const handleFinishShopping = () => {
     if (!id) return;
-    // Open dialog to enter amount and store
+    
+    // Check if there are uncollected items
+    const uncollectedCount = items.filter(item => !item.checked).length;
+    if (uncollectedCount > 0) {
+      // Show warning dialog
+      setShowUncollectedWarning(true);
+    } else {
+      // All items collected, open finish dialog
+      setShowFinishDialog(true);
+    }
+  };
+
+  const proceedToFinishDialog = () => {
+    setShowUncollectedWarning(false);
     setShowFinishDialog(true);
   };
 
@@ -217,8 +231,15 @@ export const ShoppingMode = () => {
     localStorage.removeItem(`activeList_${id}`);
 
     setShowFinishDialog(false);
-    toast.success(language === 'he' ? 'הקניות הושלמו!' : 'Shopping completed!');
-    navigate("/history");
+    
+    // Navigate to dashboard and show toast
+    navigate("/");
+    setTimeout(() => {
+      toast.success(
+        language === 'he' ? '🎉 הקנייה הושלמה בהצלחה!' : '🎉 Shopping completed successfully!',
+        { duration: 4000 }
+      );
+    }, 100);
   };
 
   const handleSaveForLater = () => {
@@ -245,8 +266,14 @@ export const ShoppingMode = () => {
     localStorage.removeItem(`shoppingList_${id}`);
     localStorage.removeItem(`activeList_${id}`);
 
-    toast.success(language === 'he' ? 'הרשימה נשמרה בפנקס שלי!' : 'List saved to My Notebook!');
-    navigate("/notebook");
+    // Navigate to dashboard and show toast
+    navigate("/");
+    setTimeout(() => {
+      toast.success(
+        language === 'he' ? '💾 הרשימה נשמרה בהצלחה!' : '💾 List saved successfully!',
+        { duration: 4000 }
+      );
+    }, 100);
   };
 
   const handleExit = () => {
@@ -900,6 +927,51 @@ export const ShoppingMode = () => {
             >
               <CheckCircle2 className="h-4 w-4 mr-2" />
               {language === 'he' ? 'שמור וסיים' : 'Save & Finish'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Uncollected Items Warning Dialog */}
+      <Dialog open={showUncollectedWarning} onOpenChange={setShowUncollectedWarning}>
+        <DialogContent className="sm:max-w-md" dir={direction}>
+          <DialogHeader>
+            <DialogTitle className="text-center text-xl font-bold">
+              {language === 'he' ? '⚠️ רגע!' : '⚠️ Wait!'}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="py-4 text-center space-y-3">
+            <div className="w-16 h-16 mx-auto rounded-full bg-orange-100 flex items-center justify-center">
+              <ShoppingCart className="h-8 w-8 text-orange-500" />
+            </div>
+            <p className="text-base font-medium text-foreground">
+              {language === 'he' 
+                ? `שכחת ${items.filter(item => !item.checked).length} פריטים!` 
+                : `You forgot ${items.filter(item => !item.checked).length} items!`
+              }
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {language === 'he' 
+                ? 'האם אתה בטוח שברצונך לסיים?' 
+                : 'Are you sure you want to finish?'
+              }
+            </p>
+          </div>
+
+          <DialogFooter className="flex flex-col gap-2 sm:flex-col">
+            <Button
+              onClick={() => setShowUncollectedWarning(false)}
+              className="w-full h-12 text-base font-bold bg-primary hover:bg-primary/90"
+            >
+              {language === 'he' ? '🛒 חזרה לקנייה' : '🛒 Back to Shopping'}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={proceedToFinishDialog}
+              className="w-full h-12 text-base font-medium text-muted-foreground"
+            >
+              {language === 'he' ? 'המשך בכל זאת' : 'Continue Anyway'}
             </Button>
           </DialogFooter>
         </DialogContent>

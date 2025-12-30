@@ -2205,37 +2205,67 @@ export const ShoppingList = () => {
 
         {/* Create Template Dialog */}
         <Dialog open={isCreateTemplateDialogOpen} onOpenChange={setIsCreateTemplateDialogOpen}>
-          <DialogContent className="sm:max-w-[500px]">
-            <DialogHeader>
-              <DialogTitle className="text-2xl font-bold">
+          <DialogContent 
+            className="sm:max-w-[500px] rounded-2xl border-border"
+            dir={language === 'he' ? 'rtl' : 'ltr'}
+          >
+            <DialogHeader className="pb-4 border-b border-border">
+              <DialogTitle className="text-xl font-bold flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-primary/10">
+                  <ClipboardList className="h-5 w-5 text-primary" />
+                </div>
                 {language === 'he' ? 'יצירת תבנית חדשה' : 'Create New Template'}
               </DialogTitle>
+              <p className="text-sm text-muted-foreground mt-2">
+                {language === 'he' 
+                  ? 'שמור רשימת קניות כתבנית לשימוש חוזר' 
+                  : 'Save a shopping list as a reusable template'}
+              </p>
             </DialogHeader>
 
-            <div className="space-y-6 py-4">
+            <div className="space-y-5 py-4">
               {/* Template Name */}
-              <div className="space-y-3">
-                <Label htmlFor="templateName" className="text-base font-semibold">
+              <div className="space-y-2">
+                <Label htmlFor="templateName" className="text-sm font-medium text-foreground">
                   {language === 'he' ? 'שם התבנית' : 'Template Name'}
                 </Label>
-                <Input id="templateName" value={newTemplateName} onChange={e => setNewTemplateName(e.target.value)} placeholder={language === 'he' ? 'למשל: הקנייה הקבועה שלי' : 'e.g., My Regular Shopping'} className="h-11 text-lg" />
+                <Input 
+                  id="templateName" 
+                  value={newTemplateName} 
+                  onChange={e => setNewTemplateName(e.target.value)} 
+                  placeholder={language === 'he' ? 'למשל: קניות שבועיות' : 'e.g., Weekly Shopping'} 
+                  className="h-12 text-base rounded-xl" 
+                />
               </div>
 
               {/* Template Items */}
-              <div className="space-y-3">
-                <Label htmlFor="templateItems" className="text-base font-semibold">
+              <div className="space-y-2">
+                <Label htmlFor="templateItems" className="text-sm font-medium text-foreground">
                   {language === 'he' ? 'פריטי התבנית' : 'Template Items'}
                 </Label>
-                <StandardizedTextarea id="templateItems" value={newTemplateItems} onChange={e => setNewTemplateItems(e.target.value)} placeholder={language === 'he' ? 'הדבק או הקלד את רשימת הקניות שלך, כל פריט בשורה נפרדת' : 'Paste or type your shopping list, one item per line'} className="min-h-[120px] text-base" />
+                <StandardizedTextarea 
+                  id="templateItems" 
+                  value={newTemplateItems} 
+                  onChange={e => setNewTemplateItems(e.target.value)} 
+                  placeholder={language === 'he' ? 'פריט אחד בכל שורה...' : 'One item per line...'} 
+                  className="min-h-[140px] text-base rounded-xl resize-none" 
+                />
               </div>
             </div>
 
-            <DialogFooter className="gap-2">
-              <Button variant="outline" onClick={() => setIsCreateTemplateDialogOpen(false)}>
+            <DialogFooter className="gap-3 pt-4 border-t border-border flex-row">
+              <Button 
+                variant="outline" 
+                onClick={() => setIsCreateTemplateDialogOpen(false)}
+                className="flex-1 h-11 rounded-xl"
+              >
                 {t.cancel}
               </Button>
-              <Button onClick={handleCreateTemplate} className="bg-primary hover:bg-primary/90 font-bold">
-                <Save className="mr-2 h-4 w-4" />
+              <Button 
+                onClick={handleCreateTemplate} 
+                className="flex-1 h-11 rounded-xl bg-primary hover:bg-primary/90 font-semibold"
+              >
+                <Save className="me-2 h-4 w-4" />
                 {language === 'he' ? 'שמור תבנית' : 'Save Template'}
               </Button>
             </DialogFooter>

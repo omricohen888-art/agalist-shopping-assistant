@@ -2206,69 +2206,74 @@ export const ShoppingList = () => {
         {/* Create Template Dialog */}
         <Dialog open={isCreateTemplateDialogOpen} onOpenChange={setIsCreateTemplateDialogOpen}>
           <DialogContent 
-            className="sm:max-w-[500px] rounded-2xl border-border"
+            className="sm:max-w-[420px] p-0 gap-0 overflow-hidden"
             dir={language === 'he' ? 'rtl' : 'ltr'}
           >
-            <DialogHeader className="pb-4 border-b border-border">
-              <DialogTitle className="text-xl font-bold flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-primary/10">
+            {/* Header with gradient */}
+            <div className="bg-gradient-to-b from-primary/5 to-transparent px-6 pt-6 pb-4">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                   <ClipboardList className="h-5 w-5 text-primary" />
                 </div>
-                {language === 'he' ? 'יצירת תבנית חדשה' : 'Create New Template'}
-              </DialogTitle>
-              <p className="text-sm text-muted-foreground mt-2">
-                {language === 'he' 
-                  ? 'שמור רשימת קניות כתבנית לשימוש חוזר' 
-                  : 'Save a shopping list as a reusable template'}
-              </p>
-            </DialogHeader>
+                <div>
+                  <h2 className="text-lg font-bold text-foreground">
+                    {language === 'he' ? 'יצירת תבנית חדשה' : 'Create New Template'}
+                  </h2>
+                  <p className="text-xs text-muted-foreground">
+                    {language === 'he' 
+                      ? 'שמור פריטים לשימוש חוזר' 
+                      : 'Save items for reuse'}
+                  </p>
+                </div>
+              </div>
+            </div>
 
-            <div className="space-y-5 py-4">
-              {/* Template Name */}
-              <div className="space-y-2">
-                <Label htmlFor="templateName" className="text-sm font-medium text-foreground">
+            {/* Form content */}
+            <div className="px-6 py-5 space-y-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="templateName" className="text-sm font-medium">
                   {language === 'he' ? 'שם התבנית' : 'Template Name'}
                 </Label>
                 <Input 
                   id="templateName" 
                   value={newTemplateName} 
                   onChange={e => setNewTemplateName(e.target.value)} 
-                  placeholder={language === 'he' ? 'למשל: קניות שבועיות' : 'e.g., Weekly Shopping'} 
-                  className="h-12 text-base rounded-xl" 
+                  placeholder={language === 'he' ? 'קניות שבועיות' : 'Weekly Shopping'} 
+                  className="h-11 bg-muted/50 border-0 focus-visible:ring-1 focus-visible:ring-primary" 
                 />
               </div>
 
-              {/* Template Items */}
-              <div className="space-y-2">
-                <Label htmlFor="templateItems" className="text-sm font-medium text-foreground">
-                  {language === 'he' ? 'פריטי התבנית' : 'Template Items'}
+              <div className="space-y-1.5">
+                <Label htmlFor="templateItems" className="text-sm font-medium">
+                  {language === 'he' ? 'פריטים' : 'Items'}
                 </Label>
-                <StandardizedTextarea 
+                <textarea 
                   id="templateItems" 
                   value={newTemplateItems} 
                   onChange={e => setNewTemplateItems(e.target.value)} 
-                  placeholder={language === 'he' ? 'פריט אחד בכל שורה...' : 'One item per line...'} 
-                  className="min-h-[140px] text-base rounded-xl resize-none" 
+                  placeholder={language === 'he' ? 'חלב\nלחם\nביצים' : 'Milk\nBread\nEggs'} 
+                  className="w-full min-h-[120px] p-3 text-sm bg-muted/50 border-0 rounded-md resize-none focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-muted-foreground/60" 
                 />
               </div>
             </div>
 
-            <DialogFooter className="gap-3 pt-4 border-t border-border flex-row">
+            {/* Footer buttons */}
+            <div className="px-6 pb-6 pt-2 flex gap-3">
               <Button 
-                variant="outline" 
+                variant="ghost" 
                 onClick={() => setIsCreateTemplateDialogOpen(false)}
-                className="flex-1 h-11 rounded-xl"
+                className="flex-1 h-11 text-muted-foreground hover:text-foreground"
               >
                 {t.cancel}
               </Button>
               <Button 
                 onClick={handleCreateTemplate} 
-                className="flex-1 h-11 rounded-xl bg-primary hover:bg-primary/90 font-semibold"
+                className="flex-1 h-11 font-medium"
               >
                 <Save className="me-2 h-4 w-4" />
-                {language === 'he' ? 'שמור תבנית' : 'Save Template'}
+                {language === 'he' ? 'שמור' : 'Save'}
               </Button>
-            </DialogFooter>
+            </div>
           </DialogContent>
         </Dialog>
 

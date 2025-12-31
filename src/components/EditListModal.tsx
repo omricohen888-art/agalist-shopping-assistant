@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Trash2, X, Save, ListPlus } from "lucide-react";
 import { SavedList, ShoppingItem, Unit, UNITS } from "@/types/shopping";
 import { updateSavedList } from "@/utils/storage";
+import { toast } from "sonner";
 
 interface EditListModalProps {
   list: SavedList | null;
@@ -32,6 +33,8 @@ export const EditListModal: React.FC<EditListModalProps> = ({
   const [newItemUnit, setNewItemUnit] = useState<Unit>('units');
   const [bulkText, setBulkText] = useState('');
   const [activeTab, setActiveTab] = useState<'single' | 'bulk'>('single');
+  const [newlyAddedIds, setNewlyAddedIds] = useState<Set<string>>(new Set());
+  const itemsListRef = useRef<HTMLDivElement>(null);
 
   const direction = language === 'he' ? 'rtl' : 'ltr';
 
@@ -63,14 +66,27 @@ export const EditListModal: React.FC<EditListModalProps> = ({
     setNewItemText('');
     setNewItemQuantity(1);
     setNewItemUnit('units');
+    
+    // Show success toast
+    toast.success(language === 'he' ? 'הפריט נוסף בהצלחה!' : 'Item added!');
+    
+    // Highlight and scroll to new item
+    setNewlyAddedIds(new Set([newItem.id]));
+    setTimeout(() => setNewlyAddedIds(new Set()), 1500);
+    setTimeout(() => {
+      itemsListRef.current?.scrollTo({
+        top: itemsListRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    }, 50);
   };
 
   const handleAddBulkItems = () => {
     if (!bulkText.trim()) return;
 
     const lines = bulkText.split('\n').filter(line => line.trim());
-    const newItems: ShoppingItem[] = lines.map(line => ({
-      id: `item-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    const newItems: ShoppingItem[] = lines.map((line, index) => ({
+      id: `item-${Date.now()}-${index}-${Math.random().toString(36).substr(2, 9)}`,
       text: line.trim(),
       checked: false,
       quantity: 1,
@@ -79,6 +95,23 @@ export const EditListModal: React.FC<EditListModalProps> = ({
 
     setItems([...items, ...newItems]);
     setBulkText('');
+    
+    // Show success toast
+    toast.success(
+      language === 'he' 
+        ? `${newItems.length} פריטים נוספו בהצלחה!` 
+        : `${newItems.length} items added!`
+    );
+    
+    // Highlight and scroll to new items
+    setNewlyAddedIds(new Set(newItems.map(item => item.id)));
+    setTimeout(() => setNewlyAddedIds(new Set()), 1500);
+    setTimeout(() => {
+      itemsListRef.current?.scrollTo({
+        top: itemsListRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    }, 50);
   };
 
   const handleDeleteItem = (itemId: string) => {
@@ -225,7 +258,10 @@ export const EditListModal: React.FC<EditListModalProps> = ({
                 {language === 'he' ? `פריטים (${items.length})` : `Items (${items.length})`}
               </label>
             </div>
-            <div className="space-y-1.5 max-h-[200px] overflow-y-auto rounded-xl border border-border p-2 bg-muted/20">
+            <div 
+              ref={itemsListRef}
+              className="space-y-1.5 max-h-[200px] overflow-y-auto rounded-xl border border-border p-2 bg-muted/20"
+            >
               {items.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-4">
                   {language === 'he' ? 'אין פריטים ברשימה' : 'No items in list'}
@@ -234,8 +270,12 @@ export const EditListModal: React.FC<EditListModalProps> = ({
                 items.map((item) => (
                   <div
                     key={item.id}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
-                      item.checked ? 'bg-muted/50' : 'bg-card hover:bg-muted/30'
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-300 ${
+                      newlyAddedIds.has(item.id) 
+                        ? 'bg-primary/20 ring-2 ring-primary/40' 
+                        : item.checked 
+                          ? 'bg-muted/50' 
+                          : 'bg-card hover:bg-muted/30'
                     }`}
                   >
                     <Checkbox

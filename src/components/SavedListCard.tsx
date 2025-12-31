@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
@@ -43,6 +43,11 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
     const [editingQuantity, setEditingQuantity] = useState<number>(0);
     const [editingUnit, setEditingUnit] = useState<Unit>('units');
     const direction = userLanguage === 'he' ? 'rtl' : 'ltr';
+
+    // Sync local items state when list.items prop changes
+    useEffect(() => {
+        setItems([...list.items]);
+    }, [list.items]);
 
     // Calculate progress
     const completedCount = items.filter(item => item.checked).length;

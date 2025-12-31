@@ -36,11 +36,17 @@ export const EditListModal: React.FC<EditListModalProps> = ({
   const direction = language === 'he' ? 'rtl' : 'ltr';
 
   useEffect(() => {
-    if (list) {
+    if (list && isOpen) {
       setItems([...list.items]);
       setListName(list.name);
+      // Reset input fields when modal opens
+      setNewItemText('');
+      setNewItemQuantity(1);
+      setNewItemUnit('units');
+      setBulkText('');
+      setActiveTab('single');
     }
-  }, [list]);
+  }, [list, isOpen]);
 
   const handleAddSingleItem = () => {
     if (!newItemText.trim()) return;

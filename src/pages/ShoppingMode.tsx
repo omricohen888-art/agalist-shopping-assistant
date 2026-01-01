@@ -12,8 +12,9 @@ import { useSoundSettings } from "@/hooks/use-sound-settings.tsx";
 import { useHaptics } from "@/hooks/use-haptics";
 import { ConfettiEffect } from "@/components/ConfettiEffect";
 import { toast } from "sonner";
-import { saveShoppingHistory, saveList } from "@/utils/storage";
+import { saveShoppingHistory, saveList, deleteSavedList, updateSavedList, getSavedLists } from "@/utils/storage";
 import { SavedList } from "@/types/shopping";
+
 import {
   Dialog,
   DialogContent,
@@ -91,6 +92,7 @@ export const ShoppingMode = () => {
   const [newItemText, setNewItemText] = useState("");
   const [isSmartSort, setIsSmartSort] = useState(false);
   const [showExitDialog, setShowExitDialog] = useState(false);
+  const [originalListId, setOriginalListId] = useState<string | null>(null);
   const direction = language === 'he' ? 'rtl' : 'ltr';
 
   // Stopwatch state
@@ -141,6 +143,13 @@ export const ShoppingMode = () => {
       const list = JSON.parse(listData);
       setItems(list.items || []);
       setListName(list.name || (language === 'he' ? 'רשימת קניות' : 'Shopping List'));
+      
+      // Check if this list exists in savedLists and save its original ID
+      const savedLists = getSavedLists();
+      const existingList = savedLists.find(savedList => savedList.id === id);
+      if (existingList) {
+        setOriginalListId(id);
+      }
     } else {
       toast.error(language === 'he' ? 'הרשימה לא נמצאה' : 'List not found');
       navigate("/");
@@ -227,6 +236,12 @@ export const ShoppingMode = () => {
 
     // Use storage utility function to save with correct key
     saveShoppingHistory(history);
+    
+    // Delete original list from savedLists (moves to history only)
+    if (originalListId) {
+      deleteSavedList(originalListId);
+    }
+    
     localStorage.removeItem(`shoppingList_${id}`);
     localStorage.removeItem(`activeList_${id}`);
 
@@ -248,9 +263,9 @@ export const ShoppingMode = () => {
     // Stop timer
     setIsTimerRunning(false);
 
-    // Save to savedLists with shopping status
-    const newSavedList: SavedList = {
-      id: Date.now().toString(),
+    // Create list object - use original ID if exists to update instead of create
+    const listToSave: SavedList = {
+      id: originalListId || Date.now().toString(),
       name: listName,
       items: items,
       createdAt: new Date().toISOString(),
@@ -259,8 +274,13 @@ export const ShoppingMode = () => {
       shoppingDuration: elapsedTime,
     };
     
-    // Use storage utility function to save with correct key
-    saveList(newSavedList);
+    if (originalListId) {
+      // Update existing list - moves it to "Continue where we left off" section
+      updateSavedList(listToSave);
+    } else {
+      // New list - save as new
+      saveList(listToSave);
+    }
     
     // Remove active list
     localStorage.removeItem(`shoppingList_${id}`);

@@ -1467,20 +1467,6 @@ export const ShoppingList = () => {
                   {language === 'he' ? 'יציאה' : 'Exit'}
                 </Button>}
 
-              {/* Search Icon */}
-              <button className="p-2.5 rounded-xl glass hover:bg-muted/80 transition-all active:scale-95 touch-manipulation" title={language === 'he' ? 'חיפוש' : 'Search'} aria-label={language === 'he' ? 'חיפוש' : 'Search'}>
-                <Search className="h-5 w-5 sm:h-6 sm:w-6 text-muted-foreground" strokeWidth={2} />
-              </button>
-
-              {/* Shopping Cart Icon */}
-              <button className="p-2.5 rounded-xl glass hover:bg-muted/80 transition-all active:scale-95 touch-manipulation" title={language === 'he' ? 'מצב קנייה' : 'Shopping Mode'} aria-label={language === 'he' ? 'מצב קנייה' : 'Shopping Mode'}>
-                <ShoppingCart className="h-5 w-5 sm:h-6 sm:w-6 text-muted-foreground" strokeWidth={2} />
-              </button>
-
-              {/* Profile Icon */}
-              <button className="p-2.5 rounded-xl glass hover:bg-muted/80 transition-all active:scale-95 touch-manipulation" title={language === 'he' ? 'פרופיל' : 'Profile'} aria-label={language === 'he' ? 'פרופיל' : 'Profile'}>
-                <User className="h-5 w-5 sm:h-6 sm:w-6 text-muted-foreground" strokeWidth={2} />
-              </button>
             </div>
           </div>
         </div>
@@ -1526,6 +1512,18 @@ export const ShoppingList = () => {
         <div className="relative bg-card dark:bg-slate-800/90 border-2 border-foreground/80 dark:border-foreground/60 rounded-2xl p-3 sm:p-4 md:p-6 mb-4 sm:mb-6 shadow-lg hover:shadow-xl focus-within:shadow-xl transition-all duration-300 overflow-hidden backdrop-blur-sm">
           {/* Subtle gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none rounded-2xl" />
+
+          {/* Instruction Hint - Show when list is empty */}
+          {notepadItems.length === 0 && (
+            <div className="flex items-center gap-2 mb-3 text-muted-foreground text-sm">
+              <Info className="h-4 w-4 flex-shrink-0" />
+              <span>
+                {language === 'he' 
+                  ? 'הדבק רשימת קניות או הוסף פריטים כדי להתחיל' 
+                  : 'Paste a shopping list or add items to get started'}
+              </span>
+            </div>
+          )}
 
           {/* List Name Input + Quick Actions - Mobile Optimized */}
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
@@ -1820,53 +1818,8 @@ export const ShoppingList = () => {
           return (
             <div className="mb-12 border-t border-border/30 pt-8 max-w-5xl mx-auto space-y-10">
               
-              {/* In Progress Section - Always visible */}
-              <div>
-                <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
-                    <ShoppingCart className="h-5 w-5 text-warning" />
-                    {language === 'he' ? 'ממשיכים מאיפה שעצרנו' : 'Continue Where You Left Off'}
-                    {inProgressLists.length > 0 && (
-                      <span className="text-xs bg-warning/10 text-warning px-2.5 py-1 rounded-full font-semibold">
-                        {inProgressLists.length}
-                      </span>
-                    )}
-                  </h3>
-                </div>
-
-                {inProgressLists.length > 0 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
-                    {inProgressLists.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 4).map((list, index) => (
-                      <SavedListCard 
-                        key={list.id} 
-                        list={list} 
-                        index={index} 
-                        language={language} 
-                        t={t} 
-                        variant="in-progress"
-                        onEdit={handleEditSavedList} 
-                        onDelete={handleDelete}
-                        onToggleItem={handleToggle}
-                        onGoShopping={handleGoShopping}
-                        onDuplicate={handleDuplicateList}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="bg-muted/30 border border-dashed border-muted-foreground/30 rounded-xl p-8 text-center">
-                    <ShoppingCart className="h-10 w-10 text-muted-foreground/50 mx-auto mb-3" />
-                    <p className="text-muted-foreground">
-                      {language === 'he' ? 'אין כרגע קניות פעילות' : 'No active shopping trips'}
-                    </p>
-                    <p className="text-sm text-muted-foreground/70 mt-1">
-                      {language === 'he' ? 'כשתתחיל קנייה ותעצור באמצע, היא תופיע כאן' : 'Start shopping and pause midway to see it here'}
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {/* Ready to Shop Section - Always visible */}
-              <div>
+              {/* Ready to Shop Section - FIRST */}
+              <div className="bg-primary/5 rounded-2xl p-4 sm:p-6 border border-primary/20">
                 <div className="flex justify-between items-center mb-6">
                   <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
                     <ClipboardList className="h-5 w-5 text-primary" />
@@ -1902,7 +1855,7 @@ export const ShoppingList = () => {
                     ))}
                   </div>
                 ) : (
-                  <div className="bg-muted/30 border border-dashed border-muted-foreground/30 rounded-xl p-8 text-center">
+                  <div className="bg-card/50 border border-dashed border-muted-foreground/30 rounded-xl p-8 text-center">
                     <ClipboardList className="h-10 w-10 text-muted-foreground/50 mx-auto mb-3" />
                     <p className="text-muted-foreground">
                       {language === 'he' ? 'אין רשימות ממתינות' : 'No lists waiting'}
@@ -1913,6 +1866,57 @@ export const ShoppingList = () => {
                   </div>
                 )}
               </div>
+
+              {/* Visual Separator */}
+              <div className="flex items-center gap-4">
+                <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+              </div>
+
+              {/* In Progress Section - SECOND */}
+              <div className="bg-warning/5 rounded-2xl p-4 sm:p-6 border border-warning/20">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                    <ShoppingCart className="h-5 w-5 text-warning" />
+                    {language === 'he' ? 'ממשיכים מאיפה שעצרנו' : 'Continue Where You Left Off'}
+                    {inProgressLists.length > 0 && (
+                      <span className="text-xs bg-warning/10 text-warning px-2.5 py-1 rounded-full font-semibold">
+                        {inProgressLists.length}
+                      </span>
+                    )}
+                  </h3>
+                </div>
+
+                {inProgressLists.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
+                    {inProgressLists.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 4).map((list, index) => (
+                      <SavedListCard 
+                        key={list.id} 
+                        list={list} 
+                        index={index} 
+                        language={language} 
+                        t={t} 
+                        variant="in-progress"
+                        onEdit={handleEditSavedList} 
+                        onDelete={handleDelete}
+                        onToggleItem={handleToggle}
+                        onGoShopping={handleGoShopping}
+                        onDuplicate={handleDuplicateList}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="bg-card/50 border border-dashed border-muted-foreground/30 rounded-xl p-8 text-center">
+                    <ShoppingCart className="h-10 w-10 text-muted-foreground/50 mx-auto mb-3" />
+                    <p className="text-muted-foreground">
+                      {language === 'he' ? 'אין כרגע קניות פעילות' : 'No active shopping trips'}
+                    </p>
+                    <p className="text-sm text-muted-foreground/70 mt-1">
+                      {language === 'he' ? 'כשתתחיל קנייה ותעצור באמצע, היא תופיע כאן' : 'Start shopping and pause midway to see it here'}
+                    </p>
+                  </div>
+                )}
+              </div>
+
 
               {/* Completed Lists Section */}
               {completedLists.length > 0 && (

@@ -457,7 +457,7 @@ export const ShoppingMode = () => {
       {/* Mission Header - Gamified & Mobile-Optimized */}
       <div className="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-black/10 shadow-lg">
         <div className="max-w-3xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
-          {/* Top Row: Exit + Title */}
+          {/* Top Row: Exit + Title + Green Cart */}
           <div className={`flex items-center justify-between mb-3 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
             {/* Exit Button */}
             <Button
@@ -487,8 +487,10 @@ export const ShoppingMode = () => {
               />
             </div>
 
-            {/* Spacer to balance layout */}
-            <div className="h-10 w-10 sm:h-12 sm:w-12" />
+            {/* Green Shopping Cart Icon - Indicates Shopping Mode */}
+            <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-success/15 flex items-center justify-center">
+              <ShoppingCart className="h-5 w-5 sm:h-6 sm:w-6 text-success" strokeWidth={2.5} />
+            </div>
           </div>
 
           {/* Progress Section - Compact */}
@@ -547,6 +549,18 @@ export const ShoppingMode = () => {
               </span>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Interactive Shopping Mode Banner */}
+      <div className="bg-success/10 border-b border-success/20">
+        <div className="max-w-3xl mx-auto px-3 py-2 flex items-center justify-center gap-2">
+          <ShoppingCart className="h-4 w-4 text-success" />
+          <span className="text-sm font-medium text-success">
+            {language === 'he' 
+              ? 'מצב קנייה אינטראקטיבי - חוויית קנייה משופרת' 
+              : 'Interactive Shopping Mode - Enhanced Shopping Experience'}
+          </span>
         </div>
       </div>
 

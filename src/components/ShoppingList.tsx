@@ -1572,64 +1572,49 @@ export const ShoppingList = () => {
           {/* Items List - Mobile Optimized */}
           <div className="min-h-[120px] sm:min-h-[140px]" dir={language === 'he' ? 'rtl' : 'ltr'}>
             {notepadItems.length === 0 ? 
-              // Empty state - show single input to start
-              <div className="space-y-2 sm:space-y-3">
-                <input
-                  type="text"
+              // Empty state - Google Keep style input
+              <div className="space-y-1">
+                <textarea
                   autoFocus
-                  placeholder={language === 'he' ? 'הקלד פריט ולחץ Enter...' : 'Type an item and press Enter...'}
-                  className="w-full bg-muted/30 hover:bg-muted/50 focus:bg-muted/50 outline-none text-base md:text-lg font-medium text-foreground placeholder:text-muted-foreground py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl border-2 border-foreground/30 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          const value = (e.target as HTMLInputElement).value.trim();
-                          if (value) {
-                            // Create first item with the entered text
-                            const firstItem: NotepadItem = {
-                              id: `notepad-${Date.now()}`,
-                              text: value,
-                              isChecked: false,
-                              quantity: 1,
-                              unit: 'units'
-                            };
-                            // Create empty second item for continued input
-                            const secondItem: NotepadItem = {
-                              id: `notepad-${Date.now() + 1}`,
-                              text: '',
-                              isChecked: false,
-                              quantity: 1,
-                              unit: 'units'
-                            };
-                            setNotepadItems([firstItem, secondItem]);
-                            // Focus the second (empty) input
-                            setTimeout(() => {
-                              if (notepadInputRefs.current[1]) {
-                                notepadInputRefs.current[1]!.focus();
-                              }
-                            }, 50);
-                          } else {
-                            // Even if empty, create the first item structure
-                            const newItem: NotepadItem = {
-                              id: `notepad-${Date.now()}`,
-                              text: '',
-                              isChecked: false,
-                              quantity: 1,
-                              unit: 'units'
-                            };
-                            setNotepadItems([newItem]);
-                            setTimeout(() => {
-                              if (notepadInputRefs.current[0]) {
-                                notepadInputRefs.current[0]!.focus();
-                              }
-                            }, 50);
+                  rows={4}
+                  placeholder={language === 'he' 
+                    ? 'כתבו את רשימת הקניות שלכם...\n\nלדוגמה:\nחלב\nלחם\nביצים' 
+                    : 'Write your shopping list...\n\nExample:\nMilk\nBread\nEggs'}
+                  className="w-full bg-transparent outline-none text-lg leading-relaxed font-medium text-foreground placeholder:text-muted-foreground/60 py-3 px-1 resize-none border-0 focus:ring-0"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      const value = (e.target as HTMLTextAreaElement).value.trim();
+                      if (value) {
+                        // Split by newlines and create items
+                        const lines = value.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+                        const newItems: NotepadItem[] = lines.map((text, i) => ({
+                          id: `notepad-${Date.now()}-${i}`,
+                          text: text.replace(/^[-•*]\s*/, ''),
+                          isChecked: false,
+                          quantity: 1,
+                          unit: 'units' as Unit
+                        }));
+                        // Add empty item at end for continued input
+                        newItems.push({
+                          id: `notepad-${Date.now() + lines.length}`,
+                          text: '',
+                          isChecked: false,
+                          quantity: 1,
+                          unit: 'units' as Unit
+                        });
+                        setNotepadItems(newItems);
+                        // Focus the last (empty) input
+                        setTimeout(() => {
+                          const lastIndex = newItems.length - 1;
+                          if (notepadInputRefs.current[lastIndex]) {
+                            notepadInputRefs.current[lastIndex]!.focus();
                           }
-                        }
-                      }}
-                    />
-                <p className="text-sm text-muted-foreground text-center flex items-center justify-center gap-2">
-                  <span className="inline-flex items-center justify-center px-2 py-0.5 rounded bg-muted text-xs font-medium">Enter</span>
-                  {language === 'he' ? 'להוספת פריט חדש' : 'to add a new item'}
-                </p>
+                        }, 50);
+                      }
+                    }
+                  }}
+                />
               </div>
                 : isSmartSort ?
           // Grouped view

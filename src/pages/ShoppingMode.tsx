@@ -573,11 +573,11 @@ export const ShoppingMode = () => {
                 ref={addItemInputRef}
                 type="text"
                 value={newItemText}
-                onChange={(e) => setNewItemText(sanitizeInput(e.target.value))}
+                onChange={(e) => setNewItemText(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && newItemText.trim()) {
                     // Check if multiple lines (pasted content)
-                    const lines = newItemText.split(/[\n,]/).map(l => l.trim()).filter(l => l.length > 0);
+                    const lines = newItemText.split(/[\n,]/).map(l => sanitizeInput(l.trim())).filter(l => l.length > 0);
                     const newItems: ShoppingItem[] = lines.map((text, i) => ({
                       id: `${Date.now()}-${i}`,
                       text: text.replace(/^•\s*/, ''),
@@ -594,7 +594,7 @@ export const ShoppingMode = () => {
                   }
                 }}
                 placeholder={language === 'he' ? 'הקלד פריט או הדבק רשימה...' : 'Type item or paste list...'}
-                className="flex-1 h-12 px-4 text-base bg-white dark:bg-slate-800 border-2 border-primary/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary shadow-sm"
+                className="flex-1 h-14 px-4 text-lg font-medium bg-gradient-to-r from-success/5 to-primary/5 border-[3px] border-success/50 hover:border-success rounded-2xl focus:outline-none focus:ring-4 focus:ring-success/30 focus:border-success shadow-lg shadow-success/10 placeholder:text-success/60 text-foreground transition-all"
                 autoFocus
               />
               <Button
@@ -603,10 +603,10 @@ export const ShoppingMode = () => {
                   try {
                     const text = await navigator.clipboard.readText();
                     if (text.trim()) {
-                      const lines = text.split(/[\n,]/).map(l => l.trim()).filter(l => l.length > 0);
+                      const lines = text.split(/[\n,]/).map(l => sanitizeInput(l.trim())).filter(l => l.length > 0);
                       const newItems: ShoppingItem[] = lines.map((line, i) => ({
                         id: `${Date.now()}-${i}`,
-                        text: sanitizeInput(line.replace(/^•\s*/, '')),
+                        text: line.replace(/^•\s*/, ''),
                         checked: false,
                         quantity: 1,
                         unit: 'units' as Unit
@@ -620,7 +620,7 @@ export const ShoppingMode = () => {
                     toast.error(language === 'he' ? 'לא ניתן לקרוא מהלוח' : 'Cannot read clipboard');
                   }
                 }}
-                className="h-12 px-4 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20"
+                className="h-14 px-4 bg-success/10 hover:bg-success/20 text-success border-2 border-success/30 rounded-xl"
                 variant="ghost"
               >
                 <ClipboardPaste className="h-5 w-5" />
@@ -629,7 +629,7 @@ export const ShoppingMode = () => {
                 size="sm"
                 onClick={() => { setShowAddItemInput(false); setNewItemText(""); }}
                 variant="ghost"
-                className="h-12 w-12 text-muted-foreground hover:bg-muted"
+                className="h-14 w-14 text-muted-foreground hover:bg-muted rounded-xl"
               >
                 <X className="h-5 w-5" />
               </Button>
@@ -640,10 +640,10 @@ export const ShoppingMode = () => {
                 setShowAddItemInput(true);
                 setTimeout(() => addItemInputRef.current?.focus(), 100);
               }}
-              className="w-full flex items-center justify-center gap-3 h-14 bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 hover:from-primary/20 hover:via-primary/10 hover:to-primary/20 border-2 border-dashed border-primary/40 hover:border-primary/60 rounded-2xl text-base font-bold text-primary transition-all active:scale-[0.98] shadow-sm hover:shadow-md"
+              className="w-full flex items-center justify-center gap-3 h-16 bg-gradient-to-r from-success/15 via-success/10 to-primary/10 hover:from-success/25 hover:via-success/20 hover:to-primary/20 border-[3px] border-dashed border-success/50 hover:border-success/80 rounded-2xl text-lg font-bold text-success transition-all active:scale-[0.98] shadow-md hover:shadow-lg"
             >
-              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-                <Plus className="h-5 w-5" />
+              <div className="w-10 h-10 rounded-full bg-success/20 flex items-center justify-center">
+                <Plus className="h-6 w-6" />
               </div>
               {language === 'he' ? 'הוסף פריט או הדבק רשימה' : 'Add item or paste list'}
             </button>

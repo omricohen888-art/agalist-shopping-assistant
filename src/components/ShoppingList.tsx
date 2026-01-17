@@ -1513,15 +1513,33 @@ export const ShoppingList = () => {
           {/* Subtle gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none rounded-2xl" />
 
-          {/* Instruction Hint - Show when list is empty */}
+          {/* Instruction Card - Show when list is empty */}
           {notepadItems.length === 0 && (
-            <div className="flex items-center gap-2 mb-3 text-muted-foreground text-sm">
-              <Info className="h-4 w-4 flex-shrink-0" />
-              <span>
-                {language === 'he' 
-                  ? 'הדבק רשימת קניות או הוסף פריטים כדי להתחיל' 
-                  : 'Paste a shopping list or add items to get started'}
-              </span>
+            <div className="bg-gradient-to-r from-primary/8 via-primary/4 to-transparent border border-primary/15 rounded-xl p-3 sm:p-4 mb-4">
+              <h4 className="text-sm font-bold text-primary flex items-center gap-2 mb-2.5">
+                <span className="text-base">📝</span>
+                {language === 'he' ? 'איך מתחילים?' : 'How to start?'}
+              </h4>
+              <ul className="space-y-1.5 text-xs sm:text-sm text-muted-foreground">
+                <li className="flex items-center gap-2">
+                  <Check className="h-3.5 w-3.5 text-success flex-shrink-0" />
+                  {language === 'he' 
+                    ? 'הקלידו פריטים, כל אחד בשורה נפרדת' 
+                    : 'Type items, each on a new line'}
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-3.5 w-3.5 text-success flex-shrink-0" />
+                  {language === 'he' 
+                    ? 'או הדביקו רשימה קיימת מ-WhatsApp / Notes' 
+                    : 'Or paste an existing list'}
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-3.5 w-3.5 text-success flex-shrink-0" />
+                  {language === 'he' 
+                    ? 'לחצו "יוצאים לקניות!" כשמוכנים' 
+                    : 'Click "Let\'s Shop!" when ready'}
+                </li>
+              </ul>
             </div>
           )}
 
@@ -1573,14 +1591,26 @@ export const ShoppingList = () => {
           <div className="min-h-[120px] sm:min-h-[140px]" dir={language === 'he' ? 'rtl' : 'ltr'}>
             {notepadItems.length === 0 ? 
               // Empty state - Google Keep style input
-              <div className="space-y-1">
+              <div className="relative">
+                {/* Notebook line effect */}
+                <div className="absolute top-0 bottom-0 right-5 w-0.5 bg-primary/15 rounded-full pointer-events-none" />
+                
                 <textarea
                   autoFocus
-                  rows={4}
+                  rows={6}
                   placeholder={language === 'he' 
-                    ? 'כתבו את רשימת הקניות שלכם...\n\nלדוגמה:\nחלב\nלחם\nביצים' 
-                    : 'Write your shopping list...\n\nExample:\nMilk\nBread\nEggs'}
-                  className="w-full bg-transparent outline-none text-lg leading-relaxed font-medium text-foreground placeholder:text-muted-foreground/60 py-3 px-1 resize-none border-0 focus:ring-0"
+                    ? 'הוסיפו פריטים...\n\nחלב\nלחם\nביצים\nגבינה' 
+                    : 'Add items...\n\nMilk\nBread\nEggs\nCheese'}
+                  className="w-full bg-muted/20 dark:bg-slate-800/40 
+                    border-2 border-muted-foreground/10 hover:border-primary/30 
+                    focus:border-primary/40 focus:ring-2 focus:ring-primary/10
+                    rounded-xl outline-none 
+                    text-lg leading-relaxed font-medium text-foreground 
+                    placeholder:text-muted-foreground/40 
+                    py-4 px-5 pr-8
+                    resize-none min-h-[200px]
+                    transition-all duration-200
+                    shadow-inner"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                       e.preventDefault();

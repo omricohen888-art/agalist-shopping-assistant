@@ -100,7 +100,7 @@ export const ShoppingMode = () => {
   const [isTimerRunning, setIsTimerRunning] = useState(true);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number>(Date.now());
-  const addItemInputRef = useRef<HTMLInputElement>(null);
+  const addItemInputRef = useRef<HTMLTextAreaElement>(null);
 
   // Timer effect
   useEffect(() => {
@@ -564,19 +564,122 @@ export const ShoppingMode = () => {
         </div>
       </div>
 
-      {/* Quick Add Item Bar - Enhanced & Prominent */}
-      <div className="sticky top-[140px] z-30 bg-gradient-to-b from-white/90 to-white/70 dark:from-slate-900/90 dark:to-slate-900/70 backdrop-blur-md border-b border-primary/10 px-3 py-3">
+      {/* Quick Add Item Bar - Enhanced & Professional */}
+      <div className="sticky top-[140px] z-30 bg-gradient-to-b from-white/95 to-white/80 dark:from-slate-900/95 dark:to-slate-900/80 backdrop-blur-md border-b border-primary/10 px-3 py-3">
         <div className="max-w-3xl mx-auto">
           {showAddItemInput ? (
-            <div className="flex items-center gap-2">
-              <input
-                ref={addItemInputRef}
-                type="text"
-                value={newItemText}
-                onChange={(e) => setNewItemText(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && newItemText.trim()) {
-                    // Check if multiple lines (pasted content)
+            <div className="space-y-3">
+              {/* Instruction Card */}
+              <div className="bg-gradient-to-r from-primary/8 via-primary/4 to-transparent border border-primary/15 rounded-xl p-3">
+                <h4 className="text-sm font-bold text-primary flex items-center gap-2 mb-2">
+                  <span className="text-base">📝</span>
+                  {language === 'he' ? 'איך להוסיף פריטים?' : 'How to add items?'}
+                </h4>
+                <ul className="space-y-1 text-xs text-muted-foreground">
+                  <li className="flex items-center gap-2">
+                    <Check className="h-3 w-3 text-success flex-shrink-0" />
+                    {language === 'he' 
+                      ? 'הקלידו פריטים, כל אחד בשורה נפרדת' 
+                      : 'Type items, each on a new line'}
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-3 w-3 text-success flex-shrink-0" />
+                    {language === 'he' 
+                      ? 'או הדביקו רשימה קיימת מ-WhatsApp / Notes' 
+                      : 'Or paste an existing list'}
+                  </li>
+                </ul>
+              </div>
+
+              {/* Enhanced Textarea */}
+              <div className="relative flex gap-2">
+                {/* Notebook line effect */}
+                <div className="absolute top-0 bottom-0 right-5 w-0.5 bg-primary/15 rounded-full pointer-events-none" />
+                
+                <textarea
+                  ref={addItemInputRef}
+                  value={newItemText}
+                  onChange={(e) => setNewItemText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey && newItemText.trim()) {
+                      e.preventDefault();
+                      const lines = newItemText.split(/[\n,]/).map(l => sanitizeInput(l.trim())).filter(l => l.length > 0);
+                      const newItems: ShoppingItem[] = lines.map((text, i) => ({
+                        id: `${Date.now()}-${i}`,
+                        text: text.replace(/^•\s*/, ''),
+                        checked: false,
+                        quantity: 1,
+                        unit: 'units' as Unit
+                      }));
+                      setItems(prev => [...newItems, ...prev]);
+                      setNewItemText("");
+                      setShowAddItemInput(false);
+                      toast.success(language === 'he' ? `נוספו ${newItems.length} פריטים` : `Added ${newItems.length} items`);
+                    } else if (e.key === 'Escape') {
+                      setShowAddItemInput(false);
+                      setNewItemText("");
+                    }
+                  }}
+                  placeholder={language === 'he' 
+                    ? 'הוסיפו פריטים...\n\nחלב\nלחם\nביצים' 
+                    : 'Add items...\n\nMilk\nBread\nEggs'}
+                  className="flex-1 bg-muted/20 dark:bg-slate-800/40 
+                    border-2 border-muted-foreground/10 hover:border-primary/30 
+                    focus:border-primary/40 focus:ring-2 focus:ring-primary/10
+                    rounded-xl outline-none 
+                    text-lg leading-relaxed font-medium text-foreground 
+                    placeholder:text-muted-foreground/40 
+                    py-3 px-4 pr-8
+                    resize-none min-h-[120px]
+                    transition-all duration-200
+                    shadow-inner"
+                  rows={4}
+                  autoFocus
+                />
+                <div className="flex flex-col gap-2">
+                  <Button
+                    size="sm"
+                    onClick={async () => {
+                      try {
+                        const text = await navigator.clipboard.readText();
+                        if (text.trim()) {
+                          const lines = text.split(/[\n,]/).map(l => sanitizeInput(l.trim())).filter(l => l.length > 0);
+                          const newItems: ShoppingItem[] = lines.map((line, i) => ({
+                            id: `${Date.now()}-${i}`,
+                            text: line.replace(/^•\s*/, ''),
+                            checked: false,
+                            quantity: 1,
+                            unit: 'units' as Unit
+                          }));
+                          setItems(prev => [...newItems, ...prev]);
+                          setNewItemText("");
+                          setShowAddItemInput(false);
+                          toast.success(language === 'he' ? `הודבקו ${newItems.length} פריטים` : `Pasted ${newItems.length} items`);
+                        }
+                      } catch {
+                        toast.error(language === 'he' ? 'לא ניתן לקרוא מהלוח' : 'Cannot read clipboard');
+                      }
+                    }}
+                    className="h-12 w-12 bg-success/10 hover:bg-success/20 text-success border-2 border-success/30 rounded-xl"
+                    variant="ghost"
+                  >
+                    <ClipboardPaste className="h-5 w-5" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => { setShowAddItemInput(false); setNewItemText(""); }}
+                    variant="ghost"
+                    className="h-12 w-12 text-muted-foreground hover:bg-muted rounded-xl"
+                  >
+                    <X className="h-5 w-5" />
+                  </Button>
+                </div>
+              </div>
+
+              {/* Add button */}
+              <Button
+                onClick={() => {
+                  if (newItemText.trim()) {
                     const lines = newItemText.split(/[\n,]/).map(l => sanitizeInput(l.trim())).filter(l => l.length > 0);
                     const newItems: ShoppingItem[] = lines.map((text, i) => ({
                       id: `${Date.now()}-${i}`,
@@ -587,51 +690,14 @@ export const ShoppingMode = () => {
                     }));
                     setItems(prev => [...newItems, ...prev]);
                     setNewItemText("");
-                    toast.success(language === 'he' ? `נוספו ${newItems.length} פריטים` : `Added ${newItems.length} items`);
-                  } else if (e.key === 'Escape') {
                     setShowAddItemInput(false);
-                    setNewItemText("");
+                    toast.success(language === 'he' ? `נוספו ${newItems.length} פריטים` : `Added ${newItems.length} items`);
                   }
                 }}
-                placeholder={language === 'he' ? 'הקלד פריט או הדבק רשימה...' : 'Type item or paste list...'}
-                className="flex-1 h-14 px-4 text-lg font-medium bg-gradient-to-r from-success/5 to-primary/5 border-[3px] border-success/50 hover:border-success rounded-2xl focus:outline-none focus:ring-4 focus:ring-success/30 focus:border-success shadow-lg shadow-success/10 placeholder:text-success/60 text-foreground transition-all"
-                autoFocus
-              />
-              <Button
-                size="sm"
-                onClick={async () => {
-                  try {
-                    const text = await navigator.clipboard.readText();
-                    if (text.trim()) {
-                      const lines = text.split(/[\n,]/).map(l => sanitizeInput(l.trim())).filter(l => l.length > 0);
-                      const newItems: ShoppingItem[] = lines.map((line, i) => ({
-                        id: `${Date.now()}-${i}`,
-                        text: line.replace(/^•\s*/, ''),
-                        checked: false,
-                        quantity: 1,
-                        unit: 'units' as Unit
-                      }));
-                      setItems(prev => [...newItems, ...prev]);
-                      setNewItemText("");
-                      setShowAddItemInput(false);
-                      toast.success(language === 'he' ? `הודבקו ${newItems.length} פריטים` : `Pasted ${newItems.length} items`);
-                    }
-                  } catch {
-                    toast.error(language === 'he' ? 'לא ניתן לקרוא מהלוח' : 'Cannot read clipboard');
-                  }
-                }}
-                className="h-14 px-4 bg-success/10 hover:bg-success/20 text-success border-2 border-success/30 rounded-xl"
-                variant="ghost"
+                disabled={!newItemText.trim()}
+                className="w-full h-12 bg-success hover:bg-success/90 text-success-foreground font-bold rounded-xl"
               >
-                <ClipboardPaste className="h-5 w-5" />
-              </Button>
-              <Button
-                size="sm"
-                onClick={() => { setShowAddItemInput(false); setNewItemText(""); }}
-                variant="ghost"
-                className="h-14 w-14 text-muted-foreground hover:bg-muted rounded-xl"
-              >
-                <X className="h-5 w-5" />
+                {language === 'he' ? 'הוסף לרשימה' : 'Add to list'}
               </Button>
             </div>
           ) : (
@@ -640,11 +706,9 @@ export const ShoppingMode = () => {
                 setShowAddItemInput(true);
                 setTimeout(() => addItemInputRef.current?.focus(), 100);
               }}
-              className="w-full flex items-center justify-center gap-3 h-16 bg-gradient-to-r from-success/15 via-success/10 to-primary/10 hover:from-success/25 hover:via-success/20 hover:to-primary/20 border-[3px] border-dashed border-success/50 hover:border-success/80 rounded-2xl text-lg font-bold text-success transition-all active:scale-[0.98] shadow-md hover:shadow-lg"
+              className="w-full flex items-center justify-center gap-3 h-14 bg-gradient-to-r from-success/10 via-success/5 to-primary/5 hover:from-success/20 hover:via-success/15 hover:to-primary/10 border-2 border-dashed border-success/40 hover:border-success/60 rounded-xl text-base font-semibold text-success transition-all active:scale-[0.98]"
             >
-              <div className="w-10 h-10 rounded-full bg-success/20 flex items-center justify-center">
-                <Plus className="h-6 w-6" />
-              </div>
+              <Plus className="h-5 w-5" />
               {language === 'he' ? 'הוסף פריט או הדבק רשימה' : 'Add item or paste list'}
             </button>
           )}

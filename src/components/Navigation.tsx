@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Menu, X, Plus, Book, History, BarChart3, Lightbulb, Info, Settings } from 'lucide-react';
+import { Menu, X, Plus, Book, History, BarChart3, Lightbulb, Info, Settings, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useGlobalLanguage } from '@/context/LanguageContext';
 import { translations } from '@/utils/translations';
@@ -82,7 +82,19 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
 
             {/* Menu */}
             <div className="absolute bottom-20 right-4 left-4 bg-card border border-border shadow-xl rounded-2xl z-50">
-              <div className="p-4">
+              <div className="p-4 space-y-2">
+                {/* Account Button - Future login */}
+                <button
+                  onClick={() => {
+                    // Future: navigate to login/account page
+                    setIsMenuOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition-colors active:scale-95"
+                >
+                  <User className="h-5 w-5 flex-shrink-0" strokeWidth={1.5} />
+                  <span className="font-medium text-sm">{language === 'he' ? 'החשבון שלי' : 'My Account'}</span>
+                </button>
+
                 {/* Settings Button */}
                 <button
                   onClick={() => {
@@ -122,8 +134,19 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
             ))}
           </div>
 
-          {/* Right Section - Settings */}
+          {/* Right Section - Account & Settings */}
           <div className="flex items-center gap-2">
+            {/* Account Button - Future login */}
+            <button
+              onClick={() => {
+                // Future: navigate to login/account page
+              }}
+              className="p-2 rounded-xl text-primary hover:bg-primary/10 transition-colors active:scale-95"
+              title={language === 'he' ? 'החשבון שלי' : 'My Account'}
+            >
+              <User className="h-5 w-5 flex-shrink-0" strokeWidth={1.5} />
+            </button>
+
             {/* Settings Button */}
             <button
               onClick={() => onSettingsClick?.()}

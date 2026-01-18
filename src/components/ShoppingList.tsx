@@ -1455,6 +1455,19 @@ export const ShoppingList = () => {
 
             {/* Actions Section - RIGHT (LTR) / LEFT (RTL) */}
             <div className={`flex items-center gap-1.5 sm:gap-2 flex-shrink-0 ${language === 'he' ? 'flex-row-reverse' : ''}`}>
+              {/* User Account Button */}
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  toast.info(language === 'he' ? 'התחברות תהיה זמינה בקרוב!' : 'Login coming soon!');
+                }}
+                className="h-10 w-10 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 
+                           touch-manipulation active:scale-95 transition-all p-0"
+                title={language === 'he' ? 'החשבון שלי' : 'My Account'}
+              >
+                <User className="h-5 w-5" strokeWidth={1.5} />
+              </Button>
+
               {/* Exit Button - Only shown in edit mode */}
               {activeListId && <Button variant="ghost" onClick={() => {
               if (items.length > 0) {

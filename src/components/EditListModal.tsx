@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Trash2, X, Save, ListPlus } from "lucide-react";
+import { Plus, Minus, Trash2, X, Save, ListPlus } from "lucide-react";
 import { SavedList, ShoppingItem, Unit, UNITS } from "@/types/shopping";
 import { updateSavedList } from "@/utils/storage";
 import { toast } from "sonner";
@@ -286,30 +286,60 @@ export const EditListModal: React.FC<EditListModalProps> = ({
                     <span className={`flex-1 text-sm font-medium ${item.checked ? 'line-through text-muted-foreground' : ''}`}>
                       {item.text}
                     </span>
-                    <div className="flex items-center gap-1">
-                      <Input
-                        type="number"
-                        min="1"
-                        value={item.quantity}
-                        onChange={(e) => handleUpdateItemQuantity(item.id, Math.max(1, parseInt(e.target.value) || 1), item.unit)}
-                        className="w-12 h-7 text-xs text-center rounded-lg"
-                      />
-                      <Select 
-                        value={item.unit} 
-                        onValueChange={(v: Unit) => handleUpdateItemQuantity(item.id, item.quantity, v)}
+                    <div className="flex items-center gap-0.5 bg-muted/40 rounded-lg p-0.5">
+                      {/* Minus Button */}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleUpdateItemQuantity(item.id, Math.max(0.5, item.quantity - 1), item.unit)}
+                        className="h-6 w-6 rounded-md hover:bg-primary/10 text-muted-foreground"
+                        disabled={item.quantity <= 0.5}
                       >
-                        <SelectTrigger className="w-16 h-7 text-xs rounded-lg px-1.5">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {UNITS.map(u => (
-                            <SelectItem key={u.value} value={u.value}>
-                              {language === 'he' ? u.labelHe : u.labelEn}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                        <Minus className="h-3 w-3" />
+                      </Button>
+                      
+                      {/* Free Input */}
+                      <Input
+                        type="text"
+                        inputMode="decimal"
+                        value={item.quantity}
+                        onChange={(e) => {
+                          const val = parseFloat(e.target.value);
+                          if (!isNaN(val) && val >= 0) {
+                            handleUpdateItemQuantity(item.id, val, item.unit);
+                          } else if (e.target.value === '') {
+                            handleUpdateItemQuantity(item.id, 0, item.unit);
+                          }
+                        }}
+                        className="w-10 h-6 text-xs text-center rounded-md border-0 bg-transparent focus:ring-1 focus:ring-primary/30 p-0"
+                      />
+                      
+                      {/* Plus Button */}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleUpdateItemQuantity(item.id, item.quantity + 1, item.unit)}
+                        className="h-6 w-6 rounded-md hover:bg-primary/10 text-muted-foreground"
+                      >
+                        <Plus className="h-3 w-3" />
+                      </Button>
                     </div>
+                    
+                    <Select 
+                      value={item.unit} 
+                      onValueChange={(v: Unit) => handleUpdateItemQuantity(item.id, item.quantity, v)}
+                    >
+                      <SelectTrigger className="w-14 h-6 text-xs rounded-lg px-1.5">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {UNITS.map(u => (
+                          <SelectItem key={u.value} value={u.value}>
+                            {language === 'he' ? u.labelHe : u.labelEn}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <Button
                       variant="ghost"
                       size="icon"

@@ -1514,9 +1514,16 @@ export const ShoppingList = () => {
 
       {/* Main Content */}
       <div className="max-w-3xl mx-auto p-3 sm:p-4 md:p-6 lg:p-8 pb-28 sm:pb-32 md:pb-40 overflow-hidden w-full min-w-0">
+        {/* Welcome Header */}
         <div className="text-center mb-6 sm:mb-8 md:mb-10 mt-4 sm:mt-6">
-          
-          
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
+            {language === 'he' ? 'רשימת הקניות החכמה שלך' : 'Your Smart Shopping List'}
+          </h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
+            {language === 'he' 
+              ? 'מארגנים, ממיינים, קונים - בקלות!' 
+              : 'Organize, sort, and shop - effortlessly!'}
+          </p>
         </div>
 
 

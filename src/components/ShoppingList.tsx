@@ -1988,7 +1988,7 @@ export const ShoppingList = () => {
                   <div className="flex justify-between items-center mb-6">
                     <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
                       <History className="h-5 w-5 text-muted-foreground" />
-                      {language === 'he' ? 'היסטוריית קניות' : 'Shopping History'}
+                      {language === 'he' ? 'קניות שהושלמו' : 'Completed Shopping'}
                       <span className="text-xs bg-muted text-muted-foreground px-2.5 py-1 rounded-full font-semibold">
                         {shoppingHistory.length}
                       </span>

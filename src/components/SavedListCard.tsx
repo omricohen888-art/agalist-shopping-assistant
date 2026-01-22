@@ -213,32 +213,12 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
                     <Button
                         variant="ghost"
                         size="icon"
-                        onClick={(e) => { e.stopPropagation(); handleShareWhatsApp(); }}
-                        className="h-8 w-8 text-muted-foreground hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-xl"
-                        title={language === 'he' ? 'שתף בוואטסאפ' : 'Share on WhatsApp'}
-                    >
-                        <FaWhatsapp className="h-4 w-4" />
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="icon"
                         onClick={(e) => { e.stopPropagation(); handleCopyList(); }}
                         className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl"
                         title={language === 'he' ? 'העתק רשימה' : 'Copy List'}
                     >
                         <Copy className="h-4 w-4" />
                     </Button>
-                    {onDuplicate && (
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={(e) => { e.stopPropagation(); onDuplicate(list); }}
-                            className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl"
-                            title={language === 'he' ? 'שכפל רשימה' : 'Duplicate List'}
-                        >
-                            <RefreshCcw className="h-4 w-4" />
-                        </Button>
-                    )}
                     <Button
                         variant="ghost"
                         size="icon"

@@ -474,7 +474,7 @@ export const ShoppingMode = () => {
                 value={listName}
                 onChange={(e) => setListName(e.target.value)}
                 placeholder={language === 'he' ? 'שם הרשימה...' : 'List name...'}
-                className="w-full max-w-[200px] text-center text-xs sm:text-sm text-muted-foreground font-medium bg-transparent border-b border-dashed border-border focus:border-primary focus:outline-none px-2 py-0.5 transition-colors"
+                className="w-full max-w-[280px] sm:max-w-[320px] text-center text-xs sm:text-sm text-muted-foreground font-medium bg-transparent border-b border-dashed border-border focus:border-primary focus:outline-none px-2 py-0.5 transition-colors"
                 dir={direction}
               />
             </div>

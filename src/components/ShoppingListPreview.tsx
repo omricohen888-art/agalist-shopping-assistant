@@ -141,7 +141,7 @@ export const ShoppingListPreview: React.FC<ShoppingListPreviewProps> = ({
             {/* Card Header - Compact */}
             <div className="flex justify-between items-start mb-2 sm:mb-3 border-b-2 border-black/10 dark:border-slate-700/50 pb-1.5 sm:pb-2 gap-2">
                 <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                    <h4 className="font-bold text-sm sm:text-base text-gray-900 dark:text-white tracking-tight truncate flex-1">{list.name}</h4>
+                    <h4 className="font-bold text-sm sm:text-base text-gray-900 dark:text-white tracking-tight flex-1 break-words line-clamp-2" title={list.name}>{list.name}</h4>
                     <div className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full ${indicatorColor} flex-shrink-0`} />
                 </div>
 

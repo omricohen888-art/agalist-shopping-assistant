@@ -205,7 +205,7 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
             <div className="flex justify-between items-start mb-3 pb-3 border-b border-border/30 gap-3">
                 <div className="flex items-center gap-2.5 flex-1 min-w-0">
                     <div className={`w-3 h-3 rounded-full ${indicatorColor} flex-shrink-0`} />
-                    <h4 className="font-semibold text-base sm:text-lg text-foreground truncate flex-1">{list.name}</h4>
+                    <h4 className="font-semibold text-base sm:text-lg text-foreground flex-1 break-words line-clamp-2" title={list.name}>{list.name}</h4>
                 </div>
 
                 {/* Actions */}

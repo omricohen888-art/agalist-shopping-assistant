@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { 
   ArrowRight, CheckCircle2, Home, X, Check, Sparkles, 
   Trophy, Zap, Star, PartyPopper, ShoppingCart, Timer, Store,
-  Plus, ClipboardPaste, Clock, Pin, PinOff, Trash2
+  Plus, ClipboardPaste, Clock, Pin, PinOff, Trash2, Pencil, MessageSquare, Minus
 } from "lucide-react";
 import { useGlobalLanguage } from "@/context/LanguageContext";
 import { useSoundSettings } from "@/hooks/use-sound-settings.tsx";
@@ -99,6 +99,10 @@ export const ShoppingMode = () => {
     return localStorage.getItem('agalist-skip-delete-confirm') === 'true';
   });
   const [dontAskAgainChecked, setDontAskAgainChecked] = useState(false);
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
+  const [editingNote, setEditingNote] = useState("");
+  const [editingQuantity, setEditingQuantity] = useState<number>(1);
+  const [editingUnit, setEditingUnit] = useState<Unit>("units");
   const direction = language === 'he' ? 'rtl' : 'ltr';
 
   // Stopwatch state
@@ -356,6 +360,44 @@ export const ShoppingMode = () => {
     setPendingDeleteItemId(null);
   }, [pendingDeleteItemId, dontAskAgainChecked, lightTap, language]);
 
+  // Start editing an item
+  const startEditingItem = useCallback((item: ShoppingItem, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingItemId(item.id);
+    setEditingQuantity(item.quantity);
+    setEditingUnit(item.unit);
+    setEditingNote(item.note || "");
+    lightTap();
+  }, [lightTap]);
+
+  // Save item edits
+  const saveItemEdit = useCallback(() => {
+    if (!editingItemId) return;
+    
+    setItems(prev => prev.map(item =>
+      item.id === editingItemId
+        ? { ...item, quantity: editingQuantity, unit: editingUnit, note: editingNote.trim() || undefined }
+        : item
+    ));
+    
+    setEditingItemId(null);
+    lightTap();
+    toast.success(language === 'he' ? 'הפריט עודכן' : 'Item updated');
+  }, [editingItemId, editingQuantity, editingUnit, editingNote, lightTap, language]);
+
+  // Cancel editing
+  const cancelEdit = useCallback(() => {
+    setEditingItemId(null);
+    setEditingNote("");
+    setEditingQuantity(1);
+    setEditingUnit("units");
+  }, []);
+
+  // Update quantity inline
+  const updateQuantity = useCallback((delta: number) => {
+    setEditingQuantity(prev => Math.max(0.5, prev + delta));
+  }, []);
+
   // Sorted items with pinned first, then smart sort if enabled
   const { pinnedItems, groupedItems, flatSortedItems } = useMemo(() => {
     const active = items.filter(item => !item.checked);
@@ -377,6 +419,7 @@ export const ShoppingMode = () => {
   // Render a single item
   const renderItem = (item: ShoppingItem) => {
     const isAnimating = animatingItemId === item.id;
+    const isEditing = editingItemId === item.id;
     const unitLabel = UNITS.find(u => u.value === item.unit)?.[language === 'he' ? 'labelHe' : 'labelEn'] || '';
     
     return (
@@ -395,76 +438,188 @@ export const ShoppingMode = () => {
             ? 'border-success bg-success/10 scale-[0.97] shadow-lg' 
             : ''
           }
+          ${isEditing ? 'border-primary bg-primary/5' : ''}
         `}
       >
-        <div className={`flex items-center gap-3 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
-          {/* Pin button */}
-          <button
-            onClick={(e) => togglePin(item.id, e)}
-            className={`
-              flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center
-              border transition-all duration-200 touch-manipulation active:scale-90
-              ${item.pinned 
-                ? 'bg-destructive/10 text-destructive border-destructive/30 hover:bg-destructive/20' 
-                : 'bg-muted border-border text-muted-foreground hover:bg-accent hover:text-foreground'
+        {/* Normal View */}
+        {!isEditing && (
+          <div className={`flex items-center gap-2 sm:gap-3 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
+            {/* Pin button */}
+            <button
+              onClick={(e) => togglePin(item.id, e)}
+              className={`
+                flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center
+                border transition-all duration-200 touch-manipulation active:scale-90
+                ${item.pinned 
+                  ? 'bg-destructive/10 text-destructive border-destructive/30 hover:bg-destructive/20' 
+                  : 'bg-muted border-border text-muted-foreground hover:bg-accent hover:text-foreground'
+                }
+              `}
+              title={item.pinned 
+                ? (language === 'he' ? 'הסר נעיצה' : 'Unpin') 
+                : (language === 'he' ? 'נעץ פריט דחוף' : 'Pin urgent')
               }
-            `}
-            title={item.pinned 
-              ? (language === 'he' ? 'הסר נעיצה' : 'Unpin') 
-              : (language === 'he' ? 'נעץ פריט דחוף' : 'Pin urgent')
-            }
-          >
-            {item.pinned ? (
-              <PinOff className="h-4 w-4" />
-            ) : (
-              <Pin className="h-4 w-4" />
-            )}
-          </button>
+            >
+              {item.pinned ? (
+                <PinOff className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              ) : (
+                <Pin className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              )}
+            </button>
 
-          {/* Delete button */}
-          <button
-            onClick={(e) => requestDeleteItem(item.id, e)}
-            className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center
-              border transition-all duration-200 touch-manipulation active:scale-90
-              bg-muted border-border text-muted-foreground 
-              hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30"
-            title={language === 'he' ? 'הסר פריט' : 'Remove item'}
-          >
-            <Trash2 className="h-4 w-4" />
-          </button>
+            {/* Delete button */}
+            <button
+              onClick={(e) => requestDeleteItem(item.id, e)}
+              className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center
+                border transition-all duration-200 touch-manipulation active:scale-90
+                bg-muted border-border text-muted-foreground 
+                hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30"
+              title={language === 'he' ? 'הסר פריט' : 'Remove item'}
+            >
+              <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            </button>
 
-          {/* Content */}
-          <button
-            onClick={() => toggleItem(item.id)}
-            className={`flex-1 min-w-0 text-${direction === 'rtl' ? 'right' : 'left'} touch-manipulation`}
-          >
-            <p className="text-base sm:text-lg font-semibold text-foreground truncate">
+            {/* Edit button */}
+            <button
+              onClick={(e) => startEditingItem(item, e)}
+              className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center
+                border transition-all duration-200 touch-manipulation active:scale-90
+                bg-muted border-border text-muted-foreground 
+                hover:bg-primary/10 hover:text-primary hover:border-primary/30"
+              title={language === 'he' ? 'ערוך פריט' : 'Edit item'}
+            >
+              <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            </button>
+
+            {/* Content */}
+            <button
+              onClick={() => toggleItem(item.id)}
+              className={`flex-1 min-w-0 text-${direction === 'rtl' ? 'right' : 'left'} touch-manipulation`}
+            >
+              <p className="text-base sm:text-lg font-semibold text-foreground truncate">
+                {item.text}
+              </p>
+              <div className="flex flex-col gap-0.5">
+                <p className="text-xs sm:text-sm text-muted-foreground font-medium">
+                  {item.quantity} {unitLabel}
+                </p>
+                {item.note && (
+                  <p className="text-xs text-primary/70 flex items-center gap-1">
+                    <MessageSquare className="h-3 w-3 inline" />
+                    {item.note}
+                  </p>
+                )}
+              </div>
+            </button>
+
+            {/* Checkbox */}
+            <button
+              onClick={() => toggleItem(item.id)}
+              className={`
+                flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-lg
+                flex items-center justify-center
+                border-2 transition-all duration-300
+                touch-manipulation active:scale-95
+                ${isAnimating 
+                  ? 'bg-success border-success text-success-foreground scale-110' 
+                  : 'bg-card border-border hover:border-primary'
+                }
+              `}
+            >
+              {isAnimating && (
+                <Check className="h-5 w-5 sm:h-6 sm:w-6 animate-check-bounce" strokeWidth={3} />
+              )}
+            </button>
+          </div>
+        )}
+
+        {/* Edit Mode */}
+        {isEditing && (
+          <div className="space-y-3">
+            {/* Item name (read-only) */}
+            <p className={`text-base font-semibold text-foreground ${direction === 'rtl' ? 'text-right' : 'text-left'}`}>
               {item.text}
             </p>
-            <p className="text-xs sm:text-sm text-muted-foreground font-medium">
-              {item.quantity} {unitLabel}
-            </p>
-          </button>
 
-          {/* Checkbox */}
-          <button
-            onClick={() => toggleItem(item.id)}
-            className={`
-              flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-lg
-              flex items-center justify-center
-              border-2 transition-all duration-300
-              touch-manipulation active:scale-95
-              ${isAnimating 
-                ? 'bg-success border-success text-success-foreground scale-110' 
-                : 'bg-card border-border hover:border-primary'
-              }
-            `}
-          >
-            {isAnimating && (
-              <Check className="h-5 w-5 sm:h-6 sm:w-6 animate-check-bounce" strokeWidth={3} />
-            )}
-          </button>
-        </div>
+            {/* Quantity controls */}
+            <div className={`flex items-center gap-3 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
+              <span className="text-sm text-muted-foreground font-medium">
+                {language === 'he' ? 'כמות:' : 'Qty:'}
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => updateQuantity(-0.5)}
+                  className="w-8 h-8 rounded-lg bg-muted border border-border flex items-center justify-center
+                    hover:bg-accent transition-colors touch-manipulation active:scale-95"
+                >
+                  <Minus className="h-4 w-4" />
+                </button>
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  value={editingQuantity}
+                  onChange={(e) => setEditingQuantity(Math.max(0.5, parseFloat(e.target.value) || 0.5))}
+                  className="w-16 h-8 text-center text-base font-semibold bg-background border border-border rounded-lg"
+                />
+                <button
+                  onClick={() => updateQuantity(0.5)}
+                  className="w-8 h-8 rounded-lg bg-muted border border-border flex items-center justify-center
+                    hover:bg-accent transition-colors touch-manipulation active:scale-95"
+                >
+                  <Plus className="h-4 w-4" />
+                </button>
+              </div>
+
+              {/* Unit selector */}
+              <Select value={editingUnit} onValueChange={(val) => setEditingUnit(val as Unit)}>
+                <SelectTrigger className="w-24 h-8 text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {UNITS.map((u) => (
+                    <SelectItem key={u.value} value={u.value}>
+                      {language === 'he' ? u.labelHe : u.labelEn}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Note input */}
+            <div className="space-y-1">
+              <label className={`text-sm text-muted-foreground font-medium flex items-center gap-1 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
+                <MessageSquare className="h-3.5 w-3.5" />
+                {language === 'he' ? 'הערה:' : 'Note:'}
+              </label>
+              <input
+                type="text"
+                value={editingNote}
+                onChange={(e) => setEditingNote(e.target.value)}
+                placeholder={language === 'he' ? 'הוסף הערה...' : 'Add a note...'}
+                className={`w-full h-9 px-3 text-sm bg-background border border-border rounded-lg ${direction === 'rtl' ? 'text-right' : 'text-left'}`}
+                dir={direction}
+              />
+            </div>
+
+            {/* Action buttons */}
+            <div className={`flex gap-2 pt-1 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
+              <button
+                onClick={cancelEdit}
+                className="flex-1 h-9 rounded-lg border border-border bg-muted text-muted-foreground
+                  hover:bg-accent transition-colors text-sm font-medium touch-manipulation active:scale-95"
+              >
+                {language === 'he' ? 'ביטול' : 'Cancel'}
+              </button>
+              <button
+                onClick={saveItemEdit}
+                className="flex-1 h-9 rounded-lg bg-primary text-primary-foreground
+                  hover:bg-primary/90 transition-colors text-sm font-bold touch-manipulation active:scale-95"
+              >
+                {language === 'he' ? 'שמור' : 'Save'}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     );
   };

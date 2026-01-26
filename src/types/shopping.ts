@@ -87,6 +87,7 @@ export interface ShoppingItem {
   quantity: number;
   unit: Unit;
   pinned?: boolean;
+  note?: string;
 }
 
 export interface SmartItem {

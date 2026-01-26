@@ -242,13 +242,13 @@ const MyNotebook = () => {
                     <Tabs defaultValue="ready" className="w-full">
                         <TabsList className="w-full grid grid-cols-3 h-auto p-1 rounded-xl bg-muted/50 mb-6">
                             <TabsTrigger 
-                                value="ready" 
-                                className="rounded-lg py-2.5 px-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:shadow-sm flex items-center justify-center gap-1.5 text-xs sm:text-sm"
+                                value="completed"
+                                className="rounded-lg py-2.5 px-2 data-[state=active]:bg-green-500/10 data-[state=active]:text-green-600 dark:data-[state=active]:text-green-400 data-[state=active]:shadow-sm flex items-center justify-center gap-1.5 text-xs sm:text-sm"
                             >
-                                <ClipboardList className="h-4 w-4 shrink-0" />
-                                <span className="hidden sm:inline">{language === 'he' ? 'מוכנות' : 'Ready'}</span>
-                                <span className="bg-primary/20 text-primary text-xs px-1.5 py-0.5 rounded-full min-w-[20px]">
-                                    {readyLists.length}
+                                <CheckCircle className="h-4 w-4 shrink-0" />
+                                <span className="hidden sm:inline">{language === 'he' ? 'הושלמו' : 'Completed'}</span>
+                                <span className="bg-green-500/20 text-green-600 dark:text-green-400 text-xs px-1.5 py-0.5 rounded-full min-w-[20px]">
+                                    {completedLists.length}
                                 </span>
                             </TabsTrigger>
                             
@@ -264,13 +264,13 @@ const MyNotebook = () => {
                             </TabsTrigger>
                             
                             <TabsTrigger 
-                                value="completed"
-                                className="rounded-lg py-2.5 px-2 data-[state=active]:bg-green-500/10 data-[state=active]:text-green-600 dark:data-[state=active]:text-green-400 data-[state=active]:shadow-sm flex items-center justify-center gap-1.5 text-xs sm:text-sm"
+                                value="ready" 
+                                className="rounded-lg py-2.5 px-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:shadow-sm flex items-center justify-center gap-1.5 text-xs sm:text-sm"
                             >
-                                <CheckCircle className="h-4 w-4 shrink-0" />
-                                <span className="hidden sm:inline">{language === 'he' ? 'הושלמו' : 'Completed'}</span>
-                                <span className="bg-green-500/20 text-green-600 dark:text-green-400 text-xs px-1.5 py-0.5 rounded-full min-w-[20px]">
-                                    {completedLists.length}
+                                <ClipboardList className="h-4 w-4 shrink-0" />
+                                <span className="hidden sm:inline">{language === 'he' ? 'מוכנות' : 'Ready'}</span>
+                                <span className="bg-primary/20 text-primary text-xs px-1.5 py-0.5 rounded-full min-w-[20px]">
+                                    {readyLists.length}
                                 </span>
                             </TabsTrigger>
                         </TabsList>

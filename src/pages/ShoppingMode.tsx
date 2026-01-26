@@ -626,25 +626,32 @@ export const ShoppingMode = () => {
 
   return (
     <div 
-      className="min-h-screen pb-28 sm:pb-32 transition-all duration-500 relative overflow-hidden bg-background"
+      className="min-h-screen pb-28 sm:pb-32 transition-all duration-500 relative overflow-hidden bg-gradient-to-b from-background via-background to-muted/20"
       dir={direction}
     >
-      {/* Clean Modern Background */}
-      <div 
-        className="fixed inset-0 -z-10 bg-gradient-to-b from-muted/30 to-background dark:from-background dark:to-background"
-      />
+      {/* Colorful Decorative Background */}
+      <div className="fixed inset-0 -z-10 overflow-hidden">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-success/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-0 w-80 h-80 bg-primary/10 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-0 w-64 h-64 bg-warning/10 rounded-full blur-3xl" />
+      </div>
       
-      {/* Subtle Decorative Elements */}
+      {/* Subtle Decorative Icons */}
       <div className="fixed inset-0 -z-5 pointer-events-none overflow-hidden">
         <ShoppingCart 
-          className="absolute -bottom-10 -right-10 sm:-bottom-16 sm:-right-16 h-48 w-48 sm:h-72 sm:w-72 text-muted-foreground/5 rotate-12" 
+          className="absolute -bottom-10 -right-10 sm:-bottom-16 sm:-right-16 h-48 w-48 sm:h-72 sm:w-72 text-success/10 rotate-12" 
           strokeWidth={1}
         />
-        <ShoppingCart 
-          className="absolute -top-6 -left-6 sm:-top-10 sm:-left-10 h-24 w-24 sm:h-36 sm:w-36 text-muted-foreground/5 -rotate-12" 
+        <Star 
+          className="absolute top-20 right-10 h-12 w-12 text-warning/20 rotate-12" 
+          strokeWidth={1}
+        />
+        <Sparkles 
+          className="absolute top-40 left-5 h-10 w-10 text-primary/15 -rotate-12" 
           strokeWidth={1}
         />
       </div>
+      
       {/* Full-screen Confetti for Mission Complete */}
       {showConfetti && (
         <div className="fixed inset-0 pointer-events-none z-50">
@@ -652,8 +659,8 @@ export const ShoppingMode = () => {
         </div>
       )}
 
-      {/* Mission Header - Clean & Professional */}
-      <div className="sticky top-0 z-40 bg-card border-b-2 border-border shadow-sm">
+      {/* Mission Header - Enhanced & Colorful */}
+      <div className="sticky top-0 z-40 bg-gradient-to-b from-card via-card to-card/95 backdrop-blur-sm border-b-2 border-success/30 shadow-lg shadow-success/5">
         <div className="max-w-3xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
           {/* Top Row: Exit + Title + Green Cart */}
           <div className={`flex items-center justify-between mb-3 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
@@ -661,19 +668,20 @@ export const ShoppingMode = () => {
             <Button
               variant="outline"
               onClick={handleExit}
-              className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl border-2 border-destructive/50 bg-destructive/10 hover:bg-destructive/20 text-destructive transition-all active:scale-95 touch-manipulation"
+              className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl border-2 border-destructive/50 bg-destructive/10 hover:bg-destructive/20 text-destructive transition-all active:scale-95 touch-manipulation shadow-sm"
             >
               <X className="h-5 w-5 sm:h-6 sm:w-6" />
             </Button>
 
-            {/* Dynamic Title */}
+            {/* Dynamic Title with Gradient */}
             <div className="text-center flex-1 px-2">
               <div className="flex items-center justify-center gap-1.5 sm:gap-2 mb-0.5">
-                <span className="text-xl sm:text-2xl">{motivationalText.emoji}</span>
-                <h1 className="text-lg sm:text-xl font-black text-foreground">
+                <span className="text-xl sm:text-2xl animate-pulse">{motivationalText.emoji}</span>
+                <h1 className="text-lg sm:text-xl font-black bg-gradient-to-r from-foreground via-primary to-foreground bg-clip-text">
                   {motivationalText.title}
                 </h1>
               </div>
+              <p className="text-xs text-muted-foreground mb-1">{motivationalText.subtitle}</p>
               {/* Editable List Name */}
               <input
                 type="text"
@@ -685,72 +693,84 @@ export const ShoppingMode = () => {
               />
             </div>
 
-            {/* Green Shopping Cart Icon - Indicates Shopping Mode */}
-            <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-success/15 flex items-center justify-center">
+            {/* Green Shopping Cart Icon - Animated */}
+            <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-gradient-to-br from-success/20 to-success/10 flex items-center justify-center border-2 border-success/30 shadow-lg shadow-success/20">
               <ShoppingCart className="h-5 w-5 sm:h-6 sm:w-6 text-success" strokeWidth={2.5} />
             </div>
           </div>
 
-          {/* Progress Section - Compact */}
+          {/* Progress Section - Enhanced */}
           <div className="space-y-2">
-            {/* Progress Bar */}
-            <div className="relative h-4 sm:h-5 bg-muted rounded-full overflow-hidden border border-border">
+            {/* Progress Bar with Glow */}
+            <div className="relative h-5 sm:h-6 bg-muted rounded-full overflow-hidden border-2 border-border shadow-inner">
               <div 
                 className={`
                   absolute inset-y-0 left-0 rounded-full transition-all duration-700 ease-out
                   ${progress === 100 
-                    ? 'bg-success' 
-                    : 'bg-primary'
+                    ? 'bg-gradient-to-r from-success via-success to-emerald-400 shadow-lg shadow-success/50' 
+                    : progress >= 50 
+                      ? 'bg-gradient-to-r from-primary via-primary to-blue-400' 
+                      : 'bg-gradient-to-r from-warning via-warning to-amber-400'
                   }
                 `}
                 style={{ width: `${progress}%` }}
-              />
+              >
+                {/* Shine effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+              </div>
+              {/* Progress text inside bar */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-xs font-black text-foreground drop-shadow-sm">
+                  {progress}%
+                </span>
+              </div>
             </div>
 
-            {/* Counter Pills + Timer - Compact */}
+            {/* Counter Pills + Timer - Colorful */}
             <div className={`flex items-center justify-between ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
-              <div className="flex items-center gap-1.5">
-                <div className="flex items-center gap-1 px-2 py-1 bg-success/15 text-success border border-success/30 rounded-full">
-                  <Check className="h-3.5 w-3.5" strokeWidth={3} />
-                  <span className="font-bold text-xs sm:text-sm">{completedCount}</span>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-success/20 to-success/10 text-success border-2 border-success/30 rounded-full shadow-sm">
+                  <Check className="h-4 w-4" strokeWidth={3} />
+                  <span className="font-black text-sm">{completedCount}</span>
                 </div>
-                <span className="text-muted-foreground text-sm">/</span>
-                <div className="flex items-center gap-1 px-2 py-1 bg-muted border border-border rounded-full">
-                  <ShoppingCart className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="font-bold text-xs sm:text-sm text-foreground">{totalCount}</span>
+                <span className="text-muted-foreground text-lg font-bold">/</span>
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-primary/15 to-primary/5 border-2 border-primary/30 rounded-full shadow-sm">
+                  <ShoppingCart className="h-4 w-4 text-primary" />
+                  <span className="font-black text-sm text-foreground">{totalCount}</span>
                 </div>
               </div>
               
-              {/* Timer - Clean & Minimal */}
-              <div className="flex items-center gap-2 px-3 py-2 bg-muted rounded-lg border border-border">
-                <Clock className="h-4 w-4 text-muted-foreground" />
-                <span className="font-mono font-bold text-sm sm:text-base tabular-nums text-foreground">
+              {/* Timer - Enhanced */}
+              <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-muted to-muted/50 rounded-xl border-2 border-border shadow-sm">
+                <Timer className="h-4 w-4 text-primary animate-pulse" />
+                <span className="font-mono font-black text-base tabular-nums text-foreground">
                   {formatTime(elapsedTime)}
                 </span>
               </div>
-              
-              <span className="text-base sm:text-lg font-black text-foreground">
-                {progress}%
-              </span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Interactive Shopping Mode Banner */}
-      <div className="mx-3 sm:mx-4 my-2">
-        <div className="max-w-3xl mx-auto bg-success/10 border-2 border-success/30 rounded-lg px-4 py-2.5 flex items-center justify-center gap-2">
-          <ShoppingCart className="h-4 w-4 text-success" />
-          <span className="text-sm font-semibold text-success">
-            {language === 'he' 
-              ? 'מצב קנייה אינטראקטיבי - חוויית קנייה משופרת' 
-              : 'Interactive Shopping Mode - Enhanced Shopping Experience'}
-          </span>
+      {/* Interactive Shopping Mode Banner - More Colorful */}
+      <div className="mx-3 sm:mx-4 my-3">
+        <div className="max-w-3xl mx-auto bg-gradient-to-r from-success/15 via-success/10 to-primary/10 border-2 border-success/40 rounded-xl px-4 py-3 flex items-center justify-center gap-3 shadow-lg shadow-success/10">
+          <div className="p-2 bg-success/20 rounded-lg">
+            <ShoppingCart className="h-5 w-5 text-success" />
+          </div>
+          <div className="text-center">
+            <span className="text-sm font-bold text-success block">
+              {language === 'he' ? '🛒 מצב קנייה אינטראקטיבי' : '🛒 Interactive Shopping Mode'}
+            </span>
+            <span className="text-xs text-muted-foreground">
+              {language === 'he' ? 'סמנו פריטים שאספתם, ערכו כמויות, הוסיפו הערות' : 'Mark collected items, edit quantities, add notes'}
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* Quick Add Item Bar - Clean & Professional */}
-      <div className="sticky top-[140px] z-30 bg-card/95 border-b border-border px-3 py-3">
+      {/* Quick Add Item Bar - Enhanced & Colorful */}
+      <div className="sticky top-[160px] z-30 bg-gradient-to-b from-card via-card to-card/90 backdrop-blur-sm border-b-2 border-primary/20 shadow-lg px-3 py-3">
         <div className="max-w-3xl mx-auto">
           {showAddItemInput ? (
             <div className="space-y-3">
@@ -890,9 +910,11 @@ export const ShoppingMode = () => {
                 setShowAddItemInput(true);
                 setTimeout(() => addItemInputRef.current?.focus(), 100);
               }}
-              className="w-full flex items-center justify-center gap-3 h-14 bg-card hover:bg-muted border-2 border-dashed border-border hover:border-primary rounded-xl text-base font-semibold text-foreground transition-all active:scale-[0.98]"
+              className="w-full flex items-center justify-center gap-3 h-14 bg-gradient-to-r from-primary/10 via-card to-success/10 hover:from-primary/20 hover:to-success/20 border-2 border-dashed border-primary/40 hover:border-primary rounded-xl text-base font-bold text-foreground transition-all active:scale-[0.98] shadow-sm"
             >
-              <Plus className="h-5 w-5 text-primary" />
+              <div className="p-1.5 bg-primary/20 rounded-lg">
+                <Plus className="h-5 w-5 text-primary" />
+              </div>
               {language === 'he' ? 'הוסף פריט או הדבק רשימה' : 'Add item or paste list'}
             </button>
           )}
@@ -915,12 +937,14 @@ export const ShoppingMode = () => {
         {/* Active Items */}
         {activeItemsCount > 0 && (
           <div className="space-y-3 sm:space-y-4">
-            <div className="flex items-center gap-2 px-1">
-              <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-warning" />
+            <div className="flex items-center gap-2 px-2 py-2 bg-gradient-to-r from-warning/15 to-transparent rounded-xl border border-warning/20">
+              <div className="p-1.5 bg-warning/20 rounded-lg">
+                <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-warning" />
+              </div>
               <h2 className="text-sm sm:text-base font-bold text-foreground">
-                {language === 'he' ? 'צריך לאסוף' : 'To Collect'}
+                {language === 'he' ? '🛒 צריך לאסוף' : '🛒 To Collect'}
               </h2>
-              <span className="ml-auto px-2 py-0.5 bg-warning/15 text-warning border border-warning/30 rounded-full text-xs font-bold">
+              <span className="ml-auto px-3 py-1 bg-warning/20 text-warning border-2 border-warning/30 rounded-full text-xs font-black shadow-sm">
                 {activeItemsCount}
               </span>
             </div>
@@ -975,18 +999,20 @@ export const ShoppingMode = () => {
 
         {/* Completed Items */}
         {completedItems.length > 0 && (
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 px-1">
-              <Trophy className="h-4 w-4 sm:h-5 sm:w-5 text-success" />
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 px-2 py-2 bg-gradient-to-r from-success/15 to-transparent rounded-xl border border-success/20">
+              <div className="p-1.5 bg-success/20 rounded-lg">
+                <Trophy className="h-4 w-4 sm:h-5 sm:w-5 text-success" />
+              </div>
               <h2 className="text-sm sm:text-base font-bold text-success">
-                {language === 'he' ? 'נאסף!' : 'Collected!'}
+                {language === 'he' ? '✨ נאסף!' : '✨ Collected!'}
               </h2>
-              <span className="ml-auto px-2 py-0.5 bg-success/15 text-success border border-success/30 rounded-full text-xs font-bold">
+              <span className="ml-auto px-3 py-1 bg-success/20 text-success border-2 border-success/30 rounded-full text-xs font-black shadow-sm">
                 {completedItems.length}
               </span>
             </div>
             
-            <div className="space-y-1.5 sm:space-y-2">
+            <div className="space-y-2">
               {completedItems.map((item) => {
                 const unitLabel = UNITS.find(u => u.value === item.unit)?.[language === 'he' ? 'labelHe' : 'labelEn'] || '';
                 
@@ -995,8 +1021,8 @@ export const ShoppingMode = () => {
                     key={item.id}
                     className={`
                       flex items-center gap-2
-                      bg-success/5 border border-success/20 rounded-lg p-2.5 sm:p-3
-                      opacity-80 hover:opacity-100
+                      bg-gradient-to-r from-success/10 to-success/5 border-2 border-success/25 rounded-xl p-2.5 sm:p-3
+                      hover:border-success/40
                       transition-all duration-200
                       ${direction === 'rtl' ? 'flex-row-reverse' : ''}
                     `}
@@ -1007,18 +1033,26 @@ export const ShoppingMode = () => {
                     >
                       <div className={`flex items-center gap-2.5 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
                         {/* Checked indicator */}
-                        <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-success/20 flex items-center justify-center">
+                        <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-success/25 flex items-center justify-center shadow-sm border border-success/30">
                           <Check className="h-4 w-4 sm:h-5 sm:w-5 text-success" strokeWidth={3} />
                         </div>
 
                         {/* Content */}
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm sm:text-base font-medium text-muted-foreground line-through truncate">
+                          <p className="text-sm sm:text-base font-medium text-success/80 line-through truncate">
                             {item.text}
                           </p>
-                          <p className="text-xs text-muted-foreground/70">
-                            {item.quantity} {unitLabel}
-                          </p>
+                          <div className="flex flex-col gap-0.5">
+                            <p className="text-xs text-muted-foreground/70">
+                              {item.quantity} {unitLabel}
+                            </p>
+                            {item.note && (
+                              <p className="text-xs text-success/60 flex items-center gap-1">
+                                <MessageSquare className="h-3 w-3 inline" />
+                                {item.note}
+                              </p>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </button>
@@ -1041,46 +1075,58 @@ export const ShoppingMode = () => {
           </div>
         )}
 
-        {/* Empty State */}
+        {/* Empty State - Enhanced */}
         {items.length === 0 && (
-          <div className="text-center py-12 px-4">
-            <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-warning/15 flex items-center justify-center">
-              <ShoppingCart className="h-8 w-8 text-warning" />
+          <div className="text-center py-16 px-6">
+            <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-primary/20 to-success/20 flex items-center justify-center shadow-lg border-2 border-primary/20">
+              <ShoppingCart className="h-10 w-10 text-primary" />
             </div>
-            <p className="text-base text-muted-foreground font-medium">
-              {language === 'he' ? 'אין פריטים ברשימה' : 'No items in list'}
+            <h3 className="text-lg font-bold text-foreground mb-2">
+              {language === 'he' ? 'הרשימה ריקה!' : 'List is empty!'}
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              {language === 'he' ? 'לחצו על "הוסף פריט" למעלה כדי להתחיל' : 'Click "Add item" above to get started'}
             </p>
+            <div className="flex justify-center gap-2">
+              <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium">
+                {language === 'he' ? '💡 טיפ: אפשר להדביק רשימה שלמה' : '💡 Tip: You can paste a full list'}
+              </span>
+            </div>
           </div>
         )}
 
-        {/* Mission Complete Celebration */}
+        {/* Mission Complete Celebration - Enhanced */}
         {showMissionComplete && progress === 100 && (
-          <div className="bg-card rounded-xl p-5 sm:p-6 text-center border-2 border-success shadow-lg">
-            <div className="text-4xl sm:text-5xl mb-3">🎉</div>
-            <h3 className="text-xl sm:text-2xl font-black text-foreground mb-1">
+          <div className="bg-gradient-to-br from-success/20 via-card to-primary/10 rounded-2xl p-6 sm:p-8 text-center border-2 border-success shadow-xl shadow-success/20">
+            <div className="text-5xl sm:text-6xl mb-4 animate-bounce">🎉</div>
+            <h3 className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-success to-primary bg-clip-text text-transparent mb-2">
               {language === 'he' ? 'כל הכבוד!' : 'Amazing!'}
             </h3>
-            <p className="text-sm sm:text-base text-muted-foreground mb-3">
+            <p className="text-base sm:text-lg text-muted-foreground mb-4">
               {language === 'he' ? 'אספת את כל הפריטים!' : 'You collected everything!'}
             </p>
-            <div className="flex justify-center gap-1.5">
-              <Star className="h-5 w-5 text-warning animate-pulse" fill="currentColor" />
-              <Star className="h-5 w-5 text-warning animate-pulse" fill="currentColor" style={{ animationDelay: '0.1s' }} />
-              <Star className="h-5 w-5 text-warning animate-pulse" fill="currentColor" style={{ animationDelay: '0.2s' }} />
+            <div className="flex justify-center gap-2">
+              <Star className="h-6 w-6 text-warning animate-pulse" fill="currentColor" />
+              <Star className="h-7 w-7 text-warning animate-pulse" fill="currentColor" style={{ animationDelay: '0.1s' }} />
+              <Star className="h-6 w-6 text-warning animate-pulse" fill="currentColor" style={{ animationDelay: '0.2s' }} />
             </div>
+            <p className="mt-4 text-sm text-success font-semibold">
+              {language === 'he' ? `⏱ הושלם ב-${formatTime(elapsedTime)}` : `⏱ Completed in ${formatTime(elapsedTime)}`}
+            </p>
           </div>
         )}
       </div>
 
-      {/* Sticky Footer - Two Buttons */}
-      <div className="fixed bottom-0 left-0 right-0 bg-card border-t-2 border-border p-3 sm:p-4 shadow-lg z-40">
+      {/* Sticky Footer - Enhanced */}
+      <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-card via-card to-card/95 backdrop-blur-sm border-t-2 border-success/30 p-3 sm:p-4 shadow-2xl z-40">
         <div className={`max-w-3xl mx-auto flex gap-2 sm:gap-3 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
           {/* Save for Later Button */}
           <Button
             onClick={handleSaveForLater}
             variant="outline"
-            className="flex-1 h-12 sm:h-14 text-sm sm:text-base font-bold rounded-xl bg-card border-2 border-border hover:bg-muted transition-all touch-manipulation active:scale-[0.98]"
+            className="flex-1 h-12 sm:h-14 text-sm sm:text-base font-bold rounded-xl bg-card border-2 border-primary/30 hover:bg-primary/10 hover:border-primary transition-all touch-manipulation active:scale-[0.98] shadow-sm"
           >
+            <Clock className={`h-4 w-4 ${direction === 'rtl' ? 'ml-2' : 'mr-2'}`} />
             {language === 'he' ? 'שמור לאחר כך' : 'Save for Later'}
           </Button>
           

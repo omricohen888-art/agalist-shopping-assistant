@@ -1180,13 +1180,13 @@ export const ShoppingMode = () => {
                   setSelectedStore(""); // Reset store when type changes
                 }}
               >
-                <SelectTrigger className="w-full h-12 text-base">
+                <SelectTrigger className={`w-full h-12 text-base ${direction === 'rtl' ? 'text-right' : 'text-left'}`}>
                   <SelectValue placeholder={language === 'he' ? 'בחר סוג' : 'Select type'} />
                 </SelectTrigger>
-                <SelectContent className="bg-background border border-border z-50">
+                <SelectContent className="bg-background border border-border z-50" dir={direction}>
                   {SHOPPING_TYPES.map((type) => (
-                    <SelectItem key={type.value} value={type.value} className="text-base">
-                      <span className="flex items-center gap-2">
+                    <SelectItem key={type.value} value={type.value} className={`text-base ${direction === 'rtl' ? 'text-right' : 'text-left'}`}>
+                      <span className={`flex items-center gap-2 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
                         <span>{type.icon}</span>
                         <span>{language === 'he' ? type.labelHe : type.labelEn}</span>
                       </span>
@@ -1202,23 +1202,23 @@ export const ShoppingMode = () => {
                 {language === 'he' ? 'רשת/חנות' : 'Store'}
               </Label>
               <Select value={selectedStore} onValueChange={setSelectedStore}>
-                <SelectTrigger className="w-full h-12 text-base">
+                <SelectTrigger className={`w-full h-12 text-base ${direction === 'rtl' ? 'text-right' : 'text-left'}`}>
                   {selectedStore ? (
-                    <span className="flex items-center gap-2">
+                    <span className={`flex items-center gap-2 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
                       <span className="w-5 h-5 flex-shrink-0 flex items-center justify-center text-foreground [&_svg]:w-5 [&_svg]:h-5 [&_svg]:max-w-5 [&_svg]:max-h-5">{getStoreLogo(selectedStore)}</span>
                       <span>{selectedStore}</span>
                     </span>
                   ) : (
-                    <span className="flex items-center gap-2">
+                    <span className={`flex items-center gap-2 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
                       <Store className="h-4 w-4 opacity-50" />
                       <span>{language === 'he' ? 'בחר חנות' : 'Select store'}</span>
                     </span>
                   )}
                 </SelectTrigger>
-                <SelectContent className="bg-background border border-border z-50">
+                <SelectContent className="bg-background border border-border z-50" dir={direction}>
                   {STORES_BY_TYPE[selectedShoppingType].map((store) => (
-                    <SelectItem key={store} value={store} className="text-base">
-                      <span className="flex items-center gap-2">
+                    <SelectItem key={store} value={store} className={`text-base ${direction === 'rtl' ? 'text-right' : 'text-left'}`}>
+                      <span className={`flex items-center gap-2 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
                         <span className="w-5 h-5 flex-shrink-0 flex items-center justify-center text-foreground [&_svg]:w-5 [&_svg]:h-5 [&_svg]:max-w-5 [&_svg]:max-h-5">{getStoreLogo(store)}</span>
                         <span>{store}</span>
                       </span>

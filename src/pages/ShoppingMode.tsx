@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { 
   ArrowRight, CheckCircle2, Home, X, Check, Sparkles, 
   Trophy, Zap, Star, PartyPopper, ShoppingCart, Timer, Store,
-  Plus, ClipboardPaste, Clock, Pin, PinOff
+  Plus, ClipboardPaste, Clock, Pin, PinOff, Trash2
 } from "lucide-react";
 import { useGlobalLanguage } from "@/context/LanguageContext";
 import { useSoundSettings } from "@/hooks/use-sound-settings.tsx";
@@ -317,6 +317,14 @@ export const ShoppingMode = () => {
     ));
   }, [lightTap]);
 
+  // Delete item from list
+  const deleteItem = useCallback((itemId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setItems(prev => prev.filter(item => item.id !== itemId));
+    lightTap();
+    toast.success(language === 'he' ? 'פריט הוסר' : 'Item removed');
+  }, [lightTap, language]);
+
   // Sorted items with pinned first, then smart sort if enabled
   const { pinnedItems, groupedItems, flatSortedItems } = useMemo(() => {
     const active = items.filter(item => !item.checked);
@@ -412,6 +420,18 @@ export const ShoppingMode = () => {
             ) : (
               <Pin className="h-4 w-4" />
             )}
+          </button>
+
+          {/* Delete button */}
+          <button
+            onClick={(e) => deleteItem(item.id, e)}
+            className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center
+              border transition-all duration-200 touch-manipulation active:scale-90
+              bg-muted border-border text-muted-foreground 
+              hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30"
+            title={language === 'he' ? 'הסר פריט' : 'Remove item'}
+          >
+            <Trash2 className="h-4 w-4" />
           </button>
         </div>
       </div>
@@ -785,34 +805,50 @@ export const ShoppingMode = () => {
                 const unitLabel = UNITS.find(u => u.value === item.unit)?.[language === 'he' ? 'labelHe' : 'labelEn'] || '';
                 
                 return (
-                  <button
+                  <div 
                     key={item.id}
-                    onClick={() => toggleItem(item.id)}
                     className={`
-                      w-full text-${direction === 'rtl' ? 'right' : 'left'}
+                      flex items-center gap-2
                       bg-success/5 border border-success/20 rounded-lg p-2.5 sm:p-3
                       opacity-80 hover:opacity-100
                       transition-all duration-200
-                      touch-manipulation active:scale-[0.98]
+                      ${direction === 'rtl' ? 'flex-row-reverse' : ''}
                     `}
                   >
-                    <div className={`flex items-center gap-2.5 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
-                      {/* Checked indicator */}
-                      <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-success/20 flex items-center justify-center">
-                        <Check className="h-4 w-4 sm:h-5 sm:w-5 text-success" strokeWidth={3} />
-                      </div>
+                    <button
+                      onClick={() => toggleItem(item.id)}
+                      className={`flex-1 min-w-0 text-${direction === 'rtl' ? 'right' : 'left'} touch-manipulation active:scale-[0.98]`}
+                    >
+                      <div className={`flex items-center gap-2.5 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
+                        {/* Checked indicator */}
+                        <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-success/20 flex items-center justify-center">
+                          <Check className="h-4 w-4 sm:h-5 sm:w-5 text-success" strokeWidth={3} />
+                        </div>
 
-                      {/* Content */}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm sm:text-base font-medium text-muted-foreground line-through truncate">
-                          {item.text}
-                        </p>
-                        <p className="text-xs text-muted-foreground/70">
-                          {item.quantity} {unitLabel}
-                        </p>
+                        {/* Content */}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm sm:text-base font-medium text-muted-foreground line-through truncate">
+                            {item.text}
+                          </p>
+                          <p className="text-xs text-muted-foreground/70">
+                            {item.quantity} {unitLabel}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  </button>
+                    </button>
+
+                    {/* Delete button for completed items */}
+                    <button
+                      onClick={(e) => deleteItem(item.id, e)}
+                      className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center
+                        border transition-all duration-200 touch-manipulation active:scale-90
+                        bg-muted/50 border-border/50 text-muted-foreground 
+                        hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30"
+                      title={language === 'he' ? 'הסר פריט' : 'Remove item'}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
                 );
               })}
             </div>

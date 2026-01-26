@@ -504,7 +504,7 @@ export const ShoppingMode = () => {
                   {item.quantity} {unitLabel}
                 </p>
                 {item.note && (
-                  <p className="text-xs text-primary/70 flex items-center gap-1">
+                  <p className="text-xs text-destructive font-medium flex items-center gap-1">
                     <MessageSquare className="h-3 w-3 inline" />
                     {item.note}
                   </p>

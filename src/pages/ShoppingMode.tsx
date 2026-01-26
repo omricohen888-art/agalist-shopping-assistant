@@ -1180,8 +1180,20 @@ export const ShoppingMode = () => {
                   setSelectedStore(""); // Reset store when type changes
                 }}
               >
-                <SelectTrigger dir={direction} className={`w-full h-12 text-base ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
-                  <SelectValue placeholder={language === 'he' ? 'בחר סוג' : 'Select type'} />
+                <SelectTrigger dir={direction} className="w-full h-12 text-base">
+                  {selectedShoppingType ? (
+                    <span className={`flex items-center gap-2 w-full ${direction === 'rtl' ? 'flex-row-reverse justify-end' : ''}`}>
+                      <span>{SHOPPING_TYPES.find(t => t.value === selectedShoppingType)?.icon}</span>
+                      <span>{language === 'he' 
+                        ? SHOPPING_TYPES.find(t => t.value === selectedShoppingType)?.labelHe 
+                        : SHOPPING_TYPES.find(t => t.value === selectedShoppingType)?.labelEn
+                      }</span>
+                    </span>
+                  ) : (
+                    <span className={`flex items-center gap-2 w-full ${direction === 'rtl' ? 'flex-row-reverse justify-end' : ''}`}>
+                      <span>{language === 'he' ? 'בחר סוג' : 'Select type'}</span>
+                    </span>
+                  )}
                 </SelectTrigger>
                 <SelectContent className="bg-background border border-border z-50" dir={direction}>
                   {SHOPPING_TYPES.map((type) => (

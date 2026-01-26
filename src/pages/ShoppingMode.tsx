@@ -93,6 +93,12 @@ export const ShoppingMode = () => {
   const [isSmartSort, setIsSmartSort] = useState(false);
   const [showExitDialog, setShowExitDialog] = useState(false);
   const [originalListId, setOriginalListId] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [pendingDeleteItemId, setPendingDeleteItemId] = useState<string | null>(null);
+  const [skipDeleteConfirm, setSkipDeleteConfirm] = useState(() => {
+    return localStorage.getItem('agalist-skip-delete-confirm') === 'true';
+  });
+  const [dontAskAgainChecked, setDontAskAgainChecked] = useState(false);
   const direction = language === 'he' ? 'rtl' : 'ltr';
 
   // Stopwatch state
@@ -317,13 +323,38 @@ export const ShoppingMode = () => {
     ));
   }, [lightTap]);
 
-  // Delete item from list
-  const deleteItem = useCallback((itemId: string, e: React.MouseEvent) => {
+  // Request to delete an item (may show confirmation)
+  const requestDeleteItem = useCallback((itemId: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    setItems(prev => prev.filter(item => item.id !== itemId));
+    if (skipDeleteConfirm) {
+      // Skip confirmation - delete immediately
+      setItems(prev => prev.filter(item => item.id !== itemId));
+      lightTap();
+      toast.success(language === 'he' ? 'פריט הוסר' : 'Item removed');
+    } else {
+      // Show confirmation dialog
+      setPendingDeleteItemId(itemId);
+      setDontAskAgainChecked(false);
+      setShowDeleteConfirm(true);
+    }
+  }, [skipDeleteConfirm, lightTap, language]);
+
+  // Confirm delete item
+  const confirmDeleteItem = useCallback(() => {
+    if (!pendingDeleteItemId) return;
+    
+    // Save preference if checkbox was checked
+    if (dontAskAgainChecked) {
+      localStorage.setItem('agalist-skip-delete-confirm', 'true');
+      setSkipDeleteConfirm(true);
+    }
+    
+    setItems(prev => prev.filter(item => item.id !== pendingDeleteItemId));
     lightTap();
     toast.success(language === 'he' ? 'פריט הוסר' : 'Item removed');
-  }, [lightTap, language]);
+    setShowDeleteConfirm(false);
+    setPendingDeleteItemId(null);
+  }, [pendingDeleteItemId, dontAskAgainChecked, lightTap, language]);
 
   // Sorted items with pinned first, then smart sort if enabled
   const { pinnedItems, groupedItems, flatSortedItems } = useMemo(() => {
@@ -392,7 +423,7 @@ export const ShoppingMode = () => {
 
           {/* Delete button */}
           <button
-            onClick={(e) => deleteItem(item.id, e)}
+            onClick={(e) => requestDeleteItem(item.id, e)}
             className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center
               border transition-all duration-200 touch-manipulation active:scale-90
               bg-muted border-border text-muted-foreground 
@@ -839,7 +870,7 @@ export const ShoppingMode = () => {
 
                     {/* Delete button for completed items */}
                     <button
-                      onClick={(e) => deleteItem(item.id, e)}
+                      onClick={(e) => requestDeleteItem(item.id, e)}
                       className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center
                         border transition-all duration-200 touch-manipulation active:scale-90
                         bg-muted/50 border-border/50 text-muted-foreground 
@@ -1123,6 +1154,59 @@ export const ShoppingMode = () => {
               className="w-full h-12 text-base font-medium text-muted-foreground hover:text-destructive hover:border-destructive/50"
             >
               {language === 'he' ? 'כן, אני בטוח' : "Yes, I'm sure"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      {/* Delete Item Confirmation Dialog */}
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent className="sm:max-w-sm" dir={direction}>
+          <DialogHeader>
+            <DialogTitle className="text-center text-lg font-bold">
+              {language === 'he' ? '🗑️ למחוק פריט?' : '🗑️ Delete Item?'}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="py-3 text-center">
+            <p className="text-sm text-muted-foreground">
+              {language === 'he' 
+                ? 'האם אתה בטוח שברצונך להסיר פריט זה?' 
+                : 'Are you sure you want to remove this item?'
+              }
+            </p>
+          </div>
+
+          {/* Don't ask again checkbox */}
+          <div className={`flex items-center gap-2 px-2 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
+            <input
+              type="checkbox"
+              id="dontAskAgain"
+              checked={dontAskAgainChecked}
+              onChange={(e) => setDontAskAgainChecked(e.target.checked)}
+              className="w-4 h-4 rounded border-border"
+            />
+            <label htmlFor="dontAskAgain" className="text-sm text-muted-foreground cursor-pointer">
+              {language === 'he' ? 'אל תציג הודעה זו שוב' : "Don't show this again"}
+            </label>
+          </div>
+
+          <DialogFooter className={`flex gap-2 pt-2 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowDeleteConfirm(false);
+                setPendingDeleteItemId(null);
+              }}
+              className="flex-1"
+            >
+              {language === 'he' ? 'ביטול' : 'Cancel'}
+            </Button>
+            <Button
+              onClick={confirmDeleteItem}
+              className="flex-1 bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+            >
+              <Trash2 className="h-4 w-4 mr-1" />
+              {language === 'he' ? 'מחק' : 'Delete'}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -16,21 +16,23 @@ import {
   Lightbulb,
   ChevronDown,
   ChevronUp,
+  ChevronLeft,
+  ChevronRight,
   Calendar,
   CalendarDays,
   Trophy,
   Flame,
   RotateCcw,
   X,
+  History,
 } from "lucide-react";
 import { getShoppingHistory } from "@/utils/storage";
-import { ShoppingHistory } from "@/types/shopping";
+import { ShoppingHistory as ShoppingHistoryType } from "@/types/shopping";
 import { useGlobalLanguage, Language } from "@/context/LanguageContext";
 import { toast } from "sonner";
 
 const BUDGET_KEY = "user_budget";
 const SAVINGS_GOAL_KEY = "savings_goal";
-const STREAK_KEY = "budget_streak";
 
 type BudgetPeriod = 'weekly' | 'monthly';
 
@@ -215,12 +217,17 @@ const Insights = () => {
   const t = translations[language];
   const direction = language === "he" ? "rtl" : "ltr";
 
-  const [history, setHistory] = useState<ShoppingHistory[]>([]);
+  const [history, setHistory] = useState<ShoppingHistoryType[]>([]);
   const [budget, setBudget] = useState<BudgetData | null>(null);
   const [budgetInput, setBudgetInput] = useState("");
   const [budgetPeriod, setBudgetPeriod] = useState<BudgetPeriod>('monthly');
   const [isEditingBudget, setIsEditingBudget] = useState(false);
   const [showTips, setShowTips] = useState(false);
+  
+  // Month navigation
+  const [selectedMonth, setSelectedMonth] = useState(new Date());
+  const isCurrentMonth = selectedMonth.getMonth() === new Date().getMonth() && 
+                         selectedMonth.getFullYear() === new Date().getFullYear();
   
   // Savings goal
   const [savingsGoal, setSavingsGoal] = useState<number | null>(null);
@@ -244,19 +251,49 @@ const Insights = () => {
     if (savedGoal) setSavingsGoal(parseFloat(savedGoal));
   }, []);
 
-  // Date calculations
+  // Date calculations based on selected month
+  const viewMonth = selectedMonth.getMonth();
+  const viewYear = selectedMonth.getFullYear();
+  
   const now = new Date();
-  const currentMonth = now.getMonth();
-  const currentYear = now.getFullYear();
   const startOfWeek = new Date(now);
   startOfWeek.setDate(now.getDate() - now.getDay());
   startOfWeek.setHours(0, 0, 0, 0);
 
-  // Spending calculations
+  // Month navigation
+  const navigateMonth = (direction: 'prev' | 'next') => {
+    setSelectedMonth(prev => {
+      const newDate = new Date(prev);
+      if (direction === 'prev') {
+        newDate.setMonth(newDate.getMonth() - 1);
+      } else {
+        newDate.setMonth(newDate.getMonth() + 1);
+      }
+      return newDate;
+    });
+  };
+
+  const formatMonthYear = (date: Date) => {
+    return date.toLocaleDateString(language === 'he' ? 'he-IL' : 'en-US', {
+      month: 'long',
+      year: 'numeric'
+    });
+  };
+
+  // Check if there's data in previous months
+  const hasOlderData = useMemo(() => {
+    const oldestDate = new Date(viewYear, viewMonth, 1);
+    return history.some(item => new Date(item.date) < oldestDate);
+  }, [history, viewMonth, viewYear]);
+
+  // Check if we can go forward (not beyond current month)
+  const canGoNext = viewMonth < now.getMonth() || viewYear < now.getFullYear();
+
+  // Spending calculations for selected month
   const spendingData = useMemo(() => {
     const thisMonth = history.filter(item => {
       const date = new Date(item.date);
-      return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+      return date.getMonth() === viewMonth && date.getFullYear() === viewYear;
     });
 
     const thisWeek = history.filter(item => {
@@ -264,10 +301,10 @@ const Insights = () => {
       return date >= startOfWeek;
     });
 
+    const prevMonth = viewMonth === 0 ? 11 : viewMonth - 1;
+    const prevYear = viewMonth === 0 ? viewYear - 1 : viewYear;
     const lastMonth = history.filter(item => {
       const date = new Date(item.date);
-      const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
-      const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear;
       return date.getMonth() === prevMonth && date.getFullYear() === prevYear;
     });
 
@@ -289,42 +326,47 @@ const Insights = () => {
         average: thisWeek.length > 0 ? weeklyTotal / thisWeek.length : 0,
       },
       change: monthlyChange,
-      changeDirection: monthlyChange > 5 ? 'up' : monthlyChange < -5 ? 'down' : 'same',
+      changeDirection: monthlyChange > 5 ? 'up' : monthlyChange < -5 ? 'down' : 'same' as const,
     };
-  }, [history, currentMonth, currentYear, startOfWeek]);
+  }, [history, viewMonth, viewYear, startOfWeek]);
 
   // Current period data based on budget period
   const currentPeriodData = budget?.period === 'weekly' ? spendingData.weekly : spendingData.monthly;
 
-  // Store breakdown
+  // Store breakdown for selected month
   const storeData = useMemo(() => {
+    const monthItems = history.filter(item => {
+      const date = new Date(item.date);
+      return date.getMonth() === viewMonth && date.getFullYear() === viewYear;
+    });
+    
     const stores: Record<string, number> = {};
-    history.forEach(item => {
+    monthItems.forEach(item => {
       const store = item.store || (language === 'he' ? 'לא צוין' : 'Unknown');
       stores[store] = (stores[store] || 0) + item.totalAmount;
     });
     return Object.entries(stores)
       .sort(([, a], [, b]) => b - a)
       .slice(0, 5);
-  }, [history, language]);
+  }, [history, viewMonth, viewYear, language]);
 
   const topStore = storeData.length > 0 ? storeData[0][0] : null;
-  const totalAllTime = history.reduce((sum, item) => sum + item.totalAmount, 0);
+  const totalMonthSpend = storeData.reduce((sum, [, amount]) => sum + amount, 0);
 
   // Savings calculation (difference from last month if spending decreased)
   const savingsAmount = useMemo(() => {
     if (spendingData.changeDirection === 'down') {
-      const lastMonthAvg = history
+      const prevMonth = viewMonth === 0 ? 11 : viewMonth - 1;
+      const lastMonthTotal = history
         .filter(item => {
           const date = new Date(item.date);
-          const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
           return date.getMonth() === prevMonth;
         })
         .reduce((sum, item) => sum + item.totalAmount, 0);
-      return Math.max(0, lastMonthAvg - spendingData.monthly.total);
+      return Math.max(0, lastMonthTotal - spendingData.monthly.total);
     }
     return 0;
-  }, [spendingData, history, currentMonth]);
+  }, [spendingData, history, viewMonth]);
 
   // Tips generation
   const tips = useMemo(() => {
@@ -350,14 +392,14 @@ const Insights = () => {
 
     if (storeData.length > 1) {
       const [topStoreName, topAmount] = storeData[0];
-      const percentage = totalAllTime > 0 ? (topAmount / totalAllTime * 100).toFixed(0) : 0;
+      const percentage = totalMonthSpend > 0 ? (topAmount / totalMonthSpend * 100).toFixed(0) : 0;
       result.push(language === 'he'
         ? `🏪 ${percentage}% מההוצאות שלך ב${topStoreName}`
         : `🏪 ${percentage}% of spending at ${topStoreName}`);
     }
 
     return result;
-  }, [budget, currentPeriodData, spendingData, storeData, totalAllTime, language]);
+  }, [budget, currentPeriodData, spendingData, storeData, totalMonthSpend, language]);
 
   const handleSaveBudget = () => {
     const value = parseFloat(budgetInput);
@@ -450,11 +492,47 @@ const Insights = () => {
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-5 space-y-4">
+        {/* Month Navigator */}
+        <div className="flex items-center justify-between bg-card border-2 border-border rounded-2xl p-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigateMonth('prev')}
+            disabled={!hasOlderData}
+            className="h-9 w-9 p-0 rounded-xl"
+          >
+            {direction === 'rtl' ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
+          </Button>
+          
+          <div className="flex items-center gap-2">
+            <History className="h-4 w-4 text-primary" />
+            <span className="font-semibold">{formatMonthYear(selectedMonth)}</span>
+            {isCurrentMonth && (
+              <span className="text-[10px] bg-primary/15 text-primary px-2 py-0.5 rounded-full font-medium">
+                {language === 'he' ? 'עכשיו' : 'Now'}
+              </span>
+            )}
+          </div>
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigateMonth('next')}
+            disabled={!canGoNext}
+            className="h-9 w-9 p-0 rounded-xl"
+          >
+            {direction === 'rtl' ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
+          </Button>
+        </div>
+
         {/* Period Summary - Hero Card */}
         <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-2 border-primary/20 rounded-2xl p-5">
           <div className="flex items-center justify-between mb-3">
             <span className="text-sm font-medium text-muted-foreground">
-              {budget?.period === 'weekly' ? t.thisWeek : t.thisMonth}
+              {isCurrentMonth 
+                ? (budget?.period === 'weekly' ? t.thisWeek : t.thisMonth)
+                : formatMonthYear(selectedMonth)
+              }
             </span>
             {spendingData.changeDirection !== 'same' && (
               <div className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full ${
@@ -468,24 +546,27 @@ const Insights = () => {
                   <TrendingUp className="h-3 w-3" />
                 )}
                 {Math.abs(spendingData.change).toFixed(0)}%
+                <span className="text-[10px]">
+                  {language === 'he' ? 'מהחודש הקודם' : 'vs prev'}
+                </span>
               </div>
             )}
           </div>
 
           <p className="text-4xl font-bold text-foreground mb-4">
-            {formatCurrency(currentPeriodData.total)}
+            {formatCurrency(spendingData.monthly.total)}
           </p>
 
           {/* Quick Stats */}
           <div className="grid grid-cols-3 gap-2">
             <div className="bg-card/80 rounded-xl p-2.5 text-center">
               <ShoppingBag className="h-4 w-4 text-primary mx-auto mb-1" />
-              <p className="text-lg font-bold">{currentPeriodData.trips}</p>
+              <p className="text-lg font-bold">{spendingData.monthly.trips}</p>
               <p className="text-[10px] text-muted-foreground">{t.stats.trips}</p>
             </div>
             <div className="bg-card/80 rounded-xl p-2.5 text-center">
               <Wallet className="h-4 w-4 text-success mx-auto mb-1" />
-              <p className="text-lg font-bold">{formatCurrency(currentPeriodData.average)}</p>
+              <p className="text-lg font-bold">{formatCurrency(spendingData.monthly.average)}</p>
               <p className="text-[10px] text-muted-foreground">{t.stats.avgTrip}</p>
             </div>
             <div className="bg-card/80 rounded-xl p-2.5 text-center">
@@ -494,6 +575,13 @@ const Insights = () => {
               <p className="text-[10px] text-muted-foreground">{t.stats.topStore}</p>
             </div>
           </div>
+
+          {/* No data message for past months */}
+          {!isCurrentMonth && spendingData.monthly.trips === 0 && (
+            <div className="mt-4 p-3 bg-muted/50 rounded-xl text-center text-sm text-muted-foreground">
+              {language === 'he' ? 'אין נתונים לחודש זה' : 'No data for this month'}
+            </div>
+          )}
         </div>
 
         {/* Budget Tracker */}
@@ -713,7 +801,7 @@ const Insights = () => {
 
             <div className="space-y-3">
               {storeData.map(([store, amount], index) => {
-                const percentage = totalAllTime > 0 ? (amount / totalAllTime * 100) : 0;
+                const percentage = totalMonthSpend > 0 ? (amount / totalMonthSpend * 100) : 0;
                 const colors = ['bg-primary', 'bg-success', 'bg-warning', 'bg-destructive', 'bg-muted-foreground'];
 
                 return (

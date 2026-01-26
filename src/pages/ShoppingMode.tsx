@@ -367,38 +367,6 @@ export const ShoppingMode = () => {
         `}
       >
         <div className={`flex items-center gap-3 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
-          {/* Checkbox */}
-          <button
-            onClick={() => toggleItem(item.id)}
-            className={`
-              flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-lg
-              flex items-center justify-center
-              border-2 transition-all duration-300
-              touch-manipulation active:scale-95
-              ${isAnimating 
-                ? 'bg-success border-success text-success-foreground scale-110' 
-                : 'bg-card border-border hover:border-primary'
-              }
-            `}
-          >
-            {isAnimating && (
-              <Check className="h-5 w-5 sm:h-6 sm:w-6 animate-check-bounce" strokeWidth={3} />
-            )}
-          </button>
-
-          {/* Content */}
-          <button
-            onClick={() => toggleItem(item.id)}
-            className={`flex-1 min-w-0 text-${direction === 'rtl' ? 'right' : 'left'} touch-manipulation`}
-          >
-            <p className="text-base sm:text-lg font-semibold text-foreground truncate">
-              {item.text}
-            </p>
-            <p className="text-xs sm:text-sm text-muted-foreground font-medium">
-              {item.quantity} {unitLabel}
-            </p>
-          </button>
-
           {/* Pin button */}
           <button
             onClick={(e) => togglePin(item.id, e)}
@@ -432,6 +400,38 @@ export const ShoppingMode = () => {
             title={language === 'he' ? 'הסר פריט' : 'Remove item'}
           >
             <Trash2 className="h-4 w-4" />
+          </button>
+
+          {/* Content */}
+          <button
+            onClick={() => toggleItem(item.id)}
+            className={`flex-1 min-w-0 text-${direction === 'rtl' ? 'right' : 'left'} touch-manipulation`}
+          >
+            <p className="text-base sm:text-lg font-semibold text-foreground truncate">
+              {item.text}
+            </p>
+            <p className="text-xs sm:text-sm text-muted-foreground font-medium">
+              {item.quantity} {unitLabel}
+            </p>
+          </button>
+
+          {/* Checkbox */}
+          <button
+            onClick={() => toggleItem(item.id)}
+            className={`
+              flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-lg
+              flex items-center justify-center
+              border-2 transition-all duration-300
+              touch-manipulation active:scale-95
+              ${isAnimating 
+                ? 'bg-success border-success text-success-foreground scale-110' 
+                : 'bg-card border-border hover:border-primary'
+              }
+            `}
+          >
+            {isAnimating && (
+              <Check className="h-5 w-5 sm:h-6 sm:w-6 animate-check-bounce" strokeWidth={3} />
+            )}
           </button>
         </div>
       </div>

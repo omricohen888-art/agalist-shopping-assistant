@@ -1540,7 +1540,6 @@ export const ShoppingList = () => {
               <h4 className="text-sm font-bold text-primary flex items-center gap-2 mb-2.5">
                 <span className="text-base">📝</span>
                 {language === 'he' ? 'איך מתחילים?' : 'How to start?'}
-                <span className="w-2 h-2 bg-primary rounded-full" />
               </h4>
               <ul className="space-y-1.5 text-xs sm:text-sm text-muted-foreground">
                 <li className="flex items-center gap-2">
@@ -1560,6 +1559,12 @@ export const ShoppingList = () => {
                   {language === 'he' 
                     ? 'לחצו "יוצאים לקניות!" כשמוכנים' 
                     : 'Click "Let\'s Shop!" when ready'}
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-3.5 w-3.5 text-success flex-shrink-0" />
+                  {language === 'he' 
+                    ? 'או "שמור לאחר כך" לשמירה בפנקס' 
+                    : 'Or "Save for Later" to save in notebook'}
                 </li>
               </ul>
             </div>

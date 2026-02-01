@@ -3,8 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ShoppingItem, Unit, UNITS, ShoppingHistory, ShoppingType, SHOPPING_TYPES, STORES_BY_TYPE } from "@/types/shopping";
 import { Button } from "@/components/ui/button";
 import { 
-  ArrowRight, CheckCircle2, Home, X, Check, Sparkles, 
-  Trophy, Zap, Star, PartyPopper, ShoppingCart, Timer, Store,
+  CheckCircle2, X, Check, ShoppingCart, Timer, Store,
   Plus, ClipboardPaste, Clock, Pin, PinOff, Trash2, Pencil, MessageSquare, Minus
 } from "lucide-react";
 import { useGlobalLanguage } from "@/context/LanguageContext";
@@ -36,39 +35,18 @@ import { SortModeToggle } from "@/components/SortModeToggle";
 import { sortByCategory, groupByCategory, getCategoryInfo, CategoryKey } from "@/utils/categorySort";
 import { getStoreLogo } from "@/data/storeLogos";
 
-// Dynamic motivational messages
-const getMotivationalText = (
+// Clean status text based on progress
+const getStatusText = (
   progress: number, 
   language: 'he' | 'en'
-): { title: string; subtitle: string; emoji: string } => {
+): string => {
   if (progress === 0) {
-    return language === 'he' 
-      ? { title: "יוצאים למשימה!", subtitle: "בהצלחה בקניות", emoji: "🚀" }
-      : { title: "Mission Started!", subtitle: "Let's go shopping", emoji: "🚀" };
-  }
-  if (progress < 25) {
-    return language === 'he'
-      ? { title: "התחלה מצוינת!", subtitle: "ממשיכים לאסוף", emoji: "💪" }
-      : { title: "Great Start!", subtitle: "Keep collecting", emoji: "💪" };
-  }
-  if (progress < 50) {
-    return language === 'he'
-      ? { title: "בדרך הנכונה!", subtitle: "כבר חצי דרך", emoji: "⚡" }
-      : { title: "On Track!", subtitle: "Almost halfway", emoji: "⚡" };
-  }
-  if (progress < 75) {
-    return language === 'he'
-      ? { title: "מעולה!", subtitle: "יותר מחצי!", emoji: "🔥" }
-      : { title: "Excellent!", subtitle: "More than half!", emoji: "🔥" };
+    return language === 'he' ? 'מצב קנייה' : 'Shopping Mode';
   }
   if (progress < 100) {
-    return language === 'he'
-      ? { title: "כמעט שם!", subtitle: "עוד קצת!", emoji: "🎯" }
-      : { title: "Almost There!", subtitle: "Just a few more!", emoji: "🎯" };
+    return language === 'he' ? 'בתהליך' : 'In Progress';
   }
-  return language === 'he'
-    ? { title: "משימה הושלמה!", subtitle: "כל הכבוד!", emoji: "🎉" }
-    : { title: "Mission Complete!", subtitle: "Amazing job!", emoji: "🎉" };
+  return language === 'he' ? 'הושלם' : 'Completed';
 };
 
 export const ShoppingMode = () => {
@@ -169,7 +147,7 @@ export const ShoppingMode = () => {
   const completedCount = items.filter(item => item.checked).length;
   const totalCount = items.length;
   const progress = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
-  const motivationalText = getMotivationalText(progress, language);
+  const statusText = getStatusText(progress, language);
 
   // Check for mission complete
   useEffect(() => {
@@ -650,21 +628,6 @@ export const ShoppingMode = () => {
         <div className="absolute top-1/2 left-0 w-64 h-64 bg-warning/10 rounded-full blur-3xl" />
       </div>
       
-      {/* Subtle Decorative Icons */}
-      <div className="fixed inset-0 -z-5 pointer-events-none overflow-hidden">
-        <ShoppingCart 
-          className="absolute -bottom-10 -right-10 sm:-bottom-16 sm:-right-16 h-48 w-48 sm:h-72 sm:w-72 text-success/10 rotate-12" 
-          strokeWidth={1}
-        />
-        <Star 
-          className="absolute top-20 right-10 h-12 w-12 text-warning/20 rotate-12" 
-          strokeWidth={1}
-        />
-        <Sparkles 
-          className="absolute top-40 left-5 h-10 w-10 text-primary/15 -rotate-12" 
-          strokeWidth={1}
-        />
-      </div>
       
       {/* Full-screen Confetti for Mission Complete */}
       {showConfetti && (
@@ -673,159 +636,153 @@ export const ShoppingMode = () => {
         </div>
       )}
 
-      {/* Mission Header - Enhanced & Colorful */}
-      <div className="sticky top-0 z-40 bg-gradient-to-b from-card via-card to-card/95 backdrop-blur-sm border-b-2 border-success/30 shadow-lg shadow-success/5">
-        <div className="max-w-3xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
-          {/* Top Row: Exit + Title + Green Cart */}
+      {/* Professional Header */}
+      <div className="sticky top-0 z-40 bg-card border-b border-border shadow-sm">
+        <div className="max-w-3xl mx-auto px-4 py-3">
+          {/* Top Row: Exit + Title + Status */}
           <div className={`flex items-center justify-between mb-3 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
-            {/* Exit Button */}
+            {/* Exit Button - Minimal */}
             <Button
-              variant="outline"
+              variant="ghost"
+              size="sm"
               onClick={handleExit}
-              className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl border-2 border-destructive/50 bg-destructive/10 hover:bg-destructive/20 text-destructive transition-all active:scale-95 touch-manipulation shadow-sm"
+              className="h-9 w-9 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
             >
-              <X className="h-5 w-5 sm:h-6 sm:w-6" />
+              <X className="h-5 w-5" />
             </Button>
 
-            {/* Dynamic Title with Gradient */}
-            <div className="text-center flex-1 px-2">
-              <div className="flex items-center justify-center gap-1.5 sm:gap-2 mb-0.5">
-                <span className="text-xl sm:text-2xl animate-pulse">{motivationalText.emoji}</span>
-                <h1 className="text-lg sm:text-xl font-black bg-gradient-to-r from-foreground via-primary to-foreground bg-clip-text">
-                  {motivationalText.title}
-                </h1>
-              </div>
-              <p className="text-xs text-muted-foreground mb-1">{motivationalText.subtitle}</p>
-              {/* Editable List Name */}
+            {/* Center: List Name & Timer */}
+            <div className="text-center flex-1 px-4">
               <input
                 type="text"
                 value={listName}
                 onChange={(e) => setListName(e.target.value)}
-                placeholder={language === 'he' ? 'שם הרשימה...' : 'List name...'}
-                className="w-full max-w-[280px] sm:max-w-[320px] text-center text-xs sm:text-sm text-muted-foreground font-medium bg-transparent border-b border-dashed border-border focus:border-primary focus:outline-none px-2 py-0.5 transition-colors"
+                placeholder={language === 'he' ? 'רשימת קניות' : 'Shopping List'}
+                className="w-full max-w-[260px] text-center text-base font-semibold text-foreground bg-transparent focus:outline-none placeholder:text-muted-foreground"
                 dir={direction}
+              />
+              <div className="flex items-center justify-center gap-2 mt-1 text-xs text-muted-foreground">
+                <Timer className="h-3.5 w-3.5" />
+                <span className="font-mono tabular-nums">{formatTime(elapsedTime)}</span>
+              </div>
+            </div>
+
+            {/* Status Badge */}
+            <div className={`px-3 py-1.5 rounded-lg text-xs font-medium ${
+              progress === 100 
+                ? 'bg-success/15 text-success' 
+                : 'bg-primary/10 text-primary'
+            }`}>
+              {statusText}
+            </div>
+          </div>
+
+          {/* Progress Bar - Clean & Minimal */}
+          <div className="space-y-2">
+            <div className="relative h-2 bg-muted rounded-full overflow-hidden">
+              <div 
+                className={`absolute inset-y-0 left-0 rounded-full transition-all duration-500 ease-out ${
+                  progress === 100 ? 'bg-success' : 'bg-primary'
+                }`}
+                style={{ width: `${progress}%` }}
               />
             </div>
 
-            {/* Green Shopping Cart Icon - Animated */}
-            <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-gradient-to-br from-success/20 to-success/10 flex items-center justify-center border-2 border-success/30 shadow-lg shadow-success/20">
-              <ShoppingCart className="h-5 w-5 sm:h-6 sm:w-6 text-success" strokeWidth={2.5} />
-            </div>
-          </div>
-
-          {/* Progress Section - Enhanced */}
-          <div className="space-y-2">
-            {/* Progress Bar with Glow */}
-            <div className="relative h-5 sm:h-6 bg-muted rounded-full overflow-hidden border-2 border-border shadow-inner">
-              <div 
-                className={`
-                  absolute inset-y-0 left-0 rounded-full transition-all duration-700 ease-out
-                  ${progress === 100 
-                    ? 'bg-gradient-to-r from-success via-success to-emerald-400 shadow-lg shadow-success/50' 
-                    : progress >= 50 
-                      ? 'bg-gradient-to-r from-primary via-primary to-blue-400' 
-                      : 'bg-gradient-to-r from-warning via-warning to-amber-400'
-                  }
-                `}
-                style={{ width: `${progress}%` }}
-              >
-                {/* Shine effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-              </div>
-              {/* Progress text inside bar */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-xs font-black text-foreground drop-shadow-sm">
-                  {progress}%
+            {/* Counter Row - Clean pills */}
+            <div className={`flex items-center justify-between text-sm ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
+              <div className="flex items-center gap-3">
+                <span className="text-muted-foreground">
+                  {language === 'he' ? 'נאספו' : 'Collected'}
+                </span>
+                <span className="font-semibold text-foreground">
+                  {completedCount} / {totalCount}
                 </span>
               </div>
-            </div>
-
-            {/* Counter Pills + Timer - Colorful */}
-            <div className={`flex items-center justify-between ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
-              <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-success/20 to-success/10 text-success border-2 border-success/30 rounded-full shadow-sm">
-                  <Check className="h-4 w-4" strokeWidth={3} />
-                  <span className="font-black text-sm">{completedCount}</span>
-                </div>
-                <span className="text-muted-foreground text-lg font-bold">/</span>
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-primary/15 to-primary/5 border-2 border-primary/30 rounded-full shadow-sm">
-                  <ShoppingCart className="h-4 w-4 text-primary" />
-                  <span className="font-black text-sm text-foreground">{totalCount}</span>
-                </div>
-              </div>
-              
-              {/* Timer - Enhanced */}
-              <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-muted to-muted/50 rounded-xl border-2 border-border shadow-sm">
-                <Timer className="h-4 w-4 text-primary animate-pulse" />
-                <span className="font-mono font-black text-base tabular-nums text-foreground">
-                  {formatTime(elapsedTime)}
-                </span>
-              </div>
+              <span className="font-semibold text-primary">{progress}%</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Interactive Shopping Mode Banner - More Colorful */}
-      <div className="mx-3 sm:mx-4 my-3">
-        <div className="max-w-3xl mx-auto bg-gradient-to-r from-success/15 via-success/10 to-primary/10 border-2 border-success/40 rounded-xl px-4 py-3 flex items-center justify-center gap-3 shadow-lg shadow-success/10">
-          <div className="p-2 bg-success/20 rounded-lg">
-            <ShoppingCart className="h-5 w-5 text-success" />
-          </div>
-          <div className="text-center">
-            <span className="text-sm font-bold text-success block">
-              {language === 'he' ? '🛒 מצב קנייה אינטראקטיבי' : '🛒 Interactive Shopping Mode'}
-            </span>
-            <span className="text-xs text-muted-foreground">
-              {language === 'he' ? 'סמנו פריטים שאספתם, ערכו כמויות, הוסיפו הערות' : 'Mark collected items, edit quantities, add notes'}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Quick Add Item Bar - Enhanced & Colorful */}
-      <div className="sticky top-[160px] z-30 bg-gradient-to-b from-card via-card to-card/90 backdrop-blur-sm border-b-2 border-primary/20 shadow-lg px-3 py-3">
+      {/* Quick Add Button - Minimal */}
+      <div className="sticky top-[108px] z-30 bg-card/95 backdrop-blur-sm border-b border-border px-4 py-2">
         <div className="max-w-3xl mx-auto">
-          {showAddItemInput ? (
-            <div className="space-y-3">
-              {/* Instruction Card */}
-              <div className="bg-gradient-to-r from-primary/8 via-primary/4 to-transparent border border-primary/15 rounded-xl p-3">
-                <h4 className="text-sm font-bold text-primary flex items-center gap-2 mb-2">
-                  <span className="text-base">📝</span>
-                  {language === 'he' ? 'איך להוסיף פריטים?' : 'How to add items?'}
-                </h4>
-                <ul className="space-y-1 text-xs text-muted-foreground">
-                  <li className="flex items-center gap-2">
-                    <Check className="h-3 w-3 text-success flex-shrink-0" />
-                    {language === 'he' 
-                      ? 'הקלידו פריטים, כל אחד בשורה נפרדת' 
-                      : 'Type items, each on a new line'}
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="h-3 w-3 text-success flex-shrink-0" />
-                    {language === 'he' 
-                      ? 'או הדביקו רשימה קיימת מ-WhatsApp / Notes' 
-                      : 'Or paste an existing list'}
-                  </li>
-                </ul>
-              </div>
+          <button
+            onClick={() => {
+              setShowAddItemInput(true);
+              setTimeout(() => addItemInputRef.current?.focus(), 100);
+            }}
+            className="w-full flex items-center justify-center gap-2 h-10 bg-muted/50 hover:bg-muted border border-border rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Plus className="h-4 w-4" />
+            {language === 'he' ? 'הוסף פריט' : 'Add item'}
+          </button>
+        </div>
+      </div>
 
-              {/* Enhanced Textarea */}
-              <div className="relative flex gap-2">
-                {/* Notebook line effect */}
-                <div className="absolute top-0 bottom-0 right-5 w-0.5 bg-primary/15 rounded-full pointer-events-none" />
-                
-                <textarea
-                  ref={addItemInputRef}
-                  value={newItemText}
-                  onChange={(e) => setNewItemText(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey && newItemText.trim()) {
-                      e.preventDefault();
-                      const lines = newItemText.split(/[\n,]/).map(l => sanitizeInput(l.trim())).filter(l => l.length > 0);
-                      const newItems: ShoppingItem[] = lines.map((text, i) => ({
+      {/* Add Item Modal/Expanded Area */}
+      {showAddItemInput && (
+        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-start justify-center pt-20 px-4">
+          <div className="w-full max-w-lg bg-card border border-border rounded-xl shadow-xl p-4 space-y-4">
+            <div className={`flex items-center justify-between ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
+              <h3 className="text-base font-semibold text-foreground">
+                {language === 'he' ? 'הוספת פריטים' : 'Add Items'}
+              </h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => { setShowAddItemInput(false); setNewItemText(""); }}
+                className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            
+            <textarea
+              ref={addItemInputRef}
+              value={newItemText}
+              onChange={(e) => setNewItemText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey && newItemText.trim()) {
+                  e.preventDefault();
+                  const lines = newItemText.split(/[\n,]/).map(l => sanitizeInput(l.trim())).filter(l => l.length > 0);
+                  const newItems: ShoppingItem[] = lines.map((text, i) => ({
+                    id: `${Date.now()}-${i}`,
+                    text: text.replace(/^•\s*/, ''),
+                    checked: false,
+                    quantity: 1,
+                    unit: 'units' as Unit
+                  }));
+                  setItems(prev => [...newItems, ...prev]);
+                  setNewItemText("");
+                  setShowAddItemInput(false);
+                  toast.success(language === 'he' ? `נוספו ${newItems.length} פריטים` : `Added ${newItems.length} items`);
+                } else if (e.key === 'Escape') {
+                  setShowAddItemInput(false);
+                  setNewItemText("");
+                }
+              }}
+              placeholder={language === 'he' 
+                ? 'הקלידו או הדביקו פריטים...\nחלב\nלחם\nביצים' 
+                : 'Type or paste items...\nMilk\nBread\nEggs'}
+              className="w-full bg-muted/30 border border-border focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-lg outline-none text-base text-foreground placeholder:text-muted-foreground/50 py-3 px-4 resize-none min-h-[140px] transition-colors"
+              rows={5}
+              autoFocus
+              dir={direction}
+            />
+
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={async () => {
+                  try {
+                    const text = await navigator.clipboard.readText();
+                    if (text.trim()) {
+                      const lines = text.split(/[\n,]/).map(l => sanitizeInput(l.trim())).filter(l => l.length > 0);
+                      const newItems: ShoppingItem[] = lines.map((line, i) => ({
                         id: `${Date.now()}-${i}`,
-                        text: text.replace(/^•\s*/, ''),
+                        text: line.replace(/^•\s*/, ''),
                         checked: false,
                         quantity: 1,
                         unit: 'units' as Unit
@@ -833,68 +790,17 @@ export const ShoppingMode = () => {
                       setItems(prev => [...newItems, ...prev]);
                       setNewItemText("");
                       setShowAddItemInput(false);
-                      toast.success(language === 'he' ? `נוספו ${newItems.length} פריטים` : `Added ${newItems.length} items`);
-                    } else if (e.key === 'Escape') {
-                      setShowAddItemInput(false);
-                      setNewItemText("");
+                      toast.success(language === 'he' ? `הודבקו ${newItems.length} פריטים` : `Pasted ${newItems.length} items`);
                     }
-                  }}
-                  placeholder={language === 'he' 
-                    ? 'הוסיפו פריטים...\n\nחלב\nלחם\nביצים' 
-                    : 'Add items...\n\nMilk\nBread\nEggs'}
-                  className="flex-1 bg-muted/30 
-                    border-2 border-border hover:border-primary/30 
-                    focus:border-primary focus:ring-2 focus:ring-primary/10
-                    rounded-xl outline-none 
-                    text-lg leading-relaxed font-medium text-foreground 
-                    placeholder:text-muted-foreground/40 
-                    py-3 px-4 pr-8
-                    resize-none min-h-[120px]
-                    transition-all duration-200"
-                  rows={4}
-                  autoFocus
-                />
-                <div className="flex flex-col gap-2">
-                  <Button
-                    size="sm"
-                    onClick={async () => {
-                      try {
-                        const text = await navigator.clipboard.readText();
-                        if (text.trim()) {
-                          const lines = text.split(/[\n,]/).map(l => sanitizeInput(l.trim())).filter(l => l.length > 0);
-                          const newItems: ShoppingItem[] = lines.map((line, i) => ({
-                            id: `${Date.now()}-${i}`,
-                            text: line.replace(/^•\s*/, ''),
-                            checked: false,
-                            quantity: 1,
-                            unit: 'units' as Unit
-                          }));
-                          setItems(prev => [...newItems, ...prev]);
-                          setNewItemText("");
-                          setShowAddItemInput(false);
-                          toast.success(language === 'he' ? `הודבקו ${newItems.length} פריטים` : `Pasted ${newItems.length} items`);
-                        }
-                      } catch {
-                        toast.error(language === 'he' ? 'לא ניתן לקרוא מהלוח' : 'Cannot read clipboard');
-                      }
-                    }}
-                    className="h-12 w-12 bg-success/10 hover:bg-success/20 text-success border-2 border-success/30 rounded-xl"
-                    variant="ghost"
-                  >
-                    <ClipboardPaste className="h-5 w-5" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => { setShowAddItemInput(false); setNewItemText(""); }}
-                    variant="ghost"
-                    className="h-12 w-12 text-muted-foreground hover:bg-muted rounded-xl"
-                  >
-                    <X className="h-5 w-5" />
-                  </Button>
-                </div>
-              </div>
-
-              {/* Add button */}
+                  } catch {
+                    toast.error(language === 'he' ? 'לא ניתן לקרוא מהלוח' : 'Cannot read clipboard');
+                  }
+                }}
+                className="flex-1 h-10"
+              >
+                <ClipboardPaste className="h-4 w-4 mr-2" />
+                {language === 'he' ? 'הדבק' : 'Paste'}
+              </Button>
               <Button
                 onClick={() => {
                   if (newItemText.trim()) {
@@ -913,30 +819,18 @@ export const ShoppingMode = () => {
                   }
                 }}
                 disabled={!newItemText.trim()}
-                className="w-full h-12 bg-success hover:bg-success/90 text-success-foreground font-bold rounded-xl"
+                className="flex-1 h-10 bg-primary hover:bg-primary/90 text-primary-foreground"
               >
-                {language === 'he' ? 'הוסף לרשימה' : 'Add to list'}
+                {language === 'he' ? 'הוסף לרשימה' : 'Add to List'}
               </Button>
             </div>
-          ) : (
-            <button
-              onClick={() => {
-                setShowAddItemInput(true);
-                setTimeout(() => addItemInputRef.current?.focus(), 100);
-              }}
-              className="w-full flex items-center justify-center gap-3 h-14 bg-gradient-to-r from-primary/10 via-card to-success/10 hover:from-primary/20 hover:to-success/20 border-2 border-dashed border-primary/40 hover:border-primary rounded-xl text-base font-bold text-foreground transition-all active:scale-[0.98] shadow-sm"
-            >
-              <div className="p-1.5 bg-primary/20 rounded-lg">
-                <Plus className="h-5 w-5 text-primary" />
-              </div>
-              {language === 'he' ? 'הוסף פריט או הדבק רשימה' : 'Add item or paste list'}
-            </button>
-          )}
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Items List - Mobile-Optimized */}
-      <div className="max-w-3xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6">
+
+      {/* Items List */}
+      <div className="max-w-3xl mx-auto px-4 py-4 space-y-4">
         {/* Sort Toggle */}
         {activeItemsCount > 0 && (
           <div className="mb-2">
@@ -948,17 +842,14 @@ export const ShoppingMode = () => {
           </div>
         )}
 
-        {/* Active Items */}
+        {/* Active Items Header - Clean */}
         {activeItemsCount > 0 && (
-          <div className="space-y-3 sm:space-y-4">
-            <div className="flex items-center gap-2 px-2 py-2 bg-gradient-to-r from-warning/15 to-transparent rounded-xl border border-warning/20">
-              <div className="p-1.5 bg-warning/20 rounded-lg">
-                <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-warning" />
-              </div>
-              <h2 className="text-sm sm:text-base font-bold text-foreground">
-                {language === 'he' ? '🛒 צריך לאסוף' : '🛒 To Collect'}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-foreground">
+                {language === 'he' ? 'לאסוף' : 'To Collect'}
               </h2>
-              <span className="ml-auto px-3 py-1 bg-warning/20 text-warning border-2 border-warning/30 rounded-full text-xs font-black shadow-sm">
+              <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded">
                 {activeItemsCount}
               </span>
             </div>
@@ -1011,22 +902,19 @@ export const ShoppingMode = () => {
           </div>
         )}
 
-        {/* Completed Items */}
+        {/* Completed Items - Clean header */}
         {completedItems.length > 0 && (
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 px-2 py-2 bg-gradient-to-r from-success/15 to-transparent rounded-xl border border-success/20">
-              <div className="p-1.5 bg-success/20 rounded-lg">
-                <Trophy className="h-4 w-4 sm:h-5 sm:w-5 text-success" />
-              </div>
-              <h2 className="text-sm sm:text-base font-bold text-success">
-                {language === 'he' ? '✨ נאסף!' : '✨ Collected!'}
+          <div className="space-y-3 mt-6 pt-4 border-t border-border">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-success">
+                {language === 'he' ? 'נאסף' : 'Collected'}
               </h2>
-              <span className="ml-auto px-3 py-1 bg-success/20 text-success border-2 border-success/30 rounded-full text-xs font-black shadow-sm">
+              <span className="text-xs text-success/70 bg-success/10 px-2 py-0.5 rounded">
                 {completedItems.length}
               </span>
             </div>
             
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {completedItems.map((item) => {
                 const unitLabel = UNITS.find(u => u.value === item.unit)?.[language === 'he' ? 'labelHe' : 'labelEn'] || '';
                 
@@ -1034,51 +922,43 @@ export const ShoppingMode = () => {
                   <div 
                     key={item.id}
                     className={`
-                      flex items-center gap-2
-                      bg-gradient-to-r from-success/10 to-success/5 border-2 border-success/25 rounded-xl p-2.5 sm:p-3
-                      hover:border-success/40
-                      transition-all duration-200
+                      flex items-center gap-3 py-2 px-3
+                      bg-muted/30 rounded-lg
+                      transition-colors
                       ${direction === 'rtl' ? 'flex-row-reverse' : ''}
                     `}
                   >
                     <button
                       onClick={() => toggleItem(item.id)}
-                      className={`flex-1 min-w-0 text-${direction === 'rtl' ? 'right' : 'left'} touch-manipulation active:scale-[0.98]`}
+                      className={`flex-1 min-w-0 text-${direction === 'rtl' ? 'right' : 'left'} touch-manipulation`}
                     >
-                      <div className={`flex items-center gap-2.5 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
+                      <div className={`flex items-center gap-3 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
                         {/* Checked indicator */}
-                        <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-success/25 flex items-center justify-center shadow-sm border border-success/30">
-                          <Check className="h-4 w-4 sm:h-5 sm:w-5 text-success" strokeWidth={3} />
+                        <div className="flex-shrink-0 w-6 h-6 rounded-md bg-success/20 flex items-center justify-center">
+                          <Check className="h-3.5 w-3.5 text-success" strokeWidth={2.5} />
                         </div>
 
                         {/* Content */}
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm sm:text-base font-medium text-success/80 line-through truncate">
+                          <p className="text-sm text-muted-foreground line-through truncate">
                             {item.text}
                           </p>
-                          <div className="flex flex-col gap-0.5">
-                            <p className="text-xs text-muted-foreground/70">
+                          {(item.note || item.quantity > 1) && (
+                            <p className="text-xs text-muted-foreground/60">
                               {item.quantity} {unitLabel}
+                              {item.note && ` • ${item.note}`}
                             </p>
-                            {item.note && (
-                              <p className="text-xs text-success/60 flex items-center gap-1">
-                                <MessageSquare className="h-3 w-3 inline" />
-                                {item.note}
-                              </p>
-                            )}
-                          </div>
+                          )}
                         </div>
                       </div>
                     </button>
 
-                    {/* Delete button for completed items */}
+                    {/* Delete button */}
                     <button
                       onClick={(e) => requestDeleteItem(item.id, e)}
-                      className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center
-                        border transition-all duration-200 touch-manipulation active:scale-90
-                        bg-muted/50 border-border/50 text-muted-foreground 
-                        hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30"
-                      title={language === 'he' ? 'הסר פריט' : 'Remove item'}
+                      className="flex-shrink-0 w-7 h-7 rounded flex items-center justify-center
+                        text-muted-foreground/50 hover:text-destructive transition-colors"
+                      title={language === 'he' ? 'הסר' : 'Remove'}
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
@@ -1089,85 +969,59 @@ export const ShoppingMode = () => {
           </div>
         )}
 
-        {/* Empty State - Enhanced */}
+        {/* Empty State - Clean */}
         {items.length === 0 && (
           <div className="text-center py-16 px-6">
-            <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-primary/20 to-success/20 flex items-center justify-center shadow-lg border-2 border-primary/20">
-              <ShoppingCart className="h-10 w-10 text-primary" />
+            <div className="w-16 h-16 mx-auto mb-4 rounded-xl bg-muted/50 flex items-center justify-center">
+              <ShoppingCart className="h-8 w-8 text-muted-foreground" />
             </div>
-            <h3 className="text-lg font-bold text-foreground mb-2">
-              {language === 'he' ? 'הרשימה ריקה!' : 'List is empty!'}
+            <h3 className="text-base font-semibold text-foreground mb-1">
+              {language === 'he' ? 'הרשימה ריקה' : 'List is empty'}
             </h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              {language === 'he' ? 'לחצו על "הוסף פריט" למעלה כדי להתחיל' : 'Click "Add item" above to get started'}
+            <p className="text-sm text-muted-foreground">
+              {language === 'he' ? 'הוסף פריטים כדי להתחיל' : 'Add items to get started'}
             </p>
-            <div className="flex justify-center gap-2">
-              <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium">
-                {language === 'he' ? '💡 טיפ: אפשר להדביק רשימה שלמה' : '💡 Tip: You can paste a full list'}
-              </span>
-            </div>
           </div>
         )}
 
-        {/* Mission Complete Celebration - Enhanced */}
+        {/* Mission Complete - Minimal celebration */}
         {showMissionComplete && progress === 100 && (
-          <div className="bg-gradient-to-br from-success/20 via-card to-primary/10 rounded-2xl p-6 sm:p-8 text-center border-2 border-success shadow-xl shadow-success/20">
-            <div className="text-5xl sm:text-6xl mb-4 animate-bounce">🎉</div>
-            <h3 className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-success to-primary bg-clip-text text-transparent mb-2">
-              {language === 'he' ? 'כל הכבוד!' : 'Amazing!'}
-            </h3>
-            <p className="text-base sm:text-lg text-muted-foreground mb-4">
-              {language === 'he' ? 'אספת את כל הפריטים!' : 'You collected everything!'}
-            </p>
-            <div className="flex justify-center gap-2">
-              <Star className="h-6 w-6 text-warning animate-pulse" fill="currentColor" />
-              <Star className="h-7 w-7 text-warning animate-pulse" fill="currentColor" style={{ animationDelay: '0.1s' }} />
-              <Star className="h-6 w-6 text-warning animate-pulse" fill="currentColor" style={{ animationDelay: '0.2s' }} />
+          <div className="bg-success/10 rounded-xl p-6 text-center border border-success/20">
+            <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-success/20 flex items-center justify-center">
+              <Check className="h-6 w-6 text-success" strokeWidth={2.5} />
             </div>
-            <p className="mt-4 text-sm text-success font-semibold">
-              {language === 'he' ? `⏱ הושלם ב-${formatTime(elapsedTime)}` : `⏱ Completed in ${formatTime(elapsedTime)}`}
+            <h3 className="text-lg font-semibold text-success mb-1">
+              {language === 'he' ? 'הושלם!' : 'Complete!'}
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              {language === 'he' ? `הזמן: ${formatTime(elapsedTime)}` : `Time: ${formatTime(elapsedTime)}`}
             </p>
           </div>
         )}
       </div>
 
-      {/* Sticky Footer - Enhanced */}
-      <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-card via-card to-card/95 backdrop-blur-sm border-t-2 border-success/30 p-3 sm:p-4 shadow-2xl z-40">
-        <div className={`max-w-3xl mx-auto flex gap-2 sm:gap-3 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
-          {/* Save for Later Button */}
+      {/* Footer - Clean and professional */}
+      <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border p-4 z-40">
+        <div className={`max-w-3xl mx-auto flex gap-3 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
           <Button
             onClick={handleSaveForLater}
             variant="outline"
-            className="flex-1 h-12 sm:h-14 text-sm sm:text-base font-bold rounded-xl bg-card border-2 border-primary/30 hover:bg-primary/10 hover:border-primary transition-all touch-manipulation active:scale-[0.98] shadow-sm"
+            className="flex-1 h-11"
           >
             <Clock className={`h-4 w-4 ${direction === 'rtl' ? 'ml-2' : 'mr-2'}`} />
-            {language === 'he' ? 'שמור לאחר כך' : 'Save for Later'}
+            {language === 'he' ? 'שמור' : 'Save'}
           </Button>
           
-          {/* Finish Shopping Button */}
           <Button
             onClick={handleFinishShopping}
-            className={`
-              flex-1 h-12 sm:h-14 text-sm sm:text-base font-bold rounded-xl
-              transition-all duration-300 touch-manipulation
-              ${progress === 100 
-                ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg shadow-green-200/50 hover:shadow-xl hover:shadow-green-300/50' 
-                : 'bg-gradient-to-r from-orange-400 to-yellow-400 text-white shadow-lg shadow-orange-200/50 hover:shadow-xl hover:shadow-orange-300/50'
-              }
-              active:scale-[0.98]
-            `}
+            className={`flex-1 h-11 ${
+              progress === 100 
+                ? 'bg-success hover:bg-success/90 text-success-foreground' 
+                : 'bg-primary hover:bg-primary/90 text-primary-foreground'
+            }`}
           >
-            {progress === 100 ? (
-              <>
-                <PartyPopper className={`h-5 w-5 ${direction === 'rtl' ? 'ml-2' : 'mr-2'}`} />
-                {language === 'he' ? 'סיום מושלם!' : 'Perfect Finish!'}
-              </>
-            ) : (
-              <>
-                <CheckCircle2 className={`h-5 w-5 ${direction === 'rtl' ? 'ml-2' : 'mr-2'}`} />
-                {language === 'he' ? 'סיום קנייה' : 'Finish Shopping'}
-              </>
-            )}
+            <CheckCircle2 className={`h-4 w-4 ${direction === 'rtl' ? 'ml-2' : 'mr-2'}`} />
+            {language === 'he' ? 'סיים קנייה' : 'Finish'}
           </Button>
         </div>
       </div>

@@ -444,57 +444,29 @@ export const ShoppingMode = () => {
         {/* Normal View */}
         {!isEditing && (
           <div className={`flex items-center gap-2 sm:gap-3 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
-            {/* Pin button */}
+            {/* Checkbox - FIRST and LARGER for easy tapping */}
             <button
-              onClick={(e) => togglePin(item.id, e)}
+              onClick={() => toggleItem(item.id)}
               className={`
-                flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center
-                border transition-all duration-200 touch-manipulation active:scale-90
-                ${item.pinned 
-                  ? 'bg-destructive/10 text-destructive border-destructive/30 hover:bg-destructive/20' 
-                  : 'bg-muted border-border text-muted-foreground hover:bg-accent hover:text-foreground'
+                flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-xl
+                flex items-center justify-center
+                border-2 transition-all duration-300
+                touch-manipulation active:scale-90
+                ${isAnimating 
+                  ? 'bg-success border-success text-success-foreground scale-110' 
+                  : 'bg-card border-foreground/40 hover:border-primary hover:bg-primary/5'
                 }
               `}
-              title={item.pinned 
-                ? (language === 'he' ? 'הסר נעיצה' : 'Unpin') 
-                : (language === 'he' ? 'נעץ פריט דחוף' : 'Pin urgent')
-              }
             >
-              {item.pinned ? (
-                <PinOff className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              ) : (
-                <Pin className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              {isAnimating && (
+                <Check className="h-7 w-7 sm:h-8 sm:h-8 animate-check-bounce" strokeWidth={3} />
               )}
             </button>
 
-            {/* Delete button */}
-            <button
-              onClick={(e) => requestDeleteItem(item.id, e)}
-              className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center
-                border transition-all duration-200 touch-manipulation active:scale-90
-                bg-muted border-border text-muted-foreground 
-                hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30"
-              title={language === 'he' ? 'הסר פריט' : 'Remove item'}
-            >
-              <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-            </button>
-
-            {/* Edit button */}
-            <button
-              onClick={(e) => startEditingItem(item, e)}
-              className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center
-                border transition-all duration-200 touch-manipulation active:scale-90
-                bg-muted border-border text-muted-foreground 
-                hover:bg-primary/10 hover:text-primary hover:border-primary/30"
-              title={language === 'he' ? 'ערוך פריט' : 'Edit item'}
-            >
-              <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-            </button>
-
-            {/* Content */}
+            {/* Content - clickable to toggle */}
             <button
               onClick={() => toggleItem(item.id)}
-              className={`flex-1 min-w-0 text-${direction === 'rtl' ? 'right' : 'left'} touch-manipulation`}
+              className={`flex-1 min-w-0 text-${direction === 'rtl' ? 'right' : 'left'} touch-manipulation py-1`}
             >
               <p className="text-base sm:text-lg font-semibold text-foreground truncate">
                 {item.text}
@@ -512,24 +484,55 @@ export const ShoppingMode = () => {
               </div>
             </button>
 
-            {/* Checkbox */}
-            <button
-              onClick={() => toggleItem(item.id)}
-              className={`
-                flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-lg
-                flex items-center justify-center
-                border-2 transition-all duration-300
-                touch-manipulation active:scale-95
-                ${isAnimating 
-                  ? 'bg-success border-success text-success-foreground scale-110' 
-                  : 'bg-card border-border hover:border-primary'
+            {/* Action buttons - smaller, on the opposite side */}
+            <div className={`flex items-center gap-1 flex-shrink-0 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
+              {/* Pin button */}
+              <button
+                onClick={(e) => togglePin(item.id, e)}
+                className={`
+                  w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center
+                  border transition-all duration-200 touch-manipulation active:scale-90
+                  ${item.pinned 
+                    ? 'bg-destructive/10 text-destructive border-destructive/30 hover:bg-destructive/20' 
+                    : 'bg-muted border-border text-muted-foreground hover:bg-accent hover:text-foreground'
+                  }
+                `}
+                title={item.pinned 
+                  ? (language === 'he' ? 'הסר נעיצה' : 'Unpin') 
+                  : (language === 'he' ? 'נעץ פריט דחוף' : 'Pin urgent')
                 }
-              `}
-            >
-              {isAnimating && (
-                <Check className="h-5 w-5 sm:h-6 sm:w-6 animate-check-bounce" strokeWidth={3} />
-              )}
-            </button>
+              >
+                {item.pinned ? (
+                  <PinOff className="h-3.5 w-3.5" />
+                ) : (
+                  <Pin className="h-3.5 w-3.5" />
+                )}
+              </button>
+
+              {/* Delete button */}
+              <button
+                onClick={(e) => requestDeleteItem(item.id, e)}
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center
+                  border transition-all duration-200 touch-manipulation active:scale-90
+                  bg-muted border-border text-muted-foreground 
+                  hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30"
+                title={language === 'he' ? 'הסר פריט' : 'Remove item'}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+
+              {/* Edit button */}
+              <button
+                onClick={(e) => startEditingItem(item, e)}
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center
+                  border transition-all duration-200 touch-manipulation active:scale-90
+                  bg-muted border-border text-muted-foreground 
+                  hover:bg-primary/10 hover:text-primary hover:border-primary/30"
+                title={language === 'he' ? 'ערוך פריט' : 'Edit item'}
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </button>
+            </div>
           </div>
         )}
 

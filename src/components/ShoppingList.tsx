@@ -38,6 +38,7 @@ interface NotepadItem {
 }
 import { saveShoppingHistory, getShoppingHistory, deleteShoppingHistory, saveList, getSavedLists, deleteSavedList, updateSavedList } from "@/utils/storage";
 import { useGlobalLanguage, Language } from "@/context/LanguageContext";
+import { useAuth } from "@/context/AuthContext";
 import { translations } from "@/utils/translations";
 import { parseItemWithUnit, formatItemDisplay } from "@/utils/itemParser";
 import { useTheme } from "next-themes";
@@ -139,6 +140,7 @@ export const ShoppingList = () => {
     theme,
     setTheme
   } = useTheme();
+  const { user } = useAuth();
   const t = translations[language];
   const storeOptions = language === "he" ? ISRAELI_STORES : ENGLISH_STORES;
   const otherLabel = language === "he" ? "אחר" : "Other";
@@ -1459,7 +1461,7 @@ export const ShoppingList = () => {
               {/* User Account Button */}
               <Button
                 variant="ghost"
-                onClick={() => navigate('/auth')}
+                onClick={() => navigate(user ? '/profile' : '/auth')}
                 className="h-10 w-10 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 
                            touch-manipulation active:scale-95 transition-all p-0"
                 title={language === 'he' ? 'החשבון שלי' : 'My Account'}

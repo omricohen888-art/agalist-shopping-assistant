@@ -1493,7 +1493,7 @@ export const ShoppingList = () => {
                            touch-manipulation active:scale-95 transition-all p-0"
                 title={language === 'he' ? 'החשבון שלי' : 'My Account'}
               >
-                <User className="h-6 w-6" strokeWidth={2.5} />
+                <User className="h-7 w-7" strokeWidth={2} fill="currentColor" />
               </Button>
               </div>
 

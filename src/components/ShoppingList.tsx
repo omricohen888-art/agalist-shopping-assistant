@@ -1586,8 +1586,8 @@ export const ShoppingList = () => {
                 <li className="flex items-center gap-2">
                   <Check className="h-3.5 w-3.5 text-success flex-shrink-0" />
                   {language === 'he' 
-                    ? 'לחצו "יוצאים לקניות!" כשמוכנים' 
-                    : 'Click "Let\'s Shop!" when ready'}
+                    ? 'לחצו "יוצאים לקניות!" - מצב קניות אינטראקטיבי ונוח' 
+                    : 'Click "Let\'s Shop!" - interactive & easy shopping mode'}
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="h-3.5 w-3.5 text-success flex-shrink-0" />

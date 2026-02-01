@@ -1458,9 +1458,7 @@ export const ShoppingList = () => {
               {/* User Account Button */}
               <Button
                 variant="ghost"
-                onClick={() => {
-                  toast.info(language === 'he' ? 'התחברות תהיה זמינה בקרוב!' : 'Login coming soon!');
-                }}
+                onClick={() => navigate('/auth')}
                 className="h-10 w-10 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 
                            touch-manipulation active:scale-95 transition-all p-0"
                 title={language === 'he' ? 'החשבון שלי' : 'My Account'}

@@ -1540,6 +1540,7 @@ export const ShoppingList = () => {
               <h4 className="text-sm font-bold text-primary flex items-center gap-2 mb-2.5">
                 <span className="text-base">📝</span>
                 {language === 'he' ? 'איך מתחילים?' : 'How to start?'}
+                <span className="w-2 h-2 bg-primary rounded-full" />
               </h4>
               <ul className="space-y-1.5 text-xs sm:text-sm text-muted-foreground">
                 <li className="flex items-center gap-2">

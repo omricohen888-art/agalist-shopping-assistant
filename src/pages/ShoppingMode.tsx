@@ -50,6 +50,43 @@ const getStatusText = (
   return language === 'he' ? 'הושלם' : 'Completed';
 };
 
+// Professional progress feedback messages
+const getProgressFeedback = (
+  progress: number,
+  completedCount: number,
+  totalCount: number,
+  language: 'he' | 'en'
+): string => {
+  if (progress === 0) {
+    return language === 'he' 
+      ? `${totalCount} פריטים ברשימה` 
+      : `${totalCount} items in list`;
+  }
+  if (progress < 25) {
+    return language === 'he' 
+      ? 'התחלת לאסוף' 
+      : 'Started collecting';
+  }
+  if (progress < 50) {
+    return language === 'he' 
+      ? 'ממשיך להתקדם' 
+      : 'Making progress';
+  }
+  if (progress < 75) {
+    return language === 'he' 
+      ? 'יותר מחצי הדרך' 
+      : 'Past halfway';
+  }
+  if (progress < 100) {
+    return language === 'he' 
+      ? `נותרו ${totalCount - completedCount} פריטים` 
+      : `${totalCount - completedCount} items left`;
+  }
+  return language === 'he' 
+    ? 'כל הפריטים נאספו' 
+    : 'All items collected';
+};
+
 export const ShoppingMode = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -721,15 +758,14 @@ export const ShoppingMode = () => {
               )}
             </div>
 
-            {/* Counter Row - Enhanced with icons */}
+            {/* Counter Row - Enhanced with feedback */}
             <div className={`flex items-center justify-between text-sm ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
               <div className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-primary" />
-                <span className="text-muted-foreground">
-                  {language === 'he' ? 'נאספו' : 'Collected'}
-                </span>
                 <span className="font-bold text-foreground">
                   {completedCount} / {totalCount}
+                </span>
+                <span className="text-muted-foreground text-xs">
+                  · {getProgressFeedback(progress, completedCount, totalCount, language)}
                 </span>
               </div>
               <div className={`flex items-center gap-1.5 font-bold ${
@@ -738,9 +774,9 @@ export const ShoppingMode = () => {
                 {progress === 100 && <CheckCircle2 className="h-4 w-4" />}
                 {progress}%
               </div>
-            </div>
           </div>
         </div>
+      </div>
       </div>
 
       {/* Quick Add Button - Minimal */}

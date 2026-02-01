@@ -444,10 +444,10 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
                                 <Button
                                     size="sm"
                                     onClick={(e) => { e.stopPropagation(); onGoShopping({ ...list, items }); }}
-                                    className="h-8 px-3 bg-success hover:bg-success/90 text-success-foreground font-semibold text-xs rounded-xl flex items-center gap-1.5 shadow-sm"
+                                    className="h-8 px-3 bg-foreground hover:bg-foreground/90 text-primary font-semibold text-xs rounded-xl flex items-center gap-1.5 shadow-md"
                                     title={language === 'he' ? 'צא לקנייה' : 'Go Shopping'}
                                 >
-                                    <ShoppingCart className="h-3.5 w-3.5" />
+                                    <ShoppingCart className="h-3.5 w-3.5 fill-current" />
                                     {language === 'he' ? 'צא לקנייה' : 'Go Shop'}
                                 </Button>
                             )}

@@ -674,9 +674,20 @@ export const ShoppingMode = () => {
         </div>
       )}
 
-      {/* Professional Header */}
-      <div className="sticky top-0 z-40 bg-card border-b border-border shadow-sm">
+      {/* Professional Header with Welcome Message */}
+      <div className="sticky top-0 z-40 bg-card border-b-2 border-foreground/20 shadow-md">
         <div className="max-w-3xl mx-auto px-4 py-3">
+          {/* Welcome Banner */}
+          <div className={`text-center mb-3 pb-3 border-b border-border ${direction === 'rtl' ? 'text-right' : 'text-left'}`}>
+            <h1 className="text-lg font-bold text-foreground">
+              {language === 'he' ? 'מצב קנייה אינטראקטיבי' : 'Interactive Shopping Mode'}
+            </h1>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {language === 'he' 
+                ? 'סמנו פריטים תוך כדי קנייה • הוסיפו פריטים בזמן אמת' 
+                : 'Check items while shopping • Add items in real-time'}
+            </p>
+          </div>
           {/* Top Row: Exit + Title + Status */}
           <div className={`flex items-center justify-between mb-3 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
             {/* Exit Button - Minimal */}
@@ -779,18 +790,29 @@ export const ShoppingMode = () => {
       </div>
       </div>
 
-      {/* Quick Add Button - Minimal */}
-      <div className="sticky top-[108px] z-30 bg-card/95 backdrop-blur-sm border-b border-border px-4 py-2">
+      {/* Quick Add Button - Prominent & Inviting */}
+      <div className="sticky top-[140px] z-30 bg-gradient-to-b from-background via-background to-transparent px-4 py-3">
         <div className="max-w-3xl mx-auto">
           <button
             onClick={() => {
               setShowAddItemInput(true);
               setTimeout(() => addItemInputRef.current?.focus(), 100);
             }}
-            className="w-full flex items-center justify-center gap-2 h-10 bg-muted/50 hover:bg-muted border border-border rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            className={`
+              w-full flex items-center justify-center gap-3 h-12
+              bg-gradient-to-r from-success/10 to-primary/10 
+              hover:from-success/20 hover:to-primary/20
+              border-2 border-success/50 hover:border-success
+              rounded-xl text-base font-semibold text-foreground 
+              shadow-sm hover:shadow-md
+              transition-all duration-200
+              ${direction === 'rtl' ? 'flex-row-reverse' : ''}
+            `}
           >
-            <Plus className="h-4 w-4" />
-            {language === 'he' ? 'הוסף פריט' : 'Add item'}
+            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-success/20">
+              <Plus className="h-5 w-5 text-success" />
+            </div>
+            {language === 'he' ? 'הוסף פריט לרשימה' : 'Add item to list'}
           </button>
         </div>
       </div>

@@ -382,8 +382,8 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
             )}
 
             {/* Footer */}
-            <div className="mt-3 pt-3 border-t border-border/30 flex justify-between items-center gap-3">
-                <div className="flex items-center gap-2">
+            <div className="mt-3 pt-3 border-t border-border/30 flex flex-wrap justify-between items-center gap-2">
+                <div className="flex items-center gap-2 flex-shrink-0">
                     <span className="text-xs font-medium text-muted-foreground">
                         {new Date(list.createdAt || new Date().toISOString()).toLocaleDateString(language === 'he' ? 'he-IL' : 'en-US', {
                             month: 'short',
@@ -399,7 +399,7 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
                 </div>
                 
                 {/* Shopping Status Badge + Action - Based on Variant */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-shrink-0">
                     {variant === 'completed' ? (
                         <>
                             <div className="flex items-center gap-1.5 bg-success/10 text-success px-2.5 py-1 rounded-full text-xs font-semibold">

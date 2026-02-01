@@ -484,17 +484,17 @@ export const ShoppingMode = () => {
               </div>
             </button>
 
-            {/* Action buttons - smaller, on the opposite side */}
-            <div className={`flex items-center gap-1 flex-shrink-0 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
+            {/* Action buttons - compact icons */}
+            <div className={`flex items-center gap-0.5 flex-shrink-0 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
               {/* Pin button */}
               <button
                 onClick={(e) => togglePin(item.id, e)}
                 className={`
-                  w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center
-                  border transition-all duration-200 touch-manipulation active:scale-90
+                  w-7 h-7 rounded-md flex items-center justify-center
+                  transition-all duration-200 touch-manipulation active:scale-90
                   ${item.pinned 
-                    ? 'bg-destructive/10 text-destructive border-destructive/30 hover:bg-destructive/20' 
-                    : 'bg-muted border-border text-muted-foreground hover:bg-accent hover:text-foreground'
+                    ? 'text-destructive hover:bg-destructive/10' 
+                    : 'text-muted-foreground/60 hover:text-foreground hover:bg-muted'
                   }
                 `}
                 title={item.pinned 
@@ -512,10 +512,9 @@ export const ShoppingMode = () => {
               {/* Delete button */}
               <button
                 onClick={(e) => requestDeleteItem(item.id, e)}
-                className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center
-                  border transition-all duration-200 touch-manipulation active:scale-90
-                  bg-muted border-border text-muted-foreground 
-                  hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30"
+                className="w-7 h-7 rounded-md flex items-center justify-center
+                  transition-all duration-200 touch-manipulation active:scale-90
+                  text-muted-foreground/60 hover:text-destructive hover:bg-destructive/10"
                 title={language === 'he' ? 'הסר פריט' : 'Remove item'}
               >
                 <Trash2 className="h-3.5 w-3.5" />
@@ -524,10 +523,9 @@ export const ShoppingMode = () => {
               {/* Edit button */}
               <button
                 onClick={(e) => startEditingItem(item, e)}
-                className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center
-                  border transition-all duration-200 touch-manipulation active:scale-90
-                  bg-muted border-border text-muted-foreground 
-                  hover:bg-primary/10 hover:text-primary hover:border-primary/30"
+                className="w-7 h-7 rounded-md flex items-center justify-center
+                  transition-all duration-200 touch-manipulation active:scale-90
+                  text-muted-foreground/60 hover:text-primary hover:bg-primary/10"
                 title={language === 'he' ? 'ערוך פריט' : 'Edit item'}
               >
                 <Pencil className="h-3.5 w-3.5" />

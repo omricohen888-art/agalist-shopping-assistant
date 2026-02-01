@@ -54,7 +54,7 @@ export const WelcomePrompt = () => {
   const isHebrew = language === 'he';
 
   const content = {
-    title: isHebrew ? 'ברוכים הבאים לאגליסט!' : 'Welcome to Agalist!',
+    title: isHebrew ? 'ברוכים הבאים לעגליסט!' : 'Welcome to Eglist!',
     description: isHebrew
       ? 'הירשם עכשיו כדי ליהנות מכל היתרונות:'
       : 'Sign up now to enjoy all the benefits:',

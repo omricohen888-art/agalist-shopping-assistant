@@ -1455,18 +1455,27 @@ export const ShoppingList = () => {
                 {/* Checkmark - yellow */}
                 <polyline points="6 12 10 16 18 8" fill="none" stroke="hsl(48, 96%, 53%)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-              <div className="flex items-center gap-1 sm:gap-1.5">
-                <span className="text-2xl sm:text-3xl font-bold text-foreground">
-                  {language === 'he' ? 'עגליסט' : 'ShopList'}
+              <div className="flex flex-col">
+                <div className="flex items-center gap-1 sm:gap-1.5">
+                  <span className="text-2xl sm:text-3xl font-bold text-foreground">
+                    {language === 'he' ? 'עגליסט' : 'ShopList'}
+                  </span>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-7 w-7 sm:h-8 sm:w-8 text-foreground flex-shrink-0 -ml-0.5">
+                    <circle cx="8" cy="21" r="1" />
+                    <circle cx="19" cy="21" r="1" />
+                    <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
+                    <path d="M16.5 7.5H5.9" />
+                    <path d="M16.5 10.5H6.7" />
+                    <path d="M16.5 13.5H7.5" />
+                  </svg>
+                </div>
+                {/* User Greeting */}
+                <span className="text-xs sm:text-sm text-muted-foreground font-medium -mt-0.5">
+                  {language === 'he' 
+                    ? `שלום, ${user ? (localStorage.getItem('user_display_name') || user.user_metadata?.full_name?.split(' ')[0] || 'משתמש') : 'אורח'}`
+                    : `Hello, ${user ? (localStorage.getItem('user_display_name') || user.user_metadata?.full_name?.split(' ')[0] || 'User') : 'Guest'}`
+                  }
                 </span>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-7 w-7 sm:h-8 sm:w-8 text-foreground flex-shrink-0 -ml-0.5">
-                  <circle cx="8" cy="21" r="1" />
-                  <circle cx="19" cy="21" r="1" />
-                  <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
-                  <path d="M16.5 7.5H5.9" />
-                  <path d="M16.5 10.5H6.7" />
-                  <path d="M16.5 13.5H7.5" />
-                </svg>
               </div>
             </button>
 

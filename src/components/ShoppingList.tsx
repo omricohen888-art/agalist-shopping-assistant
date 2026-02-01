@@ -1583,12 +1583,12 @@ export const ShoppingList = () => {
                     ? 'או הדביקו רשימה קיימת מ-WhatsApp / Notes' 
                     : 'Or paste an existing list'}
                 </li>
-                <li className="flex items-center gap-2 relative">
+                <li className="flex items-center gap-2">
                   <Check className="h-3.5 w-3.5 text-success flex-shrink-0" />
-                  <span className="font-semibold text-foreground border-b-2 border-primary/60 pb-0.5">
+                  <span className="text-foreground">
                     {language === 'he' 
-                      ? '"יוצאים לקניות" – מצב קניות חכם לסימון פריטים בזמן אמת' 
-                      : '"Let\'s Shop" – Smart mode for real-time item tracking'}
+                      ? <>"יוצאים לקניות" – <span className="font-bold relative inline-block">מצב חכם<span className="absolute bottom-0 left-0 right-0 h-[3px] bg-foreground rounded-full transform -rotate-1 opacity-80"></span></span> לסימון פריטים בזמן אמת</> 
+                      : <>"Let's Shop" – <span className="font-bold relative inline-block">Smart mode<span className="absolute bottom-0 left-0 right-0 h-[3px] bg-foreground rounded-full transform rotate-1 opacity-80"></span></span> for real-time item tracking</>}
                   </span>
                 </li>
                 <li className="flex items-center gap-2">

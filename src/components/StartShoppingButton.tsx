@@ -80,6 +80,7 @@ export const SaveListButton: React.FC<{
       onClick={onClick}
       disabled={disabled}
       className={`
+        relative
         h-11 sm:h-14 px-4 sm:px-6 rounded-xl sm:rounded-2xl w-full sm:w-auto
         font-semibold
         bg-card/80 backdrop-blur-sm
@@ -93,6 +94,8 @@ export const SaveListButton: React.FC<{
         flex items-center justify-center gap-2
       `}
     >
+      {/* Notification dot */}
+      <span className="absolute -top-1 -right-1 w-3 h-3 bg-primary rounded-full border-2 border-card" />
       <svg 
         className="h-5 w-5" 
         viewBox="0 0 24 24" 

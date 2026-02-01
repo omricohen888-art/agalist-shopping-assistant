@@ -20,7 +20,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     // Skip if Supabase is not configured
-    if (!supabase || !isSupabaseConfigured) {
+    if (!isSupabaseConfigured) {
       setLoading(false);
       return;
     }
@@ -45,11 +45,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signInWithGoogle = async () => {
-    if (!supabase) {
-      console.warn('Supabase is not configured. Cannot sign in.');
-      return;
-    }
-
     const redirectUrl = `${window.location.origin}/`;
     
     const { error } = await supabase.auth.signInWithOAuth({
@@ -66,11 +61,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signOut = async () => {
-    if (!supabase) {
-      console.warn('Supabase is not configured. Cannot sign out.');
-      return;
-    }
-
     const { error } = await supabase.auth.signOut();
     if (error) {
       console.error('Error signing out:', error.message);

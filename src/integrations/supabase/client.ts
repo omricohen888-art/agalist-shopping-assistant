@@ -1,23 +1,13 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Supabase configuration - these are publishable keys (safe to include in code)
+const supabaseUrl = 'https://bbksunwslrdqmlpwconi.supabase.co';
+const supabaseAnonKey = 'sb_publishable_2OykZzt5npMApmJFZwZhRw_ZDtLRIKn';
 
-// Debug: Log Supabase configuration status
-console.log('Supabase URL configured:', !!supabaseUrl, supabaseUrl ? 'URL exists' : 'URL missing');
-console.log('Supabase Anon Key configured:', !!supabaseAnonKey, supabaseAnonKey ? 'Key exists' : 'Key missing');
+// Supabase is now always configured
+export const isSupabaseConfigured = true;
 
-// Check if Supabase credentials are configured
-export const isSupabaseConfigured = !!(supabaseUrl && supabaseAnonKey);
+// Create the Supabase client
+export const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKey);
 
-// Only create the client if credentials exist
-export const supabase: SupabaseClient | null = isSupabaseConfigured
-  ? createClient(supabaseUrl, supabaseAnonKey)
-  : null;
-
-if (!isSupabaseConfigured) {
-  console.info(
-    'Supabase not configured. App will work in offline mode with localStorage. ' +
-    'To enable cloud sync, set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables.'
-  );
-}
+console.log('Supabase client initialized with URL:', supabaseUrl);

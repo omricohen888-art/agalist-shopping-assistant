@@ -4,7 +4,8 @@ import { ShoppingItem, Unit, UNITS, ShoppingHistory, ShoppingType, SHOPPING_TYPE
 import { Button } from "@/components/ui/button";
 import { 
   CheckCircle2, X, Check, ShoppingCart, Timer, Store,
-  Plus, ClipboardPaste, Clock, Pin, PinOff, Trash2, Pencil, MessageSquare, Minus
+  Plus, ClipboardPaste, Clock, Pin, PinOff, Trash2, Pencil, MessageSquare, Minus,
+  Zap, Sparkles
 } from "lucide-react";
 import { useGlobalLanguage } from "@/context/LanguageContext";
 import { useSoundSettings } from "@/hooks/use-sound-settings.tsx";
@@ -661,44 +662,82 @@ export const ShoppingMode = () => {
                 className="w-full max-w-[260px] text-center text-base font-semibold text-foreground bg-transparent focus:outline-none placeholder:text-muted-foreground"
                 dir={direction}
               />
-              <div className="flex items-center justify-center gap-2 mt-1 text-xs text-muted-foreground">
+              <div className={`flex items-center justify-center gap-2 mt-1 text-xs ${
+                elapsedTime > 1800 ? 'text-destructive' : elapsedTime > 900 ? 'text-warning' : 'text-success'
+              }`}>
                 <Timer className="h-3.5 w-3.5" />
-                <span className="font-mono tabular-nums">{formatTime(elapsedTime)}</span>
+                <span className="font-mono tabular-nums font-medium">{formatTime(elapsedTime)}</span>
               </div>
             </div>
 
-            {/* Status Badge */}
-            <div className={`px-3 py-1.5 rounded-lg text-xs font-medium ${
-              progress === 100 
-                ? 'bg-success/15 text-success' 
-                : 'bg-primary/10 text-primary'
-            }`}>
-              {statusText}
+            {/* Status Badge - Large & Inviting */}
+            <div className={`
+              flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold
+              transition-all duration-300 shadow-md
+              ${progress === 100 
+                ? 'bg-gradient-to-r from-success to-emerald-400 text-white animate-pulse-glow' 
+                : progress > 0
+                  ? 'bg-gradient-to-r from-warning to-primary text-white'
+                  : 'bg-gradient-to-r from-cyan-500 to-primary text-white'
+              }
+            `}>
+              {progress === 100 ? (
+                <CheckCircle2 className="h-5 w-5" />
+              ) : progress > 0 ? (
+                <Zap className="h-5 w-5" />
+              ) : (
+                <ShoppingCart className="h-5 w-5" />
+              )}
+              <span>
+                {progress === 100 
+                  ? (language === 'he' ? 'סיימת!' : 'Done!')
+                  : progress > 0 
+                    ? `${progress}%`
+                    : (language === 'he' ? 'בואו נתחיל!' : "Let's Go!")
+                }
+              </span>
             </div>
           </div>
 
-          {/* Progress Bar - Clean & Minimal */}
+          {/* Progress Bar - Colorful Gradient */}
           <div className="space-y-2">
-            <div className="relative h-2 bg-muted rounded-full overflow-hidden">
+            <div className="relative h-3 bg-muted rounded-full overflow-hidden shadow-inner">
               <div 
-                className={`absolute inset-y-0 left-0 rounded-full transition-all duration-500 ease-out ${
-                  progress === 100 ? 'bg-success' : 'bg-primary'
-                }`}
-                style={{ width: `${progress}%` }}
+                className="absolute inset-y-0 left-0 rounded-full transition-all duration-500 ease-out"
+                style={{ 
+                  width: `${progress}%`,
+                  background: progress === 100 
+                    ? 'linear-gradient(90deg, hsl(152, 69%, 46%), hsl(160, 84%, 39%))' 
+                    : progress > 50 
+                      ? 'linear-gradient(90deg, hsl(38, 92%, 50%), hsl(152, 69%, 46%))'
+                      : 'linear-gradient(90deg, hsl(47.9, 95.8%, 53.1%), hsl(38, 92%, 50%))'
+                }}
               />
+              {/* Animated shine effect */}
+              {progress > 0 && progress < 100 && (
+                <div className="absolute inset-0 overflow-hidden rounded-full">
+                  <div className="absolute inset-y-0 w-20 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shine" />
+                </div>
+              )}
             </div>
 
-            {/* Counter Row - Clean pills */}
+            {/* Counter Row - Enhanced with icons */}
             <div className={`flex items-center justify-between text-sm ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-primary" />
                 <span className="text-muted-foreground">
                   {language === 'he' ? 'נאספו' : 'Collected'}
                 </span>
-                <span className="font-semibold text-foreground">
+                <span className="font-bold text-foreground">
                   {completedCount} / {totalCount}
                 </span>
               </div>
-              <span className="font-semibold text-primary">{progress}%</span>
+              <div className={`flex items-center gap-1.5 font-bold ${
+                progress === 100 ? 'text-success' : progress > 50 ? 'text-warning' : 'text-primary'
+              }`}>
+                {progress === 100 && <CheckCircle2 className="h-4 w-4" />}
+                {progress}%
+              </div>
             </div>
           </div>
         </div>

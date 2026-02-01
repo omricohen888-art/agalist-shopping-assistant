@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
 import { useGlobalLanguage } from '@/context/LanguageContext';
 import { ShoppingCart, BarChart3, Smartphone } from 'lucide-react';
+import { FaGoogle } from 'react-icons/fa';
 
 const STORAGE_KEY = 'hasSeenWelcomePrompt';
 
@@ -114,8 +115,9 @@ export const WelcomePrompt = () => {
           </Button>
           <Button
             onClick={handleSignIn}
-            className="w-full sm:w-auto order-1 sm:order-2"
+            className="w-full sm:w-auto order-1 sm:order-2 gap-2"
           >
+            <FaGoogle className="w-4 h-4" />
             {content.signInButton}
           </Button>
         </DialogFooter>

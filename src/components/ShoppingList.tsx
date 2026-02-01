@@ -1489,6 +1489,7 @@ export const ShoppingList = () => {
                 variant="ghost"
                 onClick={() => navigate(user ? '/profile' : '/auth')}
                 className="h-10 w-10 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 
+                           border-2 border-foreground/20 hover:border-foreground/40
                            touch-manipulation active:scale-95 transition-all p-0"
                 title={language === 'he' ? 'החשבון שלי' : 'My Account'}
               >

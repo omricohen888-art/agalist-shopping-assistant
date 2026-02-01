@@ -1517,8 +1517,9 @@ export const ShoppingList = () => {
       <div className="max-w-3xl mx-auto p-3 sm:p-4 md:p-6 lg:p-8 pb-28 sm:pb-32 md:pb-40 overflow-hidden w-full min-w-0">
         {/* Welcome Header */}
         <div className="text-center mb-6 sm:mb-8 md:mb-10 mt-4 sm:mt-6">
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2 inline-block">
             {language === 'he' ? 'רשימת הקניות החכמה שלך' : 'Your Smart Shopping List'}
+            <div className="h-1 w-3/4 mx-auto mt-1 bg-gradient-to-r from-transparent via-primary to-transparent rounded-full" />
           </h1>
           <p className="text-sm sm:text-base text-muted-foreground">
             {language === 'he' 
@@ -1536,7 +1537,7 @@ export const ShoppingList = () => {
 
           {/* Instruction Card - Show when list is empty */}
           {notepadItems.length === 0 && (
-            <div className="bg-gradient-to-r from-primary/8 via-primary/4 to-transparent border border-primary/15 rounded-xl p-3 sm:p-4 mb-4">
+            <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-2 border-primary/30 rounded-xl p-3 sm:p-4 mb-4">
               <h4 className="text-sm font-bold text-primary flex items-center gap-2 mb-2.5">
                 <span className="text-base">📝</span>
                 {language === 'he' ? 'איך מתחילים?' : 'How to start?'}

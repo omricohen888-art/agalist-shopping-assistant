@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { useGlobalLanguage } from '@/context/LanguageContext';
 import { useAuth } from '@/context/AuthContext';
-import { CheckCircle2, Sparkles, User } from 'lucide-react';
+import { CheckCircle2, Sparkles, ShoppingCart, Cloud, BarChart3 } from 'lucide-react';
 
 interface WelcomeNameModalProps {
   open: boolean;
@@ -16,18 +15,23 @@ const WelcomeNameModal: React.FC<WelcomeNameModalProps> = ({ open, onOpenChange 
   const { user } = useAuth();
   const direction = language === 'he' ? 'rtl' : 'ltr';
   
-  const [name, setName] = useState('');
   const [showSuccess, setShowSuccess] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Pre-fill with Google display name if available
+  // Get user's display name from Google
+  const displayName = user?.user_metadata?.full_name || 
+                      user?.user_metadata?.name || 
+                      (language === 'he' ? 'משתמש' : 'User');
+
+  // Auto-save the name from Google to localStorage
   useEffect(() => {
     if (user?.user_metadata?.full_name) {
-      setName(user.user_metadata.full_name);
+      localStorage.setItem('user_display_name', user.user_metadata.full_name);
+    } else if (user?.user_metadata?.name) {
+      localStorage.setItem('user_display_name', user.user_metadata.name);
     }
   }, [user]);
 
-  // Show success animation first, then transition to name input
+  // Show success animation first, then transition to welcome screen
   useEffect(() => {
     if (open && showSuccess) {
       const timer = setTimeout(() => {
@@ -37,27 +41,35 @@ const WelcomeNameModal: React.FC<WelcomeNameModalProps> = ({ open, onOpenChange 
     }
   }, [open, showSuccess]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim()) return;
-    
-    setIsSubmitting(true);
-    
-    // Store the name in localStorage
-    localStorage.setItem('user_display_name', name.trim());
-    
-    // Small delay for UX
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    setIsSubmitting(false);
-    onOpenChange(false);
-  };
+  // Reset state when modal opens
+  useEffect(() => {
+    if (open) {
+      setShowSuccess(true);
+    }
+  }, [open]);
 
-  const handleSkip = () => {
-    // Mark as seen even if skipped
+  const handleStart = () => {
     localStorage.setItem('welcome_name_shown', 'true');
     onOpenChange(false);
   };
+
+  const features = [
+    {
+      icon: ShoppingCart,
+      textHe: 'צור רשימות קניות בקלות',
+      textEn: 'Create shopping lists easily'
+    },
+    {
+      icon: Cloud,
+      textHe: 'הרשימות שלך שמורות ונגישות מכל מכשיר',
+      textEn: 'Your lists are saved and accessible from any device'
+    },
+    {
+      icon: BarChart3,
+      textHe: 'קבל תובנות על הקניות שלך',
+      textEn: 'Get insights about your shopping'
+    }
+  ];
 
   if (showSuccess) {
     return (
@@ -94,56 +106,48 @@ const WelcomeNameModal: React.FC<WelcomeNameModalProps> = ({ open, onOpenChange 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md" dir={direction}>
-        <DialogHeader className="space-y-3">
-          <div className="mx-auto w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center">
-            <User className="w-8 h-8 text-primary" />
-          </div>
-          <DialogTitle className="text-center text-xl">
-            {language === 'he' ? 'איך לקרוא לך?' : 'What should we call you?'}
-          </DialogTitle>
-          <DialogDescription className="text-center">
-            {language === 'he' 
-              ? 'הזן את השם שלך כדי שנוכל לפנות אליך באופן אישי'
-              : 'Enter your name so we can address you personally'
-            }
-          </DialogDescription>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="space-y-6 mt-4">
-          <div className="space-y-2">
-            <Input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder={language === 'he' ? 'השם שלך בעברית...' : 'Your name...'}
-              className="text-center text-lg h-12"
-              dir={language === 'he' ? 'rtl' : 'ltr'}
-              autoFocus
-            />
+      <DialogContent 
+        className="sm:max-w-md border-none bg-gradient-to-br from-background to-muted/30"
+        dir={direction}
+      >
+        <div className="flex flex-col items-center py-6 space-y-6">
+          {/* Personal Greeting */}
+          <div className="text-center space-y-2 animate-fade-in">
+            <h2 className="text-2xl font-bold text-foreground">
+              {language === 'he' ? `שלום, ${displayName}! 👋` : `Hello, ${displayName}! 👋`}
+            </h2>
+            <p className="text-lg text-muted-foreground">
+              {language === 'he' ? 'ברוכים הבאים לעגליסט' : 'Welcome to Agalist'}
+            </p>
           </div>
 
-          <div className="flex flex-col gap-2">
-            <Button 
-              type="submit" 
-              className="w-full h-12 text-base"
-              disabled={!name.trim() || isSubmitting}
-            >
-              {isSubmitting 
-                ? (language === 'he' ? 'שומר...' : 'Saving...') 
-                : (language === 'he' ? 'בואו נתחיל!' : "Let's Start!")
-              }
-            </Button>
-            
-            <button
-              type="button"
-              onClick={handleSkip}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors py-2"
-            >
-              {language === 'he' ? 'אולי אחר כך' : 'Maybe later'}
-            </button>
+          {/* Feature Cards */}
+          <div className="w-full space-y-3 animate-fade-in">
+            {features.map((feature, index) => (
+              <div 
+                key={index}
+                className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border/50 shadow-sm"
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <feature.icon className="w-5 h-5 text-primary" />
+                </div>
+                <p className="text-sm font-medium text-foreground">
+                  {language === 'he' ? feature.textHe : feature.textEn}
+                </p>
+              </div>
+            ))}
           </div>
-        </form>
+
+          {/* Start Button */}
+          <Button 
+            onClick={handleStart}
+            className="w-full h-12 text-base font-medium animate-fade-in"
+            size="lg"
+          >
+            {language === 'he' ? 'בואו נתחיל!' : "Let's Start!"}
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );

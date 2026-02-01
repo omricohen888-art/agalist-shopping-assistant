@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { SoundSettingsProvider } from "@/hooks/use-sound-settings.tsx";
 import { LanguageProvider } from "@/context/LanguageContext";
+import { AuthProvider } from "@/context/AuthContext";
 import { Navigation } from "@/components/Navigation";
 import { SettingsModal } from "@/components/SettingsModal";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -18,6 +19,7 @@ import MyNotebook from "./pages/MyNotebook";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 import { ShoppingMode } from "./pages/ShoppingMode";
+import Auth from "./pages/Auth";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +35,7 @@ const AppContent = () => {
       <main className="flex-1">
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/auth" element={<Auth />} />
           <Route path="/shopping/:id" element={<ShoppingMode />} />
           <Route path="/history" element={<History />} />
           <Route path="/compare" element={<Compare />} />
@@ -64,13 +67,15 @@ const App = () => (
       <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
         <SoundSettingsProvider>
           <LanguageProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-                <AppContent />
-              </BrowserRouter>
-            </TooltipProvider>
+            <AuthProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
+                  <AppContent />
+                </BrowserRouter>
+              </TooltipProvider>
+            </AuthProvider>
           </LanguageProvider>
         </SoundSettingsProvider>
       </ThemeProvider>

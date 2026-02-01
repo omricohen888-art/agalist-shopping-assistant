@@ -427,9 +427,9 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
                                 <Button
                                     size="sm"
                                     onClick={(e) => { e.stopPropagation(); onGoShopping({ ...list, items }); }}
-                                    className="h-8 px-3 bg-warning hover:bg-warning/90 text-warning-foreground font-semibold text-xs rounded-xl flex items-center gap-1.5 shadow-sm"
+                                    className="h-8 px-3 bg-warning hover:bg-warning/90 text-foreground font-semibold text-xs rounded-xl flex items-center gap-1.5 shadow-sm border border-foreground/20"
                                 >
-                                    <Play className="h-3.5 w-3.5" />
+                                    <Play className="h-3.5 w-3.5 fill-current" />
                                     <span>{language === 'he' ? 'המשך קנייה' : 'Continue'}</span>
                                 </Button>
                             )}

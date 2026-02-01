@@ -1469,13 +1469,6 @@ export const ShoppingList = () => {
                     <path d="M16.5 13.5H7.5" />
                   </svg>
                 </div>
-                {/* User Greeting */}
-                <span className="text-xs sm:text-sm text-muted-foreground font-medium -mt-0.5">
-                  {language === 'he' 
-                    ? `שלום, ${user ? (localStorage.getItem('user_display_name') || user.user_metadata?.full_name?.split(' ')[0] || 'משתמש') : 'אורח'}`
-                    : `Hello, ${user ? (localStorage.getItem('user_display_name') || user.user_metadata?.full_name?.split(' ')[0] || 'User') : 'Guest'}`
-                  }
-                </span>
               </div>
             </button>
 
@@ -1484,7 +1477,14 @@ export const ShoppingList = () => {
 
             {/* Actions Section - RIGHT (LTR) / LEFT (RTL) */}
             <div className={`flex items-center gap-1.5 sm:gap-2 flex-shrink-0 ${language === 'he' ? 'flex-row-reverse' : ''}`}>
-              {/* User Account Button */}
+              {/* User Account Button with Greeting */}
+              <div className="flex items-center gap-2">
+                <span className="text-xs sm:text-sm text-muted-foreground font-medium hidden xs:inline">
+                  {language === 'he' 
+                    ? `שלום, ${user ? (localStorage.getItem('user_display_name') || user.user_metadata?.full_name?.split(' ')[0] || 'משתמש') : 'אורח'}`
+                    : `Hi, ${user ? (localStorage.getItem('user_display_name') || user.user_metadata?.full_name?.split(' ')[0] || 'User') : 'Guest'}`
+                  }
+                </span>
               <Button
                 variant="ghost"
                 onClick={() => navigate(user ? '/profile' : '/auth')}
@@ -1494,6 +1494,7 @@ export const ShoppingList = () => {
               >
                 <User className="h-5 w-5" strokeWidth={1.5} />
               </Button>
+              </div>
 
               {/* Exit Button - Only shown in edit mode */}
               {activeListId && <Button variant="ghost" onClick={() => {

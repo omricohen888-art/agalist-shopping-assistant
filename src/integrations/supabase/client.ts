@@ -3,6 +3,10 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+// Debug: Log Supabase configuration status
+console.log('Supabase URL configured:', !!supabaseUrl, supabaseUrl ? 'URL exists' : 'URL missing');
+console.log('Supabase Anon Key configured:', !!supabaseAnonKey, supabaseAnonKey ? 'Key exists' : 'Key missing');
+
 // Check if Supabase credentials are configured
 export const isSupabaseConfigured = !!(supabaseUrl && supabaseAnonKey);
 

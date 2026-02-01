@@ -20,6 +20,7 @@ import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 import { ShoppingMode } from "./pages/ShoppingMode";
 import Auth from "./pages/Auth";
+import Profile from "./pages/Profile";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,7 @@ const AppContent = () => {
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/shopping/:id" element={<ShoppingMode />} />
           <Route path="/history" element={<History />} />
           <Route path="/compare" element={<Compare />} />

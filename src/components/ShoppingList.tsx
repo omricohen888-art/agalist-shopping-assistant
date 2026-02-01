@@ -25,6 +25,7 @@ import { GroupedShoppingList } from "@/components/GroupedShoppingList";
 import { SortableTemplates } from "@/components/SortableTemplates";
 import { SortModeToggle } from "@/components/SortModeToggle";
 import { StartShoppingButton, SaveListButton } from "@/components/StartShoppingButton";
+import { WelcomePrompt } from "@/components/WelcomePrompt";
 import { sortByCategory, detectCategory, getCategoryInfo, CategoryKey, CATEGORY_ORDER } from "@/utils/categorySort";
 import { processInput, RateLimiter } from "@/utils/security";
 import { createWorker } from 'tesseract.js';
@@ -2333,6 +2334,9 @@ export const ShoppingList = () => {
           onSave={handleSaveEditedList}
           language={language}
         />
+
+        {/* Welcome Prompt for Guests */}
+        <WelcomePrompt />
       </div>
     </div>;
 };

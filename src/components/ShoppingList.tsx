@@ -26,6 +26,7 @@ import { SortableTemplates } from "@/components/SortableTemplates";
 import { SortModeToggle } from "@/components/SortModeToggle";
 import { StartShoppingButton, SaveListButton } from "@/components/StartShoppingButton";
 import { WelcomePrompt } from "@/components/WelcomePrompt";
+import WelcomeNameModal from "@/components/WelcomeNameModal";
 import { sortByCategory, detectCategory, getCategoryInfo, CategoryKey, CATEGORY_ORDER } from "@/utils/categorySort";
 import { processInput, RateLimiter } from "@/utils/security";
 import { createWorker } from 'tesseract.js';
@@ -182,7 +183,23 @@ export const ShoppingList = () => {
   const [isVoiceRecording, setIsVoiceRecording] = useState(false);
   const [isProcessingImage, setIsProcessingImage] = useState(false);
   const [isHandwritingOpen, setIsHandwritingOpen] = useState(false);
+  const [isWelcomeNameModalOpen, setIsWelcomeNameModalOpen] = useState(false);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+
+  // Show welcome name modal after successful first-time login
+  useEffect(() => {
+    if (user) {
+      const hasSeenWelcome = localStorage.getItem(`welcome_name_shown_${user.id}`);
+      if (!hasSeenWelcome) {
+        // Small delay to let the page load first
+        const timer = setTimeout(() => {
+          setIsWelcomeNameModalOpen(true);
+          localStorage.setItem(`welcome_name_shown_${user.id}`, 'true');
+        }, 500);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [user]);
 
   // Update refs array when notepadItems changes
   useEffect(() => {
@@ -2346,6 +2363,12 @@ export const ShoppingList = () => {
 
         {/* Welcome Prompt for Guests */}
         <WelcomePrompt />
+
+        {/* Welcome Name Modal for New Users */}
+        <WelcomeNameModal 
+          open={isWelcomeNameModalOpen} 
+          onOpenChange={setIsWelcomeNameModalOpen} 
+        />
       </div>
     </div>;
 };

@@ -427,48 +427,58 @@ export const ShoppingMode = () => {
         key={item.id}
         className={`
           relative w-full
-          bg-card rounded-xl p-3 sm:p-4
+          bg-card rounded-2xl p-3 sm:p-4
           border-2 transition-all duration-300
-          shadow-sm hover:shadow-md
+          shadow-sm hover:shadow-lg
           ${item.pinned 
-            ? 'border-destructive/50 bg-destructive/5' 
-            : 'border-border hover:border-primary/30'
+            ? 'border-destructive bg-destructive/5 ring-2 ring-destructive/20' 
+            : 'border-foreground/20 hover:border-primary/50'
           }
           ${isAnimating 
-            ? 'border-success bg-success/10 scale-[0.97] shadow-lg' 
+            ? 'border-success bg-success/10 scale-[0.98] shadow-xl' 
             : ''
           }
           ${isEditing ? 'border-primary bg-primary/5' : ''}
         `}
       >
+        {/* Pinned indicator badge */}
+        {item.pinned && (
+          <div className={`absolute -top-2 ${direction === 'rtl' ? 'left-3' : 'right-3'} 
+            bg-destructive text-destructive-foreground text-[10px] font-bold px-2 py-0.5 rounded-full
+            flex items-center gap-1`}>
+            <Pin className="h-2.5 w-2.5" />
+            {language === 'he' ? 'דחוף' : 'Urgent'}
+          </div>
+        )}
+
         {/* Normal View */}
         {!isEditing && (
-          <div className={`flex items-center gap-2 sm:gap-3 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
-            {/* Checkbox - FIRST and LARGER for easy tapping */}
+          <div className={`flex items-center gap-3 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
+            {/* Checkbox - Large and prominent */}
             <button
               onClick={() => toggleItem(item.id)}
               className={`
-                flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-xl
+                flex-shrink-0 w-14 h-14 rounded-2xl
                 flex items-center justify-center
                 border-2 transition-all duration-300
                 touch-manipulation active:scale-90
                 ${isAnimating 
-                  ? 'bg-success border-success text-success-foreground scale-110' 
-                  : 'bg-card border-foreground/40 hover:border-primary hover:bg-primary/5'
+                  ? 'bg-success border-success text-success-foreground scale-105' 
+                  : 'bg-muted/50 border-foreground/30 hover:border-primary hover:bg-primary/10'
                 }
               `}
             >
               {isAnimating && (
-                <Check className="h-7 w-7 sm:h-8 sm:h-8 animate-check-bounce" strokeWidth={3} />
+                <Check className="h-8 w-8 animate-check-bounce" strokeWidth={3} />
               )}
             </button>
 
             {/* Content - clickable to toggle */}
             <button
               onClick={() => toggleItem(item.id)}
-              className={`flex-1 min-w-0 text-${direction === 'rtl' ? 'right' : 'left'} touch-manipulation py-1`}
+              className={`flex-1 min-w-0 text-${direction === 'rtl' ? 'right' : 'left'} touch-manipulation py-2`}
             >
-              <p className="text-base sm:text-lg font-semibold text-foreground truncate">
+              <p className="text-base sm:text-lg font-bold text-foreground truncate">
                 {item.text}
               </p>
               <div className="flex flex-col gap-0.5">
@@ -484,17 +494,17 @@ export const ShoppingMode = () => {
               </div>
             </button>
 
-            {/* Action buttons - compact icons */}
-            <div className={`flex items-center gap-0.5 flex-shrink-0 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
-              {/* Pin button */}
+            {/* Action buttons - vertical stack for cleaner look */}
+            <div className={`flex flex-col items-center gap-1 flex-shrink-0`}>
+              {/* Pin button - prominent */}
               <button
                 onClick={(e) => togglePin(item.id, e)}
                 className={`
-                  w-7 h-7 rounded-md flex items-center justify-center
-                  transition-all duration-200 touch-manipulation active:scale-90
+                  w-9 h-9 rounded-xl flex items-center justify-center
+                  border-2 transition-all duration-200 touch-manipulation active:scale-90
                   ${item.pinned 
-                    ? 'text-destructive hover:bg-destructive/10' 
-                    : 'text-muted-foreground/60 hover:text-foreground hover:bg-muted'
+                    ? 'bg-destructive text-destructive-foreground border-destructive' 
+                    : 'bg-warning/10 text-warning border-warning/50 hover:bg-warning/20 hover:border-warning'
                   }
                 `}
                 title={item.pinned 
@@ -503,33 +513,36 @@ export const ShoppingMode = () => {
                 }
               >
                 {item.pinned ? (
-                  <PinOff className="h-3.5 w-3.5" />
+                  <PinOff className="h-4 w-4" />
                 ) : (
-                  <Pin className="h-3.5 w-3.5" />
+                  <Pin className="h-4 w-4" />
                 )}
               </button>
 
-              {/* Delete button */}
-              <button
-                onClick={(e) => requestDeleteItem(item.id, e)}
-                className="w-7 h-7 rounded-md flex items-center justify-center
-                  transition-all duration-200 touch-manipulation active:scale-90
-                  text-muted-foreground/60 hover:text-destructive hover:bg-destructive/10"
-                title={language === 'he' ? 'הסר פריט' : 'Remove item'}
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </button>
+              {/* Secondary actions row */}
+              <div className="flex items-center gap-0.5">
+                {/* Edit button */}
+                <button
+                  onClick={(e) => startEditingItem(item, e)}
+                  className="w-7 h-7 rounded-lg flex items-center justify-center
+                    transition-all duration-200 touch-manipulation active:scale-90
+                    text-muted-foreground/60 hover:text-primary hover:bg-primary/10"
+                  title={language === 'he' ? 'ערוך פריט' : 'Edit item'}
+                >
+                  <Pencil className="h-3 w-3" />
+                </button>
 
-              {/* Edit button */}
-              <button
-                onClick={(e) => startEditingItem(item, e)}
-                className="w-7 h-7 rounded-md flex items-center justify-center
-                  transition-all duration-200 touch-manipulation active:scale-90
-                  text-muted-foreground/60 hover:text-primary hover:bg-primary/10"
-                title={language === 'he' ? 'ערוך פריט' : 'Edit item'}
-              >
-                <Pencil className="h-3.5 w-3.5" />
-              </button>
+                {/* Delete button */}
+                <button
+                  onClick={(e) => requestDeleteItem(item.id, e)}
+                  className="w-7 h-7 rounded-lg flex items-center justify-center
+                    transition-all duration-200 touch-manipulation active:scale-90
+                    text-muted-foreground/60 hover:text-destructive hover:bg-destructive/10"
+                  title={language === 'he' ? 'הסר פריט' : 'Remove item'}
+                >
+                  <Trash2 className="h-3 w-3" />
+                </button>
+              </div>
             </div>
           </div>
         )}

@@ -1488,12 +1488,13 @@ export const ShoppingList = () => {
               <Button
                 variant="ghost"
                 onClick={() => navigate(user ? '/profile' : '/auth')}
-                className="h-10 w-10 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 
-                           border-2 border-foreground/20 hover:border-foreground/40
+                className="h-10 w-10 rounded-xl bg-card text-foreground hover:bg-muted 
+                           border-2 border-foreground/50 hover:border-foreground
+                           shadow-sm hover:shadow-md
                            touch-manipulation active:scale-95 transition-all p-0"
                 title={language === 'he' ? 'החשבון שלי' : 'My Account'}
               >
-                <User className="h-5 w-5" strokeWidth={1.5} />
+                <User className="h-5 w-5" strokeWidth={2} />
               </Button>
               </div>
 

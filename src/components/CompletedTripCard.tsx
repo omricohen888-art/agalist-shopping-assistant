@@ -45,9 +45,9 @@ export const CompletedTripCard: React.FC<CompletedTripCardProps> = ({
       className="bg-card border border-border/50 rounded-2xl p-4 sm:p-5 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer group relative flex flex-col min-h-[200px] overflow-hidden"
       dir={direction}
     >
-      {/* Completed Badge */}
-      <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-success/10 text-success px-2.5 py-1 rounded-full text-xs font-semibold">
-        <CheckCircle2 className="h-3.5 w-3.5" />
+      {/* Completed Badge - Left side in RTL */}
+      <div className={`absolute top-3 ${language === 'he' ? 'left-3' : 'right-3'} flex items-center gap-1.5 bg-success text-success-foreground px-3 py-1.5 rounded-full text-xs font-bold shadow-sm`}>
+        <CheckCircle2 className="h-4 w-4" />
         <span>{language === 'he' ? 'הושלם' : 'Completed'}</span>
       </div>
 

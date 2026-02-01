@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Menu, X, Plus, Book, History, BarChart3, Lightbulb, Info, Settings, User } from 'lucide-react';
+import { Menu, X, Plus, Book, History, BarChart3, Lightbulb, Info, Settings, User, LogOut, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useGlobalLanguage } from '@/context/LanguageContext';
+import { useAuth } from '@/context/AuthContext';
 import { translations } from '@/utils/translations';
 
 interface NavigationProps {
@@ -13,6 +14,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { language } = useGlobalLanguage();
+  const { user, loading, signOut } = useAuth();
   const t = translations[language];
   const direction = language === 'he' ? 'rtl' : 'ltr';
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -30,7 +32,29 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
     setIsMenuOpen(false);
   };
 
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      setIsMenuOpen(false);
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
+
+  const handleAuthClick = () => {
+    if (user) {
+      handleSignOut();
+    } else {
+      navigate('/auth');
+      setIsMenuOpen(false);
+    }
+  };
+
   const isActive = (path: string) => location.pathname === path;
+
+  // User display info
+  const userDisplayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || '';
+  const userAvatarUrl = user?.user_metadata?.avatar_url;
 
   return (
     <nav 
@@ -83,16 +107,51 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
             {/* Menu */}
             <div className="absolute bottom-20 right-4 left-4 bg-card border border-border shadow-xl rounded-2xl z-50">
               <div className="p-4 space-y-2">
-                {/* Account Button - Future login */}
+                {/* User Info (if logged in) */}
+                {user && (
+                  <div className="flex items-center gap-3 px-4 py-3 border-b border-border mb-2 pb-4">
+                    {userAvatarUrl ? (
+                      <img
+                        src={userAvatarUrl}
+                        alt={userDisplayName}
+                        className="w-10 h-10 rounded-full"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                        <User className="h-5 w-5 text-primary" />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm text-foreground truncate">
+                        {userDisplayName}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {user.email}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Account/Login Button */}
                 <button
-                  onClick={() => {
-                    // Future: navigate to login/account page
-                    setIsMenuOpen(false);
-                  }}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition-colors active:scale-95"
+                  onClick={handleAuthClick}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:scale-95 ${
+                    user 
+                      ? 'bg-destructive/10 text-destructive hover:bg-destructive/20'
+                      : 'bg-primary/10 text-primary hover:bg-primary/20'
+                  }`}
                 >
-                  <User className="h-5 w-5 flex-shrink-0" strokeWidth={1.5} />
-                  <span className="font-medium text-sm">{language === 'he' ? 'החשבון שלי' : 'My Account'}</span>
+                  {user ? (
+                    <>
+                      <LogOut className="h-5 w-5 flex-shrink-0" strokeWidth={1.5} />
+                      <span className="font-medium text-sm">{language === 'he' ? 'התנתק' : 'Sign Out'}</span>
+                    </>
+                  ) : (
+                    <>
+                      <LogIn className="h-5 w-5 flex-shrink-0" strokeWidth={1.5} />
+                      <span className="font-medium text-sm">{language === 'he' ? 'התחבר' : 'Sign In'}</span>
+                    </>
+                  )}
                 </button>
 
                 {/* Settings Button */}
@@ -136,16 +195,36 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
 
           {/* Right Section - Account & Settings */}
           <div className="flex items-center gap-2">
-            {/* Account Button - Future login */}
-            <button
-              onClick={() => {
-                // Future: navigate to login/account page
-              }}
-              className="p-2 rounded-xl text-primary hover:bg-primary/10 transition-colors active:scale-95"
-              title={language === 'he' ? 'החשבון שלי' : 'My Account'}
-            >
-              <User className="h-5 w-5 flex-shrink-0" strokeWidth={1.5} />
-            </button>
+            {/* User Avatar or Login Button */}
+            {user ? (
+              <button
+                onClick={handleAuthClick}
+                className="flex items-center gap-2 p-2 rounded-xl hover:bg-muted transition-colors active:scale-95"
+                title={language === 'he' ? 'התנתק' : 'Sign Out'}
+              >
+                {userAvatarUrl ? (
+                  <img
+                    src={userAvatarUrl}
+                    alt={userDisplayName}
+                    className="w-8 h-8 rounded-full"
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <User className="h-4 w-4 text-primary" />
+                  </div>
+                )}
+                <LogOut className="h-4 w-4 text-muted-foreground" />
+              </button>
+            ) : (
+              <button
+                onClick={() => navigate('/auth')}
+                className="flex items-center gap-2 px-3 py-2 rounded-xl text-primary hover:bg-primary/10 transition-colors active:scale-95"
+                title={language === 'he' ? 'התחבר' : 'Sign In'}
+              >
+                <LogIn className="h-5 w-5 flex-shrink-0" strokeWidth={1.5} />
+                <span className="text-sm font-medium">{language === 'he' ? 'התחבר' : 'Sign In'}</span>
+              </button>
+            )}
 
             {/* Settings Button */}
             <button

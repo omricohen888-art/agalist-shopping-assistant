@@ -2,10 +2,10 @@ import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Trash2, Calendar as CalendarIcon, ShoppingCart, Receipt, List, X, Clock, Store, ChevronDown, ChevronUp } from "lucide-react";
-import { getShoppingHistory, deleteShoppingHistory, clearAllHistory } from "@/utils/storage";
 import { ShoppingHistory as ShoppingHistoryType, SHOPPING_TYPES } from "@/types/shopping";
 import { toast } from "sonner";
 import { useGlobalLanguage, Language } from "@/context/LanguageContext";
+import { useCloudSync } from "@/hooks/use-cloud-sync";
 import { getStoreLogo } from "@/data/storeLogos";
 import { Calendar } from "@/components/ui/calendar";
 import { HistoryDetailModal } from "@/components/HistoryDetailModal";
@@ -118,7 +118,9 @@ const History = () => {
   const [viewMode, setViewMode] = useState<'calendar' | 'list'>('list');
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
   const [selectedTrip, setSelectedTrip] = useState<ShoppingHistoryType | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const { language } = useGlobalLanguage();
+  const { getShoppingHistory, deleteShoppingHistory, clearAllHistory, isLoggedIn } = useCloudSync();
   const t = historyTranslations[language];
   const direction = language === "he" ? "rtl" : "ltr";
   const locale = language === "he" ? "he-IL" : "en-US";
@@ -127,22 +129,26 @@ const History = () => {
     loadHistory();
   }, []);
 
-  const loadHistory = () => {
-    const data = getShoppingHistory();
+  const loadHistory = async () => {
+    setIsLoading(true);
+    const data = await getShoppingHistory();
     setHistory(data);
+    setIsLoading(false);
   };
 
-  const handleDelete = (id: string, e: React.MouseEvent) => {
+  const handleDelete = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (deleteShoppingHistory(id)) {
+    const success = await deleteShoppingHistory(id);
+    if (success) {
       toast.success(t.toasts.deleted);
       loadHistory();
     }
   };
 
-  const handleClearAll = () => {
+  const handleClearAll = async () => {
     if (!window.confirm(t.confirmClear)) return;
-    if (clearAllHistory()) {
+    const success = await clearAllHistory();
+    if (success) {
       toast.success(t.toasts.cleared);
       loadHistory();
     }
@@ -213,6 +219,19 @@ const History = () => {
   const modifiers = useMemo(() => ({
     hasPurchase: (date: Date) => datesWithPurchases.has(date.toDateString()),
   }), [datesWithPurchases]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center" dir={direction}>
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">
+            {language === 'he' ? 'טוען היסטוריה...' : 'Loading history...'}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background pb-24" dir={direction} lang={language}>
@@ -443,62 +462,44 @@ const History = () => {
                         </div>
                       </div>
 
-                      {/* Actions Row */}
-                      <div className="px-4 py-2 bg-muted/30 border-t border-border flex items-center justify-between">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setExpandedCard(isExpanded ? null : item.id)}
-                          className="h-7 text-xs text-muted-foreground hover:text-foreground"
-                        >
-                          {isExpanded ? (
-                            <>
-                              <ChevronUp className="h-3.5 w-3.5 me-1" />
-                              {language === 'he' ? 'הסתר' : 'Hide'}
-                            </>
-                          ) : (
-                            <>
-                              <ChevronDown className="h-3.5 w-3.5 me-1" />
-                              {language === 'he' ? 'הצג פריטים' : 'Show items'}
-                            </>
-                          )}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => handleDelete(item.id, e)}
-                          className="h-7 text-xs text-muted-foreground hover:text-destructive"
-                        >
-                          <Trash2 className="h-3.5 w-3.5 me-1" />
-                          {t.deleteItem}
-                        </Button>
-                      </div>
-
-                      {/* Expanded Items */}
+                      {/* Expanded Actions */}
                       {isExpanded && (
-                        <div className="px-4 py-3 border-t border-border bg-muted/20">
-                          <div className="space-y-1.5">
-                            {item.items.map(shopItem => (
-                              <div
-                                key={shopItem.id}
-                                className={`flex items-center gap-2 text-sm py-1 ${
-                                  shopItem.checked ? 'text-foreground' : 'text-muted-foreground line-through'
-                                }`}
-                              >
-                                <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
-                                  shopItem.checked ? 'bg-success/20 text-success' : 'bg-muted'
-                                }`}>
-                                  {shopItem.checked && <span className="text-[10px]">✓</span>}
-                                </div>
-                                <span>{shopItem.text}</span>
-                                {shopItem.quantity > 1 && (
-                                  <span className="text-xs text-muted-foreground">×{shopItem.quantity}</span>
-                                )}
-                              </div>
-                            ))}
+                        <div className="px-4 pb-4 pt-2 border-t border-border/50">
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setSelectedTrip(item)}
+                              className="flex-1 rounded-xl"
+                            >
+                              {t.viewDetails}
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={(e) => handleDelete(item.id, e)}
+                              className="rounded-xl"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
                           </div>
                         </div>
                       )}
+
+                      {/* Expand/Collapse Toggle */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setExpandedCard(isExpanded ? null : item.id);
+                        }}
+                        className="w-full py-2 border-t border-border/50 flex items-center justify-center text-muted-foreground hover:bg-muted/50 transition-colors"
+                      >
+                        {isExpanded ? (
+                          <ChevronUp className="h-4 w-4" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4" />
+                        )}
+                      </button>
                     </div>
                   );
                 })
@@ -506,24 +507,21 @@ const History = () => {
             </div>
 
             {/* Clear All Button */}
-            {history.length > 1 && (
-              <div className="pt-4 flex justify-center">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleClearAll}
-                  className="text-destructive border-destructive/30 hover:bg-destructive/10 rounded-xl"
-                >
-                  <Trash2 className="h-4 w-4 me-2" />
-                  {t.clearAll}
-                </Button>
-              </div>
+            {history.length > 0 && (
+              <Button
+                variant="outline"
+                onClick={handleClearAll}
+                className="w-full rounded-xl text-destructive hover:text-destructive hover:bg-destructive/10"
+              >
+                <Trash2 className="h-4 w-4 me-2" />
+                {t.clearAll}
+              </Button>
             )}
           </>
         )}
       </div>
 
-      {/* Detail Modal */}
+      {/* History Detail Modal */}
       <HistoryDetailModal
         trip={selectedTrip}
         isOpen={!!selectedTrip}

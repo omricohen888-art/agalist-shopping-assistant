@@ -12,8 +12,9 @@ import { useSoundSettings } from "@/hooks/use-sound-settings.tsx";
 import { useHaptics } from "@/hooks/use-haptics";
 import { ConfettiEffect } from "@/components/ConfettiEffect";
 import { toast } from "sonner";
-import { saveShoppingHistory, saveList, deleteSavedList, updateSavedList, getSavedLists } from "@/utils/storage";
+import { getSavedLists } from "@/utils/storage";
 import { SavedList } from "@/types/shopping";
+import { useCloudSync } from "@/hooks/use-cloud-sync";
 
 import {
   Dialog,
@@ -93,6 +94,7 @@ export const ShoppingMode = () => {
   const { language } = useGlobalLanguage();
   const { playFeedback } = useSoundSettings();
   const { successPattern, lightTap } = useHaptics();
+  const { saveShoppingHistory, saveList, updateSavedList, deleteSavedList } = useCloudSync();
   
   const [items, setItems] = useState<ShoppingItem[]>([]);
   const [listName, setListName] = useState("");
@@ -242,7 +244,7 @@ export const ShoppingMode = () => {
     setShowFinishDialog(true);
   };
 
-  const confirmFinishShopping = () => {
+  const confirmFinishShopping = async () => {
     if (!id) return;
 
     // Stop timer
@@ -261,11 +263,11 @@ export const ShoppingMode = () => {
     };
 
     // Use storage utility function to save with correct key
-    saveShoppingHistory(history);
+    await saveShoppingHistory(history);
     
     // Delete original list from savedLists (moves to history only)
     if (originalListId) {
-      deleteSavedList(originalListId);
+      await deleteSavedList(originalListId);
     }
     
     localStorage.removeItem(`shoppingList_${id}`);
@@ -283,7 +285,7 @@ export const ShoppingMode = () => {
     }, 100);
   };
 
-  const handleSaveForLater = () => {
+  const handleSaveForLater = async () => {
     if (!id) return;
 
     // Stop timer
@@ -302,10 +304,10 @@ export const ShoppingMode = () => {
     
     if (originalListId) {
       // Update existing list - moves it to "Continue where we left off" section
-      updateSavedList(listToSave);
+      await updateSavedList(listToSave);
     } else {
       // New list - save as new
-      saveList(listToSave);
+      await saveList(listToSave);
     }
     
     // Remove active list

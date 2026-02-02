@@ -37,7 +37,7 @@ interface NotepadItem {
   quantity?: number;
   unit?: Unit;
 }
-import { saveShoppingHistory, getShoppingHistory, deleteShoppingHistory, saveList, getSavedLists, deleteSavedList, updateSavedList } from "@/utils/storage";
+import { useCloudSync } from "@/hooks/use-cloud-sync";
 import { useGlobalLanguage, Language } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
 import { translations } from "@/utils/translations";
@@ -142,6 +142,7 @@ export const ShoppingList = () => {
     setTheme
   } = useTheme();
   const { user } = useAuth();
+  const cloudSync = useCloudSync();
   const t = translations[language];
   const storeOptions = language === "he" ? ISRAELI_STORES : ENGLISH_STORES;
   const otherLabel = language === "he" ? "אחר" : "Other";
@@ -235,9 +236,14 @@ export const ShoppingList = () => {
   const showPaste = notepadItems.length === 0 || notepadItems.length === 1 && notepadItems[0].text === '';
   const titleInputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
-    setSavedLists(getSavedLists());
-    setShoppingHistory(getShoppingHistory());
-  }, []);
+    const loadData = async () => {
+      const lists = await cloudSync.getSavedLists();
+      const history = await cloudSync.getShoppingHistory();
+      setSavedLists(lists);
+      setShoppingHistory(history);
+    };
+    loadData();
+  }, [cloudSync]);
 
   // Load custom templates from localStorage
   useEffect(() => {
@@ -734,7 +740,7 @@ export const ShoppingList = () => {
     setActiveListId(null);
     toast.success(t.toasts.clearedAll);
   };
-  const handleSaveList = () => {
+  const handleSaveList = async () => {
     console.log("=== SAVE LIST DEBUG ===");
     console.log("Save button clicked!");
     console.log("Notepad items:", notepadItems);
@@ -777,8 +783,10 @@ export const ShoppingList = () => {
           items: convertedItems
         };
         console.log("Updated list object:", updatedList);
-        if (updateSavedList(updatedList)) {
-          setSavedLists(getSavedLists());
+        const success = await cloudSync.updateSavedList(updatedList);
+        if (success) {
+          const lists = await cloudSync.getSavedLists();
+          setSavedLists(lists);
           toast.success(t.toasts.listUpdated);
           console.log("List updated successfully!");
         }
@@ -804,9 +812,11 @@ export const ShoppingList = () => {
     };
     
     console.log("New list object being saved:", newList);
-    if (saveList(newList)) {
+    const success = await cloudSync.saveList(newList);
+    if (success) {
       console.log("✓ saveList returned true - save successful");
-      setSavedLists(getSavedLists());
+      const lists = await cloudSync.getSavedLists();
+      setSavedLists(lists);
       setItems([]);
       setInputText("");
       setActiveListId(null);
@@ -829,7 +839,7 @@ export const ShoppingList = () => {
       toast.error(language === 'he' ? 'שגיאה בשמירת הרשימה' : 'Error saving list');
     }
   };
-  const confirmSaveList = () => {
+  const confirmSaveList = async () => {
     console.log("=== CONFIRM SAVE LIST DEBUG ===");
     console.log("Current items to save:", items);
     console.log("Items count:", items.length);
@@ -846,9 +856,11 @@ export const ShoppingList = () => {
     };
     console.log("New list object being saved:", newList);
     console.log("Calling saveList function...");
-    if (saveList(newList)) {
+    const success = await cloudSync.saveList(newList);
+    if (success) {
       console.log("✓ saveList returned true - save successful");
-      setSavedLists(getSavedLists());
+      const lists = await cloudSync.getSavedLists();
+      setSavedLists(lists);
       setItems([]);
       setInputText("");
       setActiveListId(null); // Exit edit mode
@@ -903,8 +915,9 @@ export const ShoppingList = () => {
     setIsEditModalOpen(true);
   };
 
-  const handleSaveEditedList = (updatedList: SavedList) => {
-    setSavedLists(getSavedLists());
+  const handleSaveEditedList = async (updatedList: SavedList) => {
+    const lists = await cloudSync.getSavedLists();
+    setSavedLists(lists);
     toast.success(t.toasts.listSaved);
   };
 
@@ -1158,10 +1171,12 @@ export const ShoppingList = () => {
       setIsHandwritingOpen(false);
     }
   };
-  const handleDeleteList = (id: string, e: React.MouseEvent) => {
+  const handleDeleteList = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (deleteSavedList(id)) {
-      setSavedLists(getSavedLists());
+    const success = await cloudSync.deleteSavedList(id);
+    if (success) {
+      const lists = await cloudSync.getSavedLists();
+      setSavedLists(lists);
       toast.success(t.toasts.listDeleted);
     }
   };
@@ -1171,7 +1186,7 @@ export const ShoppingList = () => {
     setRenamingListName(list.name);
     setIsRenameDialogOpen(true);
   };
-  const handleToggleSavedItem = (listId: string, itemId: string, e: React.MouseEvent) => {
+  const handleToggleSavedItem = async (listId: string, itemId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     const list = savedLists.find(l => l.id === listId);
     if (!list) return;
@@ -1183,11 +1198,13 @@ export const ShoppingList = () => {
       ...list,
       items: updatedItems
     };
-    if (updateSavedList(updatedList)) {
-      setSavedLists(getSavedLists());
+    const success = await cloudSync.updateSavedList(updatedList);
+    if (success) {
+      const lists = await cloudSync.getSavedLists();
+      setSavedLists(lists);
     }
   };
-  const confirmRenameList = () => {
+  const confirmRenameList = async () => {
     if (!renamingListId || !renamingListName.trim()) return;
     const listToUpdate = savedLists.find(l => l.id === renamingListId);
     if (!listToUpdate) return;
@@ -1195,8 +1212,10 @@ export const ShoppingList = () => {
       ...listToUpdate,
       name: renamingListName.trim()
     };
-    if (updateSavedList(updatedList)) {
-      setSavedLists(getSavedLists());
+    const success = await cloudSync.updateSavedList(updatedList);
+    if (success) {
+      const lists = await cloudSync.getSavedLists();
+      setSavedLists(lists);
       setIsRenameDialogOpen(false);
       setRenamingListId(null);
       setRenamingListName("");
@@ -1329,7 +1348,7 @@ export const ShoppingList = () => {
     }
     setIsFinishDialogOpen(true);
   };
-  const handleFinishShopping = () => {
+  const handleFinishShopping = async () => {
     const amount = parseFloat(totalAmount);
     if (isNaN(amount) || amount <= 0) {
       toast.error(t.toasts.invalidAmount);
@@ -1350,12 +1369,14 @@ export const ShoppingList = () => {
       completedItems,
       totalItems: items.length
     };
-    if (saveShoppingHistory(history)) {
+    const success = await cloudSync.saveShoppingHistory(history);
+    if (success) {
       // Close dialog first
       setIsFinishDialogOpen(false);
 
       // Update shopping history state
-      setShoppingHistory(getShoppingHistory());
+      const history2 = await cloudSync.getShoppingHistory();
+      setShoppingHistory(history2);
 
       // Show success celebration
       toast.success(language === 'he' ? '🎉 הקנייה הושלמה בהצלחה!' : '🎉 Shopping completed successfully!');
@@ -1841,7 +1862,7 @@ export const ShoppingList = () => {
           const completedLists = savedLists.filter(list => list.isShoppingComplete);
 
           // Duplicate list handler
-          const handleDuplicateList = (list: SavedList) => {
+          const handleDuplicateList = async (list: SavedList) => {
             const newList: SavedList = {
               ...list,
               id: Date.now().toString(),
@@ -1852,27 +1873,33 @@ export const ShoppingList = () => {
               shoppingDuration: undefined,
               items: list.items.map(item => ({ ...item, checked: false }))
             };
-            if (saveList(newList)) {
-              setSavedLists(getSavedLists());
+            const success = await cloudSync.saveList(newList);
+            if (success) {
+              const lists = await cloudSync.getSavedLists();
+              setSavedLists(lists);
               toast.success(language === 'he' ? 'הרשימה שוכפלה!' : 'List duplicated!');
             }
           };
 
           // Common handlers
-          const handleDelete = (id: string) => {
-            if (deleteSavedList(id)) {
-              setSavedLists(getSavedLists());
+          const handleDelete = async (id: string) => {
+            const success = await cloudSync.deleteSavedList(id);
+            if (success) {
+              const lists = await cloudSync.getSavedLists();
+              setSavedLists(lists);
               toast.success(t.toasts.listDeleted);
             }
           };
 
-          const handleToggle = (listId: string, itemId: string) => {
+          const handleToggle = async (listId: string, itemId: string) => {
             const list = savedLists.find(l => l.id === listId);
             if (!list) return;
             const updatedItems = list.items.map(item => item.id === itemId ? { ...item, checked: !item.checked } : item);
             const updatedList = { ...list, items: updatedItems };
-            if (updateSavedList(updatedList)) {
-              setSavedLists(getSavedLists());
+            const success = await cloudSync.updateSavedList(updatedList);
+            if (success) {
+              const lists = await cloudSync.getSavedLists();
+              setSavedLists(lists);
             }
           };
 
@@ -2055,9 +2082,11 @@ export const ShoppingList = () => {
                           setSelectedTrip(trip);
                           setIsHistoryModalOpen(true);
                         }} 
-                        onDelete={id => {
-                          if (deleteShoppingHistory(id)) {
-                            setShoppingHistory(getShoppingHistory());
+                        onDelete={async (id) => {
+                          const success = await cloudSync.deleteShoppingHistory(id);
+                          if (success) {
+                            const history = await cloudSync.getShoppingHistory();
+                            setShoppingHistory(history);
                             toast.success(language === 'he' ? 'הקנייה נמחקה' : 'Trip deleted');
                           }
                         }} 

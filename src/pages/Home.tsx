@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ShoppingItem, Unit } from "@/types/shopping";
 import { ShoppingItemRow } from "@/components/ShoppingItemRow";
 import { Button } from "@/components/ui/button";
 import { Plus, Rocket, Save } from "lucide-react";
 import { useGlobalLanguage } from "@/context/LanguageContext";
+import { useCloudSync } from "@/hooks/use-cloud-sync";
 import { toast } from "sonner";
+import { SavedList, ShoppingItem, Unit } from "@/types/shopping";
 
 interface HomeItem {
     id: string;
@@ -18,7 +19,9 @@ interface HomeItem {
 export const Home = () => {
     const navigate = useNavigate();
     const { language } = useGlobalLanguage();
+    const { saveList, isLoggedIn } = useCloudSync();
     const [items, setItems] = useState<HomeItem[]>([]);
+    const [isSaving, setIsSaving] = useState(false);
 
     const addNewItem = () => {
         const newItem: HomeItem = {
@@ -41,32 +44,39 @@ export const Home = () => {
         setItems(items.filter(item => item.id !== id));
     };
 
-    const handleSaveForLater = () => {
+    const handleSaveForLater = async () => {
         if (items.length === 0) {
             toast.error(language === 'he' ? 'אין פריטים לשמור' : 'No items to save');
             return;
         }
 
-        // Save to localStorage
-        const savedLists = JSON.parse(localStorage.getItem('savedLists') || '[]');
-        const newList = {
+        setIsSaving(true);
+
+        const newList: SavedList = {
             id: Date.now().toString(),
-            name: language === 'he' ? `רשימה ${savedLists.length + 1}` : `List ${savedLists.length + 1}`,
+            name: language === 'he' ? `רשימה חדשה` : `New List`,
             items: items.map(item => ({
                 id: item.id,
                 text: item.text,
                 checked: item.isChecked,
                 quantity: item.quantity,
-                unit: item.unit,
+                unit: item.unit as Unit,
             })),
             createdAt: new Date().toISOString(),
         };
 
-        savedLists.push(newList);
-        localStorage.setItem('savedLists', JSON.stringify(savedLists));
+        const success = await saveList(newList);
+        setIsSaving(false);
 
-        toast.success(language === 'he' ? 'הרשימה נשמרה בהצלחה' : 'List saved successfully');
-        setItems([]);
+        if (success) {
+            const syncMessage = isLoggedIn 
+                ? (language === 'he' ? 'הרשימה נשמרה בענן' : 'List saved to cloud')
+                : (language === 'he' ? 'הרשימה נשמרה מקומית' : 'List saved locally');
+            toast.success(syncMessage);
+            setItems([]);
+        } else {
+            toast.error(language === 'he' ? 'שגיאה בשמירת הרשימה' : 'Error saving list');
+        }
     };
 
     const handleGoShopping = () => {
@@ -148,10 +158,13 @@ export const Home = () => {
                         onClick={handleSaveForLater}
                         variant="outline"
                         className="flex-1 h-12 font-bold border-2 border-black dark:border-slate-700 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all active:scale-95"
-                        disabled={items.length === 0}
+                        disabled={items.length === 0 || isSaving}
                     >
                         <Save className="ml-2 h-5 w-5" />
-                        {language === 'he' ? 'שמור לאחר כך' : 'Save for Later'}
+                        {isSaving 
+                            ? (language === 'he' ? 'שומר...' : 'Saving...') 
+                            : (language === 'he' ? 'שמור לאחר כך' : 'Save for Later')
+                        }
                     </Button>
 
                     <Button

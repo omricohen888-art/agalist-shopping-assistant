@@ -14,7 +14,72 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      saved_lists: {
+        Row: {
+          created_at: string
+          id: string
+          items: Json
+          name: string
+          store: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          items?: Json
+          name: string
+          store?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          items?: Json
+          name?: string
+          store?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      shopping_history: {
+        Row: {
+          checked_items: number
+          completed_at: string
+          created_at: string
+          id: string
+          items: Json
+          started_at: string
+          store: string | null
+          total_items: number
+          user_id: string
+        }
+        Insert: {
+          checked_items?: number
+          completed_at?: string
+          created_at?: string
+          id?: string
+          items?: Json
+          started_at?: string
+          store?: string | null
+          total_items?: number
+          user_id: string
+        }
+        Update: {
+          checked_items?: number
+          completed_at?: string
+          created_at?: string
+          id?: string
+          items?: Json
+          started_at?: string
+          store?: string | null
+          total_items?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

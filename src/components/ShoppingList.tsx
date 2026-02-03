@@ -5,6 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import { Share2, Trash2, Plus, Minus, CheckCircle2, History, BarChart3, Globe, Save, ClipboardList, Book, Square, CheckSquare, Printer, Mail, FileSpreadsheet, Copy, Pencil, X, ClipboardPaste, Info, ShoppingCart, Check, Volume2, RotateCcw, Mic, Camera, PenLine, Search, User, ChevronDown } from "lucide-react";
@@ -29,6 +39,7 @@ import { WelcomePrompt } from "@/components/WelcomePrompt";
 import WelcomeNameModal from "@/components/WelcomeNameModal";
 import { sortByCategory, detectCategory, getCategoryInfo, CategoryKey, CATEGORY_ORDER } from "@/utils/categorySort";
 import { processInput, RateLimiter } from "@/utils/security";
+import { createUUID } from "@/lib/utils";
 import { createWorker } from 'tesseract.js';
 interface NotepadItem {
   id: string;
@@ -179,6 +190,9 @@ export const ShoppingList = () => {
   // Edit List Modal States
   const [editingList, setEditingList] = useState<SavedList | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  // Delete All Dialog State
+  const [isDeleteAllDialogOpen, setIsDeleteAllDialogOpen] = useState(false);
 
   // Smart Input States
   const [isVoiceRecording, setIsVoiceRecording] = useState(false);
@@ -341,7 +355,7 @@ export const ShoppingList = () => {
 
     // Create shopping items from lines
     let newItems: ShoppingItem[] = lines.map((line, index) => ({
-      id: `${Date.now()}-${index}`,
+      id: `${createUUID()}-${index}`,
       text: line,
       checked: false,
       quantity: 1,
@@ -366,7 +380,7 @@ export const ShoppingList = () => {
       setBulkPreviewItems([]); // Clear preview
 
       // Create new list
-      const newListId = Date.now().toString();
+      const newListId = createUUID();
       const currentDate = new Date().toLocaleDateString(language === 'he' ? 'he-IL' : 'en-US', {
         day: '2-digit',
         month: '2-digit',
@@ -453,7 +467,7 @@ export const ShoppingList = () => {
     let newItems: ShoppingItem[] = notepadItems
       .filter(item => item.text.trim() !== '')
       .map((notepadItem, index) => ({
-        id: `${Date.now()}-${index}`,
+        id: `${createUUID()}-${index}`,
         text: notepadItem.text,
         checked: notepadItem.isChecked,
         quantity: notepadItem.quantity || 1,
@@ -471,7 +485,7 @@ export const ShoppingList = () => {
     }
 
     // Generate unique list ID
-    const newListId = Date.now().toString();
+    const newListId = createUUID();
     const currentDate = new Date().toLocaleDateString(language === 'he' ? 'he-IL' : 'en-US', {
       day: '2-digit',
       month: '2-digit',
@@ -563,7 +577,7 @@ export const ShoppingList = () => {
 
         // Create notepad items with unchecked status
         const newNotepadItems: NotepadItem[] = processedItems.map((item, index) => ({
-          id: `notepad-${Date.now()}-${index}`,
+          id: `notepad-${createUUID()}-${index}`,
           text: item,
           isChecked: false
         }));
@@ -581,7 +595,7 @@ export const ShoppingList = () => {
   };
   const handleTemplateClick = (templateItems: string[]) => {
     let newNotepadItems: NotepadItem[] = templateItems.map((item, index) => ({
-      id: `template-${Date.now()}-${index}`,
+      id: `template-${createUUID()}-${index}`,
       text: item,
       isChecked: false
     }));
@@ -607,7 +621,7 @@ export const ShoppingList = () => {
       return;
     }
     const newTemplate = {
-      id: `custom-${Date.now()}`,
+      id: `custom-${createUUID()}`,
       name: newTemplateName.trim(),
       items: items
     };
@@ -649,7 +663,7 @@ export const ShoppingList = () => {
       if (quantity === 0) quantity = 1;
     }
     const newItem: ShoppingItem = {
-      id: `${Date.now()}`,
+      id: `${createUUID()}`,
       text: result.processedText,
       checked: false,
       quantity: quantity,
@@ -782,6 +796,7 @@ export const ShoppingList = () => {
     toast.success(t.toasts.clearedAll);
   };
   const handleSaveList = async () => {
+    console.log('Attempting save with User ID:', user?.id);
     console.log("=== SAVE LIST DEBUG ===");
     console.log("Save button clicked!");
     console.log("Notepad items:", notepadItems);
@@ -846,23 +861,35 @@ export const ShoppingList = () => {
     });
     
     const newList: SavedList = {
-      id: Date.now().toString(),
+      id: createUUID(),
       name: autoName,
       items: convertedItems,
       createdAt: new Date().toISOString()
     };
     
     console.log("New list object being saved:", newList);
+    
+    // Save list (local first, then cloud if logged in)
     const success = await cloudSync.saveList(newList);
     if (success) {
       console.log("✓ saveList returned true - save successful");
+      
+      // Show toast based on user status
+      if (user) {
+        // Logged in: show cloud sync message
+        toast.success(language === 'he' ? '✓ הרשימה נשמרה וסונכרנה לענן!' : '✓ List saved and synced to cloud!');
+      } else {
+        // Guest: show local save message
+        toast.success(language === 'he' ? '✓ הרשימה נשמרה במכשיר!' : '✓ List saved to device!');
+      }
+      
+      // Refresh lists and reset state
       const lists = await cloudSync.getSavedLists();
       setSavedLists(lists);
       setItems([]);
       setInputText("");
       setActiveListId(null);
       setListName("");
-      toast.success(language === 'he' ? '✓ הרשימה נשמרה בפנקס שלי!' : '✓ List saved to My Notebook!');
       
       // Show confirmation animation
       setShowConfirmation(true);
@@ -881,12 +908,13 @@ export const ShoppingList = () => {
     }
   };
   const confirmSaveList = async () => {
+    console.log('Attempting save with User ID:', user?.id);
     console.log("=== CONFIRM SAVE LIST DEBUG ===");
     console.log("Current items to save:", items);
     console.log("Items count:", items.length);
     console.log("List name:", listName);
     const newList: SavedList = {
-      id: Date.now().toString(),
+      id: createUUID(),
       name: listName || new Date().toLocaleDateString(language === 'he' ? 'he-IL' : 'en-US', {
         weekday: 'long',
         day: 'numeric',
@@ -900,6 +928,16 @@ export const ShoppingList = () => {
     const success = await cloudSync.saveList(newList);
     if (success) {
       console.log("✓ saveList returned true - save successful");
+      
+      // Show toast based on user status
+      if (user) {
+        // Logged in: show cloud sync message
+        toast.success(language === 'he' ? '✓ הרשימה נשמרה וסונכרנה לענן!' : '✓ List saved and synced to cloud!');
+      } else {
+        // Guest: show local save message
+        toast.success(language === 'he' ? '✓ הרשימה נשמרה במכשיר!' : '✓ List saved to device!');
+      }
+      
       const lists = await cloudSync.getSavedLists();
       setSavedLists(lists);
       setItems([]);
@@ -907,7 +945,6 @@ export const ShoppingList = () => {
       setActiveListId(null); // Exit edit mode
       setListName(""); // Reset list name
       setIsSaveDialogOpen(false);
-      toast.success(t.toasts.listSaved);
 
       // Show confirmation animation
       setShowConfirmation(true);
@@ -1377,6 +1414,29 @@ export const ShoppingList = () => {
       })}
       </div>;
   };
+  // Delete All handlers (component level for AlertDialog access)
+  const handleDeleteAllFromDevice = async () => {
+    const success = await cloudSync.deleteAllSavedLists(false);
+    if (success) {
+      setSavedLists([]);
+      setIsDeleteAllDialogOpen(false);
+      toast.success(language === 'he' ? 'כל הרשימות נמחקו מהמכשיר' : 'All lists deleted from device');
+    } else {
+      toast.error(language === 'he' ? 'שגיאה במחיקת הרשימות' : 'Error deleting lists');
+    }
+  };
+
+  const handleDeleteAllEverywhere = async () => {
+    const success = await cloudSync.deleteAllSavedLists(true);
+    if (success) {
+      setSavedLists([]);
+      setIsDeleteAllDialogOpen(false);
+      toast.success(language === 'he' ? 'כל הרשימות נמחקו מהענן והמכשיר' : 'All lists deleted from cloud and device');
+    } else {
+      toast.error(language === 'he' ? 'שגיאה במחיקת הרשימות' : 'Error deleting lists');
+    }
+  };
+
   const openFinishDialog = () => {
     if (items.length === 0) {
       toast.error(t.toasts.noItems);
@@ -1402,7 +1462,7 @@ export const ShoppingList = () => {
     }
     const completedItems = items.filter(item => item.checked).length;
     const history = {
-      id: Date.now().toString(),
+      id: createUUID(),
       date: new Date().toISOString(),
       items: [...items],
       totalAmount: amount,
@@ -1539,6 +1599,20 @@ export const ShoppingList = () => {
 
             {/* Actions Section - RIGHT (LTR) / LEFT (RTL) */}
             <div className={`flex items-center gap-1.5 sm:gap-2 flex-shrink-0 ${language === 'he' ? 'flex-row-reverse' : ''}`}>
+              {/* Delete All Button - Always visible when there are saved lists */}
+              {savedLists.length > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsDeleteAllDialogOpen(true)}
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10 h-9 sm:h-10 px-2 sm:px-3 text-xs sm:text-sm font-medium"
+                  title={language === 'he' ? 'מחק את כל הרשימות' : 'Delete all lists'}
+                >
+                  <Trash2 className="h-4 w-4 sm:mr-1" />
+                  <span className="hidden sm:inline">{language === 'he' ? 'מחק הכל' : 'Delete All'}</span>
+                </Button>
+              )}
+              
               {/* User Account Button with Greeting */}
               <div className="flex items-center gap-2">
                 <span className="text-xs sm:text-sm text-muted-foreground font-medium">
@@ -1906,7 +1980,7 @@ export const ShoppingList = () => {
           const handleDuplicateList = async (list: SavedList) => {
             const newList: SavedList = {
               ...list,
-              id: Date.now().toString(),
+              id: createUUID(),
               name: language === 'he' ? `${list.name} (עותק)` : `${list.name} (copy)`,
               createdAt: new Date().toISOString(),
               isShoppingComplete: false,
@@ -1971,10 +2045,12 @@ export const ShoppingList = () => {
                       </span>
                     )}
                   </h3>
-                  <Button variant="ghost" onClick={() => navigate("/notebook")} className="text-sm font-semibold text-primary hover:text-primary/80 hover:bg-primary/10">
-                    {t.viewAllListsButton}
-                    {language === 'he' ? <div className="mr-1 rotate-180">➜</div> : <div className="ml-1">➜</div>}
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button variant="ghost" onClick={() => navigate("/notebook")} className="text-sm font-semibold text-primary hover:text-primary/80 hover:bg-primary/10">
+                      {t.viewAllListsButton}
+                      {language === 'he' ? <div className="mr-1 rotate-180">➜</div> : <div className="ml-1">➜</div>}
+                    </Button>
+                  </div>
                 </div>
 
                 {readyLists.length > 0 ? (
@@ -2431,6 +2507,57 @@ export const ShoppingList = () => {
         setIsHistoryModalOpen(false);
         setSelectedTrip(null);
       }} language={language} />
+
+        {/* Delete All Lists Confirmation Dialog */}
+        <AlertDialog open={isDeleteAllDialogOpen} onOpenChange={setIsDeleteAllDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                {language === 'he' ? 'האם אתה בטוח שברצונך למחוק את כל הרשימות?' : 'Are you sure you want to delete all lists?'}
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                {language === 'he' 
+                  ? 'פעולה זו לא ניתנת לביטול.' 
+                  : 'This action cannot be undone.'}
+                {user && (
+                  <span className="block mt-2 text-destructive font-medium">
+                    {language === 'he' 
+                      ? 'מחיקה מכל מקום תמחק את הנתונים לצמיתות מהחשבון שלך.' 
+                      : 'Deleting everywhere will permanently remove data from your account.'}
+                  </span>
+                )}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>
+                {language === 'he' ? 'ביטול' : 'Cancel'}
+              </AlertDialogCancel>
+              {user ? (
+                <>
+                  <AlertDialogAction
+                    onClick={handleDeleteAllFromDevice}
+                    className="bg-muted text-muted-foreground hover:bg-muted/80"
+                  >
+                    {language === 'he' ? 'מחק מהמכשיר בלבד' : 'Delete from Device Only'}
+                  </AlertDialogAction>
+                  <AlertDialogAction
+                    onClick={handleDeleteAllEverywhere}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    {language === 'he' ? 'מחק מכל מקום' : 'Delete Everywhere'}
+                  </AlertDialogAction>
+                </>
+              ) : (
+                <AlertDialogAction
+                  onClick={handleDeleteAllFromDevice}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  {language === 'he' ? 'מחק' : 'Delete'}
+                </AlertDialogAction>
+              )}
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         {/* Edit List Modal */}
         <EditListModal

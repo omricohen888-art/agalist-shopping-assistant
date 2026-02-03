@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { SavedList, ShoppingHistory, ShoppingItem } from "@/types/shopping";
-import { Json } from "@/integrations/supabase/types";
+import { Json, TablesInsert } from "@/integrations/supabase/types";
 
 // Convert Supabase format to app format
 const toSavedList = (row: {
@@ -56,23 +56,69 @@ export const cloudGetSavedLists = async (userId: string): Promise<SavedList[]> =
 };
 
 export const cloudSaveList = async (userId: string, list: SavedList): Promise<boolean> => {
-  const { error } = await supabase
-    .from("saved_lists")
-    .insert({
-      id: list.id,
-      user_id: userId,
-      name: list.name,
-      items: list.items as unknown as Json,
-      store: null,
-      created_at: list.createdAt,
-    });
+  console.log('Attempting save with User ID (cloudSaveList):', userId);
+  console.log('[cloudSaveList] List ID being used:', list.id, 'Type:', typeof list.id);
 
-  if (error) {
-    console.error("Failed to save list to cloud:", error);
-    return false;
+  if (!userId) {
+    console.error(
+      '%c[cloudSaveList] User not authenticated – aborting Supabase insert',
+      'color: red; font-size: 16px; font-weight: bold;'
+    );
+    throw new Error('User not authenticated');
   }
 
-  return true;
+  // Simple payload - accept any string ID (numeric timestamps are fine)
+  const payload: TablesInsert<"saved_lists"> = {
+    id: String(list.id), // Ensure it's a string
+    user_id: userId,
+    name: list.name,
+    items: list.items as unknown as Json,
+    store: null,
+    created_at: list.createdAt,
+    // updated_at is optional and can be provided by the database default
+  };
+
+  console.log("[cloudSaveList] Insert payload:", payload);
+
+  try {
+    const { data, error } = await supabase
+      .from("saved_lists")
+      .insert(payload)
+      .select()
+      .single();
+
+    if (error || !data) {
+      console.group(
+        "%cSupabase Save Debug (saved_lists insert)",
+        "color: red; font-size: 16px; font-weight: bold;"
+      );
+      console.log("User ID:", userId);
+      console.log("Anon Key Loaded:", !!import.meta.env.VITE_SUPABASE_ANON_KEY);
+      console.error("Full Error Object:", error);
+      console.log("Error Code:", (error as any)?.code);
+      console.log("Error Message:", (error as any)?.message);
+      console.log("Error Details:", (error as any)?.details);
+      console.groupEnd();
+      return false;
+    }
+
+    // Log the saved row from the database for debugging
+    console.log("[cloudSaveList] Saved row from Supabase:", data);
+
+    return true;
+  } catch (error: any) {
+    console.group(
+      "%cSupabase Save Debug (saved_lists insert - exception)",
+      "color: red; font-size: 16px; font-weight: bold;"
+    );
+    console.log("User ID:", userId);
+    console.log("Anon Key Loaded:", !!import.meta.env.VITE_SUPABASE_ANON_KEY);
+    console.error("Full Error Object:", error);
+    console.log("Error Message:", error?.message);
+    console.log("Error Details:", (error as any)?.details);
+    console.groupEnd();
+    return false;
+  }
 };
 
 export const cloudUpdateSavedList = async (userId: string, list: SavedList): Promise<boolean> => {
@@ -108,6 +154,20 @@ export const cloudDeleteSavedList = async (userId: string, listId: string): Prom
   return true;
 };
 
+export const cloudDeleteAllSavedLists = async (userId: string): Promise<boolean> => {
+  const { error } = await supabase
+    .from("saved_lists")
+    .delete()
+    .eq("user_id", userId);
+
+  if (error) {
+    console.error("Failed to delete all lists from cloud:", error);
+    return false;
+  }
+
+  return true;
+};
+
 // ========== SHOPPING HISTORY ==========
 
 export const cloudGetShoppingHistory = async (userId: string): Promise<ShoppingHistory[]> => {
@@ -126,25 +186,43 @@ export const cloudGetShoppingHistory = async (userId: string): Promise<ShoppingH
 };
 
 export const cloudSaveShoppingHistory = async (userId: string, history: ShoppingHistory): Promise<boolean> => {
-  const { error } = await supabase
-    .from("shopping_history")
-    .insert({
-      id: history.id,
-      user_id: userId,
-      store: history.store,
-      items: history.items as unknown as Json,
-      total_items: history.totalItems,
-      checked_items: history.completedItems,
-      started_at: history.date,
-      completed_at: history.date,
-    });
+  const payload: TablesInsert<"shopping_history"> = {
+    id: String(history.id), // Accept any string ID
+    user_id: userId,
+    store: history.store,
+    items: history.items as unknown as Json,
+    total_items: history.totalItems,
+    checked_items: history.completedItems,
+    started_at: history.date,
+    completed_at: history.date,
+    // created_at is optional and defaults in the database
+  };
 
-  if (error) {
-    console.error("Failed to save shopping history to cloud:", error);
+  try {
+    const { error } = await supabase.from("shopping_history").insert(payload);
+
+    if (error) {
+      console.error(
+        "%cFULL SUPABASE ERROR (shopping_history insert):",
+        "color: red; font-size: 16px; font-weight: bold;",
+        error,
+        (error as any).message,
+        (error as any).details
+      );
+      return false;
+    }
+
+    return true;
+  } catch (error: any) {
+    console.error(
+      "%cFULL SUPABASE ERROR (caught exception during shopping_history insert):",
+      "color: red; font-size: 16px; font-weight: bold;",
+      error,
+      error?.message,
+      error?.details
+    );
     return false;
   }
-
-  return true;
 };
 
 export const cloudDeleteShoppingHistory = async (userId: string, historyId: string): Promise<boolean> => {

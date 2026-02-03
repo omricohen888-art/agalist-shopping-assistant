@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ShoppingItem, Unit, UNITS, ShoppingHistory, ShoppingType, SHOPPING_TYPES, STORES_BY_TYPE } from "@/types/shopping";
+import { createUUID } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { 
   CheckCircle2, X, Check, ShoppingCart, Timer, Store,
@@ -622,7 +623,7 @@ export const ShoppingMode = () => {
     setIsTimerRunning(false);
 
     const history: ShoppingHistory = {
-      id: Date.now().toString(),
+      id: createUUID(),
       date: new Date().toISOString(),
       listName: listName.trim() || undefined,
       items: items,
@@ -657,7 +658,7 @@ export const ShoppingMode = () => {
     setIsTimerRunning(false);
 
     const listToSave: SavedList = {
-      id: originalListId || Date.now().toString(),
+      id: originalListId || createUUID(),
       name: listName,
       items: items,
       createdAt: new Date().toISOString(),

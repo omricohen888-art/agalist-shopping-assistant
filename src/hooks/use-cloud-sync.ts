@@ -6,6 +6,7 @@ import {
   cloudSaveList,
   cloudUpdateSavedList,
   cloudDeleteSavedList,
+  cloudDeleteAllSavedLists,
   cloudGetShoppingHistory,
   cloudSaveShoppingHistory,
   cloudDeleteShoppingHistory,
@@ -47,27 +48,68 @@ export const useCloudSync = () => {
   }, [userId]);
 
   const saveList = useCallback(async (list: SavedList): Promise<boolean> => {
+    console.log('Attempting save with User ID (useCloudSync.saveList):', userId);
+
+    // STEP 1: ALWAYS save locally first
+    const localSuccess = localSaveList(list);
+    if (!localSuccess) {
+      console.error("[CloudSync] Failed to save locally");
+      return false;
+    }
+
+    // STEP 2: Check if user is logged in
+    if (!userId) {
+      // Guest user: local save is complete, return success
+      console.log("[CloudSync] Guest user - saved locally only");
+      return true;
+    }
+
+    // STEP 3: Logged in user - sync to cloud
     try {
-      if (userId) {
-        return await cloudSaveList(userId, list);
+      const cloudSuccess = await cloudSaveList(userId, list);
+      if (cloudSuccess) {
+        console.log("[CloudSync] Successfully synced to cloud");
+      } else {
+        console.warn("[CloudSync] Local save succeeded but cloud sync failed");
       }
-      return localSaveList(list);
+      // Return true because local save succeeded (cloud sync is optional)
+      return true;
     } catch (error) {
-      console.error("[CloudSync] saveList error:", error);
-      // Try local storage as fallback
-      return localSaveList(list);
+      console.error("[CloudSync] Cloud sync error (but local save succeeded):", error);
+      // Return true because local save succeeded
+      return true;
     }
   }, [userId]);
 
   const updateSavedList = useCallback(async (list: SavedList): Promise<boolean> => {
-    try {
-      if (userId) {
-        return await cloudUpdateSavedList(userId, list);
-      }
-      return localUpdateSavedList(list);
-    } catch (error) {
-      console.error("[CloudSync] updateSavedList error:", error);
+    // STEP 1: ALWAYS save locally first
+    const localSuccess = localUpdateSavedList(list);
+    if (!localSuccess) {
+      console.error("[CloudSync] Failed to update locally");
       return false;
+    }
+
+    // STEP 2: Check if user is logged in
+    if (!userId) {
+      // Guest user: local update is complete, return success
+      console.log("[CloudSync] Guest user - updated locally only");
+      return true;
+    }
+
+    // STEP 3: Logged in user - sync to cloud
+    try {
+      const cloudSuccess = await cloudUpdateSavedList(userId, list);
+      if (cloudSuccess) {
+        console.log("[CloudSync] Successfully synced update to cloud");
+      } else {
+        console.warn("[CloudSync] Local update succeeded but cloud sync failed");
+      }
+      // Return true because local update succeeded (cloud sync is optional)
+      return true;
+    } catch (error) {
+      console.error("[CloudSync] Cloud sync error (but local update succeeded):", error);
+      // Return true because local update succeeded
+      return true;
     }
   }, [userId]);
 
@@ -79,6 +121,33 @@ export const useCloudSync = () => {
       return localDeleteSavedList(listId);
     } catch (error) {
       console.error("[CloudSync] deleteSavedList error:", error);
+      return false;
+    }
+  }, [userId]);
+
+  const deleteAllSavedLists = useCallback(async (deleteFromCloud: boolean = false): Promise<boolean> => {
+    try {
+      // Always delete locally first
+      const localLists = localGetSavedLists();
+      localLists.forEach(list => {
+        localDeleteSavedList(list.id);
+      });
+      // Clear localStorage directly
+      localStorage.removeItem("saved_lists");
+
+      // If guest or only deleting from device, stop here
+      if (!userId || !deleteFromCloud) {
+        return true;
+      }
+
+      // If logged in and deleteFromCloud is true, delete from cloud
+      const cloudSuccess = await cloudDeleteAllSavedLists(userId);
+      if (!cloudSuccess) {
+        console.warn("[CloudSync] Local delete succeeded but cloud delete failed");
+      }
+      return true; // Return true because local delete succeeded
+    } catch (error) {
+      console.error("[CloudSync] deleteAllSavedLists error:", error);
       return false;
     }
   }, [userId]);
@@ -143,6 +212,7 @@ export const useCloudSync = () => {
     saveList,
     updateSavedList,
     deleteSavedList,
+    deleteAllSavedLists,
     
     // Shopping history
     getShoppingHistory,

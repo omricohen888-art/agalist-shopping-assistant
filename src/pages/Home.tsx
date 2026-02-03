@@ -7,6 +7,7 @@ import { useGlobalLanguage } from "@/context/LanguageContext";
 import { useCloudSync } from "@/hooks/use-cloud-sync";
 import { toast } from "sonner";
 import { SavedList, ShoppingItem, Unit } from "@/types/shopping";
+import { createUUID } from "@/lib/utils";
 
 interface HomeItem {
     id: string;
@@ -25,7 +26,7 @@ export const Home = () => {
 
     const addNewItem = () => {
         const newItem: HomeItem = {
-            id: Date.now().toString(),
+            id: createUUID(),
             text: "",
             isChecked: false,
             quantity: 1,
@@ -53,7 +54,7 @@ export const Home = () => {
         setIsSaving(true);
 
         const newList: SavedList = {
-            id: Date.now().toString(),
+            id: createUUID(),
             name: language === 'he' ? `רשימה חדשה` : `New List`,
             items: items.map(item => ({
                 id: item.id,
@@ -86,7 +87,7 @@ export const Home = () => {
         }
 
         // Save current list to active shopping
-        const listId = Date.now().toString();
+        const listId = createUUID();
         const shoppingList = {
             id: listId,
             items: items.map(item => ({

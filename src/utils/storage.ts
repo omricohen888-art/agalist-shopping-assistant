@@ -1,4 +1,4 @@
-import { ShoppingHistory } from "@/types/shopping";
+import { SavedList, ShoppingHistory } from "@/types/shopping";
 
 const STORAGE_KEY = "shopping_history";
 
@@ -48,10 +48,18 @@ export const clearAllHistory = () => {
 
 const LISTS_KEY = "saved_lists";
 
-export const getSavedLists = (): import("@/types/shopping").SavedList[] => {
+export const getSavedLists = (): SavedList[] => {
   try {
     const data = localStorage.getItem(LISTS_KEY);
-    return data ? JSON.parse(data) : [];
+    const parsed: SavedList[] = data ? JSON.parse(data) : [];
+
+    // Ensure all IDs are strings (convert any non-string IDs)
+    const normalized = parsed.map((list) => ({
+      ...list,
+      id: String(list.id ?? ""),
+    }));
+
+    return normalized;
   } catch (error) {
     console.error("Failed to load saved lists:", error);
     return [];

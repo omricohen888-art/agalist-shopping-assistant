@@ -195,6 +195,11 @@ export const ShoppingList = () => {
   // Delete All Dialog State
   const [isDeleteAllDialogOpen, setIsDeleteAllDialogOpen] = useState(false);
 
+  // ✅ CRITICAL: Local UI state for visual filtering ONLY
+  // Lists are NOT deleted or archived - just hidden from dashboard view
+  // This state resets when page refreshes (session-only visibility)
+  const [hiddenListIds, setHiddenListIds] = useState<string[]>([]);
+
   // Smart Input States
   const [isVoiceRecording, setIsVoiceRecording] = useState(false);
   const [isProcessingImage, setIsProcessingImage] = useState(false);
@@ -1941,16 +1946,20 @@ export const ShoppingList = () => {
 
         {/* Dashboard - Saved Lists & Completed Trips */}
         {items.length === 0 && (savedLists.length > 0 || shoppingHistory.length > 0) && (() => {
-          // Categorize lists
-          const inProgressLists = savedLists.filter(list => {
+          // ✅ CRITICAL: Filter lists for DASHBOARD VIEW ONLY
+          // Apply hiddenListIds filter here for dashboard display
+          const visibleLists = savedLists.filter(list => !hiddenListIds.includes(list.id));
+          
+          // Categorize visible lists
+          const inProgressLists = visibleLists.filter(list => {
             const completedCount = list.items.filter(item => item.checked).length;
             return !list.isShoppingComplete && completedCount > 0;
           });
-          const readyLists = savedLists.filter(list => {
+          const readyLists = visibleLists.filter(list => {
             const completedCount = list.items.filter(item => item.checked).length;
             return !list.isShoppingComplete && completedCount === 0;
           });
-          const completedLists = savedLists.filter(list => list.isShoppingComplete);
+          const completedLists = visibleLists.filter(list => list.isShoppingComplete);
 
           // Duplicate list handler
           const handleDuplicateList = async (list: SavedList) => {
@@ -1982,47 +1991,39 @@ export const ShoppingList = () => {
             }
           };
 
-          // Archive section handlers (soft delete)
-          const handleArchiveReadyLists = async () => {
+          // ✅ CRITICAL: Non-destructive "Clear" handlers
+          // These ONLY hide from dashboard view - NO database/storage changes
+          // Lists remain fully intact in savedLists state and localStorage
+          
+          const handleClearReadyLists = () => {
             const listIds = readyLists.map(list => list.id);
-            if (listIds.length === 0) return;
-            
-            const success = await cloudSync.archiveSavedLists(listIds);
-            if (success) {
-              const lists = await cloudSync.getSavedLists();
-              setSavedLists(lists);
-              toast.success(language === 'he' ? 'רשימות "מוכנות לקנייה" הועברו לארכיון' : 'Ready lists archived');
-            } else {
-              toast.error(language === 'he' ? 'שגיאה בארכיון הרשימות' : 'Error archiving lists');
-            }
+            setHiddenListIds(prev => [...new Set([...prev, ...listIds])]);
+            toast.info(language === 'he' 
+              ? '👁️ רשימות מוכנות מוסתרות מהתצוגה (נשארות בפנקס)' 
+              : '👁️ Ready lists hidden from view (still in notebook)');
           };
 
-          const handleArchiveInProgressLists = async () => {
+          const handleClearInProgressLists = () => {
             const listIds = inProgressLists.map(list => list.id);
-            if (listIds.length === 0) return;
-            
-            const success = await cloudSync.archiveSavedLists(listIds);
-            if (success) {
-              const lists = await cloudSync.getSavedLists();
-              setSavedLists(lists);
-              toast.success(language === 'he' ? 'רשימות "בתהליך" הועברו לארכיון' : 'In-progress lists archived');
-            } else {
-              toast.error(language === 'he' ? 'שגיאה בארכיון הרשימות' : 'Error archiving lists');
-            }
+            setHiddenListIds(prev => [...new Set([...prev, ...listIds])]);
+            toast.info(language === 'he' 
+              ? '👁️ רשימות בתהליך מוסתרות מהתצוגה (נשארות בפנקס)' 
+              : '👁️ In-progress lists hidden from view (still in notebook)');
           };
 
-          const handleArchiveCompletedLists = async () => {
+          const handleClearCompletedLists = () => {
             const listIds = completedLists.map(list => list.id);
-            if (listIds.length === 0) return;
-            
-            const success = await cloudSync.archiveSavedLists(listIds);
-            if (success) {
-              const lists = await cloudSync.getSavedLists();
-              setSavedLists(lists);
-              toast.success(language === 'he' ? 'רשימות "הושלמו" הועברו לארכיון' : 'Completed lists archived');
-            } else {
-              toast.error(language === 'he' ? 'שגיאה בארכיון הרשימות' : 'Error archiving lists');
-            }
+            setHiddenListIds(prev => [...new Set([...prev, ...listIds])]);
+            toast.info(language === 'he' 
+              ? '👁️ רשימות משולמות מוסתרות מהתצוגה (נשארות בפנקס)' 
+              : '👁️ Completed lists hidden from view (still in notebook)');
+          };
+
+          const handleShowAllLists = () => {
+            setHiddenListIds([]);
+            toast.info(language === 'he' 
+              ? 'כל הרשימות מוצגות בדאשבורד' 
+              : 'All lists visible in dashboard');
           };
 
           const handleToggle = async (listId: string, itemId: string) => {
@@ -2065,12 +2066,12 @@ export const ShoppingList = () => {
                     )}
                   </h3>
                   <div className="flex items-center gap-2">
-                    {/* Clear button - VISIBLE FOR BOTH LOGGED-IN AND GUEST USERS */}
+                    {/* Clear button - Hides lists from dashboard view ONLY (non-destructive) */}
                     {readyLists.length > 0 && (
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={handleArchiveReadyLists}
+                        onClick={handleClearReadyLists}
                         className="text-muted-foreground hover:text-foreground hover:bg-muted font-medium"
                         title={language === 'he' ? 'הסתר רשימות מוכנות' : 'Hide ready lists'}
                       >
@@ -2133,12 +2134,12 @@ export const ShoppingList = () => {
                     )}
                   </h3>
                   <div className="flex items-center gap-2">
-                    {/* Clear button - VISIBLE FOR BOTH LOGGED-IN AND GUEST USERS */}
+                    {/* Clear button - Hides lists from dashboard view ONLY (non-destructive) */}
                     {inProgressLists.length > 0 && (
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={handleArchiveInProgressLists}
+                        onClick={handleClearInProgressLists}
                         className="text-muted-foreground hover:text-foreground hover:bg-muted font-medium"
                         title={language === 'he' ? 'הסתר רשימות בתהליך' : 'Hide in-progress lists'}
                       >
@@ -2192,11 +2193,11 @@ export const ShoppingList = () => {
                       </span>
                     </h3>
                     <div className="flex items-center gap-2">
-                      {/* Clear button - VISIBLE FOR BOTH LOGGED-IN AND GUEST USERS */}
+                      {/* Clear button - Hides lists from dashboard view ONLY (non-destructive) */}
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={handleArchiveCompletedLists}
+                        onClick={handleClearCompletedLists}
                         className="text-muted-foreground hover:text-foreground hover:bg-muted font-medium"
                         title={language === 'he' ? 'הסתר רשימות שהושלמו' : 'Hide completed lists'}
                       >

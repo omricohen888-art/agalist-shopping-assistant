@@ -54,10 +54,14 @@ export const getSavedLists = (): SavedList[] => {
     const parsed: SavedList[] = data ? JSON.parse(data) : [];
 
     // Ensure all IDs are strings (convert any non-string IDs)
-    const normalized = parsed.map((list) => ({
-      ...list,
-      id: String(list.id ?? ""),
-    }));
+    // Filter out archived lists
+    const normalized = parsed
+      .map((list) => ({
+        ...list,
+        id: String(list.id ?? ""),
+        is_archived: list.is_archived ?? false,
+      }))
+      .filter((list) => !list.is_archived); // Hide archived lists
 
     return normalized;
   } catch (error) {
@@ -92,14 +96,36 @@ export const deleteSavedList = (id: string) => {
 
 export const updateSavedList = (updatedList: import("@/types/shopping").SavedList) => {
   try {
-    const existing = getSavedLists();
-    const updated = existing.map((list) =>
+    // Get all lists including archived ones
+    const data = localStorage.getItem(LISTS_KEY);
+    const allLists: import("@/types/shopping").SavedList[] = data ? JSON.parse(data) : [];
+    
+    const updated = allLists.map((list) =>
       list.id === updatedList.id ? updatedList : list
     );
     localStorage.setItem(LISTS_KEY, JSON.stringify(updated));
     return true;
   } catch (error) {
     console.error("Failed to update saved list:", error);
+    return false;
+  }
+};
+
+export const archiveSavedLists = (listIds: string[]): boolean => {
+  try {
+    if (listIds.length === 0) return true;
+
+    // Get all lists including archived ones
+    const data = localStorage.getItem(LISTS_KEY);
+    const allLists: import("@/types/shopping").SavedList[] = data ? JSON.parse(data) : [];
+
+    const updated = allLists.map((list) =>
+      listIds.includes(list.id) ? { ...list, is_archived: true } : list
+    );
+    localStorage.setItem(LISTS_KEY, JSON.stringify(updated));
+    return true;
+  } catch (error) {
+    console.error("Failed to archive lists:", error);
     return false;
   }
 };

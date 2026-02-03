@@ -118,6 +118,7 @@ export interface SavedList {
   isShoppingComplete?: boolean;
   shoppingCompletedAt?: string;
   shoppingDuration?: number; // in seconds
+  is_archived?: boolean; // Soft delete flag - archived lists are hidden from dashboard
 }
 
 // Legacy constant - keeping for backwards compatibility

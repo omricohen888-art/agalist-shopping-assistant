@@ -11,11 +11,13 @@ const toSavedList = (row: {
   store: string | null;
   created_at: string;
   updated_at: string;
+  is_archived?: boolean | null;
 }): SavedList => ({
   id: row.id,
   name: row.name,
   items: (row.items as unknown as ShoppingItem[]) || [],
   createdAt: row.created_at,
+  is_archived: row.is_archived ?? false,
 });
 
 const toShoppingHistory = (row: {
@@ -45,6 +47,7 @@ export const cloudGetSavedLists = async (userId: string): Promise<SavedList[]> =
     .from("saved_lists")
     .select("*")
     .eq("user_id", userId)
+    .or("is_archived.is.null,is_archived.eq.false") // Filter out archived lists (include null and false)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -52,7 +55,10 @@ export const cloudGetSavedLists = async (userId: string): Promise<SavedList[]> =
     return [];
   }
 
-  return (data || []).map(row => toSavedList(row));
+  // Additional filter in case Supabase query doesn't catch all cases
+  return (data || [])
+    .filter(row => !row.is_archived) // Explicitly filter out archived lists
+    .map(row => toSavedList(row));
 };
 
 export const cloudSaveList = async (userId: string, list: SavedList): Promise<boolean> => {
@@ -75,6 +81,7 @@ export const cloudSaveList = async (userId: string, list: SavedList): Promise<bo
     items: list.items as unknown as Json,
     store: null,
     created_at: list.createdAt,
+    is_archived: list.is_archived ?? false, // Ensure new lists are not archived
     // updated_at is optional and can be provided by the database default
   };
 
@@ -127,12 +134,30 @@ export const cloudUpdateSavedList = async (userId: string, list: SavedList): Pro
     .update({
       name: list.name,
       items: list.items as unknown as Json,
+      is_archived: list.is_archived ?? false,
     })
     .eq("id", list.id)
     .eq("user_id", userId);
 
   if (error) {
     console.error("Failed to update list in cloud:", error);
+    return false;
+  }
+
+  return true;
+};
+
+export const cloudArchiveSavedLists = async (userId: string, listIds: string[]): Promise<boolean> => {
+  if (listIds.length === 0) return true;
+
+  const { error } = await supabase
+    .from("saved_lists")
+    .update({ is_archived: true })
+    .eq("user_id", userId)
+    .in("id", listIds);
+
+  if (error) {
+    console.error("Failed to archive lists in cloud:", error);
     return false;
   }
 

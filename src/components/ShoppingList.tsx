@@ -1,3 +1,4 @@
+
 import { useEffect, useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -1599,20 +1600,6 @@ export const ShoppingList = () => {
 
             {/* Actions Section - RIGHT (LTR) / LEFT (RTL) */}
             <div className={`flex items-center gap-1.5 sm:gap-2 flex-shrink-0 ${language === 'he' ? 'flex-row-reverse' : ''}`}>
-              {/* Delete All Button - Always visible when there are saved lists */}
-              {savedLists.length > 0 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setIsDeleteAllDialogOpen(true)}
-                  className="text-destructive hover:text-destructive hover:bg-destructive/10 h-9 sm:h-10 px-2 sm:px-3 text-xs sm:text-sm font-medium"
-                  title={language === 'he' ? 'מחק את כל הרשימות' : 'Delete all lists'}
-                >
-                  <Trash2 className="h-4 w-4 sm:mr-1" />
-                  <span className="hidden sm:inline">{language === 'he' ? 'מחק הכל' : 'Delete All'}</span>
-                </Button>
-              )}
-              
               {/* User Account Button with Greeting */}
               <div className="flex items-center gap-2">
                 <span className="text-xs sm:text-sm text-muted-foreground font-medium">
@@ -1946,17 +1933,6 @@ export const ShoppingList = () => {
                   <StartShoppingButton onClick={handleStartShopping} language={language} disabled={notepadItems.length === 0} />
                   <SaveListButton onClick={handleSaveList} language={language} disabled={notepadItems.length === 0} />
                 </div>
-                {/* Clear button - Mobile Optimized */}
-                <div className={`overflow-hidden transition-all duration-300 ease-in-out ${notepadItems.length > 0 ? 'opacity-100' : 'opacity-0 h-0'}`}>
-                  <Button 
-                    onClick={() => setNotepadItems([])} 
-                    variant="ghost" 
-                    className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-9 sm:h-11 px-3 sm:px-4 text-xs sm:text-sm font-medium rounded-xl flex items-center justify-center transition-all"
-                  >
-                    <Trash2 className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                    {t.clearAllButton}
-                  </Button>
-                </div>
               </div>
             </div>
 
@@ -2006,6 +1982,49 @@ export const ShoppingList = () => {
             }
           };
 
+          // Archive section handlers (soft delete)
+          const handleArchiveReadyLists = async () => {
+            const listIds = readyLists.map(list => list.id);
+            if (listIds.length === 0) return;
+            
+            const success = await cloudSync.archiveSavedLists(listIds);
+            if (success) {
+              const lists = await cloudSync.getSavedLists();
+              setSavedLists(lists);
+              toast.success(language === 'he' ? 'רשימות "מוכנות לקנייה" הועברו לארכיון' : 'Ready lists archived');
+            } else {
+              toast.error(language === 'he' ? 'שגיאה בארכיון הרשימות' : 'Error archiving lists');
+            }
+          };
+
+          const handleArchiveInProgressLists = async () => {
+            const listIds = inProgressLists.map(list => list.id);
+            if (listIds.length === 0) return;
+            
+            const success = await cloudSync.archiveSavedLists(listIds);
+            if (success) {
+              const lists = await cloudSync.getSavedLists();
+              setSavedLists(lists);
+              toast.success(language === 'he' ? 'רשימות "בתהליך" הועברו לארכיון' : 'In-progress lists archived');
+            } else {
+              toast.error(language === 'he' ? 'שגיאה בארכיון הרשימות' : 'Error archiving lists');
+            }
+          };
+
+          const handleArchiveCompletedLists = async () => {
+            const listIds = completedLists.map(list => list.id);
+            if (listIds.length === 0) return;
+            
+            const success = await cloudSync.archiveSavedLists(listIds);
+            if (success) {
+              const lists = await cloudSync.getSavedLists();
+              setSavedLists(lists);
+              toast.success(language === 'he' ? 'רשימות "הושלמו" הועברו לארכיון' : 'Completed lists archived');
+            } else {
+              toast.error(language === 'he' ? 'שגיאה בארכיון הרשימות' : 'Error archiving lists');
+            }
+          };
+
           const handleToggle = async (listId: string, itemId: string) => {
             const list = savedLists.find(l => l.id === listId);
             if (!list) return;
@@ -2033,7 +2052,7 @@ export const ShoppingList = () => {
           return (
             <div className="mb-12 border-t border-border/30 pt-8 max-w-5xl mx-auto space-y-10">
               
-              {/* Ready to Shop Section - FIRST */}
+              {/* Ready to Shop Section - FIRST - UNIFIED FOR BOTH USER TYPES */}
               <div className="bg-primary/5 rounded-2xl p-4 sm:p-6 border border-primary/20">
                 <div className="flex justify-between items-center mb-6">
                   <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
@@ -2046,6 +2065,18 @@ export const ShoppingList = () => {
                     )}
                   </h3>
                   <div className="flex items-center gap-2">
+                    {/* Clear button - VISIBLE FOR BOTH LOGGED-IN AND GUEST USERS */}
+                    {readyLists.length > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleArchiveReadyLists}
+                        className="text-muted-foreground hover:text-foreground hover:bg-muted font-medium"
+                        title={language === 'he' ? 'הסתר רשימות מוכנות' : 'Hide ready lists'}
+                      >
+                        {language === 'he' ? 'נקה' : 'Clear'}
+                      </Button>
+                    )}
                     <Button variant="ghost" onClick={() => navigate("/notebook")} className="text-sm font-semibold text-primary hover:text-primary/80 hover:bg-primary/10">
                       {t.viewAllListsButton}
                       {language === 'he' ? <div className="mr-1 rotate-180">➜</div> : <div className="ml-1">➜</div>}
@@ -2089,7 +2120,7 @@ export const ShoppingList = () => {
                 <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
               </div>
 
-              {/* In Progress Section - SECOND */}
+              {/* In Progress Section - SECOND - UNIFIED FOR BOTH USER TYPES */}
               <div className="bg-warning/5 rounded-2xl p-4 sm:p-6 border border-warning/20">
                 <div className="flex justify-between items-center mb-6">
                   <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
@@ -2101,6 +2132,20 @@ export const ShoppingList = () => {
                       </span>
                     )}
                   </h3>
+                  <div className="flex items-center gap-2">
+                    {/* Clear button - VISIBLE FOR BOTH LOGGED-IN AND GUEST USERS */}
+                    {inProgressLists.length > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleArchiveInProgressLists}
+                        className="text-muted-foreground hover:text-foreground hover:bg-muted font-medium"
+                        title={language === 'he' ? 'הסתר רשימות בתהליך' : 'Hide in-progress lists'}
+                      >
+                        {language === 'he' ? 'נקה' : 'Clear'}
+                      </Button>
+                    )}
+                  </div>
                 </div>
 
                 {inProgressLists.length > 0 ? (
@@ -2146,10 +2191,22 @@ export const ShoppingList = () => {
                         {completedLists.length}
                       </span>
                     </h3>
-                    <Button variant="ghost" onClick={() => navigate("/notebook")} className="text-sm font-semibold text-success hover:text-success/80 hover:bg-success/10">
-                      {language === 'he' ? 'צפה בהכל' : 'View All'}
-                      {language === 'he' ? <div className="mr-1 rotate-180">➜</div> : <div className="ml-1">➜</div>}
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      {/* Clear button - VISIBLE FOR BOTH LOGGED-IN AND GUEST USERS */}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleArchiveCompletedLists}
+                        className="text-muted-foreground hover:text-foreground hover:bg-muted font-medium"
+                        title={language === 'he' ? 'הסתר רשימות שהושלמו' : 'Hide completed lists'}
+                      >
+                        {language === 'he' ? 'נקה' : 'Clear'}
+                      </Button>
+                      <Button variant="ghost" onClick={() => navigate("/notebook")} className="text-sm font-semibold text-success hover:text-success/80 hover:bg-success/10">
+                        {language === 'he' ? 'צפה בהכל' : 'View All'}
+                        {language === 'he' ? <div className="mr-1 rotate-180">➜</div> : <div className="ml-1">➜</div>}
+                      </Button>
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">

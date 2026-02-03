@@ -7,6 +7,7 @@ import {
   cloudUpdateSavedList,
   cloudDeleteSavedList,
   cloudDeleteAllSavedLists,
+  cloudArchiveSavedLists,
   cloudGetShoppingHistory,
   cloudSaveShoppingHistory,
   cloudDeleteShoppingHistory,
@@ -17,6 +18,7 @@ import {
   saveList as localSaveList,
   updateSavedList as localUpdateSavedList,
   deleteSavedList as localDeleteSavedList,
+  archiveSavedLists as localArchiveSavedLists,
   getShoppingHistory as localGetShoppingHistory,
   saveShoppingHistory as localSaveShoppingHistory,
   deleteShoppingHistory as localDeleteShoppingHistory,
@@ -125,6 +127,32 @@ export const useCloudSync = () => {
     }
   }, [userId]);
 
+  const archiveSavedLists = useCallback(async (listIds: string[]): Promise<boolean> => {
+    try {
+      // Always archive locally first
+      const localSuccess = localArchiveSavedLists(listIds);
+      if (!localSuccess) {
+        console.error("[CloudSync] Failed to archive locally");
+        return false;
+      }
+
+      // If guest, stop here
+      if (!userId) {
+        return true;
+      }
+
+      // If logged in, archive in cloud
+      const cloudSuccess = await cloudArchiveSavedLists(userId, listIds);
+      if (!cloudSuccess) {
+        console.warn("[CloudSync] Local archive succeeded but cloud archive failed");
+      }
+      return true; // Return true because local archive succeeded
+    } catch (error) {
+      console.error("[CloudSync] archiveSavedLists error:", error);
+      return false;
+    }
+  }, [userId]);
+
   const deleteAllSavedLists = useCallback(async (deleteFromCloud: boolean = false): Promise<boolean> => {
     try {
       // Always delete locally first
@@ -212,6 +240,7 @@ export const useCloudSync = () => {
     saveList,
     updateSavedList,
     deleteSavedList,
+    archiveSavedLists,
     deleteAllSavedLists,
     
     // Shopping history

@@ -141,7 +141,7 @@ export const ShoppingList = () => {
     theme,
     setTheme
   } = useTheme();
-  const { user } = useAuth();
+  const { user, onLogout } = useAuth();
   const cloudSync = useCloudSync();
   const t = translations[language];
   const storeOptions = language === "he" ? ISRAELI_STORES : ENGLISH_STORES;
@@ -235,15 +235,56 @@ export const ShoppingList = () => {
   const hasContent = inputText.trim().length > 0 || items.length > 0 || notepadItems.length > 0;
   const showPaste = notepadItems.length === 0 || notepadItems.length === 1 && notepadItems[0].text === '';
   const titleInputRef = useRef<HTMLInputElement>(null);
+  // Load data on mount and when userId changes
   useEffect(() => {
+    let isMounted = true;
+    
     const loadData = async () => {
-      const lists = await cloudSync.getSavedLists();
-      const history = await cloudSync.getShoppingHistory();
-      setSavedLists(lists);
-      setShoppingHistory(history);
+      try {
+        const [lists, history] = await Promise.all([
+          cloudSync.getSavedLists(),
+          cloudSync.getShoppingHistory()
+        ]);
+        
+        if (isMounted) {
+          setSavedLists(lists);
+          setShoppingHistory(history);
+        }
+      } catch (error) {
+        console.error('[ShoppingList] Failed to load data:', error);
+        if (isMounted) {
+          setSavedLists([]);
+          setShoppingHistory([]);
+        }
+      }
     };
+    
     loadData();
-  }, [cloudSync]);
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [cloudSync.getSavedLists, cloudSync.getShoppingHistory, cloudSync.userId]);
+
+  // Register cleanup callback to clear user data on logout (Privacy Protection)
+  useEffect(() => {
+    const unsubscribe = onLogout(() => {
+      console.log('[ShoppingList] Clearing user data on logout');
+      // Clear all user-specific state
+      setSavedLists([]);
+      setShoppingHistory([]);
+      setItems([]);
+      setNotepadItems([]);
+      setActiveListId(null);
+      setListName("");
+      setInputText("");
+      setBulkInputText("");
+      setEditingList(null);
+      setSelectedTrip(null);
+    });
+    
+    return unsubscribe;
+  }, [onLogout]);
 
   // Load custom templates from localStorage
   useEffect(() => {

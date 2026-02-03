@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { SavedList, ShoppingHistory } from "@/types/shopping";
 import {
@@ -32,63 +33,105 @@ export const useCloudSync = () => {
 
   // ========== SAVED LISTS ==========
 
-  const getSavedLists = async (): Promise<SavedList[]> => {
-    if (userId) {
-      return cloudGetSavedLists(userId);
+  const getSavedLists = useCallback(async (): Promise<SavedList[]> => {
+    try {
+      if (userId) {
+        return await cloudGetSavedLists(userId);
+      }
+      return localGetSavedLists();
+    } catch (error) {
+      console.error("[CloudSync] getSavedLists error:", error);
+      // Fallback to local storage on error
+      return localGetSavedLists();
     }
-    return localGetSavedLists();
-  };
+  }, [userId]);
 
-  const saveList = async (list: SavedList): Promise<boolean> => {
-    if (userId) {
-      return cloudSaveList(userId, list);
+  const saveList = useCallback(async (list: SavedList): Promise<boolean> => {
+    try {
+      if (userId) {
+        return await cloudSaveList(userId, list);
+      }
+      return localSaveList(list);
+    } catch (error) {
+      console.error("[CloudSync] saveList error:", error);
+      // Try local storage as fallback
+      return localSaveList(list);
     }
-    return localSaveList(list);
-  };
+  }, [userId]);
 
-  const updateSavedList = async (list: SavedList): Promise<boolean> => {
-    if (userId) {
-      return cloudUpdateSavedList(userId, list);
+  const updateSavedList = useCallback(async (list: SavedList): Promise<boolean> => {
+    try {
+      if (userId) {
+        return await cloudUpdateSavedList(userId, list);
+      }
+      return localUpdateSavedList(list);
+    } catch (error) {
+      console.error("[CloudSync] updateSavedList error:", error);
+      return false;
     }
-    return localUpdateSavedList(list);
-  };
+  }, [userId]);
 
-  const deleteSavedList = async (listId: string): Promise<boolean> => {
-    if (userId) {
-      return cloudDeleteSavedList(userId, listId);
+  const deleteSavedList = useCallback(async (listId: string): Promise<boolean> => {
+    try {
+      if (userId) {
+        return await cloudDeleteSavedList(userId, listId);
+      }
+      return localDeleteSavedList(listId);
+    } catch (error) {
+      console.error("[CloudSync] deleteSavedList error:", error);
+      return false;
     }
-    return localDeleteSavedList(listId);
-  };
+  }, [userId]);
 
   // ========== SHOPPING HISTORY ==========
 
-  const getShoppingHistory = async (): Promise<ShoppingHistory[]> => {
-    if (userId) {
-      return cloudGetShoppingHistory(userId);
+  const getShoppingHistory = useCallback(async (): Promise<ShoppingHistory[]> => {
+    try {
+      if (userId) {
+        return await cloudGetShoppingHistory(userId);
+      }
+      return localGetShoppingHistory();
+    } catch (error) {
+      console.error("[CloudSync] getShoppingHistory error:", error);
+      return localGetShoppingHistory();
     }
-    return localGetShoppingHistory();
-  };
+  }, [userId]);
 
-  const saveShoppingHistory = async (history: ShoppingHistory): Promise<boolean> => {
-    if (userId) {
-      return cloudSaveShoppingHistory(userId, history);
+  const saveShoppingHistory = useCallback(async (history: ShoppingHistory): Promise<boolean> => {
+    try {
+      if (userId) {
+        return await cloudSaveShoppingHistory(userId, history);
+      }
+      return localSaveShoppingHistory(history);
+    } catch (error) {
+      console.error("[CloudSync] saveShoppingHistory error:", error);
+      return localSaveShoppingHistory(history);
     }
-    return localSaveShoppingHistory(history);
-  };
+  }, [userId]);
 
-  const deleteShoppingHistory = async (historyId: string): Promise<boolean> => {
-    if (userId) {
-      return cloudDeleteShoppingHistory(userId, historyId);
+  const deleteShoppingHistory = useCallback(async (historyId: string): Promise<boolean> => {
+    try {
+      if (userId) {
+        return await cloudDeleteShoppingHistory(userId, historyId);
+      }
+      return localDeleteShoppingHistory(historyId);
+    } catch (error) {
+      console.error("[CloudSync] deleteShoppingHistory error:", error);
+      return false;
     }
-    return localDeleteShoppingHistory(historyId);
-  };
+  }, [userId]);
 
-  const clearAllHistory = async (): Promise<boolean> => {
-    if (userId) {
-      return cloudClearAllHistory(userId);
+  const clearAllHistory = useCallback(async (): Promise<boolean> => {
+    try {
+      if (userId) {
+        return await cloudClearAllHistory(userId);
+      }
+      return localClearAllHistory();
+    } catch (error) {
+      console.error("[CloudSync] clearAllHistory error:", error);
+      return false;
     }
-    return localClearAllHistory();
-  };
+  }, [userId]);
 
   return {
     // User state

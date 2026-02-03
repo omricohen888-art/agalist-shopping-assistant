@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User, Session } from '@supabase/supabase-js';
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
+import { User, Session, AuthChangeEvent } from '@supabase/supabase-js';
 import { supabase, isSupabaseConfigured } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface AuthContextType {
   user: User | null;
@@ -9,6 +10,8 @@ interface AuthContextType {
   isConfigured: boolean;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
+  // Callback for components to register cleanup functions
+  onLogout: (callback: () => void) => () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -17,6 +20,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(isSupabaseConfigured);
+  const logoutCallbacksRef = useRef<Set<() => void>>(new Set());
+  const queryClient = useQueryClient();
+
+  // Register a cleanup callback to be called on logout
+  const onLogout = useCallback((callback: () => void) => {
+    logoutCallbacksRef.current.add(callback);
+    // Return unsubscribe function
+    return () => {
+      logoutCallbacksRef.current.delete(callback);
+    };
+  }, []);
+
+  // Execute all registered cleanup callbacks
+  const executeLogoutCleanup = useCallback(() => {
+    console.log('[Auth] Executing logout cleanup...');
+    // Clear all React Query cache
+    queryClient.clear();
+    // Execute all registered callbacks
+    logoutCallbacksRef.current.forEach(callback => {
+      try {
+        callback();
+      } catch (error) {
+        console.error('[Auth] Cleanup callback error:', error);
+      }
+    });
+    console.log('[Auth] Logout cleanup complete');
+  }, [queryClient]);
 
   useEffect(() => {
     // Skip if Supabase is not configured
@@ -27,9 +57,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
+      (event: AuthChangeEvent, session) => {
+        console.log('[Auth] State changed:', event);
+        
+        // Handle logout - clear all user data
+        if (event === 'SIGNED_OUT') {
+          setSession(null);
+          setUser(null);
+          // Defer cleanup to avoid blocking auth state update
+          setTimeout(() => {
+            executeLogoutCleanup();
+          }, 0);
+        } else {
+          setSession(session);
+          setUser(session?.user ?? null);
+        }
         setLoading(false);
       }
     );
@@ -42,7 +84,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [executeLogoutCleanup]);
 
   const signInWithGoogle = async () => {
     const redirectUrl = `${window.location.origin}/`;
@@ -66,6 +108,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('Error signing out:', error.message);
       throw error;
     }
+    // The onAuthStateChange listener will handle the cleanup
   };
 
   return (
@@ -75,7 +118,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       loading, 
       isConfigured: isSupabaseConfigured,
       signInWithGoogle, 
-      signOut 
+      signOut,
+      onLogout,
     }}>
       {children}
     </AuthContext.Provider>

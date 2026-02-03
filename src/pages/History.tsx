@@ -120,37 +120,69 @@ const History = () => {
   const [selectedTrip, setSelectedTrip] = useState<ShoppingHistoryType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { language } = useGlobalLanguage();
-  const { getShoppingHistory, deleteShoppingHistory, clearAllHistory, isLoggedIn } = useCloudSync();
+  const cloudSync = useCloudSync();
+  const { getShoppingHistory, deleteShoppingHistory, clearAllHistory, isLoggedIn, userId } = cloudSync;
   const t = historyTranslations[language];
   const direction = language === "he" ? "rtl" : "ltr";
   const locale = language === "he" ? "he-IL" : "en-US";
 
+  // Load history when userId changes (login/logout)
   useEffect(() => {
+    let isMounted = true;
+    
+    const loadHistory = async () => {
+      setIsLoading(true);
+      try {
+        const data = await getShoppingHistory();
+        if (isMounted) {
+          setHistory(data);
+        }
+      } catch (error) {
+        console.error('[History] Failed to load history:', error);
+        if (isMounted) {
+          setHistory([]);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+    
     loadHistory();
-  }, []);
-
-  const loadHistory = async () => {
-    setIsLoading(true);
-    const data = await getShoppingHistory();
-    setHistory(data);
-    setIsLoading(false);
-  };
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [getShoppingHistory, userId]);
 
   const handleDelete = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    const success = await deleteShoppingHistory(id);
-    if (success) {
-      toast.success(t.toasts.deleted);
-      loadHistory();
+    try {
+      const success = await deleteShoppingHistory(id);
+      if (success) {
+        toast.success(t.toasts.deleted);
+        // Refresh data
+        const data = await getShoppingHistory();
+        setHistory(data);
+      }
+    } catch (error) {
+      console.error('[History] Failed to delete:', error);
+      toast.error(language === 'he' ? 'שגיאה במחיקה' : 'Delete failed');
     }
   };
 
   const handleClearAll = async () => {
     if (!window.confirm(t.confirmClear)) return;
-    const success = await clearAllHistory();
-    if (success) {
-      toast.success(t.toasts.cleared);
-      loadHistory();
+    try {
+      const success = await clearAllHistory();
+      if (success) {
+        toast.success(t.toasts.cleared);
+        setHistory([]);
+      }
+    } catch (error) {
+      console.error('[History] Failed to clear all:', error);
+      toast.error(language === 'he' ? 'שגיאה במחיקת ההיסטוריה' : 'Failed to clear history');
     }
   };
 

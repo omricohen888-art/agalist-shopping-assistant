@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Menu, X, Plus, Book, History, BarChart3, Lightbulb, Info, Settings, User, LogOut, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -280,16 +281,20 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
         </div>
       </div>
 
-      {/* Desktop Side Menu - Rendered outside nav stacking context */}
-      {isDesktopMenuOpen && (
+      {/* Desktop Side Menu - Rendered as Portal outside nav stacking context */}
+      {isDesktopMenuOpen && createPortal(
         <>
           {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-background/60 backdrop-blur-sm z-[200]"
+            className="fixed inset-0 bg-background/60 backdrop-blur-sm z-[9998]"
             onClick={() => setIsDesktopMenuOpen(false)}
           />
           {/* Side Panel */}
-          <div ref={menuPanelRef} className="fixed top-0 end-0 h-full w-64 bg-card border-s border-border shadow-2xl z-[201] animate-slide-in-right">
+          <div 
+            ref={menuPanelRef} 
+            className="fixed top-0 end-0 h-full w-64 bg-card border-s border-border shadow-2xl z-[9999] animate-slide-in-right"
+            dir={direction}
+          >
             <div className="p-4 border-b border-border flex items-center justify-between">
               <span className="font-medium text-foreground">{language === 'he' ? 'תפריט' : 'Menu'}</span>
               <button
@@ -312,7 +317,8 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
               </button>
             </div>
           </div>
-        </>
+        </>,
+        document.body
       )}
     </nav>
   );

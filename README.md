@@ -7,7 +7,7 @@
 
 > **Agalist** is a modern, real-time shopping list application. It was architected to showcase cloud integration between **Microsoft Azure** and **Supabase**, providing a seamless user experience across all devices.
 
-🌐 **Live Demo:** [https://icy-plant-07a95c31e.4.azurestaticapps.net]
+🌐 **Live Demo:** [Launch Agalist App](https://icy-plant-07a95c31e.4.azurestaticapps.net)
 
 ---
 
@@ -34,4 +34,4 @@ Local installation and execution are restricted to the owner to ensure the secur
 
 ## 👨‍💻 Connect with Me
 * **Author:** Omri Cohen (IT Student & Full Stack Enthusiast)
-* **LinkedIn:** [https://www.linkedin.com/in/omri-cohen-it/]
+* **LinkedIn:** [Omri Cohen Profile](https://www.linkedin.com/in/omri-cohen-it/)

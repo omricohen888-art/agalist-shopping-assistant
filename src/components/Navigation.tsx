@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Menu, X, Plus, Book, History, BarChart3, Lightbulb, Info, Settings, User, LogOut, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -18,6 +18,21 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
   const t = translations[language];
   const direction = language === 'he' ? 'rtl' : 'ltr';
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDesktopMenuOpen, setIsDesktopMenuOpen] = useState(false);
+  const desktopMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close desktop menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (desktopMenuRef.current && !desktopMenuRef.current.contains(event.target as Node)) {
+        setIsDesktopMenuOpen(false);
+      }
+    };
+    if (isDesktopMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isDesktopMenuOpen]);
 
   // UNIFIED NAVIGATION ITEMS - VISIBLE TO ALL USERS (BOTH LOGGED-IN AND GUESTS)
   // CRITICAL: Settings (Gear) button MUST appear for BOTH user types
@@ -243,14 +258,36 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
               </button>
             )}
 
-            {/* Settings Button */}
-            <button
-              onClick={() => onSettingsClick?.()}
-              className="p-2 rounded-xl text-muted-foreground hover:bg-muted transition-colors active:scale-95"
-              title={language === 'he' ? 'הגדרות' : 'Settings'}
-            >
-              <Settings className="h-5 w-5 flex-shrink-0" strokeWidth={1.5} />
-            </button>
+            {/* Hamburger Menu Button */}
+            <div className="relative" ref={desktopMenuRef}>
+              <button
+                onClick={() => setIsDesktopMenuOpen(!isDesktopMenuOpen)}
+                className="p-2 rounded-xl text-muted-foreground hover:bg-muted transition-colors active:scale-95"
+                title={language === 'he' ? 'תפריט' : 'Menu'}
+              >
+                {isDesktopMenuOpen ? (
+                  <X className="h-5 w-5 flex-shrink-0" strokeWidth={1.5} />
+                ) : (
+                  <Menu className="h-5 w-5 flex-shrink-0" strokeWidth={1.5} />
+                )}
+              </button>
+
+              {/* Desktop Dropdown Menu */}
+              {isDesktopMenuOpen && (
+                <div className="absolute top-full mt-2 end-0 w-48 bg-card border border-border shadow-xl rounded-xl z-50 overflow-hidden">
+                  <button
+                    onClick={() => {
+                      handleNavigate('/about');
+                      setIsDesktopMenuOpen(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-foreground hover:bg-muted transition-colors"
+                  >
+                    <Info className="h-5 w-5 flex-shrink-0" strokeWidth={1.5} />
+                    <span className="text-sm font-medium">{t.navigation.about}</span>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

@@ -1358,11 +1358,11 @@ export const ShoppingMode = () => {
                 {language === 'he' ? 'רשת/חנות' : 'Store'}
               </Label>
               <Select value={selectedStore} onValueChange={setSelectedStore}>
-                <SelectTrigger dir={direction} className="w-full h-12 text-base">
+                <SelectTrigger dir={direction} className="w-full h-12 text-base overflow-hidden">
                   {selectedStore ? (
                     <span className={`flex items-center gap-2 w-full ${direction === 'rtl' ? 'flex-row-reverse justify-end' : ''}`}>
-                      <span className="w-5 h-5 flex-shrink-0">{getStoreLogo(selectedStore)}</span>
-                      <span>{selectedStore}</span>
+                      <span className="w-5 h-5 min-w-[1.25rem] max-w-[1.25rem] min-h-[1.25rem] max-h-[1.25rem] flex-shrink-0 overflow-hidden">{getStoreLogo(selectedStore)}</span>
+                      <span className="truncate">{selectedStore}</span>
                     </span>
                   ) : (
                     <span className="flex items-center gap-2">
@@ -1375,7 +1375,7 @@ export const ShoppingMode = () => {
                   {STORES_BY_TYPE[selectedShoppingType].map((store) => (
                     <SelectItem key={store} value={store}>
                       <span className={`flex items-center gap-2 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
-                        <span className="w-5 h-5">{getStoreLogo(store)}</span>
+                        <span className="w-5 h-5 min-w-[1.25rem] max-w-[1.25rem] min-h-[1.25rem] max-h-[1.25rem] flex-shrink-0 overflow-hidden">{getStoreLogo(store)}</span>
                         <span>{store}</span>
                       </span>
                     </SelectItem>

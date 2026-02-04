@@ -1,15 +1,53 @@
 // Security and anti-spam utilities for input handling
 
-// Profanity filter word lists (English and Hebrew)
+// Profanity filter word lists (Multiple languages)
 const PROFANITY_WORDS = [
-  // English profanity
+  // English
   'fuck', 'shit', 'damn', 'bitch', 'asshole', 'bastard', 'crap', 'piss',
   'dick', 'cock', 'pussy', 'cunt', 'whore', 'slut', 'fag', 'nigger',
   'nigga', 'chink', 'gook', 'kike', 'spic', 'wetback', 'coon', 'jap',
-
-  // Hebrew profanity (common words)
+  
+  // Hebrew
   'זבל', 'חרא', 'שרמוטה', 'כלב', 'בן זונה', 'שמוק', 'טמבל', 'אידיוט',
-  'מטומטם', 'חמור', 'מניאק', 'פודל', 'שמוליק', 'פוץ', 'זין', 'כוס'
+  'מטומטם', 'חמור', 'מניאק', 'פודל', 'שמוליק', 'פוץ', 'זין', 'כוס',
+  'זונה', 'דפוק', 'מפגר', 'חארה', 'בהמה',
+  
+  // Spanish
+  'puta', 'mierda', 'pendejo', 'cabron', 'chingar', 'joder', 'verga',
+  'culo', 'polla', 'gilipollas', 'maricon', 'coño', 'hostia', 'cojones',
+  
+  // French
+  'merde', 'putain', 'salaud', 'connard', 'enculer', 'bordel', 'nique',
+  'salope', 'foutre', 'batard', 'con', 'pute',
+  
+  // German
+  'scheiße', 'scheisse', 'arschloch', 'fick', 'ficken', 'hurensohn',
+  'wichser', 'fotze', 'schwanz', 'schlampe', 'hure', 'verdammt',
+  
+  // Russian (transliterated)
+  'blyad', 'suka', 'huy', 'pizda', 'ebat', 'mudak', 'zalupa',
+  'pidar', 'gandon', 'debil', 'dolbaeb',
+  
+  // Arabic (transliterated)
+  'kuss', 'sharmouta', 'ibn el sharmouta', 'ibn haram', 'ayre',
+  'khara', 'maniak', 'hayawan', 'khawal',
+  
+  // Portuguese
+  'puta', 'caralho', 'foda', 'merda', 'buceta', 'viado', 'cuzao',
+  'porra', 'cacete', 'filho da puta',
+  
+  // Italian
+  'cazzo', 'merda', 'puttana', 'stronzo', 'figa', 'vaffanculo',
+  'minchia', 'coglione', 'troia', 'bastardo',
+  
+  // Turkish
+  'siktir', 'amina', 'orospu', 'pic', 'gavat', 'ibne',
+  
+  // Dutch
+  'kut', 'hoer', 'lul', 'godverdomme', 'klootzak', 'eikel',
+  
+  // Polish
+  'kurwa', 'chuj', 'dupa', 'pierdol', 'skurwysyn', 'dziwka'
 ];
 
 // Rate limiting constants

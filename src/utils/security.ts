@@ -40,19 +40,17 @@ export const sanitizeInput = (text: string): string => {
 
 /**
  * Checks if text contains profanity - returns true if blocked word found
+ * Uses simple includes() for Hebrew since \b word boundaries don't work with Hebrew
  */
 export const containsProfanity = (text: string): boolean => {
   if (!text || typeof text !== 'string') return false;
 
-  const lowerText = text.toLowerCase();
+  const normalizedText = text.toLowerCase().trim();
+  
   return PROFANITY_WORDS.some(word => {
-    try {
-      const escapedWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const regex = new RegExp(`\\b${escapedWord}\\b`, 'gi');
-      return regex.test(lowerText);
-    } catch {
-      return lowerText.includes(word.toLowerCase());
-    }
+    const normalizedWord = word.toLowerCase();
+    // Simple includes check works better for Hebrew
+    return normalizedText.includes(normalizedWord);
   });
 };
 

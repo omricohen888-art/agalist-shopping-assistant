@@ -272,20 +272,39 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
                 )}
               </button>
 
-              {/* Desktop Dropdown Menu */}
+              {/* Desktop Side Menu */}
               {isDesktopMenuOpen && (
-                <div className="absolute top-full mt-2 end-0 w-48 bg-card border border-border shadow-xl rounded-xl z-50 overflow-hidden">
-                  <button
-                    onClick={() => {
-                      handleNavigate('/about');
-                      setIsDesktopMenuOpen(false);
-                    }}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-foreground hover:bg-muted transition-colors"
-                  >
-                    <Info className="h-5 w-5 flex-shrink-0" strokeWidth={1.5} />
-                    <span className="text-sm font-medium">{t.navigation.about}</span>
-                  </button>
-                </div>
+                <>
+                  {/* Backdrop */}
+                  <div
+                    className="fixed inset-0 bg-background/60 backdrop-blur-sm z-[99]"
+                    onClick={() => setIsDesktopMenuOpen(false)}
+                  />
+                  {/* Side Panel */}
+                  <div className="fixed top-0 end-0 h-full w-64 bg-card border-s border-border shadow-2xl z-[100] animate-slide-in-right">
+                    <div className="p-4 border-b border-border flex items-center justify-between">
+                      <span className="font-medium text-foreground">{language === 'he' ? 'תפריט' : 'Menu'}</span>
+                      <button
+                        onClick={() => setIsDesktopMenuOpen(false)}
+                        className="p-2 rounded-xl hover:bg-muted transition-colors"
+                      >
+                        <X className="h-5 w-5" />
+                      </button>
+                    </div>
+                    <div className="p-2">
+                      <button
+                        onClick={() => {
+                          handleNavigate('/about');
+                          setIsDesktopMenuOpen(false);
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-foreground hover:bg-muted transition-colors"
+                      >
+                        <Info className="h-5 w-5 flex-shrink-0" strokeWidth={1.5} />
+                        <span className="text-sm font-medium">{t.navigation.about}</span>
+                      </button>
+                    </div>
+                  </div>
+                </>
               )}
             </div>
           </div>

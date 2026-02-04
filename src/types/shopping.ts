@@ -8,7 +8,7 @@ export const UNITS = [
 ] as const;
 
 // Shopping types
-export type ShoppingType = 'supermarket' | 'online' | 'convenience' | 'market' | 'pharmacy';
+export type ShoppingType = 'supermarket' | 'online' | 'convenience' | 'market' | 'pharmacy' | 'clothing' | 'electronics' | 'home' | 'kids' | 'pets' | 'other';
 
 export const SHOPPING_TYPES = [
   { value: 'supermarket' as const, labelHe: 'קנייה בסופר', labelEn: 'Supermarket', icon: '🛒' },
@@ -16,6 +16,12 @@ export const SHOPPING_TYPES = [
   { value: 'convenience' as const, labelHe: 'חנות נוחות', labelEn: 'Convenience Store', icon: '🏪' },
   { value: 'market' as const, labelHe: 'שוק/ירקות', labelEn: 'Market', icon: '🥬' },
   { value: 'pharmacy' as const, labelHe: 'בית מרקחת', labelEn: 'Pharmacy', icon: '💊' },
+  { value: 'clothing' as const, labelHe: 'ביגוד ואופנה', labelEn: 'Clothing & Fashion', icon: '👕' },
+  { value: 'electronics' as const, labelHe: 'אלקטרוניקה', labelEn: 'Electronics', icon: '📱' },
+  { value: 'home' as const, labelHe: 'בית וגינה', labelEn: 'Home & Garden', icon: '🏠' },
+  { value: 'kids' as const, labelHe: 'תינוקות וילדים', labelEn: 'Kids & Baby', icon: '🧸' },
+  { value: 'pets' as const, labelHe: 'חיות מחמד', labelEn: 'Pet Store', icon: '🐾' },
+  { value: 'other' as const, labelHe: 'אחר', labelEn: 'Other', icon: '🏷️' },
 ] as const;
 
 // Stores by shopping type
@@ -33,8 +39,10 @@ export const STORES_BY_TYPE: Record<ShoppingType, readonly string[]> = {
     "חצי חינם",
     "אושר עד",
     "סטופ מרקט",
+    "קרפור",
+    "פרש מרקט",
+    "נתיב החסד",
     "מכולת שכונתית",
-    "אחר",
   ],
   online: [
     "Amazon",
@@ -51,7 +59,8 @@ export const STORES_BY_TYPE: Record<ShoppingType, readonly string[]> = {
     "ZARA",
     "H&M",
     "Terminalx",
-    "אחר",
+    "באג",
+    "איביי ישראל",
   ],
   convenience: [
     "AM:PM",
@@ -60,24 +69,75 @@ export const STORES_BY_TYPE: Record<ShoppingType, readonly string[]> = {
     "סופר יודה",
     "גוד פארם",
     "מכולת שכונתית",
-    "אחר",
+    "פז צהוב",
+    "דלק",
+    "סונול",
   ],
   market: [
     "שוק הכרמל",
     "שוק מחנה יהודה",
     "שוק הפשפשים",
     "שוק לווינסקי",
+    "שוק הנמל",
+    "שוק רמלה",
     "ירקן שכונתי",
     "חנות טבע",
-    "אחר",
   ],
   pharmacy: [
     "סופר פארם",
     "Be",
     "גוד פארם",
     "ניו פארם",
-    "אחר",
+    "פארם אונליין",
   ],
+  clothing: [
+    "קסטרו",
+    "גולף",
+    "רנואר",
+    "פוקס",
+    "הודיס",
+    "זארה",
+    "H&M",
+    "מנגו",
+    "פול אנד בר",
+    "Terminalx",
+    "שילב",
+    "אמריקן איגל",
+  ],
+  electronics: [
+    "KSP",
+    "באג",
+    "איי דיגיטל",
+    "מחסני חשמל",
+    "זאפ",
+    "עזריאלי.קום",
+    "איקאה",
+    "אייבורי",
+  ],
+  home: [
+    "איקאה",
+    "הום סנטר",
+    "אייס",
+    "ניו פארם",
+    "סופר פארם",
+    "מקס סטוק",
+    "ג'מבו סטוק",
+  ],
+  kids: [
+    "שילב",
+    "באג'ו",
+    "טויס אר אס",
+    "קידס קלאב",
+    "מרמלדה",
+    "כתר פלסטיק",
+  ],
+  pets: [
+    "פט קלאב",
+    "פט פרינד",
+    "סופר פט",
+    "חנות לחיות",
+  ],
+  other: [],
 } as const;
 
 export interface ShoppingItem {

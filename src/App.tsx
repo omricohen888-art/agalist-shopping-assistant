@@ -26,6 +26,7 @@ import Profile from "./pages/Profile";
 const queryClient = new QueryClient();
 
 const AppContent = () => {
+  console.log("🚀 DEPLOYMENT SUCCESS: VERSION 5.0 (KEYS FIXED) 🚀");
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const location = useLocation();
   

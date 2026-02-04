@@ -1759,14 +1759,29 @@ export const ShoppingList = () => {
                 <span>{language === 'he' ? 'הדבק' : 'Paste'}</span>
               </button>
               {notepadItems.filter(item => item.text.trim() !== '').length > 0 && (
-                <button 
-                  onClick={handleCopyAllItems} 
-                  className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-lg bg-muted/80 hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer text-xs sm:text-sm font-medium border border-foreground/20" 
-                  title={language === 'he' ? 'העתק רשימה' : 'Copy list'}
-                >
-                  <Copy className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  <span>{language === 'he' ? 'העתק' : 'Copy'}</span>
-                </button>
+                <>
+                  <button 
+                    onClick={handleCopyAllItems} 
+                    className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-lg bg-muted/80 hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer text-xs sm:text-sm font-medium border border-foreground/20" 
+                    title={language === 'he' ? 'העתק רשימה' : 'Copy list'}
+                  >
+                    <Copy className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span>{language === 'he' ? 'העתק' : 'Copy'}</span>
+                  </button>
+                  <button 
+                    onClick={() => {
+                      setNotepadItems([]);
+                      setListName('');
+                      setActiveListId(null);
+                      toast.success(language === 'he' ? 'הרשימה נוקתה' : 'List cleared');
+                    }} 
+                    className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-lg bg-destructive/10 hover:bg-destructive/20 text-destructive hover:text-destructive transition-all cursor-pointer text-xs sm:text-sm font-medium border border-destructive/30" 
+                    title={language === 'he' ? 'נקה רשימה' : 'Clear list'}
+                  >
+                    <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span>{language === 'he' ? 'נקה' : 'Clear'}</span>
+                  </button>
+                </>
               )}
             </div>
           </div>

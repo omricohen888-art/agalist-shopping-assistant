@@ -39,7 +39,7 @@ export const HistoryListCard: React.FC<HistoryListCardProps> = ({
   return (
     <div
       onClick={() => onViewDetails(trip)}
-      className="bg-card border border-border/50 rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group relative"
+      className="bg-card border border-border/50 rounded-xl p-3 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group relative w-full sm:w-[280px] md:w-[300px]"
       dir={direction}
     >
       {/* Header Row */}

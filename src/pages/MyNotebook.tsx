@@ -397,7 +397,7 @@ const MyNotebook = () => {
                                         <p className="text-sm">{language === 'he' ? 'אין רשימות ממתינות' : 'No lists waiting'}</p>
                                     </div>
                                 ) : (
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="flex flex-wrap justify-end gap-3">
                                         {readyLists.map((list, index) => (
                                             <SavedListCard
                                                 key={list.id}
@@ -436,7 +436,7 @@ const MyNotebook = () => {
                                         <p className="text-sm">{language === 'he' ? 'אין קניות פעילות' : 'No active shopping'}</p>
                                     </div>
                                 ) : (
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="flex flex-wrap justify-end gap-3">
                                         {inProgressLists.map((list, index) => (
                                             <SavedListCard
                                                 key={list.id}
@@ -478,7 +478,7 @@ const MyNotebook = () => {
                                     <div className="space-y-6">
                                         {/* Completed SavedLists */}
                                         {completedLists.length > 0 && (
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <div className="flex flex-wrap justify-end gap-3">
                                                 {completedLists
                                                     .sort((a, b) => new Date(b.shoppingCompletedAt || b.createdAt).getTime() - new Date(a.shoppingCompletedAt || a.createdAt).getTime())
                                                     .map((list, index) => (
@@ -511,7 +511,7 @@ const MyNotebook = () => {
 
                                         {/* Shopping History */}
                                         {filteredHistory.length > 0 && (
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <div className="flex flex-wrap justify-end gap-3">
                                                 {filteredHistory
                                                     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
                                                     .map((trip) => (

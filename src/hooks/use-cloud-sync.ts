@@ -180,6 +180,38 @@ export const useCloudSync = () => {
     }
   }, [userId]);
 
+  /**
+   * Delete ALL data - both saved lists AND shopping history
+   * Used by the "Delete All Lists" button in settings
+   */
+  const deleteAllData = useCallback(async (deleteFromCloud: boolean = false): Promise<boolean> => {
+    try {
+      // ========== DELETE SAVED LISTS ==========
+      // Delete locally
+      localStorage.removeItem("saved_lists");
+
+      // If logged in and deleteFromCloud, delete from cloud
+      if (userId && deleteFromCloud) {
+        await cloudDeleteAllSavedLists(userId);
+      }
+
+      // ========== DELETE SHOPPING HISTORY ==========
+      // Delete locally
+      localClearAllHistory();
+
+      // If logged in and deleteFromCloud, delete from cloud
+      if (userId && deleteFromCloud) {
+        await cloudClearAllHistory(userId);
+      }
+
+      console.log("[CloudSync] All data deleted successfully");
+      return true;
+    } catch (error) {
+      console.error("[CloudSync] deleteAllData error:", error);
+      return false;
+    }
+  }, [userId]);
+
   // ========== SHOPPING HISTORY ==========
 
   const getShoppingHistory = useCallback(async (): Promise<ShoppingHistory[]> => {
@@ -248,5 +280,8 @@ export const useCloudSync = () => {
     saveShoppingHistory,
     deleteShoppingHistory,
     clearAllHistory,
+    
+    // Delete all data (lists + history)
+    deleteAllData,
   };
 };

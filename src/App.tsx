@@ -20,6 +20,7 @@ import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 import { ShoppingMode } from "./pages/ShoppingMode";
 import Auth from "./pages/Auth";
+import OGDesign from "./pages/OGDesign";
 import Profile from "./pages/Profile";
 
 const queryClient = new QueryClient();
@@ -44,6 +45,7 @@ const AppContent = () => {
           <Route path="/insights" element={<Insights />} />
           <Route path="/notebook" element={<MyNotebook />} />
           <Route path="/about" element={<About />} />
+          <Route path="/og-design" element={<OGDesign />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

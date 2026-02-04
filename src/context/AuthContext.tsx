@@ -87,7 +87,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [executeLogoutCleanup]);
 
   const signInWithGoogle = async () => {
-    const redirectUrl = `${window.location.origin}/`;
+    const redirectUrl = "https://icy-plant-07a95c31e.4.azurestaticapps.net/";
     
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',

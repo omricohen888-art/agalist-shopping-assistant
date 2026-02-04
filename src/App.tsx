@@ -26,7 +26,6 @@ import Profile from "./pages/Profile";
 const queryClient = new QueryClient();
 
 const AppContent = () => {
-  console.log("🚀 DEPLOYMENT SUCCESS: VERSION 5.0 (KEYS FIXED) 🚀");
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const location = useLocation();
   
@@ -69,21 +68,21 @@ const AppContent = () => {
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-          <SoundSettingsProvider>
-            <LanguageProvider>
-              <AuthProvider>
-                <TooltipProvider>
-                  <Toaster />
-                  <Sonner />
+      <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+        <SoundSettingsProvider>
+          <LanguageProvider>
+            <AuthProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
                   <AppContent />
-                </TooltipProvider>
-              </AuthProvider>
-            </LanguageProvider>
-          </SoundSettingsProvider>
-        </ThemeProvider>
-      </BrowserRouter>
+                </BrowserRouter>
+              </TooltipProvider>
+            </AuthProvider>
+          </LanguageProvider>
+        </SoundSettingsProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   </ErrorBoundary>
 );

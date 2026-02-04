@@ -34,4 +34,4 @@ Local installation and execution are restricted to the owner to ensure the secur
 
 ## 👨‍💻 Connect with Me
 * **Author:** Omri Cohen (IT Student & Full Stack Enthusiast)
-* **LinkedIn:** [Your Profile Link Here]
+* **LinkedIn:** [https://www.linkedin.com/in/omri-cohen-it/]

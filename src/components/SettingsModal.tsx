@@ -33,7 +33,7 @@ export const SettingsModal = ({ open, onOpenChange }: SettingsModalProps) => {
   const { theme, setTheme } = useTheme();
   const { language, setLanguage } = useGlobalLanguage();
   const { settings, setMuted, setVolume, playSound } = useSoundSettings();
-  const { deleteAllSavedLists } = useCloudSync();
+  const { deleteAllData } = useCloudSync();
   const { user } = useAuth();
   const [isDeleteAllDialogOpen, setIsDeleteAllDialogOpen] = useState(false);
   const t = translations[language];
@@ -48,24 +48,28 @@ export const SettingsModal = ({ open, onOpenChange }: SettingsModalProps) => {
 
   // Delete All handlers
   const handleDeleteAllFromDevice = async () => {
-    const success = await deleteAllSavedLists(false);
+    const success = await deleteAllData(false);
     if (success) {
       setIsDeleteAllDialogOpen(false);
       onOpenChange(false); // Close settings dialog
-      toast.success(language === 'he' ? 'כל הרשימות נמחקו מהמכשיר' : 'All lists cleared.');
+      toast.success(language === 'he' ? 'כל הרשימות וההיסטוריה נמחקו מהמכשיר' : 'All lists and history cleared from device.');
+      // Force page reload to reset all states
+      window.location.reload();
     } else {
-      toast.error(language === 'he' ? 'שגיאה במחיקת הרשימות' : 'Error deleting lists');
+      toast.error(language === 'he' ? 'שגיאה במחיקת הנתונים' : 'Error deleting data');
     }
   };
 
   const handleDeleteAllEverywhere = async () => {
-    const success = await deleteAllSavedLists(true);
+    const success = await deleteAllData(true);
     if (success) {
       setIsDeleteAllDialogOpen(false);
       onOpenChange(false); // Close settings dialog
-      toast.success(language === 'he' ? 'כל הרשימות נמחקו מהענן והמכשיר' : 'All lists cleared.');
+      toast.success(language === 'he' ? 'כל הרשימות וההיסטוריה נמחקו מהענן והמכשיר' : 'All lists and history cleared everywhere.');
+      // Force page reload to reset all states
+      window.location.reload();
     } else {
-      toast.error(language === 'he' ? 'שגיאה במחיקת הרשימות' : 'Error deleting lists');
+      toast.error(language === 'he' ? 'שגיאה במחיקת הנתונים' : 'Error deleting data');
     }
   };
 
@@ -187,18 +191,30 @@ export const SettingsModal = ({ open, onOpenChange }: SettingsModalProps) => {
       <AlertDialog open={isDeleteAllDialogOpen} onOpenChange={setIsDeleteAllDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>
-              {language === 'he' ? 'האם אתה בטוח שברצונך למחוק את כל הרשימות?' : 'Are you sure you want to delete all lists?'}
+            <AlertDialogTitle className="text-destructive">
+              {language === 'he' ? '⚠️ אזהרה: מחיקת כל הנתונים' : '⚠️ Warning: Delete All Data'}
             </AlertDialogTitle>
-            <AlertDialogDescription>
-              {language === 'he' 
-                ? 'פעולה זו לא ניתנת לביטול.' 
-                : 'This action cannot be undone.'}
+            <AlertDialogDescription className="space-y-2">
+              <span className="block font-medium text-foreground">
+                {language === 'he' 
+                  ? 'פעולה זו תמחק לצמיתות:' 
+                  : 'This will permanently delete:'}
+              </span>
+              <ul className="list-disc list-inside text-sm space-y-1">
+                <li>{language === 'he' ? 'כל הרשימות השמורות' : 'All saved lists'}</li>
+                <li>{language === 'he' ? 'כל הרשימות בתהליך' : 'All in-progress lists'}</li>
+                <li>{language === 'he' ? 'כל היסטוריית הקניות' : 'All shopping history'}</li>
+              </ul>
+              <span className="block text-destructive font-semibold mt-2">
+                {language === 'he' 
+                  ? 'פעולה זו לא ניתנת לביטול!' 
+                  : 'This action cannot be undone!'}
+              </span>
               {user && (
-                <span className="block mt-2 text-destructive font-medium">
+                <span className="block mt-2 text-muted-foreground text-sm">
                   {language === 'he' 
-                    ? 'מחיקה מכל מקום תמחק את הנתונים לצמיתות מהחשבון שלך.' 
-                    : 'Deleting everywhere will permanently remove data from your account.'}
+                    ? 'בחר "מחק מכל מקום" כדי למחוק גם מהחשבון בענן.' 
+                    : 'Choose "Delete Everywhere" to also delete from your cloud account.'}
                 </span>
               )}
             </AlertDialogDescription>

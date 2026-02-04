@@ -1,73 +1,51 @@
-# Welcome to your Lovable project
+# 🛒 Agalist - Smart Shopping Assistant
 
-## Project info
+![Azure Static Web Apps](https://img.shields.io/badge/Azure-Static_Web_Apps-0078D4?style=for-the-badge&logo=azure-devops&logoColor=white)
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
+![Status](https://img.shields.io/badge/Status-Live-success?style=for-the-badge)
+![Lovable](https://img.shields.io/badge/Developed%20with-Lovable-FF4F81?style=flat-square)
+![Cursor](https://img.shields.io/badge/Edited%20with-Cursor-00A3FF?style=flat-square&logo=cursor)
+![VS Code](https://img.shields.io/badge/IDE-VS_Code-007ACC?style=flat-square&logo=visual-studio-code&logoColor=white)
 
-**URL**: https://lovable.dev/projects/901d571a-88fb-4ca2-aef1-81940ef46489
 
-## How can I edit this code?
+> **Agalist** is a modern, real-time shopping list application designed to streamline the grocery shopping experience. It leverages the power of **Microsoft Azure** for hosting and **Supabase** for backend services, ensuring a fast and secure experience across all devices.
 
-There are several ways of editing your application.
+🌐 **Live Demo:** [https://agalist.js.org](https://agalist.js.org)
 
-**Use Lovable**
+---
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/901d571a-88fb-4ca2-aef1-81940ef46489) and start prompting.
+## ✨ Key Features
 
-Changes made via Lovable will be committed automatically to this repo.
+* **⚡ Real-time Synchronization:** Changes update instantly across all connected devices using Supabase Realtime.
+* **🔐 Secure Authentication:** Supports Google OAuth and Magic Link login flows.
+* **☁️ Cloud Native:** Fully deployed on **Azure Static Web Apps** with automated CI/CD pipelines via GitHub Actions.
+* **📱 Responsive Design:** Optimized for mobile, tablet, and desktop using Tailwind CSS.
+* **🧠 Smart Sorting:** Automatically organizes items by category (Produce, Dairy, Bakery, etc.).
 
-**Use your preferred IDE**
+## 🛠️ Tech Stack & Architecture
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+| Component | Technology | Description |
+| :--- | :--- | :--- |
+| **Frontend** | React + Vite | Fast build tool and component-based UI. |
+| **Language** | TypeScript | Type-safe code for better maintainability. |
+| **Backend / DB** | Supabase | PostgreSQL database, Auth, and Realtime subscriptions. |
+| **Hosting** | Azure Static Web Apps | Global hosting with SSL and GitHub Actions integration. |
+| **Styling** | Tailwind CSS | Utility-first CSS framework for rapid UI development. |
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 🛠️ Development Tools
 
-Follow these steps:
+This project was developed using a modern AI-assisted workflow:
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+* **Lovable:** Used for rapid prototyping and initial UI/UX architecture.
+* **Cursor:** Leveraging AI-powered code editing for complex logic and refactoring.
+* **VS Code:** Primary IDE for local development, debugging, and Git management.
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+## 🔒 Project Status
 
-# Step 3: Install the necessary dependencies.
-npm i
+This repository is for portfolio and educational purposes. Local execution is currently restricted to maintain security and proprietary configurations.
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/901d571a-88fb-4ca2-aef1-81940ef46489) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+* **Development:** Private
+* **Access:** View-only (Public Repository)
+* **License:** All Rights Reserved

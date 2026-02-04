@@ -40,7 +40,7 @@ import { WelcomePrompt } from "@/components/WelcomePrompt";
 import WelcomeNameModal from "@/components/WelcomeNameModal";
 import { PaginationDots } from "@/components/ui/pagination-dots";
 import { sortByCategory, detectCategory, getCategoryInfo, CategoryKey, CATEGORY_ORDER } from "@/utils/categorySort";
-import { processInput, RateLimiter } from "@/utils/security";
+import { processInput, RateLimiter, validateInput, containsProfanity } from "@/utils/security";
 import { createUUID } from "@/lib/utils";
 import { createWorker } from 'tesseract.js';
 interface NotepadItem {
@@ -1810,31 +1810,52 @@ export const ShoppingList = () => {
                       e.preventDefault();
                       const value = (e.target as HTMLTextAreaElement).value.trim();
                       if (value) {
-                        // Split by newlines and create items
+                        // Split by newlines and filter/validate each
                         const lines = value.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-                        const newItems: NotepadItem[] = lines.map((text, i) => ({
-                          id: `notepad-${Date.now()}-${i}`,
-                          text: text.replace(/^[-•*]\s*/, ''),
-                          isChecked: false,
-                          quantity: 1,
-                          unit: 'units' as Unit
-                        }));
-                        // Add empty item at end for continued input
-                        newItems.push({
-                          id: `notepad-${Date.now() + lines.length}`,
-                          text: '',
-                          isChecked: false,
-                          quantity: 1,
-                          unit: 'units' as Unit
-                        });
-                        setNotepadItems(newItems);
-                        // Focus the last (empty) input
-                        setTimeout(() => {
-                          const lastIndex = newItems.length - 1;
-                          if (notepadInputRefs.current[lastIndex]) {
-                            notepadInputRefs.current[lastIndex]!.focus();
+                        const validItems: NotepadItem[] = [];
+                        let blocked = 0;
+                        
+                        for (let i = 0; i < lines.length; i++) {
+                          const text = lines[i].replace(/^[-•*]\s*/, '');
+                          const validation = validateInput(text);
+                          const hasProfanity = containsProfanity(text);
+                          
+                          if (!validation.isValid || hasProfanity) {
+                            blocked++;
+                            continue;
                           }
-                        }, 50);
+                          
+                          validItems.push({
+                            id: `notepad-${Date.now()}-${i}`,
+                            text,
+                            isChecked: false,
+                            quantity: 1,
+                            unit: 'units' as Unit
+                          });
+                        }
+                        
+                        if (blocked > 0) {
+                          toast.error(language === 'he' ? 'פריט לא תקין' : 'Invalid item');
+                        }
+                        
+                        if (validItems.length > 0) {
+                          // Add empty item at end for continued input
+                          validItems.push({
+                            id: `notepad-${Date.now() + validItems.length}`,
+                            text: '',
+                            isChecked: false,
+                            quantity: 1,
+                            unit: 'units' as Unit
+                          });
+                          setNotepadItems(validItems);
+                          // Focus the last (empty) input
+                          setTimeout(() => {
+                            const lastIndex = validItems.length - 1;
+                            if (notepadInputRefs.current[lastIndex]) {
+                              notepadInputRefs.current[lastIndex]!.focus();
+                            }
+                          }, 50);
+                        }
                       }
                     }
                   }}

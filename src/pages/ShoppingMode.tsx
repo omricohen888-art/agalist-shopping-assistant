@@ -34,7 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { sanitizeInput } from "@/utils/security";
+import { sanitizeInput, validateInput, containsProfanity } from "@/utils/security";
 import { SortModeToggle } from "@/components/SortModeToggle";
 import { sortByCategory, groupByCategory, getCategoryInfo, CategoryKey } from "@/utils/categorySort";
 import { getStoreLogo } from "@/data/storeLogos";
@@ -968,18 +968,40 @@ export const ShoppingMode = () => {
                   if (e.key === 'Enter' && !e.shiftKey && newItemText.trim()) {
                     e.preventDefault();
                     const lines = newItemText.split(/[\n,]/).map(l => sanitizeInput(l.trim())).filter(l => l.length > 0);
-                    const newItems: ShoppingItem[] = lines.map((text, i) => ({
-                      id: `${Date.now()}-${i}`,
-                      text: text.replace(/^•\s*/, ''),
-                      checked: false,
-                      quantity: 1,
-                      unit: 'units' as Unit
-                    }));
-                    setItems(prev => [...newItems, ...prev]);
+                    const validItems: ShoppingItem[] = [];
+                    let blocked = 0;
+                    
+                    for (let i = 0; i < lines.length; i++) {
+                      const text = lines[i].replace(/^•\s*/, '');
+                      const validation = validateInput(text);
+                      const hasProfanity = containsProfanity(text);
+                      
+                      if (!validation.isValid || hasProfanity) {
+                        blocked++;
+                        continue;
+                      }
+                      
+                      validItems.push({
+                        id: `${Date.now()}-${i}`,
+                        text,
+                        checked: false,
+                        quantity: 1,
+                        unit: 'units' as Unit
+                      });
+                    }
+                    
+                    if (blocked > 0) {
+                      toast.error(language === 'he' ? 'פריט לא תקין' : 'Invalid item');
+                    }
+                    
+                    if (validItems.length > 0) {
+                      setItems(prev => [...validItems, ...prev]);
+                      toast.success(language === 'he' ? `נוספו ${validItems.length} פריטים` : `Added ${validItems.length} items`);
+                    }
+                    
                     setNewItemText("");
                     setShowAddItemInput(false);
                     triggerHaptic(50);
-                    toast.success(language === 'he' ? `נוספו ${newItems.length} פריטים` : `Added ${newItems.length} items`);
                   } else if (e.key === 'Escape') {
                     setShowAddItemInput(false);
                     setNewItemText("");
@@ -1020,18 +1042,40 @@ export const ShoppingMode = () => {
                   onClick={() => {
                     if (newItemText.trim()) {
                       const lines = newItemText.split(/[\n,]/).map(l => sanitizeInput(l.trim())).filter(l => l.length > 0);
-                      const newItems: ShoppingItem[] = lines.map((text, i) => ({
-                        id: `${Date.now()}-${i}`,
-                        text: text.replace(/^•\s*/, ''),
-                        checked: false,
-                        quantity: 1,
-                        unit: 'units' as Unit
-                      }));
-                      setItems(prev => [...newItems, ...prev]);
+                      const validItems: ShoppingItem[] = [];
+                      let blocked = 0;
+                      
+                      for (let i = 0; i < lines.length; i++) {
+                        const text = lines[i].replace(/^•\s*/, '');
+                        const validation = validateInput(text);
+                        const hasProfanity = containsProfanity(text);
+                        
+                        if (!validation.isValid || hasProfanity) {
+                          blocked++;
+                          continue;
+                        }
+                        
+                        validItems.push({
+                          id: `${Date.now()}-${i}`,
+                          text,
+                          checked: false,
+                          quantity: 1,
+                          unit: 'units' as Unit
+                        });
+                      }
+                      
+                      if (blocked > 0) {
+                        toast.error(language === 'he' ? 'פריט לא תקין' : 'Invalid item');
+                      }
+                      
+                      if (validItems.length > 0) {
+                        setItems(prev => [...validItems, ...prev]);
+                        toast.success(language === 'he' ? `נוספו ${validItems.length} פריטים` : `Added ${validItems.length} items`);
+                      }
+                      
                       setNewItemText("");
                       setShowAddItemInput(false);
                       triggerHaptic(50);
-                      toast.success(language === 'he' ? `נוספו ${newItems.length} פריטים` : `Added ${newItems.length} items`);
                     }
                   }}
                   disabled={!newItemText.trim()}

@@ -26,25 +26,27 @@ export const StartShoppingButton: React.FC<StartShoppingButtonProps> = ({
           ? 'h-10 sm:h-11 px-4 sm:px-6 rounded-lg sm:rounded-xl' 
           : 'h-11 sm:h-12 px-5 sm:px-8 rounded-xl'
         }
-        font-bold text-white
+        font-bold text-primary-foreground
         transition-all duration-200 ease-out
         touch-manipulation
         
-        /* Gradient background */
-        bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500
+        /* Primary background */
+        bg-primary
         
-        /* Subtle border */
-        border border-emerald-600/50
+        /* Bold border */
+        border-2 border-black dark:border-slate-700
         
-        /* Subtle shadow */
-        shadow-md hover:shadow-lg
+        /* 3D shadow effect */
+        shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]
+        dark:shadow-[3px_3px_0px_0px_rgba(100,116,139,0.8)]
         
         /* Hover/Active states */
-        hover:brightness-110
-        active:scale-[0.98] active:brightness-95
+        hover:translate-y-[2px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]
+        dark:hover:shadow-[1px_1px_0px_0px_rgba(100,116,139,0.8)]
+        active:translate-y-[3px] active:shadow-none
         
         /* Disabled state */
-        disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100
+        disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0
       `}
     >
       {/* Animated shine overlay */}

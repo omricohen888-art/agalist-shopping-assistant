@@ -22,13 +22,12 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
   // UNIFIED NAVIGATION ITEMS - VISIBLE TO ALL USERS (BOTH LOGGED-IN AND GUESTS)
   // CRITICAL: Settings (Gear) button MUST appear for BOTH user types
   // NO Info/About button in bottom bar - only Settings
+  // Navigation items - Settings removed from bottom bar (accessible via hamburger menu only)
   const navigationItems = [
     { path: '/', icon: Plus, label: t.navigation.list, id: 'list' },
     { path: '/notebook', icon: Book, label: t.navigation.notebook, id: 'notebook' },
     { path: '/history', icon: History, label: t.navigation.history, id: 'history' },
     { path: '/insights', icon: Lightbulb, label: t.navigation.insights, id: 'insights' },
-    // Settings (Gear icon) - visible to BOTH logged-in AND guest users
-    { path: null, icon: Settings, label: language === 'he' ? 'הגדרות' : 'Settings', id: 'settings', isSettings: true },
   ];
 
   const handleNavigate = (path: string) => {
@@ -70,18 +69,16 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
         <div className="flex items-center justify-center h-20 px-3">
           {/* Navigation Items - Centered */}
           <div className="flex items-center justify-center gap-1.5">
-            {navigationItems.map(({ path, icon: Icon, label, id, isSettings }) => (
+            {navigationItems.map(({ path, icon: Icon, label, id }) => (
               <button
                 key={id}
                 onClick={() => {
-                  if (isSettings) {
-                    onSettingsClick?.();
-                  } else if (path) {
+                  if (path) {
                     handleNavigate(path);
                   }
                 }}
                 className={`flex items-center justify-center w-14 h-14 rounded-xl transition-all flex-shrink-0 active:scale-95 ${
-                  !isSettings && path && isActive(path)
+                  path && isActive(path)
                     ? 'bg-primary text-primary-foreground shadow-md'
                     : 'text-muted-foreground hover:bg-muted'
                 }`}
@@ -165,6 +162,18 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
                   )}
                 </button>
 
+                {/* Settings Button - Accessible from menu */}
+                <button
+                  onClick={() => {
+                    onSettingsClick?.();
+                    setIsMenuOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-muted text-foreground hover:bg-muted/80 transition-colors active:scale-95"
+                >
+                  <Settings className="h-5 w-5 flex-shrink-0" strokeWidth={1.5} />
+                  <span className="font-medium text-sm">{language === 'he' ? 'הגדרות' : 'Settings'}</span>
+                </button>
+
                 {/* About Button - VISIBLE FOR BOTH LOGGED-IN AND GUEST USERS */}
                 <button
                   onClick={() => {
@@ -187,18 +196,16 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
         <div className="flex items-center justify-between h-16 px-6 gap-4">
           {/* Navigation Items - Horizontal */}
           <div className="flex items-center gap-2">
-            {navigationItems.map(({ path, icon: Icon, label, id, isSettings }) => (
+            {navigationItems.map(({ path, icon: Icon, label, id }) => (
               <button
                 key={id}
                 onClick={() => {
-                  if (isSettings) {
-                    onSettingsClick?.();
-                  } else if (path) {
+                  if (path) {
                     handleNavigate(path);
                   }
                 }}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-medium active:scale-95 ${
-                  !isSettings && path && isActive(path)
+                  path && isActive(path)
                     ? 'bg-primary text-primary-foreground shadow-sm'
                     : 'text-muted-foreground hover:bg-muted'
                 }`}
@@ -243,13 +250,13 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
               </button>
             )}
 
-            {/* Settings Button */}
+            {/* Menu Button (Desktop) */}
             <button
-              onClick={() => onSettingsClick?.()}
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="p-2 rounded-xl text-muted-foreground hover:bg-muted transition-colors active:scale-95"
-              title={language === 'he' ? 'הגדרות' : 'Settings'}
+              title={language === 'he' ? 'תפריט' : 'Menu'}
             >
-              <Settings className="h-5 w-5 flex-shrink-0" strokeWidth={1.5} />
+              <Menu className="h-5 w-5 flex-shrink-0" strokeWidth={1.5} />
             </button>
           </div>
         </div>

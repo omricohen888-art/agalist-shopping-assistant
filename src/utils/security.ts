@@ -55,20 +55,21 @@ const ADD_COOLDOWN_MS = 300; // 300ms between adds
 const MAX_LIST_SIZE = 100; // Maximum 100 items per list
 
 /**
- * Sanitizes input text by removing potentially dangerous characters
- * and enforcing length limits
+ * Sanitizes input text by removing HTML, scripts, and dangerous characters
  */
 export const sanitizeInput = (text: string): string => {
   if (!text || typeof text !== 'string') return '';
 
-  // Remove HTML/script tags and dangerous characters
   let sanitized = text
-    .replace(/<[^>]*>/g, '') // Remove HTML tags
-    .replace(/[{}]/g, '') // Remove curly braces
-    .replace(/\//g, '') // Remove forward slashes
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') // Remove script tags with content
+    .replace(/<[^>]*>/g, '') // Remove all HTML tags
+    .replace(/javascript:/gi, '') // Remove javascript: protocol
+    .replace(/on\w+\s*=/gi, '') // Remove event handlers (onclick=, etc.)
+    .replace(/[<>{}]/g, '') // Remove angle brackets and curly braces
+    .replace(/&[#\w]+;/g, '') // Remove HTML entities
     .trim();
 
-  // Enforce max length of 50 characters per item
+  // Enforce max length
   if (sanitized.length > 50) {
     sanitized = sanitized.substring(0, 50);
   }

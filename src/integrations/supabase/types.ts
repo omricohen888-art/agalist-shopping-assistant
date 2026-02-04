@@ -18,32 +18,32 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          is_archived: boolean | null
           items: Json
           name: string
           store: string | null
           updated_at: string
           user_id: string
-          is_archived: boolean | null
         }
         Insert: {
           created_at?: string
           id?: string
+          is_archived?: boolean | null
           items?: Json
           name: string
           store?: string | null
           updated_at?: string
           user_id: string
-          is_archived?: boolean | null
         }
         Update: {
           created_at?: string
           id?: string
+          is_archived?: boolean | null
           items?: Json
           name?: string
           store?: string | null
           updated_at?: string
           user_id?: string
-          is_archived?: boolean | null
         }
         Relationships: []
       }

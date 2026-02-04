@@ -38,6 +38,7 @@ import { SortModeToggle } from "@/components/SortModeToggle";
 import { StartShoppingButton, SaveListButton } from "@/components/StartShoppingButton";
 import { WelcomePrompt } from "@/components/WelcomePrompt";
 import WelcomeNameModal from "@/components/WelcomeNameModal";
+import { PaginationDots } from "@/components/ui/pagination-dots";
 import { sortByCategory, detectCategory, getCategoryInfo, CategoryKey, CATEGORY_ORDER } from "@/utils/categorySort";
 import { processInput, RateLimiter } from "@/utils/security";
 import { createUUID } from "@/lib/utils";
@@ -198,6 +199,13 @@ export const ShoppingList = () => {
   // ✅ CRITICAL: Local UI state for visual filtering ONLY
   // Lists are NOT deleted or archived - just hidden from dashboard view
   // This state resets when page refreshes (session-only visibility)
+
+  // Pagination state for dashboard sections
+  const [readyPage, setReadyPage] = useState(0);
+  const [inProgressPage, setInProgressPage] = useState(0);
+  const [completedPage, setCompletedPage] = useState(0);
+  const [historyPage, setHistoryPage] = useState(0);
+  const ITEMS_PER_PAGE = 4;
   const [hiddenListIds, setHiddenListIds] = useState<string[]>([]);
 
   // Smart Input States
@@ -2086,23 +2094,37 @@ export const ShoppingList = () => {
                 </div>
 
                 {readyLists.length > 0 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
-                    {readyLists.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 4).map((list, index) => (
-                      <SavedListCard 
-                        key={list.id} 
-                        list={list} 
-                        index={index} 
-                        language={language} 
-                        t={t} 
-                        variant="default"
-                        onEdit={handleEditSavedList} 
-                        onDelete={handleDelete}
-                        onToggleItem={handleToggle}
-                        onGoShopping={handleGoShopping}
-                        onDuplicate={handleDuplicateList}
+                  <>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
+                      {readyLists
+                        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                        .slice(readyPage * ITEMS_PER_PAGE, (readyPage + 1) * ITEMS_PER_PAGE)
+                        .map((list, index) => (
+                          <SavedListCard 
+                            key={list.id} 
+                            list={list} 
+                            index={index} 
+                            language={language} 
+                            t={t} 
+                            variant="default"
+                            onEdit={handleEditSavedList} 
+                            onDelete={handleDelete}
+                            onToggleItem={handleToggle}
+                            onGoShopping={handleGoShopping}
+                            onDuplicate={handleDuplicateList}
+                          />
+                        ))}
+                    </div>
+                    {Math.ceil(readyLists.length / ITEMS_PER_PAGE) > 1 && (
+                      <PaginationDots
+                        currentPage={readyPage}
+                        totalPages={Math.ceil(readyLists.length / ITEMS_PER_PAGE)}
+                        onPageChange={setReadyPage}
+                        language={language}
+                        className="mt-4"
                       />
-                    ))}
-                  </div>
+                    )}
+                  </>
                 ) : (
                   <div className="bg-card/50 border border-dashed border-muted-foreground/30 rounded-xl p-8 text-center">
                     <ClipboardList className="h-10 w-10 text-muted-foreground/50 mx-auto mb-3" />
@@ -2150,23 +2172,37 @@ export const ShoppingList = () => {
                 </div>
 
                 {inProgressLists.length > 0 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
-                    {inProgressLists.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 4).map((list, index) => (
-                      <SavedListCard 
-                        key={list.id} 
-                        list={list} 
-                        index={index} 
-                        language={language} 
-                        t={t} 
-                        variant="in-progress"
-                        onEdit={handleEditSavedList} 
-                        onDelete={handleDelete}
-                        onToggleItem={handleToggle}
-                        onGoShopping={handleGoShopping}
-                        onDuplicate={handleDuplicateList}
+                  <>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
+                      {inProgressLists
+                        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                        .slice(inProgressPage * ITEMS_PER_PAGE, (inProgressPage + 1) * ITEMS_PER_PAGE)
+                        .map((list, index) => (
+                          <SavedListCard 
+                            key={list.id} 
+                            list={list} 
+                            index={index} 
+                            language={language} 
+                            t={t} 
+                            variant="in-progress"
+                            onEdit={handleEditSavedList} 
+                            onDelete={handleDelete}
+                            onToggleItem={handleToggle}
+                            onGoShopping={handleGoShopping}
+                            onDuplicate={handleDuplicateList}
+                          />
+                        ))}
+                    </div>
+                    {Math.ceil(inProgressLists.length / ITEMS_PER_PAGE) > 1 && (
+                      <PaginationDots
+                        currentPage={inProgressPage}
+                        totalPages={Math.ceil(inProgressLists.length / ITEMS_PER_PAGE)}
+                        onPageChange={setInProgressPage}
+                        language={language}
+                        className="mt-4"
                       />
-                    ))}
-                  </div>
+                    )}
+                  </>
                 ) : (
                   <div className="bg-card/50 border border-dashed border-muted-foreground/30 rounded-xl p-8 text-center">
                     <ShoppingCart className="h-10 w-10 text-muted-foreground/50 mx-auto mb-3" />
@@ -2211,21 +2247,33 @@ export const ShoppingList = () => {
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
-                    {completedLists.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 4).map((list, index) => (
-                      <SavedListCard 
-                        key={list.id} 
-                        list={list} 
-                        index={index} 
-                        language={language} 
-                        t={t} 
-                        variant="completed"
-                        onEdit={handleEditSavedList} 
-                        onDelete={handleDelete}
-                        onToggleItem={handleToggle}
-                        onDuplicate={handleDuplicateList}
-                      />
-                    ))}
+                    {completedLists
+                      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                      .slice(completedPage * ITEMS_PER_PAGE, (completedPage + 1) * ITEMS_PER_PAGE)
+                      .map((list, index) => (
+                        <SavedListCard 
+                          key={list.id} 
+                          list={list} 
+                          index={index} 
+                          language={language} 
+                          t={t} 
+                          variant="completed"
+                          onEdit={handleEditSavedList} 
+                          onDelete={handleDelete}
+                          onToggleItem={handleToggle}
+                          onDuplicate={handleDuplicateList}
+                        />
+                      ))}
                   </div>
+                  {Math.ceil(completedLists.length / ITEMS_PER_PAGE) > 1 && (
+                    <PaginationDots
+                      currentPage={completedPage}
+                      totalPages={Math.ceil(completedLists.length / ITEMS_PER_PAGE)}
+                      onPageChange={setCompletedPage}
+                      language={language}
+                      className="mt-4"
+                    />
+                  )}
                 </div>
               )}
 
@@ -2247,27 +2295,39 @@ export const ShoppingList = () => {
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
-                    {shoppingHistory.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 4).map((trip, index) => (
-                      <CompletedTripCard 
-                        key={trip.id} 
-                        trip={trip} 
-                        index={index} 
-                        language={language} 
-                        onViewDetails={trip => {
-                          setSelectedTrip(trip);
-                          setIsHistoryModalOpen(true);
-                        }} 
-                        onDelete={async (id) => {
-                          const success = await cloudSync.deleteShoppingHistory(id);
-                          if (success) {
-                            const history = await cloudSync.getShoppingHistory();
-                            setShoppingHistory(history);
-                            toast.success(language === 'he' ? 'הקנייה נמחקה' : 'Trip deleted');
-                          }
-                        }} 
-                      />
-                    ))}
+                    {shoppingHistory
+                      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                      .slice(historyPage * ITEMS_PER_PAGE, (historyPage + 1) * ITEMS_PER_PAGE)
+                      .map((trip, index) => (
+                        <CompletedTripCard 
+                          key={trip.id} 
+                          trip={trip} 
+                          index={index} 
+                          language={language} 
+                          onViewDetails={trip => {
+                            setSelectedTrip(trip);
+                            setIsHistoryModalOpen(true);
+                          }} 
+                          onDelete={async (id) => {
+                            const success = await cloudSync.deleteShoppingHistory(id);
+                            if (success) {
+                              const history = await cloudSync.getShoppingHistory();
+                              setShoppingHistory(history);
+                              toast.success(language === 'he' ? 'הקנייה נמחקה' : 'Trip deleted');
+                            }
+                          }} 
+                        />
+                      ))}
                   </div>
+                  {Math.ceil(shoppingHistory.length / ITEMS_PER_PAGE) > 1 && (
+                    <PaginationDots
+                      currentPage={historyPage}
+                      totalPages={Math.ceil(shoppingHistory.length / ITEMS_PER_PAGE)}
+                      onPageChange={setHistoryPage}
+                      language={language}
+                      className="mt-4"
+                    />
+                  )}
                 </div>
               )}
             </div>

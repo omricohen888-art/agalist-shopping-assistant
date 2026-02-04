@@ -1,8 +1,9 @@
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { SavedList, ShoppingItem } from "@/types/shopping";
-import { getSavedLists, deleteSavedList, updateSavedList } from "@/utils/storage";
+import { SavedList, ShoppingItem, ShoppingHistory } from "@/types/shopping";
 import { SavedListCard } from "@/components/SavedListCard";
+import { HistoryListCard } from "@/components/HistoryListCard";
+import { HistoryDetailModal } from "@/components/HistoryDetailModal";
 import { EditListModal } from "@/components/EditListModal";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ArrowLeft, Plus, Book, ClipboardList, ShoppingCart, CheckCircle, Calendar } from "lucide-react";
@@ -15,6 +16,9 @@ import { format, isWithinInterval, subDays, subMonths, startOfDay, endOfDay } fr
 import { he, enUS } from "date-fns/locale";
 import { DateRange } from "react-day-picker";
 import { cn } from "@/lib/utils";
+import { useCloudSync } from "@/hooks/use-cloud-sync";
+import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
 
 type DateFilterType = 'all' | 'today' | 'week' | 'month' | 'custom';
 
@@ -24,17 +28,57 @@ const MyNotebook = () => {
     const t = translations[language];
     const direction = language === 'he' ? 'rtl' : 'ltr';
     const [savedLists, setSavedLists] = useState<SavedList[]>([]);
+    const [shoppingHistory, setShoppingHistory] = useState<ShoppingHistory[]>([]);
     const [editingList, setEditingList] = useState<SavedList | null>(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [dateFilter, setDateFilter] = useState<DateFilterType>('all');
     const [customDateRange, setCustomDateRange] = useState<DateRange | undefined>(undefined);
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+    const [selectedTrip, setSelectedTrip] = useState<ShoppingHistory | null>(null);
+    const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
 
+    const cloudSync = useCloudSync();
+    const { onLogout } = useAuth();
+
+    // Load data on mount
     useEffect(() => {
-        setSavedLists(getSavedLists());
-    }, []);
+        let isMounted = true;
+        
+        const loadData = async () => {
+            try {
+                const [lists, history] = await Promise.all([
+                    cloudSync.getSavedLists(),
+                    cloudSync.getShoppingHistory()
+                ]);
+                
+                if (isMounted) {
+                    setSavedLists(lists);
+                    setShoppingHistory(history);
+                }
+            } catch (error) {
+                console.error('[MyNotebook] Failed to load data:', error);
+            }
+        };
+        
+        loadData();
+        
+        return () => {
+            isMounted = false;
+        };
+    }, [cloudSync.getSavedLists, cloudSync.getShoppingHistory, cloudSync.userId]);
 
-    // Date filtering
+    // Clear data on logout
+    useEffect(() => {
+        const unsubscribe = onLogout(() => {
+            setSavedLists([]);
+            setShoppingHistory([]);
+            setEditingList(null);
+            setSelectedTrip(null);
+        });
+        return unsubscribe;
+    }, [onLogout]);
+
+    // Date filtering for saved lists
     const filteredLists = useMemo(() => {
         if (dateFilter === 'all') return savedLists;
         
@@ -62,6 +106,34 @@ const MyNotebook = () => {
         });
     }, [savedLists, dateFilter, customDateRange]);
 
+    // Date filtering for shopping history
+    const filteredHistory = useMemo(() => {
+        if (dateFilter === 'all') return shoppingHistory;
+        
+        const now = new Date();
+        return shoppingHistory.filter(trip => {
+            const tripDate = new Date(trip.date);
+            switch (dateFilter) {
+                case 'today':
+                    return isWithinInterval(tripDate, { start: startOfDay(now), end: endOfDay(now) });
+                case 'week':
+                    return isWithinInterval(tripDate, { start: startOfDay(subDays(now, 7)), end: endOfDay(now) });
+                case 'month':
+                    return isWithinInterval(tripDate, { start: startOfDay(subMonths(now, 1)), end: endOfDay(now) });
+                case 'custom':
+                    if (customDateRange?.from && customDateRange?.to) {
+                        return isWithinInterval(tripDate, { 
+                            start: startOfDay(customDateRange.from), 
+                            end: endOfDay(customDateRange.to) 
+                        });
+                    }
+                    return true;
+                default:
+                    return true;
+            }
+        });
+    }, [shoppingHistory, dateFilter, customDateRange]);
+
     // Categorization
     const { readyLists, inProgressLists, completedLists } = useMemo(() => {
         const ready = filteredLists.filter(list => {
@@ -79,6 +151,9 @@ const MyNotebook = () => {
         return { readyLists: ready, inProgressLists: inProgress, completedLists: completed };
     }, [filteredLists]);
 
+    // Combined completed count for badge
+    const totalCompletedCount = completedLists.length + filteredHistory.length;
+
     const dateFilters: { value: DateFilterType; labelHe: string; labelEn: string }[] = [
         { value: 'all', labelHe: 'הכל', labelEn: 'All' },
         { value: 'today', labelHe: 'היום', labelEn: 'Today' },
@@ -86,14 +161,29 @@ const MyNotebook = () => {
         { value: 'month', labelHe: 'חודש', labelEn: 'Month' },
     ];
 
-    const handleDeleteList = (id: string) => {
+    const handleDeleteList = async (id: string) => {
         if (window.confirm(language === 'he' ? 'האם אתה בטוח שברצונך למחוק רשימה זו?' : 'Are you sure you want to delete this list?')) {
-            deleteSavedList(id);
-            setSavedLists(getSavedLists());
+            const success = await cloudSync.deleteSavedList(id);
+            if (success) {
+                const lists = await cloudSync.getSavedLists();
+                setSavedLists(lists);
+                toast.success(language === 'he' ? 'הרשימה נמחקה' : 'List deleted');
+            }
         }
     };
 
-    const handleToggleItemInList = (listId: string, itemId: string) => {
+    const handleDeleteHistory = async (id: string) => {
+        if (window.confirm(language === 'he' ? 'האם אתה בטוח שברצונך למחוק קנייה זו?' : 'Are you sure you want to delete this trip?')) {
+            const success = await cloudSync.deleteShoppingHistory(id);
+            if (success) {
+                const history = await cloudSync.getShoppingHistory();
+                setShoppingHistory(history);
+                toast.success(language === 'he' ? 'הקנייה נמחקה' : 'Trip deleted');
+            }
+        }
+    };
+
+    const handleToggleItemInList = async (listId: string, itemId: string) => {
         const list = savedLists.find(l => l.id === listId);
         if (!list) return;
 
@@ -102,8 +192,11 @@ const MyNotebook = () => {
         );
 
         const updatedList = { ...list, items: updatedItems };
-        updateSavedList(updatedList);
-        setSavedLists(getSavedLists());
+        const success = await cloudSync.updateSavedList(updatedList);
+        if (success) {
+            const lists = await cloudSync.getSavedLists();
+            setSavedLists(lists);
+        }
     };
 
     const handleEditList = (list: SavedList) => {
@@ -111,22 +204,25 @@ const MyNotebook = () => {
         setIsEditModalOpen(true);
     };
 
-    const handleSaveList = (updatedList: SavedList) => {
-        setSavedLists(getSavedLists());
+    const handleSaveList = async () => {
+        const lists = await cloudSync.getSavedLists();
+        setSavedLists(lists);
     };
 
-    const handleUpdateItem = (listId: string, item: ShoppingItem) => {
+    const handleUpdateItem = async (listId: string, item: ShoppingItem) => {
         const list = savedLists.find(l => l.id === listId);
         if (!list) return;
 
         const updatedItems = list.items.map(i => i.id === item.id ? item : i);
         const updatedList = { ...list, items: updatedItems };
-        updateSavedList(updatedList);
-        setSavedLists(getSavedLists());
+        const success = await cloudSync.updateSavedList(updatedList);
+        if (success) {
+            const lists = await cloudSync.getSavedLists();
+            setSavedLists(lists);
+        }
     };
 
     const handleGoShopping = (list: SavedList) => {
-        // Save with same key pattern as ShoppingList.tsx for consistency
         localStorage.setItem(`shoppingList_${list.id}`, JSON.stringify({
             id: list.id,
             name: list.name,
@@ -135,6 +231,13 @@ const MyNotebook = () => {
         }));
         navigate(`/shopping/${list.id}`);
     };
+
+    const handleViewHistoryDetails = (trip: ShoppingHistory) => {
+        setSelectedTrip(trip);
+        setIsHistoryModalOpen(true);
+    };
+
+    const isEmpty = savedLists.length === 0 && shoppingHistory.length === 0;
 
     return (
         <div className="min-h-screen bg-background pb-24" dir={direction}>
@@ -221,7 +324,7 @@ const MyNotebook = () => {
                     </Popover>
                 </div>
 
-                {savedLists.length === 0 ? (
+                {isEmpty ? (
                     <div className="text-center py-12 sm:py-24">
                         <div className="bg-card p-6 sm:p-12 rounded-2xl shadow-sm border border-border inline-block max-w-md mx-auto w-full">
                             <Book className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground mx-auto mb-4" />
@@ -248,7 +351,7 @@ const MyNotebook = () => {
                                 <CheckCircle className="h-4 w-4 shrink-0" />
                                 <span className="hidden sm:inline">{language === 'he' ? 'הושלמו' : 'Completed'}</span>
                                 <span className="bg-green-500/20 text-green-600 dark:text-green-400 text-xs px-1.5 py-0.5 rounded-full min-w-[20px]">
-                                    {completedLists.length}
+                                    {totalCompletedCount}
                                 </span>
                             </TabsTrigger>
                             
@@ -328,27 +431,62 @@ const MyNotebook = () => {
                         </TabsContent>
                         
                         <TabsContent value="completed" className="mt-0">
-                            {completedLists.length === 0 ? (
+                            {totalCompletedCount === 0 ? (
                                 <div className="text-center py-12 text-muted-foreground">
                                     <CheckCircle className="h-12 w-12 mx-auto mb-3 opacity-50" />
                                     <p>{language === 'he' ? 'עדיין לא השלמת קניות' : 'No completed shopping yet'}</p>
                                 </div>
                             ) : (
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    {completedLists.map((list, index) => (
-                                        <SavedListCard
-                                            key={list.id}
-                                            list={list}
-                                            index={index}
-                                            language={language}
-                                            t={t}
-                                            onEdit={handleEditList}
-                                            onDelete={handleDeleteList}
-                                            onToggleItem={handleToggleItemInList}
-                                            onUpdateItem={handleUpdateItem}
-                                            onGoShopping={handleGoShopping}
-                                        />
-                                    ))}
+                                <div className="space-y-6">
+                                    {/* Completed SavedLists */}
+                                    {completedLists.length > 0 && (
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            {completedLists
+                                                .sort((a, b) => new Date(b.shoppingCompletedAt || b.createdAt).getTime() - new Date(a.shoppingCompletedAt || a.createdAt).getTime())
+                                                .map((list, index) => (
+                                                    <SavedListCard
+                                                        key={list.id}
+                                                        list={list}
+                                                        index={index}
+                                                        language={language}
+                                                        t={t}
+                                                        onEdit={handleEditList}
+                                                        onDelete={handleDeleteList}
+                                                        onToggleItem={handleToggleItemInList}
+                                                        onUpdateItem={handleUpdateItem}
+                                                        onGoShopping={handleGoShopping}
+                                                    />
+                                                ))}
+                                        </div>
+                                    )}
+
+                                    {/* Separator if both types exist */}
+                                    {completedLists.length > 0 && filteredHistory.length > 0 && (
+                                        <div className="flex items-center gap-4 py-2">
+                                            <div className="flex-1 h-px bg-border" />
+                                            <span className="text-xs text-muted-foreground px-2">
+                                                {language === 'he' ? 'היסטוריית קניות' : 'Shopping History'}
+                                            </span>
+                                            <div className="flex-1 h-px bg-border" />
+                                        </div>
+                                    )}
+
+                                    {/* Shopping History */}
+                                    {filteredHistory.length > 0 && (
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            {filteredHistory
+                                                .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                                                .map((trip) => (
+                                                    <HistoryListCard
+                                                        key={trip.id}
+                                                        trip={trip}
+                                                        language={language}
+                                                        onViewDetails={handleViewHistoryDetails}
+                                                        onDelete={handleDeleteHistory}
+                                                    />
+                                                ))}
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </TabsContent>
@@ -365,6 +503,17 @@ const MyNotebook = () => {
                     setEditingList(null);
                 }}
                 onSave={handleSaveList}
+                language={language}
+            />
+
+            {/* History Detail Modal */}
+            <HistoryDetailModal
+                trip={selectedTrip}
+                isOpen={isHistoryModalOpen}
+                onClose={() => {
+                    setIsHistoryModalOpen(false);
+                    setSelectedTrip(null);
+                }}
                 language={language}
             />
         </div>

@@ -94,6 +94,33 @@ export const validateInput = (text: string): { isValid: boolean; error?: string 
     return { isValid: false, error: 'Item cannot be empty' };
   }
 
+  // Too short (less than 2 characters)
+  if (trimmed.length < 2) {
+    return { isValid: false, error: 'קצר מדי' };
+  }
+
+  // Too long (more than 50 characters)
+  if (trimmed.length > 50) {
+    return { isValid: false, error: 'ארוך מדי' };
+  }
+
+  // Repeated characters (e.g., "aaaaaaa" - 4+ same char in a row)
+  if (/(.)\1{3,}/i.test(trimmed)) {
+    return { isValid: false, error: 'תוכן לא תקין' };
+  }
+
+  // Repeated words (e.g., "milk milk milk" - same word 3+ times)
+  const words = trimmed.toLowerCase().split(/\s+/);
+  if (words.length >= 3) {
+    const wordCounts: Record<string, number> = {};
+    for (const word of words) {
+      wordCounts[word] = (wordCounts[word] || 0) + 1;
+      if (wordCounts[word] >= 3) {
+        return { isValid: false, error: 'תוכן לא תקין' };
+      }
+    }
+  }
+
   // Check for HTML/script content (basic detection)
   if (/<script|javascript:|on\w+=/i.test(text)) {
     return { isValid: false, error: 'Invalid content detected' };

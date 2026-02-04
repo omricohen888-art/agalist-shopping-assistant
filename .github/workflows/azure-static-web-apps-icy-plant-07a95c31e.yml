@@ -32,6 +32,7 @@ jobs:
         env:
           VITE_SUPABASE_URL: "https://bbksunwslrdqmlpwconi.supabase.co"
           VITE_SUPABASE_ANON_KEY: "sb_publishable_20ykZzt5npMApmJFZwZhRw_ZdtLRIKn"
+          VITE_AUTH_REDIRECT_URL: "https://icy-plant-07a95c31e.4.azurestaticapps.net"
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'

@@ -198,14 +198,14 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
 
     return (
         <div
-            className="bg-card border-2 border-foreground/50 dark:border-foreground/40 rounded-2xl p-3 sm:p-4 md:p-5 shadow-sm hover:shadow-lg transition-all duration-300 group relative flex flex-col h-auto min-h-[220px] sm:min-h-[260px] overflow-hidden"
+            className="bg-card border-2 border-foreground/50 dark:border-foreground/40 rounded-xl p-2.5 sm:p-3 shadow-sm hover:shadow-md transition-all duration-300 group relative flex flex-col w-full sm:w-[280px] md:w-[300px] min-h-[180px] sm:min-h-[200px] overflow-hidden"
             dir={direction}
         >
             {/* Card Header */}
-            <div className="flex justify-between items-start mb-3 pb-3 border-b border-border/30 gap-3">
-                <div className="flex items-center gap-2.5 flex-1 min-w-0">
-                    <div className={`w-3 h-3 rounded-full ${indicatorColor} flex-shrink-0`} />
-                    <h4 className="font-semibold text-base sm:text-lg text-foreground flex-1 break-words line-clamp-2" title={list.name}>{list.name}</h4>
+            <div className="flex justify-between items-start mb-2 pb-2 border-b border-border/30 gap-2">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <div className={`w-2.5 h-2.5 rounded-full ${indicatorColor} flex-shrink-0`} />
+                    <h4 className="font-semibold text-sm sm:text-base text-foreground flex-1 break-words line-clamp-1" title={list.name}>{list.name}</h4>
                 </div>
 
                 {/* Actions */}
@@ -258,23 +258,23 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
                 </div>
             )}
 
-            {/* Preview Items */}
-            <div className={`flex-1 overflow-hidden relative ${isExpanded ? 'max-h-96 overflow-y-auto' : ''}`}>
-                <ul className="space-y-1.5">
-                    {visibleItems.map((item) => (
+            {/* Preview Items - More compact */}
+            <div className={`flex-1 overflow-hidden relative ${isExpanded ? 'max-h-64 overflow-y-auto' : ''}`}>
+                <ul className="space-y-0.5">
+                    {visibleItems.slice(0, isExpanded ? visibleItems.length : 4).map((item) => (
                         <li
                             key={item.id}
-                            className={`flex items-center gap-2.5 text-sm px-3 py-2 rounded-xl transition-all group/item ${item.checked ? 'bg-muted/50' : 'hover:bg-muted/30'}`}
+                            className={`flex items-center gap-2 text-xs px-2 py-1.5 rounded-lg transition-all group/item ${item.checked ? 'bg-muted/50' : 'hover:bg-muted/30'}`}
                         >
                             {/* Checkbox */}
                             <Checkbox
                                 checked={item.checked}
                                 onCheckedChange={() => handleToggleItem(item.id)}
-                                className="h-4 w-4 border-2 border-border data-[state=checked]:bg-success data-[state=checked]:border-success rounded transition-all flex-shrink-0 cursor-pointer"
+                                className="h-3.5 w-3.5 border-2 border-border data-[state=checked]:bg-success data-[state=checked]:border-success rounded transition-all flex-shrink-0 cursor-pointer"
                             />
 
                             {/* Item Text */}
-                            <span className={`flex-1 font-medium text-sm leading-snug ${item.checked ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
+                            <span className={`flex-1 font-medium text-xs leading-snug truncate ${item.checked ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
                                 {item.text}
                             </span>
 

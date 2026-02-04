@@ -343,152 +343,191 @@ const MyNotebook = () => {
                     </div>
                 ) : (
                     <Tabs defaultValue="ready" className="w-full">
-                        <TabsList className="w-full grid grid-cols-3 h-auto p-1 rounded-xl bg-muted/50 mb-6">
+                        <TabsList className="w-full grid grid-cols-3 h-auto p-1.5 rounded-2xl bg-muted/60 mb-6 gap-1">
                             <TabsTrigger 
                                 value="completed"
-                                className="rounded-lg py-2.5 px-2 data-[state=active]:bg-green-500/10 data-[state=active]:text-green-600 dark:data-[state=active]:text-green-400 data-[state=active]:shadow-sm flex items-center justify-center gap-1.5 text-xs sm:text-sm"
+                                className="rounded-xl py-3 px-2 data-[state=active]:bg-green-500/15 data-[state=active]:text-green-600 dark:data-[state=active]:text-green-400 data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-green-500/30 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 text-xs sm:text-sm transition-all"
                             >
-                                <CheckCircle className="h-4 w-4 shrink-0" />
-                                <span className="hidden sm:inline">{language === 'he' ? 'הושלמו' : 'Completed'}</span>
-                                <span className="bg-green-500/20 text-green-600 dark:text-green-400 text-xs px-1.5 py-0.5 rounded-full min-w-[20px]">
+                                <CheckCircle className="h-4 w-4 sm:h-4 sm:w-4 shrink-0" />
+                                <span className="text-[10px] sm:text-sm font-medium">{language === 'he' ? 'הושלמו' : 'Completed'}</span>
+                                <span className="bg-green-500/20 text-green-600 dark:text-green-400 text-[10px] sm:text-xs px-1.5 py-0.5 rounded-full min-w-[18px] sm:min-w-[20px]">
                                     {totalCompletedCount}
                                 </span>
                             </TabsTrigger>
                             
                             <TabsTrigger 
                                 value="inProgress"
-                                className="rounded-lg py-2.5 px-2 data-[state=active]:bg-orange-500/10 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400 data-[state=active]:shadow-sm flex items-center justify-center gap-1.5 text-xs sm:text-sm"
+                                className="rounded-xl py-3 px-2 data-[state=active]:bg-orange-500/15 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400 data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-orange-500/30 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 text-xs sm:text-sm transition-all"
                             >
-                                <ShoppingCart className="h-4 w-4 shrink-0" />
-                                <span className="hidden sm:inline">{language === 'he' ? 'בתהליך' : 'In Progress'}</span>
-                                <span className="bg-orange-500/20 text-orange-600 dark:text-orange-400 text-xs px-1.5 py-0.5 rounded-full min-w-[20px]">
+                                <ShoppingCart className="h-4 w-4 sm:h-4 sm:w-4 shrink-0" />
+                                <span className="text-[10px] sm:text-sm font-medium">{language === 'he' ? 'בתהליך' : 'In Progress'}</span>
+                                <span className="bg-orange-500/20 text-orange-600 dark:text-orange-400 text-[10px] sm:text-xs px-1.5 py-0.5 rounded-full min-w-[18px] sm:min-w-[20px]">
                                     {inProgressLists.length}
                                 </span>
                             </TabsTrigger>
                             
                             <TabsTrigger 
                                 value="ready" 
-                                className="rounded-lg py-2.5 px-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:shadow-sm flex items-center justify-center gap-1.5 text-xs sm:text-sm"
+                                className="rounded-xl py-3 px-2 data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-primary/30 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 text-xs sm:text-sm transition-all"
                             >
-                                <ClipboardList className="h-4 w-4 shrink-0" />
-                                <span className="hidden sm:inline">{language === 'he' ? 'מוכנות' : 'Ready'}</span>
-                                <span className="bg-primary/20 text-primary text-xs px-1.5 py-0.5 rounded-full min-w-[20px]">
+                                <ClipboardList className="h-4 w-4 sm:h-4 sm:w-4 shrink-0" />
+                                <span className="text-[10px] sm:text-sm font-medium">{language === 'he' ? 'מוכנות' : 'Ready'}</span>
+                                <span className="bg-primary/20 text-primary text-[10px] sm:text-xs px-1.5 py-0.5 rounded-full min-w-[18px] sm:min-w-[20px]">
                                     {readyLists.length}
                                 </span>
                             </TabsTrigger>
                         </TabsList>
                         
                         <TabsContent value="ready" className="mt-0">
-                            {readyLists.length === 0 ? (
-                                <div className="text-center py-12 text-muted-foreground">
-                                    <ClipboardList className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                                    <p>{language === 'he' ? 'אין רשימות ממתינות' : 'No lists waiting'}</p>
+                            <div className="bg-primary/5 dark:bg-primary/10 rounded-2xl p-4 sm:p-6 border border-primary/20">
+                                {/* Section Header - Mobile visible */}
+                                <div className="flex items-center gap-2 mb-4 pb-3 border-b border-primary/20">
+                                    <ClipboardList className="h-5 w-5 text-primary" />
+                                    <h2 className="font-semibold text-foreground">
+                                        {language === 'he' ? 'רשימות מוכנות' : 'Ready Lists'}
+                                    </h2>
+                                    <span className="bg-primary/20 text-primary text-xs px-2 py-0.5 rounded-full font-medium">
+                                        {readyLists.length}
+                                    </span>
                                 </div>
-                            ) : (
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    {readyLists.map((list, index) => (
-                                        <SavedListCard
-                                            key={list.id}
-                                            list={list}
-                                            index={index}
-                                            language={language}
-                                            t={t}
-                                            onEdit={handleEditList}
-                                            onDelete={handleDeleteList}
-                                            onToggleItem={handleToggleItemInList}
-                                            onUpdateItem={handleUpdateItem}
-                                            onGoShopping={handleGoShopping}
-                                        />
-                                    ))}
-                                </div>
-                            )}
+                                
+                                {readyLists.length === 0 ? (
+                                    <div className="text-center py-8 text-muted-foreground">
+                                        <ClipboardList className="h-10 w-10 mx-auto mb-3 opacity-40" />
+                                        <p className="text-sm">{language === 'he' ? 'אין רשימות ממתינות' : 'No lists waiting'}</p>
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        {readyLists.map((list, index) => (
+                                            <SavedListCard
+                                                key={list.id}
+                                                list={list}
+                                                index={index}
+                                                language={language}
+                                                t={t}
+                                                onEdit={handleEditList}
+                                                onDelete={handleDeleteList}
+                                                onToggleItem={handleToggleItemInList}
+                                                onUpdateItem={handleUpdateItem}
+                                                onGoShopping={handleGoShopping}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         </TabsContent>
                         
                         <TabsContent value="inProgress" className="mt-0">
-                            {inProgressLists.length === 0 ? (
-                                <div className="text-center py-12 text-muted-foreground">
-                                    <ShoppingCart className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                                    <p>{language === 'he' ? 'אין קניות פעילות' : 'No active shopping'}</p>
+                            <div className="bg-orange-500/5 dark:bg-orange-500/10 rounded-2xl p-4 sm:p-6 border border-orange-500/20">
+                                {/* Section Header - Mobile visible */}
+                                <div className="flex items-center gap-2 mb-4 pb-3 border-b border-orange-500/20">
+                                    <ShoppingCart className="h-5 w-5 text-orange-500" />
+                                    <h2 className="font-semibold text-foreground">
+                                        {language === 'he' ? 'קניות בתהליך' : 'In Progress'}
+                                    </h2>
+                                    <span className="bg-orange-500/20 text-orange-600 dark:text-orange-400 text-xs px-2 py-0.5 rounded-full font-medium">
+                                        {inProgressLists.length}
+                                    </span>
                                 </div>
-                            ) : (
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    {inProgressLists.map((list, index) => (
-                                        <SavedListCard
-                                            key={list.id}
-                                            list={list}
-                                            index={index}
-                                            language={language}
-                                            t={t}
-                                            onEdit={handleEditList}
-                                            onDelete={handleDeleteList}
-                                            onToggleItem={handleToggleItemInList}
-                                            onUpdateItem={handleUpdateItem}
-                                            onGoShopping={handleGoShopping}
-                                        />
-                                    ))}
-                                </div>
-                            )}
+                                
+                                {inProgressLists.length === 0 ? (
+                                    <div className="text-center py-8 text-muted-foreground">
+                                        <ShoppingCart className="h-10 w-10 mx-auto mb-3 opacity-40" />
+                                        <p className="text-sm">{language === 'he' ? 'אין קניות פעילות' : 'No active shopping'}</p>
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        {inProgressLists.map((list, index) => (
+                                            <SavedListCard
+                                                key={list.id}
+                                                list={list}
+                                                index={index}
+                                                language={language}
+                                                t={t}
+                                                onEdit={handleEditList}
+                                                onDelete={handleDeleteList}
+                                                onToggleItem={handleToggleItemInList}
+                                                onUpdateItem={handleUpdateItem}
+                                                onGoShopping={handleGoShopping}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         </TabsContent>
                         
                         <TabsContent value="completed" className="mt-0">
-                            {totalCompletedCount === 0 ? (
-                                <div className="text-center py-12 text-muted-foreground">
-                                    <CheckCircle className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                                    <p>{language === 'he' ? 'עדיין לא השלמת קניות' : 'No completed shopping yet'}</p>
+                            <div className="bg-green-500/5 dark:bg-green-500/10 rounded-2xl p-4 sm:p-6 border border-green-500/20">
+                                {/* Section Header - Mobile visible */}
+                                <div className="flex items-center gap-2 mb-4 pb-3 border-b border-green-500/20">
+                                    <CheckCircle className="h-5 w-5 text-green-500" />
+                                    <h2 className="font-semibold text-foreground">
+                                        {language === 'he' ? 'קניות שהושלמו' : 'Completed Shopping'}
+                                    </h2>
+                                    <span className="bg-green-500/20 text-green-600 dark:text-green-400 text-xs px-2 py-0.5 rounded-full font-medium">
+                                        {totalCompletedCount}
+                                    </span>
                                 </div>
-                            ) : (
-                                <div className="space-y-6">
-                                    {/* Completed SavedLists */}
-                                    {completedLists.length > 0 && (
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                            {completedLists
-                                                .sort((a, b) => new Date(b.shoppingCompletedAt || b.createdAt).getTime() - new Date(a.shoppingCompletedAt || a.createdAt).getTime())
-                                                .map((list, index) => (
-                                                    <SavedListCard
-                                                        key={list.id}
-                                                        list={list}
-                                                        index={index}
-                                                        language={language}
-                                                        t={t}
-                                                        onEdit={handleEditList}
-                                                        onDelete={handleDeleteList}
-                                                        onToggleItem={handleToggleItemInList}
-                                                        onUpdateItem={handleUpdateItem}
-                                                        onGoShopping={handleGoShopping}
-                                                    />
-                                                ))}
-                                        </div>
-                                    )}
+                                
+                                {totalCompletedCount === 0 ? (
+                                    <div className="text-center py-8 text-muted-foreground">
+                                        <CheckCircle className="h-10 w-10 mx-auto mb-3 opacity-40" />
+                                        <p className="text-sm">{language === 'he' ? 'עדיין לא השלמת קניות' : 'No completed shopping yet'}</p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-6">
+                                        {/* Completed SavedLists */}
+                                        {completedLists.length > 0 && (
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                {completedLists
+                                                    .sort((a, b) => new Date(b.shoppingCompletedAt || b.createdAt).getTime() - new Date(a.shoppingCompletedAt || a.createdAt).getTime())
+                                                    .map((list, index) => (
+                                                        <SavedListCard
+                                                            key={list.id}
+                                                            list={list}
+                                                            index={index}
+                                                            language={language}
+                                                            t={t}
+                                                            onEdit={handleEditList}
+                                                            onDelete={handleDeleteList}
+                                                            onToggleItem={handleToggleItemInList}
+                                                            onUpdateItem={handleUpdateItem}
+                                                            onGoShopping={handleGoShopping}
+                                                        />
+                                                    ))}
+                                            </div>
+                                        )}
 
-                                    {/* Separator if both types exist */}
-                                    {completedLists.length > 0 && filteredHistory.length > 0 && (
-                                        <div className="flex items-center gap-4 py-2">
-                                            <div className="flex-1 h-px bg-border" />
-                                            <span className="text-xs text-muted-foreground px-2">
-                                                {language === 'he' ? 'היסטוריית קניות' : 'Shopping History'}
-                                            </span>
-                                            <div className="flex-1 h-px bg-border" />
-                                        </div>
-                                    )}
+                                        {/* Separator if both types exist */}
+                                        {completedLists.length > 0 && filteredHistory.length > 0 && (
+                                            <div className="flex items-center gap-4 py-2">
+                                                <div className="flex-1 h-px bg-green-500/30" />
+                                                <span className="text-xs text-green-600 dark:text-green-400 px-2 font-medium">
+                                                    {language === 'he' ? 'היסטוריית קניות' : 'Shopping History'}
+                                                </span>
+                                                <div className="flex-1 h-px bg-green-500/30" />
+                                            </div>
+                                        )}
 
-                                    {/* Shopping History */}
-                                    {filteredHistory.length > 0 && (
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                            {filteredHistory
-                                                .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                                                .map((trip) => (
-                                                    <HistoryListCard
-                                                        key={trip.id}
-                                                        trip={trip}
-                                                        language={language}
-                                                        onViewDetails={handleViewHistoryDetails}
-                                                        onDelete={handleDeleteHistory}
-                                                    />
-                                                ))}
-                                        </div>
-                                    )}
-                                </div>
-                            )}
+                                        {/* Shopping History */}
+                                        {filteredHistory.length > 0 && (
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                {filteredHistory
+                                                    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                                                    .map((trip) => (
+                                                        <HistoryListCard
+                                                            key={trip.id}
+                                                            trip={trip}
+                                                            language={language}
+                                                            onViewDetails={handleViewHistoryDetails}
+                                                            onDelete={handleDeleteHistory}
+                                                        />
+                                                    ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
                         </TabsContent>
                     </Tabs>
                 )}

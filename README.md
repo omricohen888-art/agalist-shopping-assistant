@@ -7,7 +7,7 @@
 
 > **Agalist** is a modern, real-time shopping list application. It was architected to showcase cloud integration between **Microsoft Azure** and **Supabase**, providing a seamless user experience across all devices.
 
-🌐 **Live Demo:** [https://agalist.js.org](https://agalist.js.org)
+🌐 **Live Demo:** [https://white-bay-021d8421e.1.azurestaticapps.net/]
 
 ---
 

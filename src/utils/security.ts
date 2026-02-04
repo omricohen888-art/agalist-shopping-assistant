@@ -39,6 +39,24 @@ export const sanitizeInput = (text: string): string => {
 };
 
 /**
+ * Checks if text contains profanity - returns true if blocked word found
+ */
+export const containsProfanity = (text: string): boolean => {
+  if (!text || typeof text !== 'string') return false;
+
+  const lowerText = text.toLowerCase();
+  return PROFANITY_WORDS.some(word => {
+    try {
+      const escapedWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`\\b${escapedWord}\\b`, 'gi');
+      return regex.test(lowerText);
+    } catch {
+      return lowerText.includes(word.toLowerCase());
+    }
+  });
+};
+
+/**
  * Filters profanity by replacing bad words with asterisks
  */
 export const filterProfanity = (text: string): string => {

@@ -382,8 +382,8 @@ export const SavedListCard: React.FC<SavedListCardProps> = ({
             )}
 
             {/* Footer */}
-            <div className="mt-3 pt-3 border-t border-border/30 flex flex-wrap justify-between items-center gap-2">
-                <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="mt-3 pt-3 border-t border-border/30 flex flex-wrap items-center gap-2">
+                <div className="flex items-center gap-2 flex-shrink-0 flex-1">
                     <span className="text-xs font-medium text-muted-foreground">
                         {new Date(list.createdAt || new Date().toISOString()).toLocaleDateString(language === 'he' ? 'he-IL' : 'en-US', {
                             month: 'short',

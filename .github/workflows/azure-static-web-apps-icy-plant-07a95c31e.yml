@@ -30,8 +30,8 @@ jobs:
           api_location: "" 
           output_location: "dist" 
         env:
-          VITE_SUPABASE_URL: ${{ bbksunwslrdqmlpwconi.supabase.co }}
-          VITE_SUPABASE_ANON_KEY: ${{sb_publishable_2OykZzt5npMApmJFZwZhRw_ZDtLRIKn }}
+          VITE_SUPABASE_URL: "https://bbksunwslrdqmlpwconi.supabase.co"
+          VITE_SUPABASE_ANON_KEY: "sb_publishable_20ykZzt5npMApmJFZwZhRw_ZdtLRIKn"
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
@@ -44,4 +44,3 @@ jobs:
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_ICY_PLANT_07A95C31E }}
           action: "close"
-

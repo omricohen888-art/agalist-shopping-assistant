@@ -6,6 +6,10 @@
 ![Cursor](https://img.shields.io/badge/Edited%20with-Cursor-00A3FF?style=for-the-badge&logo=cursor)
 
 > **Agalist** is a modern, real-time shopping list application. It was architected to showcase cloud integration between **Microsoft Azure** and **Supabase**, providing a seamless user experience across all devices.
+> <img width="402" height="961" alt="image" src="https://github.com/user-attachments/assets/9b60010e-0430-4f1e-a12b-bf1deb17b714" />
+<img width="404" height="963" alt="image" src="https://github.com/user-attachments/assets/c81a978a-e7ef-42f7-b08b-521c13bc26c7" />
+
+
 
 🌐 **Live Demo:** [Launch Agalist App](https://icy-plant-07a95c31e.4.azurestaticapps.net)
 

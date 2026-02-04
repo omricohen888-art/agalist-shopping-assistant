@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Trash2, Pencil, X, ChevronDown } from "lucide-react";
+import { Trash2, Pencil, X, ChevronDown, ShoppingCart, Copy } from "lucide-react";
+import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
 import { SavedList, ShoppingItem, Unit, UNITS } from "@/types/shopping";
 import { useGlobalLanguage } from "@/context/LanguageContext";
-import { useTheme } from "next-themes";
 
 interface ShoppingListPreviewProps {
     list: SavedList;
@@ -31,7 +31,6 @@ export const ShoppingListPreview: React.FC<ShoppingListPreviewProps> = ({
     isPreviewMode = true
 }) => {
     const { language } = useGlobalLanguage();
-    const { theme } = useTheme();
     const [isExpanded, setIsExpanded] = useState(false);
     const [items, setItems] = useState<ShoppingItem[]>(list.items);
     const [editingItemId, setEditingItemId] = useState<string | null>(null);
@@ -40,28 +39,14 @@ export const ShoppingListPreview: React.FC<ShoppingListPreviewProps> = ({
     const contentRef = useRef<HTMLDivElement>(null);
     const direction = language === 'he' ? 'rtl' : 'ltr';
 
-    // Random rotation based on index for stable rendering
-    const rotation = index % 3 === 0 ? 'rotate-1' : index % 3 === 1 ? '-rotate-1' : 'rotate-0';
-
-    // Modern multi-color palette
-    const cardColors = [
-        'bg-[#FEFCE8]', // Yellow
-        'bg-[#FFF7ED]', // Orange/Peach
-        'bg-[#F0FDF4]', // Green/Mint
-        'bg-[#FAF5FF]', // Purple/Lavender
-        'bg-[#F0F9FF]', // Blue/Sky
-        'bg-[#FFF1F2]', // Rose
-    ];
-    const colorClass = cardColors[index % cardColors.length];
-
     // Indicator dot colors
     const indicatorColors = [
-        'bg-yellow-400', // Yellow
-        'bg-emerald-400', // Green
-        'bg-blue-400', // Blue
-        'bg-purple-400', // Purple
-        'bg-pink-400', // Pink
-        'bg-orange-400', // Orange
+        'bg-primary',
+        'bg-success',
+        'bg-blue-500',
+        'bg-purple-500',
+        'bg-pink-500',
+        'bg-orange-500',
     ];
     const indicatorColor = indicatorColors[index % indicatorColors.length];
 
@@ -101,11 +86,6 @@ export const ShoppingListPreview: React.FC<ShoppingListPreviewProps> = ({
         onToggleItem(list.id, itemId);
     };
 
-    const handleDeleteItem = (itemId: string) => {
-        const updatedItems = items.filter(item => item.id !== itemId);
-        setItems(updatedItems);
-    };
-
     const getDisplayQuantityUnit = (item: ShoppingItem) => {
         if (item.quantity <= 1 && item.unit === 'units') {
             return '';
@@ -115,82 +95,116 @@ export const ShoppingListPreview: React.FC<ShoppingListPreviewProps> = ({
         return `${item.quantity} ${unitText}`;
     };
 
+    const handleCopyList = async () => {
+        const checkedItems = items.filter(item => item.checked);
+        const uncheckedItems = items.filter(item => !item.checked);
+
+        const formatItem = (item: ShoppingItem) => {
+            const checkbox = item.checked ? '✓' : '☐';
+            const quantityUnit = getDisplayQuantityUnit(item);
+            const quantityText = quantityUnit ? ` (${quantityUnit})` : '';
+            return `${checkbox} ${item.text}${quantityText}`;
+        };
+
+        let listText = '';
+        
+        if (uncheckedItems.length > 0) {
+            listText += uncheckedItems.map(formatItem).join('\n');
+        }
+        
+        if (checkedItems.length > 0) {
+            if (uncheckedItems.length > 0) {
+                listText += '\n\n' + (language === 'he' ? '── הושלמו ──' : '── Done ──') + '\n';
+            }
+            listText += checkedItems.map(formatItem).join('\n');
+        }
+
+        const header = `📋 ${list.name}`;
+        const divider = '─'.repeat(20);
+        const summary = language === 'he' 
+            ? `\n\n📊 סה"כ: ${items.length} פריטים | ✓ ${checkedItems.length} הושלמו`
+            : `\n\n📊 Total: ${items.length} items | ✓ ${checkedItems.length} done`;
+
+        const fullText = `${header}\n${divider}\n${listText}${summary}`;
+
+        try {
+            await navigator.clipboard.writeText(fullText);
+            toast.success(language === 'he' ? 'הרשימה הועתקה ללוח' : 'List copied to clipboard');
+        } catch (err) {
+            toast.error(language === 'he' ? 'לא ניתן להעתיק' : 'Could not copy');
+        }
+    };
+
     const visibleItems = isExpanded ? items : items.slice(0, 5);
     const hasMoreItems = items.length > 5;
 
     return (
         <div
-            className={`${colorClass} dark:bg-slate-800 border-2 border-black dark:border-slate-600 rounded-xl p-3 sm:p-4 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-2px] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] transition-all duration-200 group relative flex flex-col h-auto min-h-[200px] overflow-hidden ${rotation}`}
+            className="bg-card border-2 border-foreground/50 dark:border-foreground/40 rounded-2xl p-3 sm:p-4 md:p-5 shadow-sm hover:shadow-lg transition-all duration-300 group relative flex flex-col h-auto min-h-[220px] sm:min-h-[260px] overflow-hidden"
             dir={direction}
-            style={theme !== 'dark' ? {
-                backgroundImage: 'repeating-linear-gradient(transparent, transparent 31px, #e5e7eb 31px, #e5e7eb 32px)'
-            } : {}}
         >
-            {/* Spiral Binding Effect */}
-            {theme !== 'dark' && (
-                <div className={`absolute top-0 bottom-4 ${language === 'he' ? '-right-3' : '-left-3'} w-8 flex flex-col justify-evenly py-2 z-20 pointer-events-none`}>
-                    {[...Array(8)].map((_, i) => (
-                        <div key={i} className="relative h-3 w-full">
-                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-[#1a1a1a] rounded-full shadow-inner" />
-                            <div className={`absolute top-1/2 ${language === 'he' ? 'left-1/2' : 'right-1/2'} w-5 h-1 bg-zinc-400 rounded-full transform ${language === 'he' ? '-translate-x-1/2 rotate-12' : 'translate-x-1/2 -rotate-12'} shadow-sm`} />
-                        </div>
-                    ))}
-                </div>
-            )}
-
-            {/* Card Header - Compact */}
-            <div className="flex justify-between items-start mb-2 sm:mb-3 border-b-2 border-black/10 dark:border-slate-700/50 pb-1.5 sm:pb-2 gap-2">
-                <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                    <h4 className="font-bold text-sm sm:text-base text-gray-900 dark:text-white tracking-tight flex-1 break-words line-clamp-2" title={list.name}>{list.name}</h4>
-                    <div className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full ${indicatorColor} flex-shrink-0`} />
+            {/* Card Header */}
+            <div className="flex justify-between items-start mb-3 pb-3 border-b border-border/30 gap-3">
+                <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                    <div className={`w-3 h-3 rounded-full ${indicatorColor} flex-shrink-0`} />
+                    <h4 className="font-semibold text-base sm:text-lg text-foreground flex-1 break-words line-clamp-2" title={list.name}>{list.name}</h4>
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center gap-0.5 flex-shrink-0">
+                <div className="flex items-center gap-1 flex-shrink-0">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => { e.stopPropagation(); handleCopyList(); }}
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl"
+                        title={language === 'he' ? 'העתק רשימה' : 'Copy List'}
+                    >
+                        <Copy className="h-4 w-4" />
+                    </Button>
                     <Button
                         variant="ghost"
                         size="icon"
                         onClick={(e) => { e.stopPropagation(); onLoad(list); }}
-                        className="h-6 w-6 sm:h-7 sm:w-7 text-gray-700 dark:text-slate-400 hover:text-black dark:hover:text-slate-100 hover:bg-black/5 dark:hover:bg-slate-700 rounded-full p-0"
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl"
                         title={language === 'he' ? 'ערוך רשימה' : 'Edit List'}
                     >
-                        <Pencil className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                        <Pencil className="h-4 w-4" />
                     </Button>
                     <Button
                         variant="ghost"
                         size="icon"
                         onClick={(e) => { e.stopPropagation(); onDelete(list.id); }}
-                        className="h-6 w-6 sm:h-7 sm:w-7 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full p-0"
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl"
                         title={language === 'he' ? 'מחק רשימה' : 'Delete List'}
                     >
-                        <Trash2 className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                        <Trash2 className="h-4 w-4" />
                     </Button>
                 </div>
             </div>
 
-            {/* Preview Items - Scrollable in preview mode */}
+            {/* Preview Items */}
             <div className={`flex-1 overflow-hidden relative ${isPreviewMode && isExpanded ? 'max-h-96 overflow-y-auto' : ''}`} ref={contentRef}>
-                <ul className="space-y-0.5 sm:space-y-1">
+                <ul className="space-y-1.5">
                     {visibleItems.map((item) => (
                         <li
                             key={item.id}
-                            className={`flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-1.5 sm:px-2 py-1 sm:py-1.5 rounded transition-colors group/item ${item.checked ? 'bg-gray-100/50 dark:bg-slate-700/30' : 'hover:bg-black/5 dark:hover:bg-slate-700/50'}`}
+                            className={`flex items-center gap-2.5 text-sm px-3 py-2 rounded-xl transition-all group/item ${item.checked ? 'bg-muted/50' : 'hover:bg-muted/30'}`}
                         >
                             {/* Checkbox */}
                             <Checkbox
                                 checked={item.checked}
                                 onCheckedChange={() => handleToggleItem(item.id)}
-                                className="h-3.5 w-3.5 sm:h-4 sm:w-4 border-2 border-gray-400 dark:border-slate-500 data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500 rounded-sm transition-all flex-shrink-0"
+                                className="h-4 w-4 border-2 border-border data-[state=checked]:bg-success data-[state=checked]:border-success rounded transition-all flex-shrink-0 cursor-pointer"
                             />
 
                             {/* Item Text */}
-                            <span className={`flex-1 font-medium ${item.checked ? 'line-through text-gray-400 dark:text-slate-500 decoration-1 sm:decoration-2' : 'text-gray-900 dark:text-slate-200'}`}>
+                            <span className={`flex-1 font-medium text-sm leading-snug ${item.checked ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
                                 {item.text}
                             </span>
 
                             {/* Quantity & Unit (Editable in preview mode) */}
                             {editingItemId === item.id ? (
-                                <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
+                                <div className="flex items-center gap-1 flex-shrink-0 bg-card rounded-xl p-2 border border-primary/50 shadow-sm">
                                     <input
                                         type="number"
                                         min="0.1"
@@ -205,19 +219,19 @@ export const ShoppingListPreview: React.FC<ShoppingListPreviewProps> = ({
                                             }
                                             setEditingQuantity(val);
                                         }}
-                                        className="w-8 h-6 text-center text-[10px] sm:text-xs rounded border border-gray-400 dark:border-slate-600 bg-white dark:bg-slate-900 text-black dark:text-slate-100 focus:border-yellow-400 focus:outline-none transition-colors"
+                                        className="w-12 text-center text-xs rounded-lg border border-border bg-background text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none transition-colors font-semibold"
                                         autoFocus
                                     />
                                     <Select
                                         value={editingUnit}
                                         onValueChange={(val: Unit) => setEditingUnit(val)}
                                     >
-                                        <SelectTrigger className="h-6 w-12 sm:w-14 px-0 sm:px-1 text-[8px] sm:text-[10px] border border-gray-400 dark:border-slate-600 rounded justify-center [&>span]:text-center [&>svg]:hidden bg-white dark:bg-slate-900 text-black dark:text-slate-100">
+                                        <SelectTrigger className="h-8 w-16 px-1.5 text-xs border border-border rounded-lg justify-center [&>span]:text-center [&>svg]:hidden bg-background text-foreground font-semibold hover:border-primary focus:border-primary focus:ring-2 focus:ring-primary/20">
                                             <span className="truncate">
                                                 {UNITS.find(u => u.value === editingUnit)?.[language === 'he' ? 'labelHe' : 'labelEn']}
                                             </span>
                                         </SelectTrigger>
-                                        <SelectContent className="border border-gray-400 dark:border-slate-600">
+                                        <SelectContent className="border border-border rounded-xl shadow-lg">
                                             {UNITS.map(u => (
                                                 <SelectItem key={u.value} value={u.value}>
                                                     {language === 'he' ? u.labelHe : u.labelEn}
@@ -229,7 +243,7 @@ export const ShoppingListPreview: React.FC<ShoppingListPreviewProps> = ({
                                         size="icon"
                                         variant="ghost"
                                         onClick={() => handleSaveItemEdit(item.id)}
-                                        className="h-6 w-6 p-0 text-green-600 hover:text-green-700 hover:bg-green-100 dark:hover:bg-green-900/30"
+                                        className="h-7 w-7 p-0 text-success hover:text-success/80 hover:bg-success/10 rounded-lg font-bold text-lg flex-shrink-0"
                                     >
                                         ✓
                                     </Button>
@@ -237,9 +251,9 @@ export const ShoppingListPreview: React.FC<ShoppingListPreviewProps> = ({
                                         size="icon"
                                         variant="ghost"
                                         onClick={handleCancelEditItem}
-                                        className="h-6 w-6 p-0 text-red-600 hover:text-red-700 hover:bg-red-100 dark:hover:bg-red-900/30"
+                                        className="h-7 w-7 p-0 text-destructive hover:text-destructive/80 hover:bg-destructive/10 rounded-lg flex-shrink-0"
                                     >
-                                        <X className="h-3 w-3" />
+                                        <X className="h-4 w-4" />
                                     </Button>
                                 </div>
                             ) : (
@@ -247,7 +261,7 @@ export const ShoppingListPreview: React.FC<ShoppingListPreviewProps> = ({
                                     {getDisplayQuantityUnit(item) && (
                                         <button
                                             onClick={() => handleStartEditItem(item)}
-                                            className="text-[9px] sm:text-xs text-gray-600 dark:text-slate-400 bg-gray-100 dark:bg-slate-700 px-1.5 py-0.5 rounded cursor-pointer hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors flex-shrink-0 group-hover/item:opacity-100 opacity-70"
+                                            className="text-xs text-muted-foreground bg-muted px-2.5 py-1 rounded-lg cursor-pointer hover:bg-muted/80 transition-colors flex-shrink-0 font-medium"
                                             title={language === 'he' ? 'ערוך כמות' : 'Edit quantity'}
                                         >
                                             {getDisplayQuantityUnit(item)}
@@ -256,7 +270,7 @@ export const ShoppingListPreview: React.FC<ShoppingListPreviewProps> = ({
                                     {(!item.quantity || item.quantity <= 1) && item.unit === 'units' && (
                                         <button
                                             onClick={() => handleStartEditItem(item)}
-                                            className="text-[9px] text-gray-400 dark:text-slate-500 px-1.5 py-0.5 rounded cursor-pointer hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors flex-shrink-0"
+                                            className="text-xs text-muted-foreground px-2 py-1 rounded-lg cursor-pointer hover:bg-muted transition-colors flex-shrink-0 font-medium"
                                             title={language === 'he' ? 'הוסף כמות' : 'Add quantity'}
                                         >
                                             +
@@ -267,53 +281,56 @@ export const ShoppingListPreview: React.FC<ShoppingListPreviewProps> = ({
                         </li>
                     ))}
                 </ul>
-
-                {/* Fade out effect at bottom for long lists */}
-                {isExpanded && items.length > 5 && (
-                    <div className="absolute bottom-0 left-0 right-0 h-4 bg-gradient-to-t from-white/90 dark:from-slate-800/90 to-transparent pointer-events-none" />
-                )}
             </div>
 
-            {/* Expand/Collapse Button for Preview Mode */}
+            {/* Expand/Collapse Button */}
             {isPreviewMode && hasMoreItems && (
-                <div className="flex justify-center pt-1.5 sm:pt-2">
+                <div className="flex justify-center pt-2">
                     <button
                         onClick={() => setIsExpanded(!isExpanded)}
-                        className="flex items-center gap-1 text-xs sm:text-sm text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200 transition-colors px-2 py-1 rounded hover:bg-black/5 dark:hover:bg-slate-700/50"
+                        className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-xl hover:bg-muted font-medium"
                     >
                         {isExpanded ? (
                             <>
                                 <span>{language === 'he' ? 'הסתר' : 'Hide'}</span>
-                                <ChevronDown className="h-3 w-3 rotate-180" />
+                                <ChevronDown className="h-4 w-4 rotate-180" />
                             </>
                         ) : (
                             <>
-                                <span>{language === 'he' ? `...עוד ${items.length - 5}` : `...${items.length - 5} more`}</span>
-                                <ChevronDown className="h-3 w-3" />
+                                <span>{language === 'he' ? `עוד ${items.length - 5}` : `${items.length - 5} more`}</span>
+                                <ChevronDown className="h-4 w-4" />
                             </>
                         )}
                     </button>
                 </div>
             )}
 
-            {/* Footer - Date and Action Button */}
-            <div className="mt-2 sm:mt-3 pt-1.5 sm:pt-2 border-t border-black/5 dark:border-slate-700/30 flex justify-between items-center gap-1.5 sm:gap-2">
-                <span className="text-[8px] sm:text-[9px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider flex-shrink-0">
-                    {new Date(list.createdAt || new Date().toISOString()).toLocaleDateString(language === 'he' ? 'he-IL' : 'en-US', {
-                        month: 'short',
-                        day: 'numeric'
-                    })}
-                </span>
-                {onGoShopping && (
-                    <Button
-                        size="sm"
-                        onClick={(e) => { e.stopPropagation(); onGoShopping(list); }}
-                        className="h-5 sm:h-6 px-2 sm:px-3 bg-green-500 hover:bg-green-600 text-white font-bold text-[9px] sm:text-xs rounded flex items-center gap-0.5"
-                        title={language === 'he' ? 'צא לקנייה' : 'Go Shopping'}
-                    >
-                        🛒 {language === 'he' ? 'קנייה' : 'Shop'}
-                    </Button>
-                )}
+            {/* Footer */}
+            <div className="mt-3 pt-3 border-t border-border/30 flex flex-wrap justify-between items-center gap-2">
+                <div className="flex items-center gap-2 flex-shrink-0">
+                    <span className="text-xs font-medium text-muted-foreground">
+                        {items.length} {language === 'he' ? 'פריטים' : 'items'}
+                    </span>
+                </div>
+                
+                {/* Shopping Badge + Action */}
+                <div className="flex items-center gap-2 flex-shrink-0">
+                    <div className="flex items-center gap-1.5 bg-primary/10 text-primary px-2.5 py-1 rounded-full text-xs font-semibold">
+                        <ShoppingCart className="h-3.5 w-3.5" />
+                        <span>{language === 'he' ? 'מוכנה' : 'Ready'}</span>
+                    </div>
+                    {onGoShopping && (
+                        <Button
+                            size="sm"
+                            onClick={(e) => { e.stopPropagation(); onGoShopping({ ...list, items }); }}
+                            className="h-8 px-3 bg-success hover:bg-success/90 text-success-foreground font-semibold text-xs rounded-xl flex items-center gap-1.5 shadow-sm"
+                            title={language === 'he' ? 'צא לקנייה' : 'Go Shopping'}
+                        >
+                            <ShoppingCart className="h-3.5 w-3.5" />
+                            {language === 'he' ? 'צא לקנייה' : 'Go Shop'}
+                        </Button>
+                    )}
+                </div>
             </div>
         </div>
     );

@@ -1357,25 +1357,60 @@ export const ShoppingMode = () => {
               <Label htmlFor="store" className="text-sm font-medium">
                 {language === 'he' ? 'רשת/חנות' : 'Store'}
               </Label>
-              <Select value={selectedStore} onValueChange={setSelectedStore}>
-                <SelectTrigger dir={direction} className="w-full h-12 text-base">
-                  {selectedStore ? (
-                    <span>{selectedStore}</span>
-                  ) : (
-                    <span className="flex items-center gap-2">
-                      <Store className="h-4 w-4 opacity-50" />
-                      {language === 'he' ? 'בחר חנות' : 'Select store'}
-                    </span>
+              {selectedShoppingType === 'other' || STORES_BY_TYPE[selectedShoppingType].length === 0 ? (
+                <Input
+                  id="store"
+                  type="text"
+                  placeholder={language === 'he' ? 'הקלד שם חנות...' : 'Enter store name...'}
+                  value={selectedStore}
+                  onChange={(e) => setSelectedStore(e.target.value)}
+                  className="h-12 text-base"
+                  dir={direction}
+                />
+              ) : (
+                <div className="space-y-2">
+                  <Select value={selectedStore} onValueChange={setSelectedStore}>
+                    <SelectTrigger dir={direction} className="w-full h-12 text-base">
+                      {selectedStore && !STORES_BY_TYPE[selectedShoppingType].includes(selectedStore) ? (
+                        <span>{selectedStore}</span>
+                      ) : selectedStore ? (
+                        <span>{selectedStore}</span>
+                      ) : (
+                        <span className="flex items-center gap-2">
+                          <Store className="h-4 w-4 opacity-50" />
+                          {language === 'he' ? 'בחר חנות' : 'Select store'}
+                        </span>
+                      )}
+                    </SelectTrigger>
+                    <SelectContent className="bg-background border border-border z-50 max-h-60" dir={direction}>
+                      {STORES_BY_TYPE[selectedShoppingType].map((store) => (
+                        <SelectItem key={store} value={store}>
+                          {store}
+                        </SelectItem>
+                      ))}
+                      <SelectItem value="__custom__">
+                        <span className="text-primary font-medium">
+                          {language === 'he' ? '➕ הקלד שם אחר...' : '➕ Enter custom name...'}
+                        </span>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {selectedStore === '__custom__' && (
+                    <Input
+                      type="text"
+                      placeholder={language === 'he' ? 'הקלד שם חנות...' : 'Enter store name...'}
+                      onChange={(e) => {
+                        if (e.target.value) {
+                          setSelectedStore(e.target.value);
+                        }
+                      }}
+                      className="h-12 text-base"
+                      dir={direction}
+                      autoFocus
+                    />
                   )}
-                </SelectTrigger>
-                <SelectContent className="bg-background border border-border z-50" dir={direction}>
-                  {STORES_BY_TYPE[selectedShoppingType].map((store) => (
-                    <SelectItem key={store} value={store}>
-                      {store}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">

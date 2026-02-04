@@ -19,12 +19,17 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
   const direction = language === 'he' ? 'rtl' : 'ltr';
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDesktopMenuOpen, setIsDesktopMenuOpen] = useState(false);
-  const desktopMenuRef = useRef<HTMLDivElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const menuPanelRef = useRef<HTMLDivElement>(null);
 
-  // Close desktop menu when clicking outside
+  // Close desktop menu when clicking outside (but not on button or panel)
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (desktopMenuRef.current && !desktopMenuRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      const clickedOnButton = menuButtonRef.current?.contains(target);
+      const clickedOnPanel = menuPanelRef.current?.contains(target);
+      
+      if (!clickedOnButton && !clickedOnPanel) {
         setIsDesktopMenuOpen(false);
       }
     };
@@ -259,20 +264,18 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
             )}
 
             {/* Hamburger Menu Button */}
-            <div className="relative" ref={desktopMenuRef}>
-              <button
-                onClick={() => setIsDesktopMenuOpen(!isDesktopMenuOpen)}
-                className="p-2 rounded-xl text-muted-foreground hover:bg-muted transition-colors active:scale-95"
-                title={language === 'he' ? 'תפריט' : 'Menu'}
-              >
-                {isDesktopMenuOpen ? (
-                  <X className="h-5 w-5 flex-shrink-0" strokeWidth={1.5} />
-                ) : (
-                  <Menu className="h-5 w-5 flex-shrink-0" strokeWidth={1.5} />
-                )}
-              </button>
-
-            </div>
+            <button
+              ref={menuButtonRef}
+              onClick={() => setIsDesktopMenuOpen(!isDesktopMenuOpen)}
+              className="p-2 rounded-xl text-muted-foreground hover:bg-muted transition-colors active:scale-95"
+              title={language === 'he' ? 'תפריט' : 'Menu'}
+            >
+              {isDesktopMenuOpen ? (
+                <X className="h-5 w-5 flex-shrink-0" strokeWidth={1.5} />
+              ) : (
+                <Menu className="h-5 w-5 flex-shrink-0" strokeWidth={1.5} />
+              )}
+            </button>
           </div>
         </div>
       </div>
@@ -286,7 +289,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
             onClick={() => setIsDesktopMenuOpen(false)}
           />
           {/* Side Panel */}
-          <div ref={desktopMenuRef} className="fixed top-0 end-0 h-full w-64 bg-card border-s border-border shadow-2xl z-[201] animate-slide-in-right">
+          <div ref={menuPanelRef} className="fixed top-0 end-0 h-full w-64 bg-card border-s border-border shadow-2xl z-[201] animate-slide-in-right">
             <div className="p-4 border-b border-border flex items-center justify-between">
               <span className="font-medium text-foreground">{language === 'he' ? 'תפריט' : 'Menu'}</span>
               <button

@@ -186,6 +186,19 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
                   )}
                 </button>
 
+                {/* Profile Button - ONLY FOR LOGGED-IN USERS */}
+                {user && (
+                  <button
+                    onClick={() => {
+                      handleNavigate('/profile');
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-muted text-foreground hover:bg-muted/80 transition-colors active:scale-95"
+                  >
+                    <User className="h-5 w-5 flex-shrink-0" strokeWidth={1.5} />
+                    <span className="font-medium text-sm">{language === 'he' ? 'פרופיל' : 'Profile'}</span>
+                  </button>
+                )}
+
                 {/* About Button - VISIBLE FOR BOTH LOGGED-IN AND GUEST USERS */}
                 <button
                   onClick={() => {
@@ -304,7 +317,22 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <div className="p-2">
+            <div className="p-2 space-y-1">
+              {/* Profile Button - ONLY FOR LOGGED-IN USERS */}
+              {user && (
+                <button
+                  onClick={() => {
+                    handleNavigate('/profile');
+                    setIsDesktopMenuOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-foreground hover:bg-muted transition-colors"
+                >
+                  <User className="h-5 w-5 flex-shrink-0" strokeWidth={1.5} />
+                  <span className="text-sm font-medium">{language === 'he' ? 'פרופיל' : 'Profile'}</span>
+                </button>
+              )}
+
+              {/* About Button */}
               <button
                 onClick={() => {
                   handleNavigate('/about');

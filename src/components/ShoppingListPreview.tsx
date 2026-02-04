@@ -1,7 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Trash2, Pencil, X, ChevronDown, ShoppingCart, Copy } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { Trash2, Pencil, X, ChevronDown, ShoppingCart, Copy, Play, CheckCircle2, RefreshCcw, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
 import { SavedList, ShoppingItem, Unit, UNITS } from "@/types/shopping";
@@ -16,7 +17,9 @@ interface ShoppingListPreviewProps {
     onToggleItem: (listId: string, itemId: string) => void;
     onUpdateItem?: (listId: string, item: ShoppingItem) => void;
     onGoShopping?: (list: SavedList) => void;
+    onDuplicate?: (list: SavedList) => void;
     isPreviewMode?: boolean;
+    variant?: 'default' | 'in-progress' | 'completed';
 }
 
 export const ShoppingListPreview: React.FC<ShoppingListPreviewProps> = ({
@@ -28,7 +31,9 @@ export const ShoppingListPreview: React.FC<ShoppingListPreviewProps> = ({
     onToggleItem,
     onUpdateItem,
     onGoShopping,
-    isPreviewMode = true
+    onDuplicate,
+    isPreviewMode = true,
+    variant = 'default'
 }) => {
     const { language } = useGlobalLanguage();
     const [isExpanded, setIsExpanded] = useState(false);
@@ -38,6 +43,11 @@ export const ShoppingListPreview: React.FC<ShoppingListPreviewProps> = ({
     const [editingUnit, setEditingUnit] = useState<Unit>('units');
     const contentRef = useRef<HTMLDivElement>(null);
     const direction = language === 'he' ? 'rtl' : 'ltr';
+
+    // Calculate progress
+    const completedCount = items.filter(item => item.checked).length;
+    const totalCount = items.length;
+    const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
     // Indicator dot colors
     const indicatorColors = [
@@ -49,6 +59,19 @@ export const ShoppingListPreview: React.FC<ShoppingListPreviewProps> = ({
         'bg-orange-500',
     ];
     const indicatorColor = indicatorColors[index % indicatorColors.length];
+
+    // Format duration
+    const formatDuration = (seconds?: number): string => {
+        if (!seconds) return '';
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        if (mins >= 60) {
+            const hrs = Math.floor(mins / 60);
+            const remainingMins = mins % 60;
+            return `${hrs}:${remainingMins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    };
 
     const handleStartEditItem = (item: ShoppingItem) => {
         setEditingItemId(item.id);
@@ -182,6 +205,24 @@ export const ShoppingListPreview: React.FC<ShoppingListPreviewProps> = ({
                 </div>
             </div>
 
+            {/* Progress Bar - Only show when in progress */}
+            {variant === 'in-progress' && totalCount > 0 && (
+                <div className="mb-3 space-y-1.5">
+                    <div className="flex justify-between items-center text-xs">
+                        <span className="text-muted-foreground font-medium">
+                            {language === 'he' ? 'התקדמות' : 'Progress'}
+                        </span>
+                        <span className="font-semibold text-primary">
+                            {completedCount}/{totalCount} ({progressPercent}%)
+                        </span>
+                    </div>
+                    <Progress 
+                        value={progressPercent} 
+                        className="h-2 bg-muted"
+                    />
+                </div>
+            )}
+
             {/* Preview Items */}
             <div className={`flex-1 overflow-hidden relative ${isPreviewMode && isExpanded ? 'max-h-96 overflow-y-auto' : ''}`} ref={contentRef}>
                 <ul className="space-y-1.5">
@@ -309,26 +350,73 @@ export const ShoppingListPreview: React.FC<ShoppingListPreviewProps> = ({
             <div className="mt-3 pt-3 border-t border-border/30 flex flex-wrap justify-between items-center gap-2">
                 <div className="flex items-center gap-2 flex-shrink-0">
                     <span className="text-xs font-medium text-muted-foreground">
-                        {items.length} {language === 'he' ? 'פריטים' : 'items'}
+                        {new Date(list.createdAt || new Date().toISOString()).toLocaleDateString(language === 'he' ? 'he-IL' : 'en-US', {
+                            month: 'short',
+                            day: 'numeric'
+                        })}
                     </span>
+                    {list.shoppingDuration && (
+                        <span className="flex items-center gap-1 text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                            <Clock className="h-3 w-3" />
+                            {formatDuration(list.shoppingDuration)}
+                        </span>
+                    )}
                 </div>
                 
-                {/* Shopping Badge + Action */}
+                {/* Shopping Status Badge + Action - Based on Variant */}
                 <div className="flex items-center gap-2 flex-shrink-0">
-                    <div className="flex items-center gap-1.5 bg-primary/10 text-primary px-2.5 py-1 rounded-full text-xs font-semibold">
-                        <ShoppingCart className="h-3.5 w-3.5" />
-                        <span>{language === 'he' ? 'מוכנה' : 'Ready'}</span>
-                    </div>
-                    {onGoShopping && (
-                        <Button
-                            size="sm"
-                            onClick={(e) => { e.stopPropagation(); onGoShopping({ ...list, items }); }}
-                            className="h-8 px-3 bg-success hover:bg-success/90 text-success-foreground font-semibold text-xs rounded-xl flex items-center gap-1.5 shadow-sm"
-                            title={language === 'he' ? 'צא לקנייה' : 'Go Shopping'}
-                        >
-                            <ShoppingCart className="h-3.5 w-3.5" />
-                            {language === 'he' ? 'צא לקנייה' : 'Go Shop'}
-                        </Button>
+                    {variant === 'completed' ? (
+                        <>
+                            <div className="flex items-center gap-1.5 bg-success/10 text-success px-2.5 py-1 rounded-full text-xs font-semibold">
+                                <CheckCircle2 className="h-3.5 w-3.5" />
+                                <span>{language === 'he' ? 'הושלמה' : 'Done'}</span>
+                            </div>
+                            {onDuplicate && (
+                                <Button
+                                    size="sm"
+                                    onClick={(e) => { e.stopPropagation(); onDuplicate(list); }}
+                                    className="h-8 px-3 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-xs rounded-xl flex items-center gap-1.5 shadow-sm"
+                                >
+                                    <RefreshCcw className="h-3.5 w-3.5" />
+                                    <span>{language === 'he' ? 'קנה שוב' : 'Shop Again'}</span>
+                                </Button>
+                            )}
+                        </>
+                    ) : variant === 'in-progress' ? (
+                        <>
+                            <div className="flex items-center gap-1.5 bg-warning/10 text-warning px-2.5 py-1 rounded-full text-xs font-semibold">
+                                <Play className="h-3.5 w-3.5" />
+                                <span>{language === 'he' ? 'בתהליך' : 'In Progress'}</span>
+                            </div>
+                            {onGoShopping && (
+                                <Button
+                                    size="sm"
+                                    onClick={(e) => { e.stopPropagation(); onGoShopping({ ...list, items }); }}
+                                    className="h-8 px-3 bg-warning hover:bg-warning/90 text-foreground font-semibold text-xs rounded-xl flex items-center gap-1.5 shadow-sm border border-foreground/20"
+                                >
+                                    <Play className="h-3.5 w-3.5 fill-current" />
+                                    <span>{language === 'he' ? 'המשך קנייה' : 'Continue'}</span>
+                                </Button>
+                            )}
+                        </>
+                    ) : (
+                        <>
+                            <div className="flex items-center gap-1.5 bg-primary/10 text-primary px-2.5 py-1 rounded-full text-xs font-semibold">
+                                <ShoppingCart className="h-3.5 w-3.5" />
+                                <span>{language === 'he' ? 'מוכנה' : 'Ready'}</span>
+                            </div>
+                            {onGoShopping && (
+                                <Button
+                                    size="sm"
+                                    onClick={(e) => { e.stopPropagation(); onGoShopping({ ...list, items }); }}
+                                    className="h-8 px-3 bg-success hover:bg-success/90 text-success-foreground font-semibold text-xs rounded-xl flex items-center gap-1.5 shadow-sm"
+                                    title={language === 'he' ? 'צא לקנייה' : 'Go Shopping'}
+                                >
+                                    <ShoppingCart className="h-3.5 w-3.5" />
+                                    {language === 'he' ? 'צא לקנייה' : 'Go Shop'}
+                                </Button>
+                            )}
+                        </>
                     )}
                 </div>
             </div>

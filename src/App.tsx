@@ -68,21 +68,21 @@ const AppContent = () => {
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-        <SoundSettingsProvider>
-          <LanguageProvider>
-            <AuthProvider>
-              <TooltipProvider>
-                <Toaster />
-                <Sonner />
-                <BrowserRouter>
+      <BrowserRouter>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+          <SoundSettingsProvider>
+            <LanguageProvider>
+              <AuthProvider>
+                <TooltipProvider>
+                  <Toaster />
+                  <Sonner />
                   <AppContent />
-                </BrowserRouter>
-              </TooltipProvider>
-            </AuthProvider>
-          </LanguageProvider>
-        </SoundSettingsProvider>
-      </ThemeProvider>
+                </TooltipProvider>
+              </AuthProvider>
+            </LanguageProvider>
+          </SoundSettingsProvider>
+        </ThemeProvider>
+      </BrowserRouter>
     </QueryClientProvider>
   </ErrorBoundary>
 );

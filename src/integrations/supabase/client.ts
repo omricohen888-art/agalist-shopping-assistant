@@ -2,21 +2,8 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-// Fail fast and loudly if env is misconfigured
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  console.error(
-    '%c[Supabase] Missing environment variables',
-    'color: red; font-size: 16px; font-weight: bold;',
-    {
-      SUPABASE_URL_PRESENT: !!SUPABASE_URL,
-      SUPABASE_ANON_KEY_PRESENT: !!SUPABASE_ANON_KEY,
-    }
-  );
-  throw new Error('Supabase environment variables are not configured');
-}
+const SUPABASE_URL = "https://bbksunwslrdqmlpwconi.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_20ykZzt5npMApmJFZwZhRw_ZdtLRIKn";
 
 // Supabase is configured with valid credentials
 export const isSupabaseConfigured = true;

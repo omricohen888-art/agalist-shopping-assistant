@@ -8,6 +8,7 @@
 
 > **Agalist** is more than just a list—it's a smart, collaborative shopping companion designed to streamline household management. By leveraging **Microsoft Azure** for robust hosting and **Supabase** for real-time data synchronization, Agalist ensures that your shopping list is always up-to-date across all family devices.
 
+
 <br>
 <table align="center">
   <tr>

@@ -7,10 +7,18 @@
 
 > **Agalist** is a modern, real-time shopping list application. It was architected to showcase cloud integration between **Microsoft Azure** and **Supabase**, providing a seamless user experience across all devices.
 <br>
-<img src="https://github.com/user-attachments/assets/aa103faf-57cd-4d49-88a4-b529435784d2" alt="Mobile View" width="150">
-&nbsp;&nbsp;&nbsp;
-<img width="500" height="500" alt="image" src="https://github.com/user-attachments/assets/4d9dddbe-4036-4c5e-9e1d-5a343953adbe" />
-
+<table align="center">
+  <tr>
+    <td align="center" width="30%">
+      <b>📱 Mobile View</b><br><br>
+      <img src="https://github.com/user-attachments/assets/aa103faf-57cd-4d49-88a4-b529435784d2" width="100%" alt="Mobile">
+    </td>
+    <td align="center" width="70%">
+      <b>💻 Desktop View</b><br><br>
+      <img src="https://github.com/user-attachments/assets/a9cbf438-6458-4700-b631-dfa16cb1e1b9" width="100%" alt="Desktop">
+    </td>
+  </tr>
+</table>
 <br><br>
 
 🌐 **Live Demo:** [Launch Agalist App](https://icy-plant-07a95c31e.4.azurestaticapps.net)

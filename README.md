@@ -24,7 +24,8 @@
 <br>
 
 <p align="center">
-  🌐 <b>Live Demo:</b> <a href="https://icy-plant-07a95c31e.4.azurestaticapps.net">Launch Agalist App</a>
+  🌐 <b>Live Demo:</b> 
+  <a href="https://icy-plant-07a95c31e.4.azurestaticapps.net" target="_blank">Launch Agalist App</a>
 </p>
 
 ---
@@ -85,4 +86,4 @@ Local installation and execution are restricted to the owner to ensure the secur
 
 ## 👨‍💻 Connect with Me
 * **Author:** Omri Cohen (IT Student & Full Stack Enthusiast)
-* **LinkedIn:** [Omri Cohen Profile](https://www.linkedin.com/in/omri-cohen-it/)
+* **LinkedIn:** <a href="https://www.linkedin.com/in/omri-cohen-it/" target="_blank">Omri Cohen Profile</a>

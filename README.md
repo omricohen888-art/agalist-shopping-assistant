@@ -9,7 +9,8 @@
 <br>
 <img src="https://github.com/user-attachments/assets/aa103faf-57cd-4d49-88a4-b529435784d2" alt="Mobile View" width="150">
 &nbsp;&nbsp;&nbsp;
-<img src="https://github.com/user-attachments/assets/a9cbf438-6458-4700-b631-dfa16cb1e1b9" alt="Desktop View" width="250">
+<img width="1347" height="1033" alt="image" src="https://github.com/user-attachments/assets/4d9dddbe-4036-4c5e-9e1d-5a343953adbe" />
+
 <br><br>
 
 🌐 **Live Demo:** [Launch Agalist App](https://icy-plant-07a95c31e.4.azurestaticapps.net)

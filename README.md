@@ -3,10 +3,10 @@
 ![Azure](https://img.shields.io/badge/Azure-0078D4?style=for-the-badge&logo=azure-devops&logoColor=white)
 ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 ![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
+![RTL](https://img.shields.io/badge/RTL-Supported-0052CC?style=for-the-badge)
 ![Lovable](https://img.shields.io/badge/Developed%20with-Lovable-FF4F81?style=for-the-badge)
-![Cursor](https://img.shields.io/badge/Edited%20with-Cursor-00A3FF?style=for-the-badge&logo=cursor)
 
-> **Agalist** is more than just a list—it's a smart, collaborative shopping companion designed to streamline household management. By leveraging **Microsoft Azure** for robust hosting and **Supabase** for real-time data synchronization, Agalist ensures that your shopping list is always up-to-date across all family devices, whether you're at home on a desktop or at the supermarket on mobile.
+> **Agalist** is more than just a list—it's a smart, collaborative shopping companion designed to streamline household management. By leveraging **Microsoft Azure** for robust hosting and **Supabase** for real-time data synchronization, Agalist ensures that your shopping list is always up-to-date across all family devices.
 
 <br>
 <table align="center">
@@ -31,19 +31,23 @@
 
 ## 🚀 Application Modules & Capabilities
 
-Agalist is built with a focus on UX and efficiency. Here is a breakdown of the core modules:
+Agalist is built with a focus on UX, efficiency, and financial awareness. Here is a breakdown of the core modules:
 
 ### 1. Smart List Management
 * **Intuitive Item Entry:** Quickly add items with smart suggestions.
-* **Quantity Control:** Easily adjust quantities directly from the main view.
-* **Categories & Organization:** Items are automatically sorted or manually categorized (e.g., Dairy, Produce) for an optimized path through the store.
+* **Categories & Organization:** Items are automatically sorted to optimize the shopping path.
+* **Language Focus:** The application is tailored specifically for the **Hebrew** language, featuring a fully optimized **Right-to-Left (RTL)** interface.
 
-### 2. Real-Time Collaboration (The Core Engine)
+### 2. Financial Insights & Budgeting 💰
+* **Expense Tracking:** Provides real-time visibility into estimated shopping costs.
+* **Smart Summaries:** Helps users track their spending habits and manage the household budget effectively during the shopping trip.
+
+### 3. Real-Time Collaboration (The Core Engine)
 * **Family Sync:** Powered by Supabase Realtime, changes made on one device appear instantly on others. No refresh required.
 * **Live Status Updates:** See when a family member marks an item as "bought" in real-time.
 
-### 3. User Experience (UX)
-* **Cross-Platform Design:** A fully responsive interface that adapts seamlessly from 4k desktop monitors to mobile screens.
+### 4. User Experience (UX)
+* **Cross-Platform Design:** A fully responsive interface that adapts seamlessly from desktop monitors to mobile screens.
 * **PWA Support:** Installable as a native-like app on iOS and Android devices for offline access and quick launch.
 * **Secure Authentication:** Frictionless login using Google OAuth or Magic Links.
 
@@ -53,8 +57,8 @@ Agalist is built with a focus on UX and efficiency. Here is a breakdown of the c
 
 This project serves as a showcase of modern cloud-native development:
 
-* **Frontend:** Built with **React** and **Vite** for lightning-fast performance and state management.
-* **Backend & Database:** Utilizes **Supabase (PostgreSQL)** for structured data storage and **Row Level Security (RLS)** to ensure user data privacy.
+* **Frontend:** Built with **React** and **Vite** for lightning-fast performance.
+* **Backend & Database:** Utilizes **Supabase (PostgreSQL)** for structured data storage and **Row Level Security (RLS)**.
 * **DevOps & CI/CD:**
     * Code is managed in **GitHub**.
     * Automated workflows trigger deployment to **Azure Static Web Apps** on every push to the main branch.
@@ -64,7 +68,7 @@ This project serves as a showcase of modern cloud-native development:
 
 ## 🛠️ AI-Augmented Workflow
 
-This project demonstrates a high-efficiency development cycle using AI-driven tools to accelerate delivery while maintaining code quality:
+This project demonstrates a high-efficiency development cycle using AI-driven tools:
 
 * **Lovable:** Used for rapid UI prototyping, component scaffolding, and initial logic generation.
 * **Cursor:** Employed as the primary IDE for advanced refactoring, TypeScript strict-typing optimization, and complex bug resolution.

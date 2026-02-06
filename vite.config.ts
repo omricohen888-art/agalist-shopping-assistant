@@ -15,23 +15,23 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.ico"],
+      includeAssets: ["favicon.ico", "robots.txt"], // הוספתי את robots שראיתי בתמונה
       manifest: {
-        name: "Notebook Shopping List",
-        short_name: "Shopping List",
-        description: "A beautiful notebook-style shopping list app",
-        theme_color: "#f5f0e1",
-        background_color: "#f5f0e1",
+        name: "Agalist - Smart Shopping", // השם המעודכן
+        short_name: "Agalist",
+        description: "A smart collaborative shopping list application",
+        theme_color: "#ffffff", // שיניתי ללבן כמו באייקון שלך
+        background_color: "#ffffff",
         display: "standalone",
         orientation: "portrait",
         icons: [
           {
-            src: "/icon-192.png",
+            src: "/icon-192x192.png", // תוקן: השם המלא של הקובץ
             sizes: "192x192",
             type: "image/png",
           },
           {
-            src: "/icon-512.png",
+            src: "/icon-512x512.png", // תוקן: השם המלא של הקובץ
             sizes: "512x512",
             type: "image/png",
           },

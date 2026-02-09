@@ -12,6 +12,7 @@ interface QuantityControlProps {
     step?: number; // Optional override
     isCompleted?: boolean;
     onDelete?: () => void;
+    compact?: boolean;
 }
 
 // Unit type categories
@@ -22,7 +23,8 @@ const QuantityControl = ({
     onChange,
     unit,
     isCompleted = false,
-    onDelete
+    onDelete,
+    compact = false
 }: QuantityControlProps) => {
     const { lightTap, mediumTap } = useHaptics();
 

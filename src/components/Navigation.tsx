@@ -23,35 +23,6 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const menuPanelRef = useRef<HTMLDivElement>(null);
 
-  const [secretClickCount, setSecretClickCount] = useState(0);
-  const secretClickTimerRef = useRef<NodeJS.Timeout | null>(null);
-
-  const handleSecretEntry = () => {
-    // Clear existing timer
-    if (secretClickTimerRef.current) {
-      clearTimeout(secretClickTimerRef.current);
-    }
-
-    // Increment count
-    setSecretClickCount(prev => {
-      const newCount = prev + 1;
-      if (newCount >= 5) {
-        // Trigger Secret Entry
-        navigate('/admin');
-        return 0;
-      }
-      return newCount;
-    });
-
-    // Reset count after 3 seconds of inactivity
-    secretClickTimerRef.current = setTimeout(() => {
-      setSecretClickCount(0);
-    }, 3000);
-
-    // Toggle menu as usual
-    setIsMenuOpen(!isMenuOpen);
-  };
-
   // Close desktop menu when clicking outside (but not on button or panel)
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -143,7 +114,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
 
           {/* Menu Toggle Button */}
           <button
-            onClick={handleSecretEntry}
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="h-14 w-14 flex items-center justify-center text-muted-foreground hover:bg-muted rounded-xl transition-colors ml-2 flex-shrink-0 active:scale-95"
             aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
           >

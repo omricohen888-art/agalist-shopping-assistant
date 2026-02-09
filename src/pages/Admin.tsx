@@ -71,6 +71,7 @@ function AdminContent() {
     const [adminPin, setAdminPin] = useState('12345678'); // Default fallback
     const [newPin, setNewPin] = useState('');
     const [isChangingPin, setIsChangingPin] = useState(false);
+    const [announcement, setAnnouncement] = useState({ active: false, message: '', type: 'info' as 'info' | 'warning' });
 
     // Security Layer 1: Check Email (Normalized)
     useEffect(() => {
@@ -177,12 +178,17 @@ function AdminContent() {
     const fetchSettings = async () => {
         const { data, error } = await supabase
             .from('system_settings')
-            .select('value')
-            .eq('key', 'maintenance_mode')
-            .single();
+            .select('key, value')
+            .in('key', ['maintenance_mode', 'global_announcement']);
 
         if (data) {
-            setMaintenanceMode(data.value);
+            data.forEach(setting => {
+                if (setting.key === 'maintenance_mode') {
+                    setMaintenanceMode(setting.value);
+                } else if (setting.key === 'global_announcement') {
+                    setAnnouncement(setting.value);
+                }
+            });
         }
         if (error) {
             console.error('[Admin] Error fetching settings:', error);
@@ -261,6 +267,30 @@ function AdminContent() {
             return;
         }
         setIsChangingPin(true);
+        setIsChangingPin(true);
+    };
+
+    const handleAnnouncementSave = async () => {
+        const { error } = await supabase
+            .from('system_settings')
+            .update({
+                value: announcement,
+                updated_at: new Date().toISOString()
+            })
+            .eq('key', 'global_announcement');
+
+        if (error) {
+            toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: 'Failed to update announcement: ' + error.message
+            });
+        } else {
+            toast({
+                title: 'Success',
+                description: 'Global announcement updated.'
+            });
+        }
     };
 
     if (loading) {
@@ -427,6 +457,56 @@ function AdminContent() {
                         )}
                     </CardContent>
                 </Card>
+
+
+                {/* Global Announcement Card */}
+                <Card className="md:col-span-2 border-l-4 border-l-blue-500">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-base font-medium">Global Announcement</CardTitle>
+                        <div className="flex items-center space-x-2">
+                            <Label htmlFor="ann-active" className="text-xs">Active</Label>
+                            <Switch
+                                id="ann-active"
+                                checked={announcement.active}
+                                onCheckedChange={(c) => setAnnouncement(prev => ({ ...prev, active: c }))}
+                            />
+                        </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4 pt-4">
+                        <div className="grid gap-4">
+                            <div className="grid gap-2">
+                                <Label>Message</Label>
+                                <Input
+                                    value={announcement.message}
+                                    onChange={(e) => setAnnouncement(prev => ({ ...prev, message: e.target.value }))}
+                                    placeholder="Enter announcement message..."
+                                />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label>Type</Label>
+                                <div className="flex gap-2">
+                                    <Button
+                                        size="sm"
+                                        variant={announcement.type === 'info' ? 'default' : 'outline'}
+                                        onClick={() => setAnnouncement(prev => ({ ...prev, type: 'info' }))}
+                                        className="w-full"
+                                    >
+                                        Info (Blue)
+                                    </Button>
+                                    <Button
+                                        size="sm"
+                                        variant={announcement.type === 'warning' ? 'destructive' : 'outline'}
+                                        className={`w-full ${announcement.type === 'warning' && 'bg-amber-600 hover:bg-amber-700'}`}
+                                        onClick={() => setAnnouncement(prev => ({ ...prev, type: 'warning' }))}
+                                    >
+                                        Warning (Yellow)
+                                    </Button>
+                                </div>
+                            </div>
+                            <Button onClick={handleAnnouncementSave} variant="secondary">Save Announcement</Button>
+                        </div>
+                    </CardContent>
+                </Card>
             </section>
 
             {/* Stats Overview */}
@@ -488,7 +568,7 @@ function AdminContent() {
                     )}
                 </CardContent>
             </Card>
-        </div>
+        </div >
     );
 }
 

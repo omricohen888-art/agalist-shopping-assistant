@@ -24,6 +24,7 @@ import OGDesign from "./pages/OGDesign";
 import Profile from "./pages/Profile";
 import Admin from "./pages/Admin";
 import { MaintenanceGuard } from "@/components/MaintenanceGuard";
+import { AnnouncementBanner } from "@/components/AnnouncementBanner";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const AppContent = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <MaintenanceGuard>
+        <AnnouncementBanner />
         <main className="flex-1">
           <Routes>
             <Route path="/" element={<Index />} />

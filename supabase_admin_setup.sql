@@ -11,7 +11,8 @@ CREATE TABLE IF NOT EXISTS public.system_settings (
 INSERT INTO public.system_settings (key, value, description)
 VALUES 
     ('maintenance_mode', 'false'::jsonb, 'Global maintenance mode switch'),
-    ('admin_pin', '"12345678"'::jsonb, 'Admin access PIN code')
+    ('admin_pin', '"12345678"'::jsonb, 'Admin access PIN code'),
+    ('global_announcement', '{"active": false, "message": "", "type": "info"}'::jsonb, 'Global system announcement')
 ON CONFLICT (key) DO NOTHING;
 
 -- 3. Enable RLS on system_settings

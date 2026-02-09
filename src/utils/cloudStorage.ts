@@ -26,6 +26,7 @@ const toShoppingHistory = (row: {
   store: string | null;
   items: Json;
   total_items: number;
+  total_amount: number;
   checked_items: number;
   started_at: string;
   completed_at: string;
@@ -34,7 +35,7 @@ const toShoppingHistory = (row: {
   id: row.id,
   date: row.completed_at,
   items: (row.items as unknown as ShoppingItem[]) || [],
-  totalAmount: 0,
+  totalAmount: row.total_amount || 0,
   store: row.store || "",
   completedItems: row.checked_items,
   totalItems: row.total_items,
@@ -218,6 +219,7 @@ export const cloudSaveShoppingHistory = async (userId: string, history: Shopping
     items: history.items as unknown as Json,
     total_items: history.totalItems,
     checked_items: history.completedItems,
+    total_amount: history.totalAmount,
     started_at: history.date,
     completed_at: history.date,
     // created_at is optional and defaults in the database
@@ -255,6 +257,7 @@ export const cloudUpdateShoppingHistory = async (userId: string, history: Shoppi
     .from("shopping_history")
     .update({
       store: history.store,
+      total_amount: history.totalAmount,
       started_at: history.date,
       completed_at: history.date,
     })

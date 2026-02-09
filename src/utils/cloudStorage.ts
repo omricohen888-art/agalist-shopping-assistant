@@ -225,6 +225,8 @@ export const cloudSaveShoppingHistory = async (userId: string, history: Shopping
     // created_at is optional and defaults in the database
   };
 
+  console.log('[Debug] cloudSaveShoppingHistory - Payload:', JSON.stringify(payload, null, 2));
+
   try {
     const { error } = await supabase.from("shopping_history").insert(payload);
 

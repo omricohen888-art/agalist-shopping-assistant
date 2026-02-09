@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ShoppingItem, Unit, UNITS, ShoppingHistory, ShoppingType, SHOPPING_TYPES, STORES_BY_TYPE } from "@/types/shopping";
 import { createUUID } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { 
+import {
   CheckCircle2, X, Check, ShoppingCart, Timer, Store,
   Plus, ClipboardPaste, Clock, Pin, PinOff, Trash2, Pencil, MessageSquare, Minus,
   Zap, Sparkles, Trophy, ArrowRight
@@ -52,7 +52,7 @@ const triggerHaptic = (pattern: number | number[] = 50) => {
 
 // Clean status text based on progress
 const getStatusText = (
-  progress: number, 
+  progress: number,
   language: 'he' | 'en'
 ): string => {
   if (progress === 0) {
@@ -72,40 +72,40 @@ const getProgressFeedback = (
   language: 'he' | 'en'
 ): string => {
   if (progress === 0) {
-    return language === 'he' 
-      ? `${totalCount} פריטים ברשימה` 
+    return language === 'he'
+      ? `${totalCount} פריטים ברשימה`
       : `${totalCount} items in list`;
   }
   if (progress < 25) {
-    return language === 'he' 
-      ? 'התחלת לאסוף' 
+    return language === 'he'
+      ? 'התחלת לאסוף'
       : 'Started collecting';
   }
   if (progress < 50) {
-    return language === 'he' 
-      ? 'ממשיך להתקדם' 
+    return language === 'he'
+      ? 'ממשיך להתקדם'
       : 'Making progress';
   }
   if (progress < 75) {
-    return language === 'he' 
-      ? 'יותר מחצי הדרך' 
+    return language === 'he'
+      ? 'יותר מחצי הדרך'
       : 'Past halfway';
   }
   if (progress < 100) {
-    return language === 'he' 
-      ? `נותרו ${totalCount - completedCount} פריטים` 
+    return language === 'he'
+      ? `נותרו ${totalCount - completedCount} פריטים`
       : `${totalCount - completedCount} items left`;
   }
-  return language === 'he' 
-    ? 'כל הפריטים נאספו' 
+  return language === 'he'
+    ? 'כל הפריטים נאספו'
     : 'All items collected';
 };
 
 // Swipeable Item Component
-const SwipeableItem = ({ 
-  item, 
-  onComplete, 
-  onDelete, 
+const SwipeableItem = ({
+  item,
+  onComplete,
+  onDelete,
   onEdit,
   onPin,
   language,
@@ -167,14 +167,14 @@ const SwipeableItem = ({
     <motion.div
       layout
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
-      animate={{ 
-        opacity: 1, 
-        y: 0, 
+      animate={{
+        opacity: 1,
+        y: 0,
         scale: isAnimating ? 0.95 : 1,
         backgroundColor: isAnimating ? 'hsl(var(--success) / 0.2)' : 'hsl(var(--card))'
       }}
       exit={{ opacity: 0, x: direction === 'rtl' ? 100 : -100, scale: 0.8 }}
-      transition={{ 
+      transition={{
         layout: { type: "spring", stiffness: 300, damping: 30 },
         opacity: { duration: 0.2 },
         scale: { type: "spring", stiffness: 500, damping: 25 }
@@ -183,8 +183,8 @@ const SwipeableItem = ({
         relative overflow-hidden rounded-2xl
         border-2 transition-colors duration-300
         shadow-sm hover:shadow-lg
-        ${item.pinned 
-          ? 'border-destructive bg-destructive/5 ring-2 ring-destructive/20' 
+        ${item.pinned
+          ? 'border-destructive bg-destructive/5 ring-2 ring-destructive/20'
           : 'border-foreground/20 hover:border-primary/50'
         }
         ${isAnimating ? 'border-success' : ''}
@@ -192,7 +192,7 @@ const SwipeableItem = ({
       `}
     >
       {/* Swipe background indicator */}
-      <motion.div 
+      <motion.div
         className={`absolute inset-0 flex items-center ${direction === 'rtl' ? 'justify-start pl-6' : 'justify-end pr-6'}`}
         style={{ background }}
       >
@@ -236,8 +236,8 @@ const SwipeableItem = ({
                 flex items-center justify-center
                 border-2 transition-all duration-300
                 touch-manipulation
-                ${isAnimating 
-                  ? 'bg-success border-success text-success-foreground' 
+                ${isAnimating
+                  ? 'bg-success border-success text-success-foreground'
                   : 'bg-muted/50 border-foreground/30 hover:border-primary hover:bg-primary/10'
                 }
               `}
@@ -288,8 +288,8 @@ const SwipeableItem = ({
                 className={`
                   w-9 h-9 rounded-xl flex items-center justify-center
                   border-2 transition-all duration-200
-                  ${item.pinned 
-                    ? 'bg-destructive text-destructive-foreground border-destructive' 
+                  ${item.pinned
+                    ? 'bg-destructive text-destructive-foreground border-destructive'
                     : 'bg-warning/10 text-warning border-warning/50 hover:bg-warning/20'
                   }
                 `}
@@ -407,12 +407,12 @@ const SwipeableItem = ({
 };
 
 // Completed Item Component
-const CompletedItem = ({ 
-  item, 
-  onToggle, 
-  onDelete, 
-  language, 
-  direction 
+const CompletedItem = ({
+  item,
+  onToggle,
+  onDelete,
+  language,
+  direction
 }: {
   item: ShoppingItem;
   onToggle: (id: string) => void;
@@ -475,7 +475,7 @@ export const ShoppingMode = () => {
   const { playFeedback } = useSoundSettings();
   const { successPattern, lightTap } = useHaptics();
   const { saveShoppingHistory, saveList, updateSavedList, deleteSavedList } = useCloudSync();
-  
+
   const [items, setItems] = useState<ShoppingItem[]>([]);
   const [listName, setListName] = useState("");
   const [animatingItemId, setAnimatingItemId] = useState<string | null>(null);
@@ -545,12 +545,12 @@ export const ShoppingMode = () => {
     if (!listData) {
       listData = localStorage.getItem(`activeList_${id}`);
     }
-    
+
     if (listData) {
       const list = JSON.parse(listData);
       setItems(list.items || []);
       setListName(list.name || (language === 'he' ? 'רשימת קניות' : 'Shopping List'));
-      
+
       const savedLists = getSavedLists();
       const existingList = savedLists.find(savedList => savedList.id === id);
       if (existingList) {
@@ -587,7 +587,7 @@ export const ShoppingMode = () => {
       playFeedback('success');
       successPattern();
       triggerHaptic(50);
-      
+
       setTimeout(() => {
         setItems(prev => prev.map(i =>
           i.id === itemId ? { ...i, checked: true } : i
@@ -622,12 +622,24 @@ export const ShoppingMode = () => {
     if (!id) return;
     setIsTimerRunning(false);
 
+    console.log('[Debug] confirmFinishShopping - totalAmount raw state:', totalAmount);
+    // Handle commas by replacing with dot (for locales using comma as decimal)
+    const sanitizedAmount = totalAmount.replace(/,/g, '.');
+    let parsedAmount = parseFloat(sanitizedAmount);
+
+    if (isNaN(parsedAmount)) {
+      console.warn('[Debug] Parsed amount is NaN, defaulting to 0');
+      parsedAmount = 0;
+    }
+
+    console.log('[Debug] confirmFinishShopping - final parsed amount:', parsedAmount);
+
     const history: ShoppingHistory = {
       id: createUUID(),
       date: new Date().toISOString(),
       listName: listName.trim() || undefined,
       items: items,
-      totalAmount: parseFloat(totalAmount) || 0,
+      totalAmount: parsedAmount,
       store: selectedStore || (language === 'he' ? 'לא צוין' : 'Not specified'),
       completedItems: completedCount,
       totalItems: totalCount,
@@ -635,11 +647,11 @@ export const ShoppingMode = () => {
     };
 
     await saveShoppingHistory(history);
-    
+
     if (originalListId) {
       await deleteSavedList(originalListId);
     }
-    
+
     localStorage.removeItem(`shoppingList_${id}`);
     localStorage.removeItem(`activeList_${id}`);
 
@@ -666,13 +678,13 @@ export const ShoppingMode = () => {
       shoppingCompletedAt: completedCount === totalCount && totalCount > 0 ? new Date().toISOString() : undefined,
       shoppingDuration: elapsedTime,
     };
-    
+
     if (originalListId) {
       await updateSavedList(listToSave);
     } else {
       await saveList(listToSave);
     }
-    
+
     localStorage.removeItem(`shoppingList_${id}`);
     localStorage.removeItem(`activeList_${id}`);
 
@@ -721,12 +733,12 @@ export const ShoppingMode = () => {
 
   const confirmDeleteItem = useCallback(() => {
     if (!pendingDeleteItemId) return;
-    
+
     if (dontAskAgainChecked) {
       localStorage.setItem('agalist-skip-delete-confirm', 'true');
       setSkipDeleteConfirm(true);
     }
-    
+
     setItems(prev => prev.filter(item => item.id !== pendingDeleteItemId));
     lightTap();
     triggerHaptic(30);
@@ -746,13 +758,13 @@ export const ShoppingMode = () => {
 
   const saveItemEdit = useCallback(() => {
     if (!editingItemId) return;
-    
+
     setItems(prev => prev.map(item =>
       item.id === editingItemId
         ? { ...item, quantity: editingQuantity, unit: editingUnit, note: editingNote.trim() || undefined }
         : item
     ));
-    
+
     setEditingItemId(null);
     lightTap();
     toast.success(language === 'he' ? 'הפריט עודכן' : 'Item updated');
@@ -771,7 +783,7 @@ export const ShoppingMode = () => {
     const completed = items.filter(item => item.checked);
     const pinned = active.filter(item => item.pinned);
     const unpinned = active.filter(item => !item.pinned);
-    
+
     if (isSmartSort) {
       const grouped = groupByCategory(unpinned);
       return { pinnedItems: pinned, groupedItems: grouped, flatSortedItems: [], completedItems: completed };
@@ -792,24 +804,24 @@ export const ShoppingMode = () => {
   };
 
   return (
-    <div 
+    <div
       className="min-h-screen pb-32 transition-all duration-500 relative overflow-hidden bg-gradient-to-b from-background via-background to-muted/20"
       dir={direction}
     >
       {/* Decorative Background */}
       <div className="fixed inset-0 -z-10 overflow-hidden">
-        <motion.div 
+        <motion.div
           animate={{ scale: [1, 1.1, 1], opacity: [0.1, 0.15, 0.1] }}
           transition={{ duration: 8, repeat: Infinity }}
-          className="absolute top-0 left-1/4 w-96 h-96 bg-success/10 rounded-full blur-3xl" 
+          className="absolute top-0 left-1/4 w-96 h-96 bg-success/10 rounded-full blur-3xl"
         />
-        <motion.div 
+        <motion.div
           animate={{ scale: [1, 1.2, 1], opacity: [0.1, 0.12, 0.1] }}
           transition={{ duration: 10, repeat: Infinity, delay: 2 }}
-          className="absolute bottom-1/4 right-0 w-80 h-80 bg-primary/10 rounded-full blur-3xl" 
+          className="absolute bottom-1/4 right-0 w-80 h-80 bg-primary/10 rounded-full blur-3xl"
         />
       </div>
-      
+
       {/* Confetti */}
       {showConfetti && (
         <div className="fixed inset-0 pointer-events-none z-50">
@@ -818,7 +830,7 @@ export const ShoppingMode = () => {
       )}
 
       {/* Header */}
-      <motion.div 
+      <motion.div
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         className="sticky top-0 z-40 bg-card/95 backdrop-blur-md border-b-2 border-foreground/10 shadow-lg"
@@ -843,22 +855,21 @@ export const ShoppingMode = () => {
                 className="w-full max-w-[260px] text-center text-base font-semibold text-foreground bg-transparent focus:outline-none"
                 dir={direction}
               />
-              <div className={`flex items-center justify-center gap-2 mt-1 text-xs ${
-                elapsedTime > 1800 ? 'text-destructive' : elapsedTime > 900 ? 'text-warning' : 'text-success'
-              }`}>
+              <div className={`flex items-center justify-center gap-2 mt-1 text-xs ${elapsedTime > 1800 ? 'text-destructive' : elapsedTime > 900 ? 'text-warning' : 'text-success'
+                }`}>
                 <Timer className="h-3.5 w-3.5" />
                 <span className="font-mono tabular-nums font-medium">{formatTime(elapsedTime)}</span>
               </div>
             </div>
 
             {/* Status Badge */}
-            <motion.div 
+            <motion.div
               animate={{ scale: progress === 100 ? [1, 1.1, 1] : 1 }}
               transition={{ duration: 0.5, repeat: progress === 100 ? Infinity : 0, repeatDelay: 1 }}
               className={`
                 flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold shadow-lg
-                ${progress === 100 
-                  ? 'bg-gradient-to-r from-success to-emerald-400 text-white' 
+                ${progress === 100
+                  ? 'bg-gradient-to-r from-success to-emerald-400 text-white'
                   : progress > 0
                     ? 'bg-gradient-to-r from-warning to-primary text-white'
                     : 'bg-gradient-to-r from-primary to-primary/80 text-white'
@@ -873,9 +884,9 @@ export const ShoppingMode = () => {
                 <ShoppingCart className="h-5 w-5" />
               )}
               <span>
-                {progress === 100 
+                {progress === 100
                   ? (language === 'he' ? 'סיימת!' : 'Done!')
-                  : progress > 0 
+                  : progress > 0
                     ? `${progress}%`
                     : (language === 'he' ? "בואו!" : "Let's Go!")
                 }
@@ -893,9 +904,9 @@ export const ShoppingMode = () => {
                 {getProgressFeedback(progress, completedCount, totalCount, language)}
               </span>
             </div>
-            
+
             <div className="relative h-4 bg-muted rounded-full overflow-hidden shadow-inner">
-              <motion.div 
+              <motion.div
                 className={`absolute inset-y-0 left-0 rounded-full bg-gradient-to-r ${getProgressColor()}`}
                 initial={{ width: 0 }}
                 animate={{ width: `${progress}%` }}
@@ -904,10 +915,10 @@ export const ShoppingMode = () => {
                 {/* Glow effect */}
                 <div className="absolute inset-0 bg-white/20 animate-pulse" />
               </motion.div>
-              
+
               {/* Shine animation */}
               {progress > 0 && progress < 100 && (
-                <motion.div 
+                <motion.div
                   className="absolute inset-y-0 w-16 bg-gradient-to-r from-transparent via-white/40 to-transparent"
                   animate={{ x: ['-100%', '400%'] }}
                   transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
@@ -935,13 +946,13 @@ export const ShoppingMode = () => {
       {/* Add Item Modal */}
       <AnimatePresence>
         {showAddItemInput && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-start justify-center pt-20 px-4"
           >
-            <motion.div 
+            <motion.div
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
@@ -959,7 +970,7 @@ export const ShoppingMode = () => {
                   <X className="h-4 w-4" />
                 </motion.button>
               </div>
-              
+
               <textarea
                 ref={addItemInputRef}
                 value={newItemText}
@@ -970,17 +981,17 @@ export const ShoppingMode = () => {
                     const lines = newItemText.split(/[\n,]/).map(l => sanitizeInput(l.trim())).filter(l => l.length > 0);
                     const validItems: ShoppingItem[] = [];
                     let blocked = 0;
-                    
+
                     for (let i = 0; i < lines.length; i++) {
                       const text = lines[i].replace(/^•\s*/, '');
                       const validation = validateInput(text);
                       const hasProfanity = containsProfanity(text);
-                      
+
                       if (!validation.isValid || hasProfanity) {
                         blocked++;
                         continue;
                       }
-                      
+
                       validItems.push({
                         id: `${Date.now()}-${i}`,
                         text,
@@ -989,16 +1000,16 @@ export const ShoppingMode = () => {
                         unit: 'units' as Unit
                       });
                     }
-                    
+
                     if (blocked > 0) {
                       toast.error(language === 'he' ? 'פריט לא תקין' : 'Invalid item');
                     }
-                    
+
                     if (validItems.length > 0) {
                       setItems(prev => [...validItems, ...prev]);
                       toast.success(language === 'he' ? `נוספו ${validItems.length} פריטים` : `Added ${validItems.length} items`);
                     }
-                    
+
                     setNewItemText("");
                     setShowAddItemInput(false);
                     triggerHaptic(50);
@@ -1007,8 +1018,8 @@ export const ShoppingMode = () => {
                     setNewItemText("");
                   }
                 }}
-                placeholder={language === 'he' 
-                  ? 'הקלידו או הדביקו פריטים...\nחלב\nלחם\nביצים' 
+                placeholder={language === 'he'
+                  ? 'הקלידו או הדביקו פריטים...\nחלב\nלחם\nביצים'
                   : 'Type or paste items...\nMilk\nBread\nEggs'}
                 className="w-full bg-muted/30 border border-border focus:border-primary rounded-xl text-base py-3 px-4 resize-none min-h-[140px]"
                 rows={5}
@@ -1044,17 +1055,17 @@ export const ShoppingMode = () => {
                       const lines = newItemText.split(/[\n,]/).map(l => sanitizeInput(l.trim())).filter(l => l.length > 0);
                       const validItems: ShoppingItem[] = [];
                       let blocked = 0;
-                      
+
                       for (let i = 0; i < lines.length; i++) {
                         const text = lines[i].replace(/^•\s*/, '');
                         const validation = validateInput(text);
                         const hasProfanity = containsProfanity(text);
-                        
+
                         if (!validation.isValid || hasProfanity) {
                           blocked++;
                           continue;
                         }
-                        
+
                         validItems.push({
                           id: `${Date.now()}-${i}`,
                           text,
@@ -1063,16 +1074,16 @@ export const ShoppingMode = () => {
                           unit: 'units' as Unit
                         });
                       }
-                      
+
                       if (blocked > 0) {
                         toast.error(language === 'he' ? 'פריט לא תקין' : 'Invalid item');
                       }
-                      
+
                       if (validItems.length > 0) {
                         setItems(prev => [...validItems, ...prev]);
                         toast.success(language === 'he' ? `נוספו ${validItems.length} פריטים` : `Added ${validItems.length} items`);
                       }
-                      
+
                       setNewItemText("");
                       setShowAddItemInput(false);
                       triggerHaptic(50);
@@ -1093,10 +1104,10 @@ export const ShoppingMode = () => {
       <div className="max-w-3xl mx-auto px-4 py-4 space-y-4">
         {activeItemsCount > 0 && (
           <div className="mb-2">
-            <SortModeToggle 
-              isSmartSort={isSmartSort} 
-              onToggle={setIsSmartSort} 
-              language={language} 
+            <SortModeToggle
+              isSmartSort={isSmartSort}
+              onToggle={setIsSmartSort}
+              language={language}
             />
           </div>
         )}
@@ -1112,7 +1123,7 @@ export const ShoppingMode = () => {
                 {activeItemsCount}
               </span>
             </div>
-            
+
             {/* Pinned Items */}
             <AnimatePresence>
               {pinnedItems.length > 0 && (
@@ -1233,7 +1244,7 @@ export const ShoppingMode = () => {
         {/* Completed Items */}
         <AnimatePresence>
           {completedItems.length > 0 && (
-            <motion.div 
+            <motion.div
               layout
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -1247,7 +1258,7 @@ export const ShoppingMode = () => {
                   {completedItems.length}
                 </span>
               </div>
-              
+
               <div className="space-y-1.5">
                 {completedItems.map((item) => (
                   <CompletedItem
@@ -1266,7 +1277,7 @@ export const ShoppingMode = () => {
 
         {/* Empty State */}
         {items.length === 0 && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-center py-16 px-6"
@@ -1286,13 +1297,13 @@ export const ShoppingMode = () => {
         {/* Mission Complete Banner */}
         <AnimatePresence>
           {showMissionComplete && progress === 100 && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.8 }}
               className="bg-gradient-to-r from-success/20 via-success/10 to-emerald-500/20 rounded-2xl p-6 text-center border-2 border-success/30"
             >
-              <motion.div 
+              <motion.div
                 animate={{ rotate: [0, 10, -10, 0] }}
                 transition={{ duration: 0.5, repeat: 3 }}
                 className="w-16 h-16 mx-auto mb-3 rounded-full bg-success/20 flex items-center justify-center"
@@ -1311,7 +1322,7 @@ export const ShoppingMode = () => {
       </div>
 
       {/* Sticky Action Deck (Bottom Bar) */}
-      <motion.div 
+      <motion.div
         initial={{ y: 100 }}
         animate={{ y: 0 }}
         className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-md border-t-2 border-foreground/10 p-4 z-40 shadow-2xl"
@@ -1325,15 +1336,14 @@ export const ShoppingMode = () => {
             <Clock className="h-5 w-5" />
             {language === 'he' ? 'שמור' : 'Save'}
           </motion.button>
-          
+
           <motion.button
             whileTap={{ scale: 0.95 }}
             onClick={handleFinishShopping}
-            className={`flex-[2] h-14 rounded-2xl flex items-center justify-center gap-2 font-bold text-lg shadow-lg ${
-              progress === 100 
-                ? 'bg-gradient-to-r from-success to-emerald-400 text-white' 
-                : 'bg-gradient-to-r from-primary to-primary/80 text-primary-foreground'
-            }`}
+            className={`flex-[2] h-14 rounded-2xl flex items-center justify-center gap-2 font-bold text-lg shadow-lg ${progress === 100
+              ? 'bg-gradient-to-r from-success to-emerald-400 text-white'
+              : 'bg-gradient-to-r from-primary to-primary/80 text-primary-foreground'
+              }`}
           >
             {progress === 100 ? (
               <>
@@ -1358,14 +1368,14 @@ export const ShoppingMode = () => {
               {language === 'he' ? '🛒 סיום קנייה' : '🛒 Finish Shopping'}
             </DialogTitle>
           </DialogHeader>
-          
+
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="shoppingType" className="text-sm font-medium">
                 {language === 'he' ? 'סוג קנייה' : 'Shopping Type'}
               </Label>
-              <Select 
-                value={selectedShoppingType} 
+              <Select
+                value={selectedShoppingType}
                 onValueChange={(value: ShoppingType) => {
                   setSelectedShoppingType(value);
                   setSelectedStore("");
@@ -1375,8 +1385,8 @@ export const ShoppingMode = () => {
                   {selectedShoppingType ? (
                     <span className={`flex items-center gap-2 w-full ${direction === 'rtl' ? 'flex-row-reverse justify-end' : ''}`}>
                       <span>{SHOPPING_TYPES.find(t => t.value === selectedShoppingType)?.icon}</span>
-                      <span>{language === 'he' 
-                        ? SHOPPING_TYPES.find(t => t.value === selectedShoppingType)?.labelHe 
+                      <span>{language === 'he'
+                        ? SHOPPING_TYPES.find(t => t.value === selectedShoppingType)?.labelHe
                         : SHOPPING_TYPES.find(t => t.value === selectedShoppingType)?.labelEn
                       }</span>
                     </span>
@@ -1467,7 +1477,10 @@ export const ShoppingMode = () => {
                 inputMode="decimal"
                 placeholder={language === 'he' ? 'לדוגמה: 250' : 'e.g., 250'}
                 value={totalAmount}
-                onChange={(e) => setTotalAmount(e.target.value)}
+                onChange={(e) => {
+                  console.log('[Debug] Input onChange:', e.target.value);
+                  setTotalAmount(e.target.value);
+                }}
                 className="h-12 text-base text-center"
               />
             </div>
@@ -1504,9 +1517,9 @@ export const ShoppingMode = () => {
               {language === 'he' ? '⚠️ רגע!' : '⚠️ Wait!'}
             </DialogTitle>
           </DialogHeader>
-          
+
           <div className="py-4 text-center space-y-3">
-            <motion.div 
+            <motion.div
               animate={{ scale: [1, 1.1, 1] }}
               transition={{ repeat: Infinity, duration: 1.5 }}
               className="w-16 h-16 mx-auto rounded-full bg-warning/15 flex items-center justify-center"
@@ -1514,8 +1527,8 @@ export const ShoppingMode = () => {
               <ShoppingCart className="h-8 w-8 text-warning" />
             </motion.div>
             <p className="text-base font-medium text-foreground">
-              {language === 'he' 
-                ? `שכחת ${items.filter(item => !item.checked).length} פריטים!` 
+              {language === 'he'
+                ? `שכחת ${items.filter(item => !item.checked).length} פריטים!`
                 : `You forgot ${items.filter(item => !item.checked).length} items!`
               }
             </p>
@@ -1543,7 +1556,7 @@ export const ShoppingMode = () => {
               {language === 'he' ? '🛒 לצאת מהקנייה?' : '🛒 Exit Shopping?'}
             </DialogTitle>
           </DialogHeader>
-          
+
           <div className="py-4 text-center">
             <p className="text-muted-foreground">
               {language === 'he' ? 'האם לשמור את הרשימה לפני היציאה?' : 'Would you like to save the list before exiting?'}
@@ -1569,7 +1582,7 @@ export const ShoppingMode = () => {
               {language === 'he' ? '🗑️ למחוק פריט?' : '🗑️ Delete Item?'}
             </DialogTitle>
           </DialogHeader>
-          
+
           <div className="py-3 text-center">
             <p className="text-sm text-muted-foreground">
               {language === 'he' ? 'האם אתה בטוח שברצונך להסיר פריט זה?' : 'Are you sure you want to remove this item?'}

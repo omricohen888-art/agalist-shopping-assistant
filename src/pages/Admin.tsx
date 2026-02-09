@@ -208,15 +208,20 @@ function AdminContent() {
     };
 
     const toggleMaintenanceMode = async (checked: boolean) => {
-        // Master Password Check
-        const auth = window.prompt("הכנס סיסמת מנהל להפעלת מצב חירום:");
-        if (auth !== 'omri1991') {
+        // SECURITY CHECK - BLOCKING
+        // Using window.prompt to force a halt in execution
+        const password = window.prompt("⚠️ פעולה רגישה! הכנס סיסמת מנהל להפעלת מצב חירום:");
+
+        if (password !== 'omri1991') {
+            // Revert the switch visually since the action is cancelled
+            setMaintenanceMode(!checked);
+
             toast({
                 variant: 'destructive',
                 title: 'Access Denied',
                 description: 'סיסמה שגויה! הפעולה בוטלה.'
             });
-            return;
+            return; // <--- CRITICAL: STOPS EXECUTION HERE
         }
 
         // 1. Optimistic UI update
@@ -235,14 +240,27 @@ function AdminContent() {
             toast({
                 variant: "destructive",
                 title: "Error",
-                description: 'Failed to update system settings.',
+                description: 'שגיאה בעדכון המערכת',
             });
         } else {
             toast({
-                title: 'System status updated!',
-                description: checked ? "Maintenance Mode ENABLED" : "Maintenance Mode DISABLED",
+                title: 'Success',
+                description: 'סטטוס מערכת עודכן בהצלחה',
             });
         }
+    };
+
+    const handlePinChangeClick = () => {
+        const auth = window.prompt("הכנס סיסמת מאסטר לשינוי קוד גישה:");
+        if (auth !== 'omri1991') {
+            toast({
+                variant: 'destructive',
+                title: 'Access Denied',
+                description: 'סיסמה שגויה! אין הרשאה לשנות קוד.'
+            });
+            return;
+        }
+        setIsChangingPin(true);
     };
 
     if (loading) {
@@ -401,18 +419,7 @@ function AdminContent() {
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    onClick={() => {
-                                        const auth = window.prompt("הכנס סיסמת מאסטר לשינוי קוד גישה:");
-                                        if (auth !== 'omri1991') {
-                                            toast({
-                                                variant: 'destructive',
-                                                title: 'Access Denied',
-                                                description: 'סיסמה שגויה! אין הרשאה לשנות קוד.'
-                                            });
-                                            return;
-                                        }
-                                        setIsChangingPin(true);
-                                    }}
+                                    onClick={handlePinChangeClick}
                                 >
                                     Change PIN
                                 </Button>

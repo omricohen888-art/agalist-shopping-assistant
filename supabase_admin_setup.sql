@@ -32,6 +32,12 @@ TO authenticated
 USING (true)
 WITH CHECK (true);
 
+-- Allow INSERT to authenticated users (Required for upsert if row missing)
+CREATE POLICY "Allow authenticated insert system_settings"
+ON public.system_settings FOR INSERT
+TO authenticated
+WITH CHECK (true);
+
 -- 5. Create RPC Function to get Admin Stats
 -- This function runs with security definer to bypass RLS and count total users/lists
 CREATE OR REPLACE FUNCTION public.get_admin_stats()

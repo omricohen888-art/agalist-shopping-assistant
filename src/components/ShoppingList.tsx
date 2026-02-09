@@ -19,6 +19,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import { Share2, Trash2, Plus, Minus, CheckCircle2, History, BarChart3, Globe, Save, ClipboardList, Book, Square, CheckSquare, Printer, Mail, FileSpreadsheet, Copy, Pencil, X, ClipboardPaste, Info, ShoppingCart, Check, Volume2, RotateCcw, Mic, Camera, PenLine, Search, User, ChevronDown } from "lucide-react";
+import QuantityControl from "@/components/QuantityControl";
 import { FaWhatsapp } from "react-icons/fa";
 import { SmartAutocompleteInput, SmartAutocompleteInputRef } from "@/components/SmartAutocompleteInput";
 import { SavedListCard } from "@/components/SavedListCard";
@@ -269,14 +270,14 @@ export const ShoppingList = () => {
   // Load data on mount and when userId changes
   useEffect(() => {
     let isMounted = true;
-    
+
     const loadData = async () => {
       try {
         const [lists, history] = await Promise.all([
           cloudSync.getSavedLists(),
           cloudSync.getShoppingHistory()
         ]);
-        
+
         if (isMounted) {
           setSavedLists(lists);
           setShoppingHistory(history);
@@ -289,9 +290,9 @@ export const ShoppingList = () => {
         }
       }
     };
-    
+
     loadData();
-    
+
     return () => {
       isMounted = false;
     };
@@ -313,7 +314,7 @@ export const ShoppingList = () => {
       setEditingList(null);
       setSelectedTrip(null);
     });
-    
+
     return unsubscribe;
   }, [onLogout]);
 
@@ -531,22 +532,22 @@ export const ShoppingList = () => {
   // Smart split by spaces: only split if ALL words are known products
   const smartSplitBySpaces = (line: string): string[] => {
     const words = line.split(/\s+/).filter(w => w.length > 0);
-    
+
     // If single word or empty, return as is
     if (words.length <= 1) return [line.trim()];
-    
+
     // Check if ALL words are known products (case-insensitive)
-    const allWordsAreKnown = words.every(word => 
-      ISRAELI_PRODUCTS.some(product => 
+    const allWordsAreKnown = words.every(word =>
+      ISRAELI_PRODUCTS.some(product =>
         product.toLowerCase() === word.toLowerCase()
       )
     );
-    
+
     // Only split if ALL words are known products
     if (allWordsAreKnown) {
       return words;
     }
-    
+
     // Otherwise keep as single item (e.g., "חלב תנובה 1 ליטר")
     return [line.trim()];
   };
@@ -673,17 +674,37 @@ export const ShoppingList = () => {
       toast.error(result.error || 'Invalid input');
       return;
     }
-    let quantity = parseFloat(singleItemQuantity);
-    if (isNaN(quantity) || quantity < 0) quantity = 1;
-    if (singleItemUnit === 'units') {
-      quantity = Math.round(quantity);
-      if (quantity === 0) quantity = 1;
+    // Implement Smart Parsing (e.g., "5 Milk" -> Quantity: 5, Text: Milk)
+    const smartParseRegex = /^(\d+(?:\.\d+)?)\s+(.*)$/;
+    const match = result.processedText.match(smartParseRegex);
+
+    let finalText = result.processedText;
+    let parsedQuantity = parseFloat(singleItemQuantity);
+
+    if (match) {
+      // Found a number at start!
+      const capturedNumber = parseFloat(match[1]);
+      const capturedText = match[2];
+
+      if (!isNaN(capturedNumber) && capturedText.trim().length > 0) {
+        parsedQuantity = capturedNumber;
+        finalText = capturedText.trim();
+      }
     }
+
+    if (isNaN(parsedQuantity) || parsedQuantity < 0) parsedQuantity = 1;
+
+    // Handle unit rounding logic
+    if (singleItemUnit === 'units') {
+      parsedQuantity = Math.round(parsedQuantity);
+      if (parsedQuantity === 0) parsedQuantity = 1;
+    }
+
     const newItem: ShoppingItem = {
       id: `${createUUID()}`,
-      text: result.processedText,
+      text: finalText,
       checked: false,
-      quantity: quantity,
+      quantity: parsedQuantity,
       unit: singleItemUnit
     };
     setItems([newItem, ...items]); // Prepend item
@@ -869,28 +890,28 @@ export const ShoppingList = () => {
 
     // New draft - save directly without opening dialog
     console.log("Branch: Creating new list - saving directly...");
-    
+
     // Create list with auto-generated name (date)
     const autoName = listName || new Date().toLocaleDateString(language === 'he' ? 'he-IL' : 'en-US', {
       weekday: 'long',
       day: 'numeric',
       month: 'long'
     });
-    
+
     const newList: SavedList = {
       id: createUUID(),
       name: autoName,
       items: convertedItems,
       createdAt: new Date().toISOString()
     };
-    
+
     console.log("New list object being saved:", newList);
-    
+
     // Save list (local first, then cloud if logged in)
     const success = await cloudSync.saveList(newList);
     if (success) {
       console.log("✓ saveList returned true - save successful");
-      
+
       // Show toast based on user status
       if (user) {
         // Logged in: show cloud sync message
@@ -899,7 +920,7 @@ export const ShoppingList = () => {
         // Guest: show local save message
         toast.success(language === 'he' ? '✓ הרשימה נשמרה במכשיר!' : '✓ List saved to device!');
       }
-      
+
       // Refresh lists and reset state
       const lists = await cloudSync.getSavedLists();
       setSavedLists(lists);
@@ -907,11 +928,11 @@ export const ShoppingList = () => {
       setInputText("");
       setActiveListId(null);
       setListName("");
-      
+
       // Show confirmation animation
       setShowConfirmation(true);
       setTimeout(() => setShowConfirmation(false), 1200);
-      
+
       // Smooth scroll to My Notebook section
       setTimeout(() => {
         const notebookSection = document.getElementById('my-notebooks');
@@ -945,7 +966,7 @@ export const ShoppingList = () => {
     const success = await cloudSync.saveList(newList);
     if (success) {
       console.log("✓ saveList returned true - save successful");
-      
+
       // Show toast based on user status
       if (user) {
         // Logged in: show cloud sync message
@@ -954,7 +975,7 @@ export const ShoppingList = () => {
         // Guest: show local save message
         toast.success(language === 'he' ? '✓ הרשימה נשמרה במכשיר!' : '✓ List saved to device!');
       }
-      
+
       const lists = await cloudSync.getSavedLists();
       setSavedLists(lists);
       setItems([]);
@@ -1049,11 +1070,11 @@ export const ShoppingList = () => {
     };
 
     let listText = '';
-    
+
     if (uncheckedItems.length > 0) {
       listText += uncheckedItems.map(formatItem).join('\n');
     }
-    
+
     if (checkedItems.length > 0) {
       if (uncheckedItems.length > 0) {
         listText += '\n\n' + (language === 'he' ? '── הושלמו ──' : '── Done ──') + '\n';
@@ -1063,7 +1084,7 @@ export const ShoppingList = () => {
 
     const header = `📋 ${listName || (language === 'he' ? 'רשימת קניות' : 'Shopping List')}`;
     const divider = '─'.repeat(20);
-    const summary = language === 'he' 
+    const summary = language === 'he'
       ? `\n\n📊 סה"כ: ${itemsToCopy.length} פריטים | ✓ ${checkedItems.length} הושלמו`
       : `\n\n📊 Total: ${itemsToCopy.length} items | ✓ ${checkedItems.length} done`;
 
@@ -1342,94 +1363,103 @@ export const ShoppingList = () => {
       }
     }
     return <div dir={language === 'he' ? 'rtl' : 'ltr'}>
-        {Array.from(groups.entries()).map(([categoryKey, categoryItems]) => {
+      {Array.from(groups.entries()).map(([categoryKey, categoryItems]) => {
         const categoryInfo = getCategoryInfo(categoryKey);
         const isCollapsed = collapsedNotepadCategories.has(categoryKey);
         return <div key={categoryKey}>
-              {/* Category Header - Medium size */}
-              <div 
-                className="flex items-center gap-1.5 py-1 px-1 cursor-pointer select-none hover:bg-muted/30 rounded-lg"
-                onClick={() => {
-                  const newSet = new Set(collapsedNotepadCategories);
-                  if (newSet.has(categoryKey)) {
-                    newSet.delete(categoryKey);
-                  } else {
-                    newSet.add(categoryKey);
+          {/* Category Header - Medium size */}
+          <div
+            className="flex items-center gap-1.5 py-1 px-1 cursor-pointer select-none hover:bg-muted/30 rounded-lg"
+            onClick={() => {
+              const newSet = new Set(collapsedNotepadCategories);
+              if (newSet.has(categoryKey)) {
+                newSet.delete(categoryKey);
+              } else {
+                newSet.add(categoryKey);
+              }
+              setCollapsedNotepadCategories(newSet);
+            }}
+          >
+            <ChevronDown className={`h-3 w-3 text-muted-foreground/50 transition-transform ${isCollapsed ? '-rotate-90' : ''}`} strokeWidth={2} />
+            <span className="text-sm">{categoryInfo.icon}</span>
+            <span className="text-xs font-medium text-muted-foreground">
+              {language === 'he' ? categoryInfo.nameHe : categoryInfo.nameEn}
+            </span>
+            <span className="text-[10px] text-primary font-semibold">({categoryItems.length})</span>
+          </div>
+
+          {/* Items - Medium size */}
+          {!isCollapsed && categoryItems.map((item) => {
+            const actualIndex = notepadItems.findIndex(i => i.id === item.id);
+            return <div key={item.id} className="flex items-center gap-2 py-1 px-1">
+              <Checkbox
+                checked={item.isChecked}
+                onCheckedChange={() => toggleNotepadItem(item.id)}
+                className="h-5 w-5 flex-shrink-0"
+              />
+              <input
+                ref={el => { notepadInputRefs.current[actualIndex] = el; }}
+                type="text"
+                value={item.text}
+                onChange={e => setNotepadItems(prev => prev.map(i => i.id === item.id ? { ...i, text: e.target.value } : i))}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const newItem: NotepadItem = { id: `notepad-${Date.now()}`, text: '', isChecked: false, quantity: 1, unit: 'units' };
+                    setNotepadItems(prev => {
+                      const newItems = [...prev];
+                      newItems.splice(actualIndex + 1, 0, newItem);
+                      return newItems;
+                    });
+                    setTimeout(() => {
+                      const inputEl = notepadInputRefs.current[actualIndex + 1];
+                      if (inputEl) {
+                        inputEl.focus();
+                        inputEl.setSelectionRange(inputEl.value.length, inputEl.value.length);
+                      }
+                    }, 50);
+                  } else if (e.key === 'Backspace' && item.text === '' && actualIndex > 0) {
+                    e.preventDefault();
+                    setNotepadItems(prev => prev.filter(i => i.id !== item.id));
+                    setTimeout(() => {
+                      const input = notepadInputRefs.current[actualIndex - 1];
+                      if (input) { input.focus(); input.setSelectionRange(input.value.length, input.value.length); }
+                    }, 0);
                   }
-                  setCollapsedNotepadCategories(newSet);
                 }}
-              >
-                <ChevronDown className={`h-3 w-3 text-muted-foreground/50 transition-transform ${isCollapsed ? '-rotate-90' : ''}`} strokeWidth={2} />
-                <span className="text-sm">{categoryInfo.icon}</span>
-                <span className="text-xs font-medium text-muted-foreground">
-                  {language === 'he' ? categoryInfo.nameHe : categoryInfo.nameEn}
-                </span>
-                <span className="text-[10px] text-primary font-semibold">({categoryItems.length})</span>
+                placeholder={language === 'he' ? 'פריט...' : 'Item...'}
+                className={`flex-1 text-sm bg-transparent border-0 p-0 focus:outline-none focus:ring-0 ${item.isChecked ? 'line-through text-muted-foreground/60' : 'text-foreground'}`}
+              />
+              {/* Unit - Pill Style */}
+              <div className="flex-shrink-0">
+                <select
+                  tabIndex={-1}
+                  value={item.unit || 'units'}
+                  onChange={e => setNotepadItems(prev => prev.map(i => i.id === item.id ? { ...i, unit: e.target.value as Unit } : i))}
+                  className="h-8 px-2 rounded-full border-0 bg-transparent hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors font-bold text-sm cursor-pointer outline-none appearance-none text-center"
+                  style={{ textAlignLast: 'center' }}
+                >
+                  {UNITS.map(u => <option key={u.value} value={u.value}>{language === 'he' ? u.labelHe : u.labelEn}</option>)}
+                </select>
               </div>
 
-              {/* Items - Medium size */}
-              {!isCollapsed && categoryItems.map((item) => {
-                const actualIndex = notepadItems.findIndex(i => i.id === item.id);
-                return <div key={item.id} className="flex items-center gap-2 py-1 px-1">
-                  <Checkbox 
-                    checked={item.isChecked} 
-                    onCheckedChange={() => toggleNotepadItem(item.id)} 
-                    className="h-5 w-5 flex-shrink-0" 
-                  />
-                  <input
-                    ref={el => { notepadInputRefs.current[actualIndex] = el; }}
-                    type="text"
-                    value={item.text}
-                    onChange={e => setNotepadItems(prev => prev.map(i => i.id === item.id ? { ...i, text: e.target.value } : i))}
-                    onKeyDown={e => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        const newItem: NotepadItem = { id: `notepad-${Date.now()}`, text: '', isChecked: false, quantity: 1, unit: 'units' };
-                        setNotepadItems(prev => {
-                          const newItems = [...prev];
-                          newItems.splice(actualIndex + 1, 0, newItem);
-                          return newItems;
-                        });
-                        setTimeout(() => { 
-                          const inputEl = notepadInputRefs.current[actualIndex + 1];
-                          if (inputEl) {
-                            inputEl.focus();
-                            inputEl.setSelectionRange(inputEl.value.length, inputEl.value.length);
-                          }
-                        }, 50);
-                      } else if (e.key === 'Backspace' && item.text === '' && actualIndex > 0) {
-                        e.preventDefault();
-                        setNotepadItems(prev => prev.filter(i => i.id !== item.id));
-                        setTimeout(() => {
-                          const input = notepadInputRefs.current[actualIndex - 1];
-                          if (input) { input.focus(); input.setSelectionRange(input.value.length, input.value.length); }
-                        }, 0);
-                      }
-                    }}
-                    placeholder={language === 'he' ? 'פריט...' : 'Item...'}
-                    className={`flex-1 text-sm bg-transparent border-0 p-0 focus:outline-none focus:ring-0 ${item.isChecked ? 'line-through text-muted-foreground/60' : 'text-foreground'}`}
-                  />
-                  {/* Quantity - Compact */}
-                  <div className="flex items-center gap-0.5 text-xs text-muted-foreground/60 flex-shrink-0">
-                    <button onClick={() => setNotepadItems(prev => prev.map(i => i.id === item.id ? { ...i, quantity: Math.max(1, (i.quantity || 1) - 1) } : i))} className="w-5 h-5 flex items-center justify-center hover:text-foreground">
-                      <Minus className="h-2.5 w-2.5" />
-                    </button>
-                    <span className="min-w-[14px] text-center font-medium">{item.quantity || 1}</span>
-                    <button onClick={() => setNotepadItems(prev => prev.map(i => i.id === item.id ? { ...i, quantity: (i.quantity || 1) + 1 } : i))} className="w-5 h-5 flex items-center justify-center hover:text-foreground">
-                      <Plus className="h-2.5 w-2.5" />
-                    </button>
-                  </div>
-                  <span className="text-[10px] text-muted-foreground/50 min-w-[22px] flex-shrink-0">
-                    {UNITS.find(u => u.value === (item.unit || 'units'))?.[language === 'he' ? 'labelHe' : 'labelEn'] || ''}
-                  </span>
-                  <button onClick={() => setNotepadItems(prev => prev.filter(i => i.id !== item.id))} className="w-5 h-5 flex items-center justify-center text-muted-foreground/30 hover:text-destructive flex-shrink-0">
-                    <Trash2 className="h-3 w-3" />
-                  </button>
-                </div>;
-              })}
+              {/* Quantity - Compact */}
+              <div className="flex items-center gap-0.5 px-0.5 flex-shrink-0">
+                <QuantityControl
+                  value={item.quantity || 1}
+                  onChange={(val) => setNotepadItems(prev => prev.map(i => i.id === item.id ? { ...i, quantity: val } : i))}
+                  unit={(item.unit || 'units') as Unit}
+                  isCompleted={item.isChecked}
+                  onDelete={() => setNotepadItems(prev => prev.filter(i => i.id !== item.id))}
+                  compact={true}
+                />
+              </div>
+
             </div>;
+          })}
+        </div>;
       })}
-      </div>;
+    </div>;
   };
   // Delete All handlers (component level for AlertDialog access)
   const handleDeleteAllFromDevice = async () => {
@@ -1521,16 +1551,16 @@ export const ShoppingList = () => {
   const completedCount = items.filter(item => item.checked).length;
   const progressPercentage = items.length > 0 ? completedCount / items.length * 100 : 0;
   return <div className="min-h-screen bg-white dark:bg-slate-900 pb-32 transition-colors duration-150" dir={direction} lang={language}>
-      {/* List Creation Confirmation Animation */}
-      {showConfirmation && <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-[fade-in_0.2s_ease-out,scale-in_0.3s_ease-out]">
-          <div className="bg-[#22c55e] text-white rounded-full p-4 shadow-[0_0_20px_rgba(34,197,94,0.5)] animate-pulse">
-            <CheckCircle2 className="h-12 w-12" strokeWidth={3} />
-          </div>
-        </div>}
+    {/* List Creation Confirmation Animation */}
+    {showConfirmation && <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-[fade-in_0.2s_ease-out,scale-in_0.3s_ease-out]">
+      <div className="bg-[#22c55e] text-white rounded-full p-4 shadow-[0_0_20px_rgba(34,197,94,0.5)] animate-pulse">
+        <CheckCircle2 className="h-12 w-12" strokeWidth={3} />
+      </div>
+    </div>}
 
-      {/* Add Item Animation */}
-      {showAddAnimation && <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-none">
-          <div className="text-6xl font-black animate-[fade-in_0.15s_ease-out,fade-out_0.3s_ease-out_0.3s]" style={{
+    {/* Add Item Animation */}
+    {showAddAnimation && <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-none">
+      <div className="text-6xl font-black animate-[fade-in_0.15s_ease-out,fade-out_0.3s_ease-out_0.3s]" style={{
         background: 'linear-gradient(135deg, #FACC15 0%, #22c55e 100%)',
         WebkitBackgroundClip: 'text',
         WebkitTextFillColor: 'transparent',
@@ -1538,42 +1568,42 @@ export const ShoppingList = () => {
         filter: 'drop-shadow(0 2px 8px rgba(250, 204, 21, 0.4))',
         animation: 'float-up 0.6s ease-out'
       }}>
-            +
+        +
+      </div>
+    </div>}
+    {/* List Created Success Animation */}
+    {showListSuccess && <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px] animate-in fade-in duration-200" />
+
+      {/* Success Card */}
+      <div className="relative bg-white dark:bg-slate-800 rounded-3xl shadow-2xl p-8 flex flex-col items-center gap-4 animate-in zoom-in-90 slide-in-from-bottom-10 duration-300 ease-out">
+        {/* Icon Wrapper */}
+        <div className="relative">
+          <div className="absolute inset-0 bg-green-500/30 rounded-full animate-ping" />
+          <div className="bg-gradient-to-br from-green-400 to-green-600 text-white rounded-full p-4 shadow-lg shadow-green-500/30 relative z-10">
+            <CheckCircle2 className="h-10 w-10 md:h-12 md:w-12 animate-in zoom-in spin-in-12 duration-300" strokeWidth={3} />
           </div>
-        </div>}
-      {/* List Created Success Animation */}
-      {showListSuccess && <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
-          {/* Backdrop */}
-          <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px] animate-in fade-in duration-200" />
+        </div>
 
-          {/* Success Card */}
-          <div className="relative bg-white dark:bg-slate-800 rounded-3xl shadow-2xl p-8 flex flex-col items-center gap-4 animate-in zoom-in-90 slide-in-from-bottom-10 duration-300 ease-out">
-            {/* Icon Wrapper */}
-            <div className="relative">
-              <div className="absolute inset-0 bg-green-500/30 rounded-full animate-ping" />
-              <div className="bg-gradient-to-br from-green-400 to-green-600 text-white rounded-full p-4 shadow-lg shadow-green-500/30 relative z-10">
-                <CheckCircle2 className="h-10 w-10 md:h-12 md:w-12 animate-in zoom-in spin-in-12 duration-300" strokeWidth={3} />
-              </div>
-            </div>
+        {/* Text Content */}
+        <div className="text-center space-y-1 animate-in slide-in-from-bottom-4 fade-in duration-400 delay-100 fill-mode-both">
+          <h3 className="text-2xl font-black text-gray-900 dark:text-slate-100 tracking-tight">
+            {language === 'he' ? '!הרשימה מוכנה' : 'List Ready!'}
+          </h3>
+          <p className="text-sm font-medium text-gray-500 dark:text-slate-400">
+            {language === 'he' ? 'עוברים לעריכה...' : 'Moving to edit...'}
+          </p>
+        </div>
+      </div>
+    </div>}
 
-            {/* Text Content */}
-            <div className="text-center space-y-1 animate-in slide-in-from-bottom-4 fade-in duration-400 delay-100 fill-mode-both">
-              <h3 className="text-2xl font-black text-gray-900 dark:text-slate-100 tracking-tight">
-                {language === 'he' ? '!הרשימה מוכנה' : 'List Ready!'}
-              </h3>
-              <p className="text-sm font-medium text-gray-500 dark:text-slate-400">
-                {language === 'he' ? 'עוברים לעריכה...' : 'Moving to edit...'}
-              </p>
-            </div>
-          </div>
-        </div>}
-
-      {/* Sticky Header Group */}
-      <div className="sticky top-0 z-50 glass-strong border-b border-border/30 transition-all duration-300">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
-          <div className="flex justify-between items-center w-full gap-3 sm:gap-4">
-            {/* Logo Section - Clickable to go Home */}
-            <button onClick={() => {
+    {/* Sticky Header Group */}
+    <div className="sticky top-0 z-50 glass-strong border-b border-border/30 transition-all duration-300">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
+        <div className="flex justify-between items-center w-full gap-3 sm:gap-4">
+          {/* Logo Section - Clickable to go Home */}
+          <button onClick={() => {
             if (activeListId && items.length > 0) {
               // If in edit mode with items, confirm before leaving
               const confirmExit = window.confirm(language === 'he' ? 'האם אתה בטוח שברצונך לצאת? שינויים שלא נשמרו יאבדו.' : 'Are you sure you want to exit? Unsaved changes will be lost.');
@@ -1588,42 +1618,42 @@ export const ShoppingList = () => {
             setBulkInputText('');
             setInputMode('single');
           }} className="flex items-center gap-2 sm:gap-3 flex-shrink-0 hover:opacity-80 active:scale-95 transition-all duration-200 touch-manipulation">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0 text-foreground">
-                {/* Checkbox background */}
-                <rect x="3" y="3" width="18" height="18" rx="2" fill="currentColor" stroke="currentColor" strokeWidth="2" />
-                {/* Checkmark - yellow */}
-                <polyline points="6 12 10 16 18 8" fill="none" stroke="hsl(48, 96%, 53%)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              <div className="flex flex-col">
-                <div className="flex items-center gap-1 sm:gap-1.5">
-                  <span className="text-2xl sm:text-3xl font-bold text-foreground">
-                    {language === 'he' ? 'עגליסט' : 'ShopList'}
-                  </span>
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-7 w-7 sm:h-8 sm:w-8 text-foreground flex-shrink-0 -ml-0.5">
-                    <circle cx="8" cy="21" r="1" />
-                    <circle cx="19" cy="21" r="1" />
-                    <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
-                    <path d="M16.5 7.5H5.9" />
-                    <path d="M16.5 10.5H6.7" />
-                    <path d="M16.5 13.5H7.5" />
-                  </svg>
-                </div>
-              </div>
-            </button>
-
-            {/* Spacer - Takes remaining space */}
-            <div className="flex-grow" />
-
-            {/* Actions Section - RIGHT (LTR) / LEFT (RTL) */}
-            <div className={`flex items-center gap-1.5 sm:gap-2 flex-shrink-0 ${language === 'he' ? 'flex-row-reverse' : ''}`}>
-              {/* User Account Button with Greeting */}
-              <div className="flex items-center gap-2">
-                <span className="text-xs sm:text-sm text-muted-foreground font-medium">
-                  {language === 'he' 
-                    ? `שלום, ${user ? (localStorage.getItem('user_display_name') || user.user_metadata?.full_name?.split(' ')[0] || 'משתמש') : 'אורח'}`
-                    : `Hi, ${user ? (localStorage.getItem('user_display_name') || user.user_metadata?.full_name?.split(' ')[0] || 'User') : 'Guest'}`
-                  }
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0 text-foreground">
+              {/* Checkbox background */}
+              <rect x="3" y="3" width="18" height="18" rx="2" fill="currentColor" stroke="currentColor" strokeWidth="2" />
+              {/* Checkmark - yellow */}
+              <polyline points="6 12 10 16 18 8" fill="none" stroke="hsl(48, 96%, 53%)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <div className="flex flex-col">
+              <div className="flex items-center gap-1 sm:gap-1.5">
+                <span className="text-2xl sm:text-3xl font-bold text-foreground">
+                  {language === 'he' ? 'עגליסט' : 'ShopList'}
                 </span>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-7 w-7 sm:h-8 sm:w-8 text-foreground flex-shrink-0 -ml-0.5">
+                  <circle cx="8" cy="21" r="1" />
+                  <circle cx="19" cy="21" r="1" />
+                  <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
+                  <path d="M16.5 7.5H5.9" />
+                  <path d="M16.5 10.5H6.7" />
+                  <path d="M16.5 13.5H7.5" />
+                </svg>
+              </div>
+            </div>
+          </button>
+
+          {/* Spacer - Takes remaining space */}
+          <div className="flex-grow" />
+
+          {/* Actions Section - RIGHT (LTR) / LEFT (RTL) */}
+          <div className={`flex items-center gap-1.5 sm:gap-2 flex-shrink-0 ${language === 'he' ? 'flex-row-reverse' : ''}`}>
+            {/* User Account Button with Greeting */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs sm:text-sm text-muted-foreground font-medium">
+                {language === 'he'
+                  ? `שלום, ${user ? (localStorage.getItem('user_display_name') || user.user_metadata?.full_name?.split(' ')[0] || 'משתמש') : 'אורח'}`
+                  : `Hi, ${user ? (localStorage.getItem('user_display_name') || user.user_metadata?.full_name?.split(' ')[0] || 'User') : 'Guest'}`
+                }
+              </span>
               <Button
                 variant="ghost"
                 onClick={() => navigate(user ? '/profile' : '/auth')}
@@ -1634,186 +1664,186 @@ export const ShoppingList = () => {
               >
                 <User className="h-8 w-8" strokeWidth={1.5} fill="currentColor" />
               </Button>
-              </div>
+            </div>
 
-              {/* Exit Button - Only shown in edit mode */}
-              {activeListId && <Button variant="ghost" onClick={() => {
+            {/* Exit Button - Only shown in edit mode */}
+            {activeListId && <Button variant="ghost" onClick={() => {
               if (items.length > 0) {
                 const confirmExit = window.confirm(language === 'he' ? 'האם אתה בטוח שברצונך לצאת? שינויים שלא נשמרו יאבדו.' : 'Are you sure you want to exit? Unsaved changes will be lost.');
                 if (!confirmExit) return;
               }
               exitEditMode();
             }} className="h-10 px-3 sm:px-4 rounded-xl bg-destructive/10 text-destructive hover:bg-destructive/20 font-semibold text-sm sm:text-base touch-manipulation active:scale-95 transition-all">
-                  <X className="h-4 w-4 sm:h-5 sm:w-5 mr-1" />
-                  {language === 'he' ? 'יציאה' : 'Exit'}
-                </Button>}
+              <X className="h-4 w-4 sm:h-5 sm:w-5 mr-1" />
+              {language === 'he' ? 'יציאה' : 'Exit'}
+            </Button>}
 
-            </div>
           </div>
         </div>
       </div>
+    </div>
 
-      {/* Progress Bar - Part of sticky header */}
-      {items.length > 0 && <div className="glass-strong px-4 sm:px-6 pb-4 sm:pb-5 sticky top-[60px] sm:top-[72px] z-40 border-b border-border/30 transition-all duration-200">
-          <div className="max-w-3xl mx-auto">
-            <div className="space-y-2 sm:space-y-3">
-              {/* Progress bar with gradient */}
-              <div className="relative h-3 sm:h-4 bg-muted/50 rounded-full overflow-hidden shadow-inner">
-                <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-success via-success to-success/80 rounded-full transition-all duration-500 ease-out shadow-md shadow-success/30" style={{
+    {/* Progress Bar - Part of sticky header */}
+    {items.length > 0 && <div className="glass-strong px-4 sm:px-6 pb-4 sm:pb-5 sticky top-[60px] sm:top-[72px] z-40 border-b border-border/30 transition-all duration-200">
+      <div className="max-w-3xl mx-auto">
+        <div className="space-y-2 sm:space-y-3">
+          {/* Progress bar with gradient */}
+          <div className="relative h-3 sm:h-4 bg-muted/50 rounded-full overflow-hidden shadow-inner">
+            <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-success via-success to-success/80 rounded-full transition-all duration-500 ease-out shadow-md shadow-success/30" style={{
               width: `${progressPercentage}%`
             }} />
-                {/* Shine effect */}
-                <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0 rounded-full transition-all duration-500" style={{
+            {/* Shine effect */}
+            <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0 rounded-full transition-all duration-500" style={{
               width: `${progressPercentage}%`
             }} />
-              </div>
-              <div className="flex items-center justify-between">
-                <p className="text-sm sm:text-base text-muted-foreground font-medium">
-                  {t.progressText(completedCount, items.length)}
-                </p>
-                {progressPercentage === 100 && <span className="text-success text-sm font-bold flex items-center gap-1 animate-bounce-in">
-                    <Check className="h-4 w-4" />
-                    {language === 'he' ? 'הושלם!' : 'Complete!'}
-                  </span>}
-              </div>
-            </div>
           </div>
-        </div>}
+          <div className="flex items-center justify-between">
+            <p className="text-sm sm:text-base text-muted-foreground font-medium">
+              {t.progressText(completedCount, items.length)}
+            </p>
+            {progressPercentage === 100 && <span className="text-success text-sm font-bold flex items-center gap-1 animate-bounce-in">
+              <Check className="h-4 w-4" />
+              {language === 'he' ? 'הושלם!' : 'Complete!'}
+            </span>}
+          </div>
+        </div>
+      </div>
+    </div>}
 
-      {/* Main Content */}
-      <div className="max-w-3xl mx-auto p-3 sm:p-4 md:p-6 lg:p-8 pb-28 sm:pb-32 md:pb-40 overflow-hidden w-full min-w-0">
-        {/* Welcome Header */}
-        <div className="text-center mb-6 sm:mb-8 md:mb-10 mt-4 sm:mt-6">
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2 inline-block">
-            {language === 'he' ? 'רשימת הקניות החכמה שלך' : 'Your Smart Shopping List'}
-            <div className="h-1 w-3/4 mx-auto mt-1 bg-gradient-to-r from-transparent via-primary to-transparent rounded-full" />
-          </h1>
-          <p className="text-sm sm:text-base text-muted-foreground">
-            {language === 'he' 
-              ? 'מארגנים, ממיינים, קונים - בקלות!' 
-              : 'Organize, sort, and shop - effortlessly!'}
-          </p>
+    {/* Main Content */}
+    <div className="max-w-3xl mx-auto p-3 sm:p-4 md:p-6 lg:p-8 pb-28 sm:pb-32 md:pb-40 overflow-hidden w-full min-w-0">
+      {/* Welcome Header */}
+      <div className="text-center mb-6 sm:mb-8 md:mb-10 mt-4 sm:mt-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2 inline-block">
+          {language === 'he' ? 'רשימת הקניות החכמה שלך' : 'Your Smart Shopping List'}
+          <div className="h-1 w-3/4 mx-auto mt-1 bg-gradient-to-r from-transparent via-primary to-transparent rounded-full" />
+        </h1>
+        <p className="text-sm sm:text-base text-muted-foreground">
+          {language === 'he'
+            ? 'מארגנים, ממיינים, קונים - בקלות!'
+            : 'Organize, sort, and shop - effortlessly!'}
+        </p>
+      </div>
+
+
+
+      {/* Modern Input Card - Mobile Optimized with Bold Black Borders */}
+      <div className="relative bg-card dark:bg-slate-800/90 border-2 border-foreground/80 dark:border-foreground/60 rounded-2xl p-3 sm:p-4 md:p-6 mb-4 sm:mb-6 shadow-lg hover:shadow-xl focus-within:shadow-xl transition-all duration-300 overflow-hidden backdrop-blur-sm">
+        {/* Subtle gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none rounded-2xl" />
+
+        {/* Instruction Card - Show when list is empty */}
+        {notepadItems.length === 0 && (
+          <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-2 border-primary/30 rounded-xl p-3 sm:p-4 mb-4">
+            <h4 className="text-sm font-bold text-primary flex items-center gap-2 mb-2.5">
+              <span className="text-base">📝</span>
+              {language === 'he' ? 'איך מתחילים?' : 'How to start?'}
+            </h4>
+            <ul className="space-y-1.5 text-xs sm:text-sm text-muted-foreground">
+              <li className="flex items-center gap-2">
+                <Check className="h-3.5 w-3.5 text-success flex-shrink-0" />
+                {language === 'he'
+                  ? 'הקלידו פריטים, כל אחד בשורה נפרדת'
+                  : 'Type items, each on a new line'}
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="h-3.5 w-3.5 text-success flex-shrink-0" />
+                {language === 'he'
+                  ? 'או הדביקו רשימה קיימת מ-WhatsApp / Notes'
+                  : 'Or paste an existing list'}
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="h-3.5 w-3.5 text-success flex-shrink-0" />
+                <span className="text-foreground">
+                  {language === 'he'
+                    ? <>"יוצאים לקניות" – <span className="font-bold relative inline-block">מצב חכם<span className="absolute bottom-0 left-0 right-0 h-[3px] bg-foreground rounded-full transform -rotate-1 opacity-80"></span></span> לסימון פריטים בזמן אמת</>
+                    : <>"Let's Shop" – <span className="font-bold relative inline-block">Smart mode<span className="absolute bottom-0 left-0 right-0 h-[3px] bg-foreground rounded-full transform rotate-1 opacity-80"></span></span> for real-time item tracking</>}
+                </span>
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="h-3.5 w-3.5 text-success flex-shrink-0" />
+                {language === 'he'
+                  ? 'או "שמור לאחר כך" לשמירה בפנקס'
+                  : 'Or "Save for Later" to save in notebook'}
+              </li>
+            </ul>
+          </div>
+        )}
+
+        {/* List Name Input + Quick Actions - Mobile Optimized */}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+          {/* List Name */}
+          <input
+            type="text"
+            value={listName}
+            onChange={(e) => setListName(e.target.value)}
+            placeholder={language === 'he' ? 'שם הרשימה...' : 'List name...'}
+            className="flex-1 bg-transparent border-0 text-base sm:text-lg font-semibold text-foreground placeholder:text-muted-foreground/50 focus:outline-none py-1"
+          />
+
+          {/* Quick Paste & Copy Buttons */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              onClick={handleQuickPaste}
+              className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-lg bg-muted/80 hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer text-xs sm:text-sm font-medium border border-foreground/20"
+              title={language === 'he' ? 'הדבק מהלוח' : 'Paste from clipboard'}
+            >
+              <ClipboardPaste className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span>{language === 'he' ? 'הדבק' : 'Paste'}</span>
+            </button>
+            {notepadItems.filter(item => item.text.trim() !== '').length > 0 && (
+              <>
+                <button
+                  onClick={handleCopyAllItems}
+                  className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-lg bg-muted/80 hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer text-xs sm:text-sm font-medium border border-foreground/20"
+                  title={language === 'he' ? 'העתק רשימה' : 'Copy list'}
+                >
+                  <Copy className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span>{language === 'he' ? 'העתק' : 'Copy'}</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setNotepadItems([]);
+                    setListName('');
+                    setActiveListId(null);
+                    toast.success(language === 'he' ? 'הרשימה נוקתה' : 'List cleared');
+                  }}
+                  className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-lg bg-destructive/10 hover:bg-destructive/20 text-destructive hover:text-destructive transition-all cursor-pointer text-xs sm:text-sm font-medium border border-destructive/30"
+                  title={language === 'he' ? 'נקה רשימה' : 'Clear list'}
+                >
+                  <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span>{language === 'he' ? 'נקה' : 'Clear'}</span>
+                </button>
+              </>
+            )}
+          </div>
         </div>
 
-
-
-        {/* Modern Input Card - Mobile Optimized with Bold Black Borders */}
-        <div className="relative bg-card dark:bg-slate-800/90 border-2 border-foreground/80 dark:border-foreground/60 rounded-2xl p-3 sm:p-4 md:p-6 mb-4 sm:mb-6 shadow-lg hover:shadow-xl focus-within:shadow-xl transition-all duration-300 overflow-hidden backdrop-blur-sm">
-          {/* Subtle gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none rounded-2xl" />
-
-          {/* Instruction Card - Show when list is empty */}
-          {notepadItems.length === 0 && (
-            <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-2 border-primary/30 rounded-xl p-3 sm:p-4 mb-4">
-              <h4 className="text-sm font-bold text-primary flex items-center gap-2 mb-2.5">
-                <span className="text-base">📝</span>
-                {language === 'he' ? 'איך מתחילים?' : 'How to start?'}
-              </h4>
-              <ul className="space-y-1.5 text-xs sm:text-sm text-muted-foreground">
-                <li className="flex items-center gap-2">
-                  <Check className="h-3.5 w-3.5 text-success flex-shrink-0" />
-                  {language === 'he' 
-                    ? 'הקלידו פריטים, כל אחד בשורה נפרדת' 
-                    : 'Type items, each on a new line'}
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="h-3.5 w-3.5 text-success flex-shrink-0" />
-                  {language === 'he' 
-                    ? 'או הדביקו רשימה קיימת מ-WhatsApp / Notes' 
-                    : 'Or paste an existing list'}
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="h-3.5 w-3.5 text-success flex-shrink-0" />
-                  <span className="text-foreground">
-                    {language === 'he' 
-                      ? <>"יוצאים לקניות" – <span className="font-bold relative inline-block">מצב חכם<span className="absolute bottom-0 left-0 right-0 h-[3px] bg-foreground rounded-full transform -rotate-1 opacity-80"></span></span> לסימון פריטים בזמן אמת</> 
-                      : <>"Let's Shop" – <span className="font-bold relative inline-block">Smart mode<span className="absolute bottom-0 left-0 right-0 h-[3px] bg-foreground rounded-full transform rotate-1 opacity-80"></span></span> for real-time item tracking</>}
-                  </span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="h-3.5 w-3.5 text-success flex-shrink-0" />
-                  {language === 'he' 
-                    ? 'או "שמור לאחר כך" לשמירה בפנקס' 
-                    : 'Or "Save for Later" to save in notebook'}
-                </li>
-              </ul>
-            </div>
-          )}
-
-          {/* List Name Input + Quick Actions - Mobile Optimized */}
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-            {/* List Name */}
-            <input
-              type="text"
-              value={listName}
-              onChange={(e) => setListName(e.target.value)}
-              placeholder={language === 'he' ? 'שם הרשימה...' : 'List name...'}
-              className="flex-1 bg-transparent border-0 text-base sm:text-lg font-semibold text-foreground placeholder:text-muted-foreground/50 focus:outline-none py-1"
-            />
-            
-            {/* Quick Paste & Copy Buttons */}
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <button 
-                onClick={handleQuickPaste} 
-                className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-lg bg-muted/80 hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer text-xs sm:text-sm font-medium border border-foreground/20" 
-                title={language === 'he' ? 'הדבק מהלוח' : 'Paste from clipboard'}
-              >
-                <ClipboardPaste className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                <span>{language === 'he' ? 'הדבק' : 'Paste'}</span>
-              </button>
-              {notepadItems.filter(item => item.text.trim() !== '').length > 0 && (
-                <>
-                  <button 
-                    onClick={handleCopyAllItems} 
-                    className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-lg bg-muted/80 hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer text-xs sm:text-sm font-medium border border-foreground/20" 
-                    title={language === 'he' ? 'העתק רשימה' : 'Copy list'}
-                  >
-                    <Copy className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                    <span>{language === 'he' ? 'העתק' : 'Copy'}</span>
-                  </button>
-                  <button 
-                    onClick={() => {
-                      setNotepadItems([]);
-                      setListName('');
-                      setActiveListId(null);
-                      toast.success(language === 'he' ? 'הרשימה נוקתה' : 'List cleared');
-                    }} 
-                    className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-lg bg-destructive/10 hover:bg-destructive/20 text-destructive hover:text-destructive transition-all cursor-pointer text-xs sm:text-sm font-medium border border-destructive/30" 
-                    title={language === 'he' ? 'נקה רשימה' : 'Clear list'}
-                  >
-                    <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                    <span>{language === 'he' ? 'נקה' : 'Clear'}</span>
-                  </button>
-                </>
-              )}
-            </div>
+        {/* Paste Feedback Animation */}
+        {showPasteFeedback && (
+          <div className={`absolute top-4 ${language === 'he' ? 'left-28' : 'right-28'} bg-success text-success-foreground px-3 py-1.5 rounded-lg shadow-lg text-sm font-medium animate-in fade-in slide-in-from-right-2 duration-300`}>
+            {language === 'he' ? 'הודבק!' : 'Pasted!'}
           </div>
+        )}
 
-          {/* Paste Feedback Animation */}
-          {showPasteFeedback && (
-            <div className={`absolute top-4 ${language === 'he' ? 'left-28' : 'right-28'} bg-success text-success-foreground px-3 py-1.5 rounded-lg shadow-lg text-sm font-medium animate-in fade-in slide-in-from-right-2 duration-300`}>
-              {language === 'he' ? 'הודבק!' : 'Pasted!'}
-            </div>
-          )}
+        {/* Hidden File Input for Camera (kept for future use) */}
+        <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleCameraOCR} className="hidden" />
 
-          {/* Hidden File Input for Camera (kept for future use) */}
-          <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleCameraOCR} className="hidden" />
+        {/* Items List - Mobile Optimized */}
+        <div className="min-h-[120px] sm:min-h-[140px]" dir={language === 'he' ? 'rtl' : 'ltr'}>
+          {notepadItems.length === 0 ?
+            // Empty state - Google Keep style input
+            <div className="relative">
+              {/* Notebook line effect */}
+              <div className="absolute top-0 bottom-0 right-5 w-0.5 bg-primary/15 rounded-full pointer-events-none" />
 
-          {/* Items List - Mobile Optimized */}
-          <div className="min-h-[120px] sm:min-h-[140px]" dir={language === 'he' ? 'rtl' : 'ltr'}>
-            {notepadItems.length === 0 ? 
-              // Empty state - Google Keep style input
-              <div className="relative">
-                {/* Notebook line effect */}
-                <div className="absolute top-0 bottom-0 right-5 w-0.5 bg-primary/15 rounded-full pointer-events-none" />
-                
-                <textarea
-                  autoFocus
-                  rows={6}
-                  placeholder={language === 'he' 
-                    ? 'הוסיפו פריטים...\n\nחלב\nלחם\nביצים\nגבינה' 
-                    : 'Add items...\n\nMilk\nBread\nEggs\nCheese'}
-                  className="w-full bg-muted/20 dark:bg-slate-800/40 
+              <textarea
+                autoFocus
+                rows={6}
+                placeholder={language === 'he'
+                  ? 'הוסיפו פריטים...\n\nחלב\nלחם\nביצים\nגבינה'
+                  : 'Add items...\n\nMilk\nBread\nEggs\nCheese'}
+                className="w-full bg-muted/20 dark:bg-slate-800/40 
                     border-2 border-muted-foreground/10 hover:border-primary/30 
                     focus:border-primary/40 focus:ring-2 focus:ring-primary/10
                     rounded-xl outline-none 
@@ -1823,149 +1853,155 @@ export const ShoppingList = () => {
                     resize-none min-h-[200px]
                     transition-all duration-200
                     shadow-inner"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      const value = (e.target as HTMLTextAreaElement).value.trim();
-                      if (value) {
-                        // Split by newlines and filter/validate each
-                        const lines = value.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-                        const validItems: NotepadItem[] = [];
-                        let blocked = 0;
-                        
-                        for (let i = 0; i < lines.length; i++) {
-                          const text = lines[i].replace(/^[-•*]\s*/, '');
-                          const validation = validateInput(text);
-                          const hasProfanity = containsProfanity(text);
-                          
-                          if (!validation.isValid || hasProfanity) {
-                            blocked++;
-                            continue;
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    const value = (e.target as HTMLTextAreaElement).value.trim();
+                    if (value) {
+                      // Split by newlines and filter/validate each
+                      const lines = value.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+                      const validItems: NotepadItem[] = [];
+                      let blocked = 0;
+
+                      for (let i = 0; i < lines.length; i++) {
+                        const text = lines[i].replace(/^[-•*]\s*/, '');
+                        const validation = validateInput(text);
+                        const hasProfanity = containsProfanity(text);
+
+                        if (!validation.isValid || hasProfanity) {
+                          blocked++;
+                          continue;
+                        }
+
+                        validItems.push({
+                          id: `notepad-${Date.now()}-${i}`,
+                          text,
+                          isChecked: false,
+                          quantity: 1,
+                          unit: 'units' as Unit
+                        });
+                      }
+
+                      if (blocked > 0) {
+                        toast.error(language === 'he' ? 'פריט לא תקין' : 'Invalid item');
+                      }
+
+                      if (validItems.length > 0) {
+                        // Add empty item at end for continued input
+                        validItems.push({
+                          id: `notepad-${Date.now() + validItems.length}`,
+                          text: '',
+                          isChecked: false,
+                          quantity: 1,
+                          unit: 'units' as Unit
+                        });
+                        setNotepadItems(validItems);
+                        // Focus the last (empty) input
+                        setTimeout(() => {
+                          const lastIndex = validItems.length - 1;
+                          if (notepadInputRefs.current[lastIndex]) {
+                            notepadInputRefs.current[lastIndex]!.focus();
                           }
-                          
-                          validItems.push({
-                            id: `notepad-${Date.now()}-${i}`,
-                            text,
-                            isChecked: false,
-                            quantity: 1,
-                            unit: 'units' as Unit
-                          });
-                        }
-                        
-                        if (blocked > 0) {
-                          toast.error(language === 'he' ? 'פריט לא תקין' : 'Invalid item');
-                        }
-                        
-                        if (validItems.length > 0) {
-                          // Add empty item at end for continued input
-                          validItems.push({
-                            id: `notepad-${Date.now() + validItems.length}`,
-                            text: '',
-                            isChecked: false,
-                            quantity: 1,
-                            unit: 'units' as Unit
-                          });
-                          setNotepadItems(validItems);
-                          // Focus the last (empty) input
-                          setTimeout(() => {
-                            const lastIndex = validItems.length - 1;
-                            if (notepadInputRefs.current[lastIndex]) {
-                              notepadInputRefs.current[lastIndex]!.focus();
-                            }
-                          }, 50);
-                        }
+                        }, 50);
                       }
                     }
-                  }}
-                />
-              </div>
-                : isSmartSort ?
-          // Grouped view
-          renderGroupedNotepadItems() :
-          // Flat list view
-          <div dir={language === 'he' ? 'rtl' : 'ltr'}>
-                    {notepadItems.map((item, index) => <div key={item.id} className="flex items-center gap-2 py-1.5 w-full">
-                        {/* Checkbox + Text */}
-                        <div className="flex items-center gap-2 flex-1 min-w-0">
-                          <Checkbox checked={item.isChecked} onCheckedChange={() => toggleNotepadItem(item.id)} className="h-5 w-5 flex-shrink-0" />
-                          <StandardizedInput variant="notepad" isChecked={item.isChecked} ref={el => {
-                  notepadInputRefs.current[index] = el;
-                }} type="text" value={item.text} onChange={e => {
-                  const newText = e.target.value;
-                  setNotepadItems(prev => prev.map(i => i.id === item.id ? { ...i, text: newText } : i));
-                }} onKeyDown={e => {
-                  const currentIndex = notepadItems.findIndex(i => i.id === item.id);
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    const newItem: NotepadItem = { id: `notepad-${Date.now()}`, text: '', isChecked: false, quantity: 1, unit: 'units' };
-                    setNotepadItems(prev => {
-                      const newItems = [...prev];
-                      newItems.splice(currentIndex + 1, 0, newItem);
-                      return newItems;
-                    });
-                    setTimeout(() => { 
-                      const inputEl = notepadInputRefs.current[currentIndex + 1];
-                      if (inputEl) {
-                        inputEl.focus();
-                        inputEl.setSelectionRange(inputEl.value.length, inputEl.value.length);
-                      }
-                    }, 50);
-                  } else if (e.key === 'Backspace' && item.text === '' && currentIndex > 0) {
-                    e.preventDefault();
-                    setNotepadItems(prev => prev.filter(i => i.id !== item.id));
-                    setTimeout(() => {
-                      const input = notepadInputRefs.current[currentIndex - 1];
-                      if (input) { input.focus(); input.setSelectionRange(input.value.length, input.value.length); }
-                    }, 0);
                   }
-                }} placeholder={index === 0 && notepadItems.length === 1 ? language === 'he' ? "הקלד פריט..." : "Type an item..." : ""} className="text-sm" />
-                        </div>
+                }}
+              />
+            </div>
+            : isSmartSort ?
+              // Grouped view
+              renderGroupedNotepadItems() :
+              // Flat list view
+              <div dir={language === 'he' ? 'rtl' : 'ltr'}>
+                {notepadItems.map((item, index) => <div key={item.id} className="flex items-center gap-2 py-1.5 w-full">
+                  {/* Checkbox + Text */}
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <Checkbox checked={item.isChecked} onCheckedChange={() => toggleNotepadItem(item.id)} className="h-5 w-5 flex-shrink-0" />
+                    <StandardizedInput variant="notepad" isChecked={item.isChecked} ref={el => {
+                      notepadInputRefs.current[index] = el;
+                    }} type="text" value={item.text} onChange={e => {
+                      const newText = e.target.value;
+                      setNotepadItems(prev => prev.map(i => i.id === item.id ? { ...i, text: newText } : i));
+                    }} onKeyDown={e => {
+                      const currentIndex = notepadItems.findIndex(i => i.id === item.id);
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const newItem: NotepadItem = { id: `notepad-${Date.now()}`, text: '', isChecked: false, quantity: 1, unit: 'units' };
+                        setNotepadItems(prev => {
+                          const newItems = [...prev];
+                          newItems.splice(currentIndex + 1, 0, newItem);
+                          return newItems;
+                        });
+                        setTimeout(() => {
+                          const inputEl = notepadInputRefs.current[currentIndex + 1];
+                          if (inputEl) {
+                            inputEl.focus();
+                            inputEl.setSelectionRange(inputEl.value.length, inputEl.value.length);
+                          }
+                        }, 50);
+                      } else if (e.key === 'Backspace' && item.text === '' && currentIndex > 0) {
+                        e.preventDefault();
+                        setNotepadItems(prev => prev.filter(i => i.id !== item.id));
+                        setTimeout(() => {
+                          const input = notepadInputRefs.current[currentIndex - 1];
+                          if (input) { input.focus(); input.setSelectionRange(input.value.length, input.value.length); }
+                        }, 0);
+                      }
+                    }} placeholder={index === 0 && notepadItems.length === 1 ? language === 'he' ? "הקלד פריט..." : "Type an item..." : ""} className="text-sm" />
+                  </div>
 
-                        {/* Quantity - Compact */}
-                        <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-lg bg-muted/40 border border-border/30 flex-shrink-0">
-                          <button onClick={() => setNotepadItems(prev => prev.map(i => i.id === item.id ? { ...i, quantity: Math.max(1, (i.quantity || 1) - 1) } : i))} className="w-5 h-5 flex items-center justify-center text-muted-foreground hover:text-foreground" type="button">
-                            <Minus className="h-3 w-3" />
-                          </button>
-                          <span className="w-5 text-center text-xs font-semibold tabular-nums">{item.quantity || 1}</span>
-                          <button onClick={() => setNotepadItems(prev => prev.map(i => i.id === item.id ? { ...i, quantity: (i.quantity || 1) + 1 } : i))} className="w-5 h-5 flex items-center justify-center text-muted-foreground hover:text-foreground" type="button">
-                            <Plus className="h-3 w-3" />
-                          </button>
-                        </div>
-                        
-                        {/* Unit - Compact */}
-                        <select tabIndex={-1} value={item.unit || 'units'} onChange={e => setNotepadItems(prev => prev.map(i => i.id === item.id ? { ...i, unit: e.target.value as Unit } : i))} className="w-12 h-6 text-[10px] rounded-lg border border-border/30 bg-muted/30 text-foreground cursor-pointer flex-shrink-0">
-                          {UNITS.map(u => <option key={u.value} value={u.value}>{language === 'he' ? u.labelHe : u.labelEn}</option>)}
-                        </select>
+                  {/* Unit - Pill Style */}
+                  <div className="flex-shrink-0">
+                    <select
+                      tabIndex={-1}
+                      value={item.unit || 'units'}
+                      onChange={e => setNotepadItems(prev => prev.map(i => i.id === item.id ? { ...i, unit: e.target.value as Unit } : i))}
+                      className="h-8 px-2 rounded-full border-0 bg-transparent hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors font-bold text-sm cursor-pointer outline-none appearance-none text-center"
+                      style={{ textAlignLast: 'center' }}
+                    >
+                      {UNITS.map(u => <option key={u.value} value={u.value}>{language === 'he' ? u.labelHe : u.labelEn}</option>)}
+                    </select>
+                  </div>
 
-                        {/* Delete */}
-                        <button onClick={() => setNotepadItems(prev => prev.filter(i => i.id !== item.id))} className="w-6 h-6 flex items-center justify-center text-muted-foreground/40 hover:text-destructive rounded-lg flex-shrink-0">
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
-                      </div>)}
-                  </div>}
+                  {/* Quantity - Compact */}
+                  <div className="flex items-center gap-0.5 px-1.5 py-0.5 flex-shrink-0">
+                    <QuantityControl
+                      value={item.quantity || 1}
+                      onChange={(val) => setNotepadItems(prev => prev.map(i => i.id === item.id ? { ...i, quantity: val } : i))}
+                      unit={(item.unit || 'units') as Unit}
+                      isCompleted={item.isChecked}
+                      onDelete={() => setNotepadItems(prev => prev.filter(i => i.id !== item.id))}
+                      compact={true}
+                    />
+                  </div>
+
+
+                </div>)}
+              </div>}
+        </div>
+
+        {/* Sort Mode Toggle - Only visible when items exist */}
+        {notepadItems.length > 0 && <div className="mt-4 mb-2 px-2 animate-fade-in relative">
+          {/* Smart Sort Feature Discovery Hint */}
+          {showSortHint && <div className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-3 animate-fade-in-up">
+            {/* Hint Bubble */}
+            <div className="relative">
+              {/* Main bubble */}
+              <div className="bg-white dark:bg-slate-800 border-2 border-blue-500 dark:border-blue-400 rounded-xl px-4 py-3 shadow-lg whitespace-nowrap">
+                <p className="text-sm font-bold text-blue-700 dark:text-blue-300 text-center">
+                  {language === 'he' ? 'מעדיפים את הסדר שלכם? לחצו כאן לביטול המיון האוטומטי.' : 'Prefer your own order? Click here to disable auto-sort.'}
+                </p>
               </div>
 
-              {/* Sort Mode Toggle - Only visible when items exist */}
-              {notepadItems.length > 0 && <div className="mt-4 mb-2 px-2 animate-fade-in relative">
-                  {/* Smart Sort Feature Discovery Hint */}
-                  {showSortHint && <div className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-3 animate-fade-in-up">
-                      {/* Hint Bubble */}
-                      <div className="relative">
-                        {/* Main bubble */}
-                        <div className="bg-white dark:bg-slate-800 border-2 border-blue-500 dark:border-blue-400 rounded-xl px-4 py-3 shadow-lg whitespace-nowrap">
-                          <p className="text-sm font-bold text-blue-700 dark:text-blue-300 text-center">
-                            {language === 'he' ? 'מעדיפים את הסדר שלכם? לחצו כאן לביטול המיון האוטומטי.' : 'Prefer your own order? Click here to disable auto-sort.'}
-                          </p>
-                        </div>
-                        
-                        {/* Arrow pointing down to the button */}
-                        <div className="absolute left-1/2 transform -translate-x-1/2 top-full w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-blue-500 dark:border-t-blue-400"></div>
-                      </div>
-                    </div>}
-                  
-                  {/* Sort Toggle with pulse effect when hint is visible */}
-                  <div className={showSortHint ? 'animate-pulse-glow' : ''}>
-                    <SortModeToggle isSmartSort={isSmartSort} onToggle={enabled => {
+              {/* Arrow pointing down to the button */}
+              <div className="absolute left-1/2 transform -translate-x-1/2 top-full w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-blue-500 dark:border-t-blue-400"></div>
+            </div>
+          </div>}
+
+          {/* Sort Toggle with pulse effect when hint is visible */}
+          <div className={showSortHint ? 'animate-pulse-glow' : ''}>
+            <SortModeToggle isSmartSort={isSmartSort} onToggle={enabled => {
               setIsSmartSort(enabled);
               // Dismiss hint on click
               setShowSortHint(false);
@@ -1976,411 +2012,411 @@ export const ShoppingList = () => {
                 toast.success(language === 'he' ? 'הפריטים מסודרים לפי קטגוריה' : 'Items sorted by category');
               }
             }} language={language} />
-                  </div>
-                </div>}
+          </div>
+        </div>}
 
-              <div className="flex flex-col gap-2 sm:gap-3 mt-4 sm:mt-6 w-full justify-center items-center transition-all duration-300 ease-in-out relative z-10">
-                {/* Two action buttons - Mobile Optimized */}
-                <div className={`flex flex-col sm:flex-row gap-2 sm:gap-3 w-full justify-center items-center ${notepadItems.length > 0 ? '' : 'pt-2'}`}>
-                  <StartShoppingButton onClick={handleStartShopping} language={language} disabled={notepadItems.length === 0} />
-                  <SaveListButton onClick={handleSaveList} language={language} disabled={notepadItems.length === 0} />
-                </div>
-              </div>
-            </div>
+        <div className="flex flex-col gap-2 sm:gap-3 mt-4 sm:mt-6 w-full justify-center items-center transition-all duration-300 ease-in-out relative z-10">
+          {/* Two action buttons - Mobile Optimized */}
+          <div className={`flex flex-col sm:flex-row gap-2 sm:gap-3 w-full justify-center items-center ${notepadItems.length > 0 ? '' : 'pt-2'}`}>
+            <StartShoppingButton onClick={handleStartShopping} language={language} disabled={notepadItems.length === 0} />
+            <SaveListButton onClick={handleSaveList} language={language} disabled={notepadItems.length === 0} />
+          </div>
+        </div>
+      </div>
 
-        {/* Quick Start Templates */}
-        {items.length === 0 && <SortableTemplates systemTemplates={currentTemplates} language={language} onTemplateClick={handleTemplateClick} onCreateNew={() => setIsCreateTemplateDialogOpen(true)} />}
+      {/* Quick Start Templates */}
+      {items.length === 0 && <SortableTemplates systemTemplates={currentTemplates} language={language} onTemplateClick={handleTemplateClick} onCreateNew={() => setIsCreateTemplateDialogOpen(true)} />}
 
-        {/* Dashboard - Saved Lists & Completed Trips */}
-        {items.length === 0 && (savedLists.length > 0 || shoppingHistory.length > 0) && (() => {
-          // ✅ CRITICAL: Filter lists for DASHBOARD VIEW ONLY
-          // Apply hiddenListIds filter here for dashboard display
-          const visibleLists = savedLists.filter(list => !hiddenListIds.includes(list.id));
-          
-          // Categorize visible lists
-          const inProgressLists = visibleLists.filter(list => {
-            const completedCount = list.items.filter(item => item.checked).length;
-            return !list.isShoppingComplete && completedCount > 0;
-          });
-          const readyLists = visibleLists.filter(list => {
-            const completedCount = list.items.filter(item => item.checked).length;
-            return !list.isShoppingComplete && completedCount === 0;
-          });
-          const completedLists = visibleLists.filter(list => list.isShoppingComplete);
+      {/* Dashboard - Saved Lists & Completed Trips */}
+      {items.length === 0 && (savedLists.length > 0 || shoppingHistory.length > 0) && (() => {
+        // ✅ CRITICAL: Filter lists for DASHBOARD VIEW ONLY
+        // Apply hiddenListIds filter here for dashboard display
+        const visibleLists = savedLists.filter(list => !hiddenListIds.includes(list.id));
 
-          // Duplicate list handler
-          const handleDuplicateList = async (list: SavedList) => {
-            const newList: SavedList = {
-              ...list,
-              id: createUUID(),
-              name: language === 'he' ? `${list.name} (עותק)` : `${list.name} (copy)`,
-              createdAt: new Date().toISOString(),
-              isShoppingComplete: false,
-              shoppingCompletedAt: undefined,
-              shoppingDuration: undefined,
-              items: list.items.map(item => ({ ...item, checked: false }))
-            };
-            const success = await cloudSync.saveList(newList);
-            if (success) {
-              const lists = await cloudSync.getSavedLists();
-              setSavedLists(lists);
-              toast.success(language === 'he' ? 'הרשימה שוכפלה!' : 'List duplicated!');
-            }
+        // Categorize visible lists
+        const inProgressLists = visibleLists.filter(list => {
+          const completedCount = list.items.filter(item => item.checked).length;
+          return !list.isShoppingComplete && completedCount > 0;
+        });
+        const readyLists = visibleLists.filter(list => {
+          const completedCount = list.items.filter(item => item.checked).length;
+          return !list.isShoppingComplete && completedCount === 0;
+        });
+        const completedLists = visibleLists.filter(list => list.isShoppingComplete);
+
+        // Duplicate list handler
+        const handleDuplicateList = async (list: SavedList) => {
+          const newList: SavedList = {
+            ...list,
+            id: createUUID(),
+            name: language === 'he' ? `${list.name} (עותק)` : `${list.name} (copy)`,
+            createdAt: new Date().toISOString(),
+            isShoppingComplete: false,
+            shoppingCompletedAt: undefined,
+            shoppingDuration: undefined,
+            items: list.items.map(item => ({ ...item, checked: false }))
           };
+          const success = await cloudSync.saveList(newList);
+          if (success) {
+            const lists = await cloudSync.getSavedLists();
+            setSavedLists(lists);
+            toast.success(language === 'he' ? 'הרשימה שוכפלה!' : 'List duplicated!');
+          }
+        };
 
-          // Common handlers
-          const handleDelete = async (id: string) => {
-            const success = await cloudSync.deleteSavedList(id);
-            if (success) {
-              const lists = await cloudSync.getSavedLists();
-              setSavedLists(lists);
-              toast.success(t.toasts.listDeleted);
-            }
-          };
+        // Common handlers
+        const handleDelete = async (id: string) => {
+          const success = await cloudSync.deleteSavedList(id);
+          if (success) {
+            const lists = await cloudSync.getSavedLists();
+            setSavedLists(lists);
+            toast.success(t.toasts.listDeleted);
+          }
+        };
 
-          // ✅ CRITICAL: Non-destructive "Clear" handlers
-          // These ONLY hide from dashboard view - NO database/storage changes
-          // Lists remain fully intact in savedLists state and localStorage
-          
-          const handleClearReadyLists = () => {
-            const listIds = readyLists.map(list => list.id);
-            setHiddenListIds(prev => [...new Set([...prev, ...listIds])]);
-            toast.info(language === 'he' 
-              ? '👁️ רשימות מוכנות מוסתרות מהתצוגה (נשארות בפנקס)' 
-              : '👁️ Ready lists hidden from view (still in notebook)');
-          };
+        // ✅ CRITICAL: Non-destructive "Clear" handlers
+        // These ONLY hide from dashboard view - NO database/storage changes
+        // Lists remain fully intact in savedLists state and localStorage
 
-          const handleClearInProgressLists = () => {
-            const listIds = inProgressLists.map(list => list.id);
-            setHiddenListIds(prev => [...new Set([...prev, ...listIds])]);
-            toast.info(language === 'he' 
-              ? '👁️ רשימות בתהליך מוסתרות מהתצוגה (נשארות בפנקס)' 
-              : '👁️ In-progress lists hidden from view (still in notebook)');
-          };
+        const handleClearReadyLists = () => {
+          const listIds = readyLists.map(list => list.id);
+          setHiddenListIds(prev => [...new Set([...prev, ...listIds])]);
+          toast.info(language === 'he'
+            ? '👁️ רשימות מוכנות מוסתרות מהתצוגה (נשארות בפנקס)'
+            : '👁️ Ready lists hidden from view (still in notebook)');
+        };
 
-          const handleClearCompletedLists = () => {
-            const listIds = completedLists.map(list => list.id);
-            setHiddenListIds(prev => [...new Set([...prev, ...listIds])]);
-            toast.info(language === 'he' 
-              ? '👁️ רשימות משולמות מוסתרות מהתצוגה (נשארות בפנקס)' 
-              : '👁️ Completed lists hidden from view (still in notebook)');
-          };
+        const handleClearInProgressLists = () => {
+          const listIds = inProgressLists.map(list => list.id);
+          setHiddenListIds(prev => [...new Set([...prev, ...listIds])]);
+          toast.info(language === 'he'
+            ? '👁️ רשימות בתהליך מוסתרות מהתצוגה (נשארות בפנקס)'
+            : '👁️ In-progress lists hidden from view (still in notebook)');
+        };
 
-          const handleShowAllLists = () => {
-            setHiddenListIds([]);
-            toast.info(language === 'he' 
-              ? 'כל הרשימות מוצגות בדאשבורד' 
-              : 'All lists visible in dashboard');
-          };
+        const handleClearCompletedLists = () => {
+          const listIds = completedLists.map(list => list.id);
+          setHiddenListIds(prev => [...new Set([...prev, ...listIds])]);
+          toast.info(language === 'he'
+            ? '👁️ רשימות משולמות מוסתרות מהתצוגה (נשארות בפנקס)'
+            : '👁️ Completed lists hidden from view (still in notebook)');
+        };
 
-          const handleToggle = async (listId: string, itemId: string) => {
-            const list = savedLists.find(l => l.id === listId);
-            if (!list) return;
-            const updatedItems = list.items.map(item => item.id === itemId ? { ...item, checked: !item.checked } : item);
-            const updatedList = { ...list, items: updatedItems };
-            const success = await cloudSync.updateSavedList(updatedList);
-            if (success) {
-              const lists = await cloudSync.getSavedLists();
-              setSavedLists(lists);
-            }
-          };
+        const handleShowAllLists = () => {
+          setHiddenListIds([]);
+          toast.info(language === 'he'
+            ? 'כל הרשימות מוצגות בדאשבורד'
+            : 'All lists visible in dashboard');
+        };
 
-          // Go shopping handler
-          const handleGoShopping = (list: SavedList) => {
-            // Save list data for shopping mode
-            localStorage.setItem(`shoppingList_${list.id}`, JSON.stringify({
-              id: list.id,
-              name: list.name,
-              items: list.items,
-              createdAt: list.createdAt
-            }));
-            navigate(`/shopping/${list.id}`);
-          };
+        const handleToggle = async (listId: string, itemId: string) => {
+          const list = savedLists.find(l => l.id === listId);
+          if (!list) return;
+          const updatedItems = list.items.map(item => item.id === itemId ? { ...item, checked: !item.checked } : item);
+          const updatedList = { ...list, items: updatedItems };
+          const success = await cloudSync.updateSavedList(updatedList);
+          if (success) {
+            const lists = await cloudSync.getSavedLists();
+            setSavedLists(lists);
+          }
+        };
 
-          return (
-            <div className="mb-12 border-t border-border/30 pt-8 max-w-5xl mx-auto space-y-10">
-              
-              {/* Ready to Shop Section - FIRST - UNIFIED FOR BOTH USER TYPES */}
-              <div className="bg-primary/5 rounded-2xl p-4 sm:p-6 border border-primary/20">
-                <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
-                    <ClipboardList className="h-5 w-5 text-primary" />
-                    {language === 'he' ? 'מוכנות לקנייה' : 'Ready to Shop'}
-                    {readyLists.length > 0 && (
-                      <span className="text-xs bg-primary/10 text-primary px-2.5 py-1 rounded-full font-semibold">
-                        {readyLists.length}
-                      </span>
-                    )}
-                  </h3>
-                  <div className="flex items-center gap-2">
-                    {/* Clear button - Hides lists from dashboard view ONLY (non-destructive) */}
-                    {readyLists.length > 0 && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleClearReadyLists}
-                        className="text-muted-foreground hover:text-foreground hover:bg-muted font-medium"
-                        title={language === 'he' ? 'הסתר רשימות מוכנות' : 'Hide ready lists'}
-                      >
-                        {language === 'he' ? 'נקה' : 'Clear'}
-                      </Button>
-                    )}
-                    <Button variant="ghost" onClick={() => navigate("/notebook")} className="text-sm font-semibold text-primary hover:text-primary/80 hover:bg-primary/10">
-                      {t.viewAllListsButton}
-                      {language === 'he' ? <div className="mr-1 rotate-180">➜</div> : <div className="ml-1">➜</div>}
+        // Go shopping handler
+        const handleGoShopping = (list: SavedList) => {
+          // Save list data for shopping mode
+          localStorage.setItem(`shoppingList_${list.id}`, JSON.stringify({
+            id: list.id,
+            name: list.name,
+            items: list.items,
+            createdAt: list.createdAt
+          }));
+          navigate(`/shopping/${list.id}`);
+        };
+
+        return (
+          <div className="mb-12 border-t border-border/30 pt-8 max-w-5xl mx-auto space-y-10">
+
+            {/* Ready to Shop Section - FIRST - UNIFIED FOR BOTH USER TYPES */}
+            <div className="bg-primary/5 rounded-2xl p-4 sm:p-6 border border-primary/20">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                  <ClipboardList className="h-5 w-5 text-primary" />
+                  {language === 'he' ? 'מוכנות לקנייה' : 'Ready to Shop'}
+                  {readyLists.length > 0 && (
+                    <span className="text-xs bg-primary/10 text-primary px-2.5 py-1 rounded-full font-semibold">
+                      {readyLists.length}
+                    </span>
+                  )}
+                </h3>
+                <div className="flex items-center gap-2">
+                  {/* Clear button - Hides lists from dashboard view ONLY (non-destructive) */}
+                  {readyLists.length > 0 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleClearReadyLists}
+                      className="text-muted-foreground hover:text-foreground hover:bg-muted font-medium"
+                      title={language === 'he' ? 'הסתר רשימות מוכנות' : 'Hide ready lists'}
+                    >
+                      {language === 'he' ? 'נקה' : 'Clear'}
                     </Button>
-                  </div>
+                  )}
+                  <Button variant="ghost" onClick={() => navigate("/notebook")} className="text-sm font-semibold text-primary hover:text-primary/80 hover:bg-primary/10">
+                    {t.viewAllListsButton}
+                    {language === 'he' ? <div className="mr-1 rotate-180">➜</div> : <div className="ml-1">➜</div>}
+                  </Button>
                 </div>
-
-                {readyLists.length > 0 ? (
-                  <>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
-                      {readyLists
-                        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-                        .slice(readyPage * ITEMS_PER_PAGE, (readyPage + 1) * ITEMS_PER_PAGE)
-                        .map((list, index) => (
-                          <SavedListCard 
-                            key={list.id} 
-                            list={list} 
-                            index={index} 
-                            language={language} 
-                            t={t} 
-                            variant="default"
-                            onEdit={handleEditSavedList} 
-                            onDelete={handleDelete}
-                            onToggleItem={handleToggle}
-                            onGoShopping={handleGoShopping}
-                            onDuplicate={handleDuplicateList}
-                          />
-                        ))}
-                    </div>
-                    {Math.ceil(readyLists.length / ITEMS_PER_PAGE) > 1 && (
-                      <PaginationDots
-                        currentPage={readyPage}
-                        totalPages={Math.ceil(readyLists.length / ITEMS_PER_PAGE)}
-                        onPageChange={setReadyPage}
-                        language={language}
-                        className="mt-4"
-                      />
-                    )}
-                  </>
-                ) : (
-                  <div className="bg-card/50 border border-dashed border-muted-foreground/30 rounded-xl p-8 text-center">
-                    <ClipboardList className="h-10 w-10 text-muted-foreground/50 mx-auto mb-3" />
-                    <p className="text-muted-foreground">
-                      {language === 'he' ? 'אין רשימות ממתינות' : 'No lists waiting'}
-                    </p>
-                    <p className="text-sm text-muted-foreground/70 mt-1">
-                      {language === 'he' ? 'צור רשימה חדשה ושמור אותה כדי לראות אותה כאן' : 'Create and save a list to see it here'}
-                    </p>
-                  </div>
-                )}
               </div>
 
-              {/* Visual Separator */}
-              <div className="flex items-center gap-4">
-                <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-              </div>
-
-              {/* In Progress Section - SECOND - UNIFIED FOR BOTH USER TYPES */}
-              <div className="bg-warning/5 rounded-2xl p-4 sm:p-6 border border-warning/20">
-                <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
-                    <ShoppingCart className="h-5 w-5 text-warning" />
-                    {language === 'he' ? 'ממשיכים מאיפה שעצרנו' : 'Continue Where You Left Off'}
-                    {inProgressLists.length > 0 && (
-                      <span className="text-xs bg-warning/10 text-warning px-2.5 py-1 rounded-full font-semibold">
-                        {inProgressLists.length}
-                      </span>
-                    )}
-                  </h3>
-                  <div className="flex items-center gap-2">
-                    {/* Clear button - Hides lists from dashboard view ONLY (non-destructive) */}
-                    {inProgressLists.length > 0 && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleClearInProgressLists}
-                        className="text-muted-foreground hover:text-foreground hover:bg-muted font-medium"
-                        title={language === 'he' ? 'הסתר רשימות בתהליך' : 'Hide in-progress lists'}
-                      >
-                        {language === 'he' ? 'נקה' : 'Clear'}
-                      </Button>
-                    )}
-                  </div>
-                </div>
-
-                {inProgressLists.length > 0 ? (
-                  <>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
-                      {inProgressLists
-                        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-                        .slice(inProgressPage * ITEMS_PER_PAGE, (inProgressPage + 1) * ITEMS_PER_PAGE)
-                        .map((list, index) => (
-                          <SavedListCard 
-                            key={list.id} 
-                            list={list} 
-                            index={index} 
-                            language={language} 
-                            t={t} 
-                            variant="in-progress"
-                            onEdit={handleEditSavedList} 
-                            onDelete={handleDelete}
-                            onToggleItem={handleToggle}
-                            onGoShopping={handleGoShopping}
-                            onDuplicate={handleDuplicateList}
-                          />
-                        ))}
-                    </div>
-                    {Math.ceil(inProgressLists.length / ITEMS_PER_PAGE) > 1 && (
-                      <PaginationDots
-                        currentPage={inProgressPage}
-                        totalPages={Math.ceil(inProgressLists.length / ITEMS_PER_PAGE)}
-                        onPageChange={setInProgressPage}
-                        language={language}
-                        className="mt-4"
-                      />
-                    )}
-                  </>
-                ) : (
-                  <div className="bg-card/50 border border-dashed border-muted-foreground/30 rounded-xl p-8 text-center">
-                    <ShoppingCart className="h-10 w-10 text-muted-foreground/50 mx-auto mb-3" />
-                    <p className="text-muted-foreground">
-                      {language === 'he' ? 'אין כרגע קניות פעילות' : 'No active shopping trips'}
-                    </p>
-                    <p className="text-sm text-muted-foreground/70 mt-1">
-                      {language === 'he' ? 'כשתתחיל קנייה ותעצור באמצע, היא תופיע כאן' : 'Start shopping and pause midway to see it here'}
-                    </p>
-                  </div>
-                )}
-              </div>
-
-
-              {/* Completed Lists Section */}
-              {completedLists.length > 0 && (
-                <div>
-                  <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
-                      <CheckCircle2 className="h-5 w-5 text-success" />
-                      {language === 'he' ? 'קניות שהושלמו' : 'Completed Shopping'}
-                      <span className="text-xs bg-success/10 text-success px-2.5 py-1 rounded-full font-semibold">
-                        {completedLists.length}
-                      </span>
-                    </h3>
-                    <div className="flex items-center gap-2">
-                      {/* Clear button - Hides lists from dashboard view ONLY (non-destructive) */}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleClearCompletedLists}
-                        className="text-muted-foreground hover:text-foreground hover:bg-muted font-medium"
-                        title={language === 'he' ? 'הסתר רשימות שהושלמו' : 'Hide completed lists'}
-                      >
-                        {language === 'he' ? 'נקה' : 'Clear'}
-                      </Button>
-                      <Button variant="ghost" onClick={() => navigate("/notebook")} className="text-sm font-semibold text-success hover:text-success/80 hover:bg-success/10">
-                        {language === 'he' ? 'צפה בהכל' : 'View All'}
-                        {language === 'he' ? <div className="mr-1 rotate-180">➜</div> : <div className="ml-1">➜</div>}
-                      </Button>
-                    </div>
-                  </div>
-
+              {readyLists.length > 0 ? (
+                <>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
-                    {completedLists
+                    {readyLists
                       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-                      .slice(completedPage * ITEMS_PER_PAGE, (completedPage + 1) * ITEMS_PER_PAGE)
+                      .slice(readyPage * ITEMS_PER_PAGE, (readyPage + 1) * ITEMS_PER_PAGE)
                       .map((list, index) => (
-                        <SavedListCard 
-                          key={list.id} 
-                          list={list} 
-                          index={index} 
-                          language={language} 
-                          t={t} 
-                          variant="completed"
-                          onEdit={handleEditSavedList} 
+                        <SavedListCard
+                          key={list.id}
+                          list={list}
+                          index={index}
+                          language={language}
+                          t={t}
+                          variant="default"
+                          onEdit={handleEditSavedList}
                           onDelete={handleDelete}
                           onToggleItem={handleToggle}
+                          onGoShopping={handleGoShopping}
                           onDuplicate={handleDuplicateList}
                         />
                       ))}
                   </div>
-                  {Math.ceil(completedLists.length / ITEMS_PER_PAGE) > 1 && (
+                  {Math.ceil(readyLists.length / ITEMS_PER_PAGE) > 1 && (
                     <PaginationDots
-                      currentPage={completedPage}
-                      totalPages={Math.ceil(completedLists.length / ITEMS_PER_PAGE)}
-                      onPageChange={setCompletedPage}
+                      currentPage={readyPage}
+                      totalPages={Math.ceil(readyLists.length / ITEMS_PER_PAGE)}
+                      onPageChange={setReadyPage}
                       language={language}
                       className="mt-4"
                     />
                   )}
+                </>
+              ) : (
+                <div className="bg-card/50 border border-dashed border-muted-foreground/30 rounded-xl p-8 text-center">
+                  <ClipboardList className="h-10 w-10 text-muted-foreground/50 mx-auto mb-3" />
+                  <p className="text-muted-foreground">
+                    {language === 'he' ? 'אין רשימות ממתינות' : 'No lists waiting'}
+                  </p>
+                  <p className="text-sm text-muted-foreground/70 mt-1">
+                    {language === 'he' ? 'צור רשימה חדשה ושמור אותה כדי לראות אותה כאן' : 'Create and save a list to see it here'}
+                  </p>
                 </div>
               )}
+            </div>
 
-              {/* Completed Trips from History Section */}
-              {shoppingHistory.length > 0 && (
-                <div>
-                  <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
-                      <History className="h-5 w-5 text-muted-foreground" />
-                      {language === 'he' ? 'קניות שהושלמו' : 'Completed Shopping'}
-                      <span className="text-xs bg-muted text-muted-foreground px-2.5 py-1 rounded-full font-semibold">
-                        {shoppingHistory.length}
-                      </span>
-                    </h3>
-                    <Button variant="ghost" onClick={() => navigate("/history")} className="text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-muted">
+            {/* Visual Separator */}
+            <div className="flex items-center gap-4">
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+            </div>
+
+            {/* In Progress Section - SECOND - UNIFIED FOR BOTH USER TYPES */}
+            <div className="bg-warning/5 rounded-2xl p-4 sm:p-6 border border-warning/20">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                  <ShoppingCart className="h-5 w-5 text-warning" />
+                  {language === 'he' ? 'ממשיכים מאיפה שעצרנו' : 'Continue Where You Left Off'}
+                  {inProgressLists.length > 0 && (
+                    <span className="text-xs bg-warning/10 text-warning px-2.5 py-1 rounded-full font-semibold">
+                      {inProgressLists.length}
+                    </span>
+                  )}
+                </h3>
+                <div className="flex items-center gap-2">
+                  {/* Clear button - Hides lists from dashboard view ONLY (non-destructive) */}
+                  {inProgressLists.length > 0 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleClearInProgressLists}
+                      className="text-muted-foreground hover:text-foreground hover:bg-muted font-medium"
+                      title={language === 'he' ? 'הסתר רשימות בתהליך' : 'Hide in-progress lists'}
+                    >
+                      {language === 'he' ? 'נקה' : 'Clear'}
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              {inProgressLists.length > 0 ? (
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
+                    {inProgressLists
+                      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                      .slice(inProgressPage * ITEMS_PER_PAGE, (inProgressPage + 1) * ITEMS_PER_PAGE)
+                      .map((list, index) => (
+                        <SavedListCard
+                          key={list.id}
+                          list={list}
+                          index={index}
+                          language={language}
+                          t={t}
+                          variant="in-progress"
+                          onEdit={handleEditSavedList}
+                          onDelete={handleDelete}
+                          onToggleItem={handleToggle}
+                          onGoShopping={handleGoShopping}
+                          onDuplicate={handleDuplicateList}
+                        />
+                      ))}
+                  </div>
+                  {Math.ceil(inProgressLists.length / ITEMS_PER_PAGE) > 1 && (
+                    <PaginationDots
+                      currentPage={inProgressPage}
+                      totalPages={Math.ceil(inProgressLists.length / ITEMS_PER_PAGE)}
+                      onPageChange={setInProgressPage}
+                      language={language}
+                      className="mt-4"
+                    />
+                  )}
+                </>
+              ) : (
+                <div className="bg-card/50 border border-dashed border-muted-foreground/30 rounded-xl p-8 text-center">
+                  <ShoppingCart className="h-10 w-10 text-muted-foreground/50 mx-auto mb-3" />
+                  <p className="text-muted-foreground">
+                    {language === 'he' ? 'אין כרגע קניות פעילות' : 'No active shopping trips'}
+                  </p>
+                  <p className="text-sm text-muted-foreground/70 mt-1">
+                    {language === 'he' ? 'כשתתחיל קנייה ותעצור באמצע, היא תופיע כאן' : 'Start shopping and pause midway to see it here'}
+                  </p>
+                </div>
+              )}
+            </div>
+
+
+            {/* Completed Lists Section */}
+            {completedLists.length > 0 && (
+              <div>
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-success" />
+                    {language === 'he' ? 'קניות שהושלמו' : 'Completed Shopping'}
+                    <span className="text-xs bg-success/10 text-success px-2.5 py-1 rounded-full font-semibold">
+                      {completedLists.length}
+                    </span>
+                  </h3>
+                  <div className="flex items-center gap-2">
+                    {/* Clear button - Hides lists from dashboard view ONLY (non-destructive) */}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleClearCompletedLists}
+                      className="text-muted-foreground hover:text-foreground hover:bg-muted font-medium"
+                      title={language === 'he' ? 'הסתר רשימות שהושלמו' : 'Hide completed lists'}
+                    >
+                      {language === 'he' ? 'נקה' : 'Clear'}
+                    </Button>
+                    <Button variant="ghost" onClick={() => navigate("/notebook")} className="text-sm font-semibold text-success hover:text-success/80 hover:bg-success/10">
                       {language === 'he' ? 'צפה בהכל' : 'View All'}
                       {language === 'he' ? <div className="mr-1 rotate-180">➜</div> : <div className="ml-1">➜</div>}
                     </Button>
                   </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
-                    {shoppingHistory
-                      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                      .slice(historyPage * ITEMS_PER_PAGE, (historyPage + 1) * ITEMS_PER_PAGE)
-                      .map((trip, index) => (
-                        <CompletedTripCard 
-                          key={trip.id} 
-                          trip={trip} 
-                          index={index} 
-                          language={language} 
-                          onViewDetails={trip => {
-                            setSelectedTrip(trip);
-                            setIsHistoryModalOpen(true);
-                          }} 
-                          onEdit={(trip) => {
-                            setEditingTrip(trip);
-                            setIsEditHistoryModalOpen(true);
-                          }}
-                          onDelete={async (id) => {
-                            const success = await cloudSync.deleteShoppingHistory(id);
-                            if (success) {
-                              const history = await cloudSync.getShoppingHistory();
-                              setShoppingHistory(history);
-                              toast.success(language === 'he' ? 'הקנייה נמחקה' : 'Trip deleted');
-                            }
-                          }} 
-                        />
-                      ))}
-                  </div>
-                  {Math.ceil(shoppingHistory.length / ITEMS_PER_PAGE) > 1 && (
-                    <PaginationDots
-                      currentPage={historyPage}
-                      totalPages={Math.ceil(shoppingHistory.length / ITEMS_PER_PAGE)}
-                      onPageChange={setHistoryPage}
-                      language={language}
-                      className="mt-4"
-                    />
-                  )}
                 </div>
-              )}
-            </div>
-          );
-        })()}
 
-        {/* Secondary Action Bar */}
-        {items && items.length > 0 && <div className="flex flex-col gap-3 mb-4">
-              {/* Sort Toggle */}
-              <SortModeToggle isSmartSort={isSmartSort} onToggle={enabled => {
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
+                  {completedLists
+                    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                    .slice(completedPage * ITEMS_PER_PAGE, (completedPage + 1) * ITEMS_PER_PAGE)
+                    .map((list, index) => (
+                      <SavedListCard
+                        key={list.id}
+                        list={list}
+                        index={index}
+                        language={language}
+                        t={t}
+                        variant="completed"
+                        onEdit={handleEditSavedList}
+                        onDelete={handleDelete}
+                        onToggleItem={handleToggle}
+                        onDuplicate={handleDuplicateList}
+                      />
+                    ))}
+                </div>
+                {Math.ceil(completedLists.length / ITEMS_PER_PAGE) > 1 && (
+                  <PaginationDots
+                    currentPage={completedPage}
+                    totalPages={Math.ceil(completedLists.length / ITEMS_PER_PAGE)}
+                    onPageChange={setCompletedPage}
+                    language={language}
+                    className="mt-4"
+                  />
+                )}
+              </div>
+            )}
+
+            {/* Completed Trips from History Section */}
+            {shoppingHistory.length > 0 && (
+              <div>
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                    <History className="h-5 w-5 text-muted-foreground" />
+                    {language === 'he' ? 'קניות שהושלמו' : 'Completed Shopping'}
+                    <span className="text-xs bg-muted text-muted-foreground px-2.5 py-1 rounded-full font-semibold">
+                      {shoppingHistory.length}
+                    </span>
+                  </h3>
+                  <Button variant="ghost" onClick={() => navigate("/history")} className="text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-muted">
+                    {language === 'he' ? 'צפה בהכל' : 'View All'}
+                    {language === 'he' ? <div className="mr-1 rotate-180">➜</div> : <div className="ml-1">➜</div>}
+                  </Button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
+                  {shoppingHistory
+                    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                    .slice(historyPage * ITEMS_PER_PAGE, (historyPage + 1) * ITEMS_PER_PAGE)
+                    .map((trip, index) => (
+                      <CompletedTripCard
+                        key={trip.id}
+                        trip={trip}
+                        index={index}
+                        language={language}
+                        onViewDetails={trip => {
+                          setSelectedTrip(trip);
+                          setIsHistoryModalOpen(true);
+                        }}
+                        onEdit={(trip) => {
+                          setEditingTrip(trip);
+                          setIsEditHistoryModalOpen(true);
+                        }}
+                        onDelete={async (id) => {
+                          const success = await cloudSync.deleteShoppingHistory(id);
+                          if (success) {
+                            const history = await cloudSync.getShoppingHistory();
+                            setShoppingHistory(history);
+                            toast.success(language === 'he' ? 'הקנייה נמחקה' : 'Trip deleted');
+                          }
+                        }}
+                      />
+                    ))}
+                </div>
+                {Math.ceil(shoppingHistory.length / ITEMS_PER_PAGE) > 1 && (
+                  <PaginationDots
+                    currentPage={historyPage}
+                    totalPages={Math.ceil(shoppingHistory.length / ITEMS_PER_PAGE)}
+                    onPageChange={setHistoryPage}
+                    language={language}
+                    className="mt-4"
+                  />
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })()}
+
+      {/* Secondary Action Bar */}
+      {items && items.length > 0 && <div className="flex flex-col gap-3 mb-4">
+        {/* Sort Toggle */}
+        <SortModeToggle isSmartSort={isSmartSort} onToggle={enabled => {
           setIsSmartSort(enabled);
           // Re-sort items when toggling
           if (enabled) {
@@ -2388,10 +2424,10 @@ export const ShoppingList = () => {
             toast.success(language === 'he' ? 'הפריטים מסודרים לפי קטגוריה' : 'Items sorted by category');
           }
         }} language={language} />
-              
-              {/* Reset checks button */}
-              <div className="flex justify-start">
-                <button onClick={() => {
+
+        {/* Reset checks button */}
+        <div className="flex justify-start">
+          <button onClick={() => {
             if (items && items.length > 0) {
               setItems(items.map(item => ({
                 ...item,
@@ -2400,271 +2436,271 @@ export const ShoppingList = () => {
               toast.success(language === 'he' ? 'כל הסימונים אופסו' : 'All checks reset');
             }
           }} className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1.5 px-3 py-2 rounded-xl hover:bg-muted transition-all">
-                  <RotateCcw className="w-4 h-4" />
-                  <span>{language === 'he' ? 'אפס סימונים' : 'Reset Checks'}</span>
-                </button>
-              </div>
-            </div>}
+            <RotateCcw className="w-4 h-4" />
+            <span>{language === 'he' ? 'אפס סימונים' : 'Reset Checks'}</span>
+          </button>
+        </div>
+      </div>}
 
-        {/* Items List */}
-        {items && items.length > 0 && (isSmartSort ?
-      // Grouped List View with Category Headers
-      <GroupedShoppingList items={items} language={language} onToggle={toggleItem} onDelete={deleteItem} onQuantityChange={updateItemQuantity} onUnitChange={updateItemUnit} /> :
-      // Flat List View (Original)
-      <div className="space-y-4 sm:space-y-5">
-                {/* Pending Items */}
-                <div className="space-y-3 sm:space-y-4">
-                  {items.filter(item => !item.checked).map((item, index) => <div key={item.id} className="animate-fade-in" style={{
-            animationDelay: `${index * 50}ms`
-          }}>
-                      <ShoppingListItem item={item} onToggle={toggleItem} onDelete={deleteItem} onQuantityChange={updateItemQuantity} onUnitChange={updateItemUnit} />
-                    </div>)}
-                </div>
+      {/* Items List */}
+      {items && items.length > 0 && (isSmartSort ?
+        // Grouped List View with Category Headers
+        <GroupedShoppingList items={items} language={language} onToggle={toggleItem} onDelete={deleteItem} onQuantityChange={updateItemQuantity} onUnitChange={updateItemUnit} /> :
+        // Flat List View (Original)
+        <div className="space-y-4 sm:space-y-5">
+          {/* Pending Items */}
+          <div className="space-y-3 sm:space-y-4">
+            {items.filter(item => !item.checked).map((item, index) => <div key={item.id} className="animate-fade-in" style={{
+              animationDelay: `${index * 50}ms`
+            }}>
+              <ShoppingListItem item={item} onToggle={toggleItem} onDelete={deleteItem} onQuantityChange={updateItemQuantity} onUnitChange={updateItemUnit} />
+            </div>)}
+          </div>
 
-                {/* Completed Items Separator */}
-                {items.filter(item => item.checked).length > 0 && <div className="flex items-center gap-4 py-4">
-                    <div className="h-px flex-1 bg-gradient-to-r from-transparent via-success/40 to-transparent" />
-                    <span className="text-sm font-bold text-success flex items-center gap-2.5 px-4 py-2 bg-success/15 rounded-full shadow-sm shadow-success/20 border border-success/20">
-                      <Check className="h-4 w-4" strokeWidth={3} />
-                      {language === 'he' ? `נרכשו ${items.filter(item => item.checked).length}` : `Completed ${items.filter(item => item.checked).length}`}
-                    </span>
-                    <div className="h-px flex-1 bg-gradient-to-r from-transparent via-success/40 to-transparent" />
-                  </div>}
+          {/* Completed Items Separator */}
+          {items.filter(item => item.checked).length > 0 && <div className="flex items-center gap-4 py-4">
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-success/40 to-transparent" />
+            <span className="text-sm font-bold text-success flex items-center gap-2.5 px-4 py-2 bg-success/15 rounded-full shadow-sm shadow-success/20 border border-success/20">
+              <Check className="h-4 w-4" strokeWidth={3} />
+              {language === 'he' ? `נרכשו ${items.filter(item => item.checked).length}` : `Completed ${items.filter(item => item.checked).length}`}
+            </span>
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-success/40 to-transparent" />
+          </div>}
 
-                {/* Completed Items */}
-                {items.filter(item => item.checked).length > 0 && <div className="space-y-3 sm:space-y-4">
-                    {items.filter(item => item.checked).map(item => <ShoppingListItem key={item.id} item={item} onToggle={toggleItem} onDelete={deleteItem} onQuantityChange={updateItemQuantity} onUnitChange={updateItemUnit} isCompleted={true} />)}
-                  </div>}
-              </div>)}
-        {items && items.length > 0 && <div className="fixed bottom-0 left-0 right-0 z-[60] glass-strong border-t border-border/50 shadow-[0_-8px_30px_-5px_rgba(0,0,0,0.15)] p-4 sm:p-5 safe-area-inset-bottom">
-              <div className="max-w-3xl mx-auto">
-                <div className="flex flex-row gap-3 sm:gap-4">
-                  {(() => {
+          {/* Completed Items */}
+          {items.filter(item => item.checked).length > 0 && <div className="space-y-3 sm:space-y-4">
+            {items.filter(item => item.checked).map(item => <ShoppingListItem key={item.id} item={item} onToggle={toggleItem} onDelete={deleteItem} onQuantityChange={updateItemQuantity} onUnitChange={updateItemUnit} isCompleted={true} />)}
+          </div>}
+        </div>)}
+      {items && items.length > 0 && <div className="fixed bottom-0 left-0 right-0 z-[60] glass-strong border-t border-border/50 shadow-[0_-8px_30px_-5px_rgba(0,0,0,0.15)] p-4 sm:p-5 safe-area-inset-bottom">
+        <div className="max-w-3xl mx-auto">
+          <div className="flex flex-row gap-3 sm:gap-4">
+            {(() => {
               const isSavedList = activeListId && savedLists.some(list => list.id === activeListId);
               return <Button variant="outline" onClick={handleSaveList} className="flex-1 h-14 sm:h-16 font-bold text-base sm:text-lg touch-manipulation rounded-2xl glass border-2 border-border/50 hover:border-primary/50 hover:bg-primary/5 active:scale-95 transition-all duration-200">
-                        <Save className={`h-5 w-5 sm:h-6 sm:w-6 ${language === 'he' ? 'ml-2 sm:ml-3' : 'mr-2 sm:mr-3'}`} />
-                        <span className="truncate">{isSavedList ? t.saveChangesButton : t.saveListButton}</span>
-                      </Button>;
+                <Save className={`h-5 w-5 sm:h-6 sm:w-6 ${language === 'he' ? 'ml-2 sm:ml-3' : 'mr-2 sm:mr-3'}`} />
+                <span className="truncate">{isSavedList ? t.saveChangesButton : t.saveListButton}</span>
+              </Button>;
             })()}
-                  <Button onClick={openFinishDialog} className="flex-1 h-14 sm:h-16 font-bold text-base sm:text-lg touch-manipulation rounded-2xl bg-gradient-to-br from-foreground to-foreground/90 text-background hover:opacity-90 shadow-xl hover:shadow-2xl active:scale-95 transition-all duration-200">
-                    <ClipboardList className={`h-5 w-5 sm:h-6 sm:w-6 ${language === 'he' ? 'ml-2 sm:ml-3' : 'mr-2 sm:mr-3'}`} />
-                    <span className="truncate">{t.summarizeButton}</span>
-                  </Button>
-                </div>
-              </div>
-            </div>}
+            <Button onClick={openFinishDialog} className="flex-1 h-14 sm:h-16 font-bold text-base sm:text-lg touch-manipulation rounded-2xl bg-gradient-to-br from-foreground to-foreground/90 text-background hover:opacity-90 shadow-xl hover:shadow-2xl active:scale-95 transition-all duration-200">
+              <ClipboardList className={`h-5 w-5 sm:h-6 sm:w-6 ${language === 'he' ? 'ml-2 sm:ml-3' : 'mr-2 sm:mr-3'}`} />
+              <span className="truncate">{t.summarizeButton}</span>
+            </Button>
+          </div>
+        </div>
+      </div>}
 
-        <Dialog open={isFinishDialogOpen} onOpenChange={setIsFinishDialogOpen}>
-          <DialogContent className="sm:max-w-[500px]">
-            <DialogHeader>
-              <DialogTitle className="text-2xl">{t.finishDialogTitle}</DialogTitle>
-              <DialogDescription className="text-base">
-                {t.finishDialogDescription}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-6 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="amount" className="text-base font-semibold">
-                  {t.amountLabel}
-                </Label>
-                <Input id="amount" type="number" placeholder="0.00" value={totalAmount} onChange={e => setTotalAmount(e.target.value)} className="h-12 text-lg" min="0" step="0.01" />
+      <Dialog open={isFinishDialogOpen} onOpenChange={setIsFinishDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="text-2xl">{t.finishDialogTitle}</DialogTitle>
+            <DialogDescription className="text-base">
+              {t.finishDialogDescription}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="amount" className="text-base font-semibold">
+                {t.amountLabel}
+              </Label>
+              <Input id="amount" type="number" placeholder="0.00" value={totalAmount} onChange={e => setTotalAmount(e.target.value)} className="h-12 text-lg" min="0" step="0.01" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="store" className="text-base font-semibold">
+                {t.storeLabel}
+              </Label>
+              <Select value={selectedStore} onValueChange={setSelectedStore}>
+                <SelectTrigger className="h-12 text-lg">
+                  <SelectValue placeholder={t.selectPlaceholder} />
+                </SelectTrigger>
+                <SelectContent>
+                  {storeOptions.map(store => <SelectItem key={store} value={store} className="text-lg">
+                    {store}
+                  </SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            {selectedStore === otherLabel && <div className="space-y-2">
+              <Label htmlFor="customStore" className="text-base font-semibold">
+                {t.customStoreLabel}
+              </Label>
+              <Input id="customStore" type="text" placeholder={t.customStorePlaceholder} value={customStore} onChange={e => setCustomStore(e.target.value)} className="h-12 text-lg" />
+            </div>}
+            <div className="bg-muted/50 rounded-lg p-4 space-y-1">
+              <p className="text-sm text-muted-foreground">{t.summaryLabel}</p>
+              <p className="text-lg font-semibold">
+                {t.progressText(items.filter(item => item.checked).length, items.length)}
+              </p>
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setIsFinishDialogOpen(false)} className="h-11 px-6">
+              {t.cancel}
+            </Button>
+            <Button onClick={handleFinishShopping} className="h-11 px-6 bg-success hover:bg-success/90">
+              <CheckCircle2 className="ml-2 h-4 w-4" />
+              {t.save}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold">{t.saveDialog.title}</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-6 py-4">
+            {/* Save Section */}
+            <div className="space-y-3">
+              <Label htmlFor="listName" className="text-base font-semibold">
+                {t.saveDialog.nameLabel}
+              </Label>
+              <div className="flex gap-2">
+                <Input id="listName" value={listName} onChange={e => setListName(e.target.value)} placeholder={t.saveDialog.namePlaceholder} className="h-11 text-lg" />
+                <Button onClick={confirmSaveList} className="h-11 px-6 bg-primary hover:bg-primary/90 font-bold shrink-0">
+                  <Save className="mr-2 h-4 w-4" />
+                  {t.saveDialog.saveButton}
+                </Button>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="store" className="text-base font-semibold">
-                  {t.storeLabel}
-                </Label>
-                <Select value={selectedStore} onValueChange={setSelectedStore}>
-                  <SelectTrigger className="h-12 text-lg">
-                    <SelectValue placeholder={t.selectPlaceholder} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {storeOptions.map(store => <SelectItem key={store} value={store} className="text-lg">
-                      {store}
-                    </SelectItem>)}
-                  </SelectContent>
-                </Select>
+            </div>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
               </div>
-              {selectedStore === otherLabel && <div className="space-y-2">
-                <Label htmlFor="customStore" className="text-base font-semibold">
-                  {t.customStoreLabel}
-                </Label>
-                <Input id="customStore" type="text" placeholder={t.customStorePlaceholder} value={customStore} onChange={e => setCustomStore(e.target.value)} className="h-12 text-lg" />
-              </div>}
-              <div className="bg-muted/50 rounded-lg p-4 space-y-1">
-                <p className="text-sm text-muted-foreground">{t.summaryLabel}</p>
-                <p className="text-lg font-semibold">
-                  {t.progressText(items.filter(item => item.checked).length, items.length)}
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  {t.saveDialog.shareTitle}
+                </span>
+              </div>
+            </div>
+
+            {/* Share Grid */}
+            <div className="grid grid-cols-5 gap-2">
+              <Button variant="outline" onClick={handleShareWhatsApp} className="flex flex-col items-center justify-center h-20 gap-2 hover:bg-green-50 hover:border-green-200 transition-colors" title={t.saveDialog.shareWhatsapp}>
+                <FaWhatsapp className="h-6 w-6 text-green-500" />
+                <span className="text-xs font-medium hidden sm:inline">{t.saveDialog.shareWhatsapp}</span>
+              </Button>
+              <Button variant="outline" onClick={() => copyToClipboard(getListText())} className="flex flex-col items-center justify-center h-20 gap-2 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-colors" title={t.saveDialog.shareCopy}>
+                <Copy className="h-6 w-6" />
+                <span className="text-xs font-medium hidden sm:inline">{t.saveDialog.shareCopy}</span>
+              </Button>
+              <Button variant="outline" onClick={handleExportCSV} className="flex flex-col items-center justify-center h-20 gap-2 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 transition-colors" title={t.saveDialog.shareCsv}>
+                <FileSpreadsheet className="h-6 w-6" />
+                <span className="text-xs font-medium hidden sm:inline">{t.saveDialog.shareCsv}</span>
+              </Button>
+              <Button variant="outline" onClick={handleShareEmail} className="flex flex-col items-center justify-center h-20 gap-2 hover:bg-purple-50 hover:text-purple-600 hover:border-purple-200 transition-colors" title={t.saveDialog.shareEmail}>
+                <Mail className="h-6 w-6" />
+                <span className="text-xs font-medium hidden sm:inline">{t.saveDialog.shareEmail}</span>
+              </Button>
+              <Button variant="outline" onClick={handlePrint} className="flex flex-col items-center justify-center h-20 gap-2 hover:bg-gray-100 hover:text-gray-900 hover:border-gray-300 transition-colors" title={t.saveDialog.sharePrint}>
+                <Printer className="h-6 w-6" />
+                <span className="text-xs font-medium hidden sm:inline">{t.saveDialog.sharePrint}</span>
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isRenameDialogOpen} onOpenChange={setIsRenameDialogOpen}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>{t.renameDialog.title}</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <Input value={renamingListName} onChange={e => setRenamingListName(e.target.value)} className="h-11 text-lg" onKeyDown={e => e.key === "Enter" && confirmRenameList()} />
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setIsRenameDialogOpen(false)}>
+              {t.renameDialog.cancel}
+            </Button>
+            <Button onClick={confirmRenameList}>
+              {t.renameDialog.save}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Template Dialog */}
+      <Dialog open={isCreateTemplateDialogOpen} onOpenChange={setIsCreateTemplateDialogOpen}>
+        <DialogContent
+          className="sm:max-w-[420px] p-0 gap-0 overflow-hidden"
+          dir={language === 'he' ? 'rtl' : 'ltr'}
+        >
+          {/* Header with gradient */}
+          <div className="bg-gradient-to-b from-primary/5 to-transparent px-6 pt-6 pb-4">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <ClipboardList className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-foreground">
+                  {language === 'he' ? 'יצירת תבנית חדשה' : 'Create New Template'}
+                </h2>
+                <p className="text-xs text-muted-foreground">
+                  {language === 'he'
+                    ? 'שמור פריטים לשימוש חוזר'
+                    : 'Save items for reuse'}
                 </p>
               </div>
             </div>
-            <DialogFooter className="gap-2">
-              <Button variant="outline" onClick={() => setIsFinishDialogOpen(false)} className="h-11 px-6">
-                {t.cancel}
-              </Button>
-              <Button onClick={handleFinishShopping} className="h-11 px-6 bg-success hover:bg-success/90">
-                <CheckCircle2 className="ml-2 h-4 w-4" />
-                {t.save}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+          </div>
 
-        <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
-          <DialogContent className="sm:max-w-[500px]">
-            <DialogHeader>
-              <DialogTitle className="text-2xl font-bold">{t.saveDialog.title}</DialogTitle>
-            </DialogHeader>
-
-            <div className="space-y-6 py-4">
-              {/* Save Section */}
-              <div className="space-y-3">
-                <Label htmlFor="listName" className="text-base font-semibold">
-                  {t.saveDialog.nameLabel}
-                </Label>
-                <div className="flex gap-2">
-                  <Input id="listName" value={listName} onChange={e => setListName(e.target.value)} placeholder={t.saveDialog.namePlaceholder} className="h-11 text-lg" />
-                  <Button onClick={confirmSaveList} className="h-11 px-6 bg-primary hover:bg-primary/90 font-bold shrink-0">
-                    <Save className="mr-2 h-4 w-4" />
-                    {t.saveDialog.saveButton}
-                  </Button>
-                </div>
-              </div>
-
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">
-                    {t.saveDialog.shareTitle}
-                  </span>
-                </div>
-              </div>
-
-              {/* Share Grid */}
-              <div className="grid grid-cols-5 gap-2">
-                <Button variant="outline" onClick={handleShareWhatsApp} className="flex flex-col items-center justify-center h-20 gap-2 hover:bg-green-50 hover:border-green-200 transition-colors" title={t.saveDialog.shareWhatsapp}>
-                  <FaWhatsapp className="h-6 w-6 text-green-500" />
-                  <span className="text-xs font-medium hidden sm:inline">{t.saveDialog.shareWhatsapp}</span>
-                </Button>
-                <Button variant="outline" onClick={() => copyToClipboard(getListText())} className="flex flex-col items-center justify-center h-20 gap-2 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-colors" title={t.saveDialog.shareCopy}>
-                  <Copy className="h-6 w-6" />
-                  <span className="text-xs font-medium hidden sm:inline">{t.saveDialog.shareCopy}</span>
-                </Button>
-                <Button variant="outline" onClick={handleExportCSV} className="flex flex-col items-center justify-center h-20 gap-2 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 transition-colors" title={t.saveDialog.shareCsv}>
-                  <FileSpreadsheet className="h-6 w-6" />
-                  <span className="text-xs font-medium hidden sm:inline">{t.saveDialog.shareCsv}</span>
-                </Button>
-                <Button variant="outline" onClick={handleShareEmail} className="flex flex-col items-center justify-center h-20 gap-2 hover:bg-purple-50 hover:text-purple-600 hover:border-purple-200 transition-colors" title={t.saveDialog.shareEmail}>
-                  <Mail className="h-6 w-6" />
-                  <span className="text-xs font-medium hidden sm:inline">{t.saveDialog.shareEmail}</span>
-                </Button>
-                <Button variant="outline" onClick={handlePrint} className="flex flex-col items-center justify-center h-20 gap-2 hover:bg-gray-100 hover:text-gray-900 hover:border-gray-300 transition-colors" title={t.saveDialog.sharePrint}>
-                  <Printer className="h-6 w-6" />
-                  <span className="text-xs font-medium hidden sm:inline">{t.saveDialog.sharePrint}</span>
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        <Dialog open={isRenameDialogOpen} onOpenChange={setIsRenameDialogOpen}>
-          <DialogContent className="sm:max-w-[400px]">
-            <DialogHeader>
-              <DialogTitle>{t.renameDialog.title}</DialogTitle>
-            </DialogHeader>
-            <div className="py-4">
-              <Input value={renamingListName} onChange={e => setRenamingListName(e.target.value)} className="h-11 text-lg" onKeyDown={e => e.key === "Enter" && confirmRenameList()} />
-            </div>
-            <DialogFooter className="gap-2">
-              <Button variant="outline" onClick={() => setIsRenameDialogOpen(false)}>
-                {t.renameDialog.cancel}
-              </Button>
-              <Button onClick={confirmRenameList}>
-                {t.renameDialog.save}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {/* Create Template Dialog */}
-        <Dialog open={isCreateTemplateDialogOpen} onOpenChange={setIsCreateTemplateDialogOpen}>
-          <DialogContent 
-            className="sm:max-w-[420px] p-0 gap-0 overflow-hidden"
-            dir={language === 'he' ? 'rtl' : 'ltr'}
-          >
-            {/* Header with gradient */}
-            <div className="bg-gradient-to-b from-primary/5 to-transparent px-6 pt-6 pb-4">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <ClipboardList className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <h2 className="text-lg font-bold text-foreground">
-                    {language === 'he' ? 'יצירת תבנית חדשה' : 'Create New Template'}
-                  </h2>
-                  <p className="text-xs text-muted-foreground">
-                    {language === 'he' 
-                      ? 'שמור פריטים לשימוש חוזר' 
-                      : 'Save items for reuse'}
-                  </p>
-                </div>
-              </div>
+          {/* Form content */}
+          <div className="px-6 py-5 space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="templateName" className="text-sm font-medium">
+                {language === 'he' ? 'שם התבנית' : 'Template Name'}
+              </Label>
+              <Input
+                id="templateName"
+                value={newTemplateName}
+                onChange={e => setNewTemplateName(e.target.value)}
+                placeholder={language === 'he' ? 'קניות שבועיות' : 'Weekly Shopping'}
+                className="h-11 bg-muted/50 border-0 focus-visible:ring-1 focus-visible:ring-primary"
+              />
             </div>
 
-            {/* Form content */}
-            <div className="px-6 py-5 space-y-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="templateName" className="text-sm font-medium">
-                  {language === 'he' ? 'שם התבנית' : 'Template Name'}
-                </Label>
-                <Input 
-                  id="templateName" 
-                  value={newTemplateName} 
-                  onChange={e => setNewTemplateName(e.target.value)} 
-                  placeholder={language === 'he' ? 'קניות שבועיות' : 'Weekly Shopping'} 
-                  className="h-11 bg-muted/50 border-0 focus-visible:ring-1 focus-visible:ring-primary" 
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="templateItems" className="text-sm font-medium">
-                  {language === 'he' ? 'פריטים' : 'Items'}
-                </Label>
-                <textarea 
-                  id="templateItems" 
-                  value={newTemplateItems} 
-                  onChange={e => setNewTemplateItems(e.target.value)} 
-                  placeholder={language === 'he' ? 'חלב\nלחם\nביצים' : 'Milk\nBread\nEggs'} 
-                  className="w-full min-h-[120px] p-3 text-sm bg-muted/50 border-0 rounded-md resize-none focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-muted-foreground/60" 
-                />
-              </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="templateItems" className="text-sm font-medium">
+                {language === 'he' ? 'פריטים' : 'Items'}
+              </Label>
+              <textarea
+                id="templateItems"
+                value={newTemplateItems}
+                onChange={e => setNewTemplateItems(e.target.value)}
+                placeholder={language === 'he' ? 'חלב\nלחם\nביצים' : 'Milk\nBread\nEggs'}
+                className="w-full min-h-[120px] p-3 text-sm bg-muted/50 border-0 rounded-md resize-none focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-muted-foreground/60"
+              />
             </div>
+          </div>
 
-            {/* Footer buttons */}
-            <div className="px-6 pb-6 pt-2 flex gap-3">
-              <Button 
-                variant="ghost" 
-                onClick={() => setIsCreateTemplateDialogOpen(false)}
-                className="flex-1 h-11 text-muted-foreground hover:text-foreground"
-              >
-                {t.cancel}
-              </Button>
-              <Button 
-                onClick={handleCreateTemplate} 
-                className="flex-1 h-11 font-medium"
-              >
-                <Save className="me-2 h-4 w-4" />
-                {language === 'he' ? 'שמור' : 'Save'}
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+          {/* Footer buttons */}
+          <div className="px-6 pb-6 pt-2 flex gap-3">
+            <Button
+              variant="ghost"
+              onClick={() => setIsCreateTemplateDialogOpen(false)}
+              className="flex-1 h-11 text-muted-foreground hover:text-foreground"
+            >
+              {t.cancel}
+            </Button>
+            <Button
+              onClick={handleCreateTemplate}
+              className="flex-1 h-11 font-medium"
+            >
+              <Save className="me-2 h-4 w-4" />
+              {language === 'he' ? 'שמור' : 'Save'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
-        {isHandwritingOpen && <HandwritingCanvas onSubmit={handleHandwritingSubmit} onCancel={() => setIsHandwritingOpen(false)} language={language} />}
+      {isHandwritingOpen && <HandwritingCanvas onSubmit={handleHandwritingSubmit} onCancel={() => setIsHandwritingOpen(false)} language={language} />}
 
-        {/* History Detail Modal */}
-        <HistoryDetailModal trip={selectedTrip} isOpen={isHistoryModalOpen} onClose={() => {
+      {/* History Detail Modal */}
+      <HistoryDetailModal trip={selectedTrip} isOpen={isHistoryModalOpen} onClose={() => {
         setIsHistoryModalOpen(false);
         setSelectedTrip(null);
       }} onEdit={(trip) => {
@@ -2672,96 +2708,96 @@ export const ShoppingList = () => {
         setIsEditHistoryModalOpen(true);
       }} language={language} />
 
-        {/* Edit History Modal */}
-        <EditHistoryModal
-          trip={editingTrip}
-          isOpen={isEditHistoryModalOpen}
-          onClose={() => {
-            setIsEditHistoryModalOpen(false);
-            setEditingTrip(null);
-          }}
-          onSave={async (updatedTrip) => {
-            const success = await cloudSync.updateShoppingHistory(updatedTrip);
-            if (success) {
-              const history = await cloudSync.getShoppingHistory();
-              setShoppingHistory(history);
-              toast.success(language === 'he' ? 'הקנייה עודכנה' : 'Purchase updated');
-            }
-          }}
-          language={language}
-        />
+      {/* Edit History Modal */}
+      <EditHistoryModal
+        trip={editingTrip}
+        isOpen={isEditHistoryModalOpen}
+        onClose={() => {
+          setIsEditHistoryModalOpen(false);
+          setEditingTrip(null);
+        }}
+        onSave={async (updatedTrip) => {
+          const success = await cloudSync.updateShoppingHistory(updatedTrip);
+          if (success) {
+            const history = await cloudSync.getShoppingHistory();
+            setShoppingHistory(history);
+            toast.success(language === 'he' ? 'הקנייה עודכנה' : 'Purchase updated');
+          }
+        }}
+        language={language}
+      />
 
-        {/* Delete All Lists Confirmation Dialog */}
-        <AlertDialog open={isDeleteAllDialogOpen} onOpenChange={setIsDeleteAllDialogOpen}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>
-                {language === 'he' ? 'האם אתה בטוח שברצונך למחוק את כל הרשימות?' : 'Are you sure you want to delete all lists?'}
-              </AlertDialogTitle>
-              <AlertDialogDescription>
-                {language === 'he' 
-                  ? 'פעולה זו לא ניתנת לביטול.' 
-                  : 'This action cannot be undone.'}
-                {user && (
-                  <span className="block mt-2 text-destructive font-medium">
-                    {language === 'he' 
-                      ? 'מחיקה מכל מקום תמחק את הנתונים לצמיתות מהחשבון שלך.' 
-                      : 'Deleting everywhere will permanently remove data from your account.'}
-                  </span>
-                )}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>
-                {language === 'he' ? 'ביטול' : 'Cancel'}
-              </AlertDialogCancel>
-              {user ? (
-                <>
-                  <AlertDialogAction
-                    onClick={handleDeleteAllFromDevice}
-                    className="bg-muted text-muted-foreground hover:bg-muted/80"
-                  >
-                    {language === 'he' ? 'מחק מהמכשיר בלבד' : 'Delete from Device Only'}
-                  </AlertDialogAction>
-                  <AlertDialogAction
-                    onClick={handleDeleteAllEverywhere}
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                  >
-                    {language === 'he' ? 'מחק מכל מקום' : 'Delete Everywhere'}
-                  </AlertDialogAction>
-                </>
-              ) : (
+      {/* Delete All Lists Confirmation Dialog */}
+      <AlertDialog open={isDeleteAllDialogOpen} onOpenChange={setIsDeleteAllDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {language === 'he' ? 'האם אתה בטוח שברצונך למחוק את כל הרשימות?' : 'Are you sure you want to delete all lists?'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {language === 'he'
+                ? 'פעולה זו לא ניתנת לביטול.'
+                : 'This action cannot be undone.'}
+              {user && (
+                <span className="block mt-2 text-destructive font-medium">
+                  {language === 'he'
+                    ? 'מחיקה מכל מקום תמחק את הנתונים לצמיתות מהחשבון שלך.'
+                    : 'Deleting everywhere will permanently remove data from your account.'}
+                </span>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>
+              {language === 'he' ? 'ביטול' : 'Cancel'}
+            </AlertDialogCancel>
+            {user ? (
+              <>
                 <AlertDialogAction
                   onClick={handleDeleteAllFromDevice}
+                  className="bg-muted text-muted-foreground hover:bg-muted/80"
+                >
+                  {language === 'he' ? 'מחק מהמכשיר בלבד' : 'Delete from Device Only'}
+                </AlertDialogAction>
+                <AlertDialogAction
+                  onClick={handleDeleteAllEverywhere}
                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                 >
-                  {language === 'he' ? 'מחק' : 'Delete'}
+                  {language === 'he' ? 'מחק מכל מקום' : 'Delete Everywhere'}
                 </AlertDialogAction>
-              )}
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+              </>
+            ) : (
+              <AlertDialogAction
+                onClick={handleDeleteAllFromDevice}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {language === 'he' ? 'מחק' : 'Delete'}
+              </AlertDialogAction>
+            )}
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
-        {/* Edit List Modal */}
-        <EditListModal
-          list={editingList}
-          isOpen={isEditModalOpen}
-          onClose={() => {
-            setIsEditModalOpen(false);
-            setEditingList(null);
-          }}
-          onSave={handleSaveEditedList}
-          language={language}
-        />
+      {/* Edit List Modal */}
+      <EditListModal
+        list={editingList}
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setEditingList(null);
+        }}
+        onSave={handleSaveEditedList}
+        language={language}
+      />
 
-        {/* Welcome Prompt for Guests */}
-        <WelcomePrompt />
+      {/* Welcome Prompt for Guests */}
+      <WelcomePrompt />
 
-        {/* Welcome Name Modal for New Users */}
-        <WelcomeNameModal 
-          open={isWelcomeNameModalOpen} 
-          onOpenChange={setIsWelcomeNameModalOpen} 
-        />
-      </div>
-    </div>;
+      {/* Welcome Name Modal for New Users */}
+      <WelcomeNameModal
+        open={isWelcomeNameModalOpen}
+        onOpenChange={setIsWelcomeNameModalOpen}
+      />
+    </div>
+  </div>;
 };

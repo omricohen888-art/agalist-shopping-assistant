@@ -8,220 +8,18 @@ import { useSoundSettings } from "@/hooks/use-sound-settings.tsx";
 import { useHaptics } from "@/hooks/use-haptics";
 import { ConfettiEffect } from "./ConfettiEffect";
 
+import QuantityControl from "@/components/QuantityControl";
+
 // Unit type categories for smart behavior
 // SCENARIO A: Discrete Units (whole numbers, stepper-only)
 const DISCRETE_UNITS: Unit[] = ['units', 'package'];
-
-// SCENARIO B: Weight/Measurements (decimal, input + stepper)
-const WEIGHT_UNITS: Unit[] = ['kg', 'g'];
 
 interface QuantityStepperProps {
   value: number;
   onChange: (val: number) => void;
   unit: Unit;
-  isCompleted?: boolean;
 }
 
-// Check if a unit is discrete (whole numbers) or continuous (decimal)
-const isDiscreteUnit = (unit: Unit): boolean => DISCRETE_UNITS.includes(unit);
-
-const QuantityStepper = ({ value, onChange, unit, isCompleted }: QuantityStepperProps) => {
-  const [inputValue, setInputValue] = useState(String(value));
-  const inputRef = useRef<HTMLInputElement>(null);
-  
-  // Different behavior based on unit type
-  const isDiscrete = isDiscreteUnit(unit);
-  
-  // Smarter step values based on unit type
-  let step = 0.1;
-  let minValue = 0.1;
-  
-  if (isDiscrete) {
-    step = 1;
-    minValue = 1;
-  } else if (unit === 'g') {
-    // Grams: step by 50g (0.05kg)
-    step = 0.05;
-    minValue = 0.05;
-  } else if (unit === 'kg') {
-    // Kilograms: step by 0.25kg
-    step = 0.25;
-    minValue = 0.1;
-  }
-  
-  const { lightTap } = useHaptics();
-  
-  const handleIncrement = useCallback(() => {
-    lightTap();
-    let newValue: number;
-    
-    if (isDiscrete) {
-      // For units: whole numbers only (fast, clicker-game style)
-      newValue = value + 1;
-    } else {
-      // For weights: precise decimal increments with smart rounding
-      newValue = Math.round((value + step) * 100) / 100;
-    }
-    
-    onChange(newValue);
-  }, [value, step, isDiscrete, onChange, lightTap]);
-
-  const handleDecrement = useCallback(() => {
-    lightTap();
-    let newValue: number;
-    
-    if (isDiscrete) {
-      // For units: whole numbers only, min 1 (can't go below)
-      newValue = Math.max(minValue, value - 1);
-    } else {
-      // For weights: precise decimal decrements with min check
-      newValue = Math.max(minValue, Math.round((value - step) * 100) / 100);
-    }
-    
-    onChange(newValue);
-  }, [value, step, minValue, isDiscrete, onChange, lightTap]);
-
-  // Handle manual input for weight units
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    setInputValue(val);
-  };
-
-  const handleInputBlur = () => {
-    let numValue = parseFloat(inputValue);
-    
-    // Validate the parsed value
-    if (isNaN(numValue) || numValue < minValue) {
-      numValue = minValue;
-    }
-    
-    // For discrete units: round to integer
-    if (isDiscrete) {
-      numValue = Math.round(numValue);
-    } else {
-      // For weights: round to 2 decimal places for consistency
-      numValue = Math.round(numValue * 100) / 100;
-    }
-    
-    onChange(numValue);
-    setInputValue(String(numValue));
-  };
-
-  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      handleInputBlur();
-    }
-  };
-
-  // Display value depends on unit type
-  // Discrete units: always integer
-  // Weight units: show decimal based on unit
-  let displayValue: string;
-  if (isDiscrete) {
-    displayValue = Math.round(value).toString();
-  } else {
-    // For weights, show 1-2 decimals based on the value
-    if (value >= 1) {
-      displayValue = value.toFixed(1);
-    } else {
-      displayValue = value.toFixed(2);
-    }
-  }
-
-  // SCENARIO A: Discrete Units - Ultra minimal
-  if (isDiscrete) {
-    return (
-      <div 
-        className={`
-          inline-flex items-center
-          rounded
-          border border-border/30
-          ${isCompleted ? 'opacity-40' : ''}
-        `}
-      >
-        <button
-          type="button"
-          onClick={handleDecrement}
-          disabled={isCompleted || value <= minValue}
-          className={`
-            w-5 h-5 flex items-center justify-center
-            touch-manipulation active:bg-primary/20
-            ${isCompleted || value <= minValue ? 'text-muted-foreground/20' : 'text-foreground/50'}
-          `}
-        >
-          <Minus className="h-2.5 w-2.5" strokeWidth={2} />
-        </button>
-        <span className={`min-w-[1rem] text-center text-[11px] font-semibold tabular-nums ${isCompleted ? 'text-muted-foreground/40' : 'text-foreground/70'}`}>
-          {displayValue}
-        </span>
-        <button
-          type="button"
-          onClick={handleIncrement}
-          disabled={isCompleted}
-          className={`
-            w-5 h-5 flex items-center justify-center
-            touch-manipulation active:bg-primary/20
-            ${isCompleted ? 'text-muted-foreground/20' : 'text-foreground/50'}
-          `}
-        >
-          <Plus className="h-2.5 w-2.5" strokeWidth={2} />
-        </button>
-      </div>
-    );
-  }
-
-  // SCENARIO B: Weight/Measurements - Ultra minimal
-  return (
-    <div 
-      className={`
-        inline-flex items-center
-        rounded
-        border border-border/30
-        ${isCompleted ? 'opacity-40' : ''}
-      `}
-    >
-      <button
-        type="button"
-        onClick={handleDecrement}
-        disabled={isCompleted || value <= minValue}
-        className={`
-          w-5 h-5 flex items-center justify-center
-          touch-manipulation active:bg-accent/20
-          ${isCompleted || value <= minValue ? 'text-muted-foreground/20' : 'text-foreground/50'}
-        `}
-      >
-        <Minus className="h-2.5 w-2.5" strokeWidth={2} />
-      </button>
-      <input
-        ref={inputRef}
-        type="text"
-        inputMode="decimal"
-        value={inputValue}
-        onChange={handleInputChange}
-        onBlur={handleInputBlur}
-        onKeyDown={handleInputKeyDown}
-        disabled={isCompleted}
-        className={`
-          w-6 text-center text-[11px] font-semibold bg-transparent border-0 p-0
-          focus:outline-none tabular-nums
-          ${isCompleted ? 'text-muted-foreground/40' : 'text-foreground/70'}
-        `}
-      />
-      <button
-        type="button"
-        onClick={handleIncrement}
-        disabled={isCompleted}
-        className={`
-          w-5 h-5 flex items-center justify-center
-          touch-manipulation active:bg-accent/20
-          ${isCompleted ? 'text-muted-foreground/20' : 'text-foreground/50'}
-        `}
-      >
-        <Plus className="h-2.5 w-2.5" strokeWidth={2} />
-      </button>
-    </div>
-  );
-};
 
 interface ShoppingListItemProps {
   item: ShoppingItem;
@@ -245,7 +43,7 @@ export const ShoppingListItem = ({
   const [ripplePos, setRipplePos] = useState({ x: 0, y: 0 });
   const [showRipple, setShowRipple] = useState(false);
   const checkboxRef = useRef<HTMLButtonElement>(null);
-  
+
   const { language } = useGlobalLanguage();
   const { playFeedback } = useSoundSettings();
   const { successPattern } = useHaptics();
@@ -264,15 +62,15 @@ export const ShoppingListItem = ({
     if (rect) {
       setRipplePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
     }
-    
+
     setShowRipple(true);
     setIsAnimating(true);
     setShowConfetti(true);
-    
+
     // Haptic + Sound feedback
     successPattern();
     playFeedback('success');
-    
+
     // Staggered animations
     setTimeout(() => setShowRipple(false), 600);
     setTimeout(() => {
@@ -286,55 +84,57 @@ export const ShoppingListItem = ({
   const isDimmed = isCompleted && !isAnimating;
 
   return (
-    <div 
-      className={`flex items-center gap-1 py-0.5 px-0.5 ${isDimmed ? 'opacity-40' : ''}`}
+    <div
+      className={`
+        relative flex items-center p-3 mb-2 rounded-xl border border-border/30
+        bg-card/50 shadow-sm transition-all duration-200
+        ${isDimmed ? 'opacity-50' : ''}
+        ${visualChecked ? 'bg-success/5 border-success/20' : ''}
+      `}
       dir={direction}
     >
-      <ConfettiEffect isActive={showConfetti} origin={{ x: 8, y: 8 }} />
+      <ConfettiEffect isActive={showConfetti} origin={{ x: 20, y: 20 }} />
 
       {/* Checkbox */}
-      <button
-        ref={checkboxRef}
-        onClick={handleCheck}
-        className={`
-          flex-shrink-0 w-4 h-4 rounded-sm flex items-center justify-center touch-manipulation
-          ${visualChecked ? 'bg-success' : 'border border-border/40'}
-        `}
-      >
-        {visualChecked && <Check className="h-2.5 w-2.5 text-success-foreground" strokeWidth={3} />}
-      </button>
-      
-      {/* Name */}
-      <span className={`flex-1 text-[11px] truncate ${visualChecked ? "line-through text-muted-foreground/50" : "text-foreground"}`}>
-        {item.text}
-      </span>
-
-      {/* Quantity inline */}
-      <div className={`flex items-center text-[10px] text-muted-foreground/60 ${isDimmed ? 'opacity-50' : ''}`}>
-        <button onClick={() => onQuantityChange(item.id, Math.max(1, (item.quantity || 1) - 1))} className="w-4 h-4 flex items-center justify-center touch-manipulation">
-          <Minus className="h-2 w-2" />
-        </button>
-        <span className="min-w-[12px] text-center font-medium">{item.quantity || 1}</span>
-        <button onClick={() => onQuantityChange(item.id, (item.quantity || 1) + 1)} className="w-4 h-4 flex items-center justify-center touch-manipulation">
-          <Plus className="h-2 w-2" />
+      <div className="flex-shrink-0 ml-3">
+        <button
+          ref={checkboxRef}
+          onClick={handleCheck}
+          className={`
+            w-6 h-6 rounded-full flex items-center justify-center border-2 transition-all duration-300
+            ${visualChecked
+              ? 'bg-success border-success scale-110'
+              : 'border-muted-foreground/40 hover:border-primary/50'
+            }
+          `}
+        >
+          {visualChecked && <Check className="h-3.5 w-3.5 text-white" strokeWidth={3} />}
         </button>
       </div>
 
-      {/* Unit - minimal text */}
-      <span className="text-[9px] text-muted-foreground/50 min-w-[20px]">
-        {(() => {
-          const u = UNITS.find(u => u.value === (item.unit || 'units'));
-          return u ? (language === 'he' ? u.labelHe : u.labelEn) : '';
-        })()}
-      </span>
+      {/* Name & Unit */}
+      <div className="flex-1 min-w-0 pr-3 flex flex-col justify-center translate-y-[1px]">
+        <span
+          onClick={handleCheck}
+          className={`
+            text-base font-medium truncate leading-tight cursor-pointer select-none transition-all
+            ${visualChecked ? "line-through text-muted-foreground" : "text-foreground"}
+          `}
+        >
+          {item.text}
+        </span>
+      </div>
 
-      {/* Delete */}
-      <button
-        onClick={() => onDelete(item.id)}
-        className="w-4 h-4 flex items-center justify-center text-muted-foreground/20 hover:text-destructive touch-manipulation"
-      >
-        <Trash2 className="h-2 w-2" />
-      </button>
+      {/* Quantity Control (Right Side) */}
+      <div className="flex-shrink-0 flex items-center z-10">
+        <QuantityControl
+          value={item.quantity || 1}
+          onChange={(val) => onQuantityChange(item.id, val)}
+          unit={item.unit || 'units'}
+          isCompleted={visualChecked}
+          onDelete={() => onDelete(item.id)}
+        />
+      </div>
     </div>
   );
 };

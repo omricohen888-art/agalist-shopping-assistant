@@ -208,6 +208,17 @@ function AdminContent() {
     };
 
     const toggleMaintenanceMode = async (checked: boolean) => {
+        // Master Password Check
+        const auth = window.prompt("הכנס סיסמת מנהל להפעלת מצב חירום:");
+        if (auth !== 'omri1991') {
+            toast({
+                variant: 'destructive',
+                title: 'Access Denied',
+                description: 'סיסמה שגויה! הפעולה בוטלה.'
+            });
+            return;
+        }
+
         // 1. Optimistic UI update
         setMaintenanceMode(checked);
 
@@ -387,7 +398,22 @@ function AdminContent() {
                         ) : (
                             <div>
                                 <div className="text-md font-medium mb-1">Admin PIN</div>
-                                <Button variant="outline" size="sm" onClick={() => setIsChangingPin(true)}>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                        const auth = window.prompt("הכנס סיסמת מאסטר לשינוי קוד גישה:");
+                                        if (auth !== 'omri1991') {
+                                            toast({
+                                                variant: 'destructive',
+                                                title: 'Access Denied',
+                                                description: 'סיסמה שגויה! אין הרשאה לשנות קוד.'
+                                            });
+                                            return;
+                                        }
+                                        setIsChangingPin(true);
+                                    }}
+                                >
                                     Change PIN
                                 </Button>
                             </div>

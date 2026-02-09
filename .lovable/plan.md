@@ -1,56 +1,49 @@
 
-# תוכנית: שיפור עיצוב כפתור "יוצאים לקניות!"
 
-## הבעיה
-הכפתור הנוכחי משתמש בגרדיאנט ירוק-תכלת (`from-emerald-500 via-teal-500 to-cyan-500`) שלא מתאים לעיצוב הצהוב-מודרני של האפליקציה. המראה לא אחיד עם שאר הכפתורים והאלמנטים.
+# הוספת עריכת קניות שהושלמו (היסטוריה)
 
-## הפתרון המוצע
-עיצוב מחדש של הכפתור בסגנון ה-Urban המודרני:
+## מה ישתנה
+כרגע, כרטיסי "קניות שהושלמו" מציגים מידע לקריאה בלבד (שם חנות, סכום, תאריך, פריטים). התכנית היא להוסיף אפשרות עריכה לכל השדות האלו - גם למשתמש אורח (localStorage) וגם למשתמש מחובר (Supabase).
 
-**לפני (נוכחי):**
-- גרדיאנט ירוק-תכלת
-- גבול ירוק דק
-- צל רגיל
+## שינויים מתוכננים
 
-**אחרי (משופר):**
-- רקע צהוב-זהב (צבע primary של המותג)
-- גבול שחור מודגש (border-2 border-black)
-- אפקט צל תלת-ממדי (`shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]`)
-- אנימציית hover שמזיזה את הכפתור כלפי מטה
-- צבע טקסט כהה לניגודיות טובה
+### 1. פונקציות עדכון בשכבת הנתונים
+- **storage.ts** - הוספת פונקציית `updateShoppingHistory` ל-localStorage
+- **cloudStorage.ts** - הוספת פונקציית `cloudUpdateShoppingHistory` עם Supabase UPDATE
+- **use-cloud-sync.ts** - הוספת `updateShoppingHistory` שמנתבת בין cloud/local לפי מצב ההתחברות
+
+### 2. מודל עריכה חדש - EditHistoryModal
+קומפוננטה חדשה `EditHistoryModal.tsx` שתכלול:
+- שדה לעריכת שם החנות (עם autocomplete מרשימת החנויות הקיימת)
+- שדה לעריכת הסכום הכולל
+- שדה לעריכת התאריך
+- אפשרות לעריכת סוג הקנייה (shoppingType)
+- כפתורי שמירה וביטול
+
+### 3. כפתור עריכה בכרטיס
+- הוספת כפתור עריכה (אייקון עיפרון) ב-`CompletedTripCard` ליד כפתור המחיקה בפוטר
+- הוספת כפתור עריכה גם ב-`HistoryDetailModal` (מודל הצפייה בפרטים)
+
+### 4. חיבור ב-ShoppingList
+- העברת `onEdit` callback ל-CompletedTripCard
+- ניהול state של המודל (פתיחה/סגירה, הטריפ הנערך)
+- קריאה ל-`updateShoppingHistory` ורענון הרשימה לאחר שמירה
 
 ## פרטים טכניים
 
-### קובץ לעריכה
-`src/components/StartShoppingButton.tsx`
+### קובצי עבודה:
+1. `src/utils/storage.ts` - הוספת updateShoppingHistory
+2. `src/utils/cloudStorage.ts` - הוספת cloudUpdateShoppingHistory
+3. `src/hooks/use-cloud-sync.ts` - הוספת updateShoppingHistory
+4. `src/components/EditHistoryModal.tsx` - קומפוננטה חדשה
+5. `src/components/CompletedTripCard.tsx` - הוספת כפתור עריכה
+6. `src/components/HistoryDetailModal.tsx` - הוספת כפתור עריכה
+7. `src/components/ShoppingList.tsx` - חיבור המודל והלוגיקה
+8. `src/pages/History.tsx` - חיבור עריכה גם בדף ההיסטוריה
 
-### שינויי CSS
-```text
-מחלקות ישנות:
-- bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500
-- border border-emerald-600/50
-- shadow-md hover:shadow-lg
-- text-white
-
-מחלקות חדשות:
-- bg-primary
-- border-2 border-black dark:border-slate-700
-- shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]
-- text-primary-foreground (חום כהה)
-- hover:translate-y-[2px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]
-- active:scale-95
-```
-
-### אפקטים מיוחדים
-- שמירת אנימציית הברק (shine overlay) לאפקט פרימיום
-- אפקט לחיצה תלת-ממדי שגורם לכפתור "לשקוע"
-
-## תוצאה צפויה
-הכפתור יראה כך:
-- רקע צהוב-זהב בולט
-- מסגרת שחורה עבה
-- צל שחור תלת-ממדי (3px)
-- בהובר - הכפתור זז למטה והצל מתקצר
-- טקסט חום כהה קריא
-
-העיצוב יתאים לכפתורים האחרים בדף (כמו "שמור לאחר כך") וליצור מראה אחיד ומודרני.
+### שדות הניתנים לעריכה בטריפ (ShoppingHistory):
+- `store` - שם החנות
+- `totalAmount` - סכום כולל
+- `date` - תאריך
+- `shoppingType` - סוג הקנייה
+- `listName` - שם הרשימה

@@ -25,6 +25,7 @@ import { SavedListCard } from "@/components/SavedListCard";
 import { EditListModal } from "@/components/EditListModal";
 import { CompletedTripCard } from "@/components/CompletedTripCard";
 import { HistoryDetailModal } from "@/components/HistoryDetailModal";
+import { EditHistoryModal } from "@/components/EditHistoryModal";
 import { StandardizedInput } from "@/components/ui/standardized-input";
 import { StandardizedTextarea } from "@/components/ui/standardized-textarea";
 import { HandwritingCanvas } from "@/components/HandwritingCanvas";
@@ -188,6 +189,8 @@ export const ShoppingList = () => {
   const [shoppingHistory, setShoppingHistory] = useState<ShoppingHistory[]>([]);
   const [selectedTrip, setSelectedTrip] = useState<ShoppingHistory | null>(null);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+  const [editingTrip, setEditingTrip] = useState<ShoppingHistory | null>(null);
+  const [isEditHistoryModalOpen, setIsEditHistoryModalOpen] = useState(false);
 
   // Edit List Modal States
   const [editingList, setEditingList] = useState<SavedList | null>(null);
@@ -2344,6 +2347,10 @@ export const ShoppingList = () => {
                             setSelectedTrip(trip);
                             setIsHistoryModalOpen(true);
                           }} 
+                          onEdit={(trip) => {
+                            setEditingTrip(trip);
+                            setIsEditHistoryModalOpen(true);
+                          }}
                           onDelete={async (id) => {
                             const success = await cloudSync.deleteShoppingHistory(id);
                             if (success) {
@@ -2660,7 +2667,29 @@ export const ShoppingList = () => {
         <HistoryDetailModal trip={selectedTrip} isOpen={isHistoryModalOpen} onClose={() => {
         setIsHistoryModalOpen(false);
         setSelectedTrip(null);
+      }} onEdit={(trip) => {
+        setEditingTrip(trip);
+        setIsEditHistoryModalOpen(true);
       }} language={language} />
+
+        {/* Edit History Modal */}
+        <EditHistoryModal
+          trip={editingTrip}
+          isOpen={isEditHistoryModalOpen}
+          onClose={() => {
+            setIsEditHistoryModalOpen(false);
+            setEditingTrip(null);
+          }}
+          onSave={async (updatedTrip) => {
+            const success = await cloudSync.updateShoppingHistory(updatedTrip);
+            if (success) {
+              const history = await cloudSync.getShoppingHistory();
+              setShoppingHistory(history);
+              toast.success(language === 'he' ? 'הקנייה עודכנה' : 'Purchase updated');
+            }
+          }}
+          language={language}
+        />
 
         {/* Delete All Lists Confirmation Dialog */}
         <AlertDialog open={isDeleteAllDialogOpen} onOpenChange={setIsDeleteAllDialogOpen}>

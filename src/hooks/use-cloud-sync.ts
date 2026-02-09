@@ -10,6 +10,7 @@ import {
   cloudArchiveSavedLists,
   cloudGetShoppingHistory,
   cloudSaveShoppingHistory,
+  cloudUpdateShoppingHistory,
   cloudDeleteShoppingHistory,
   cloudClearAllHistory,
 } from "@/utils/cloudStorage";
@@ -21,6 +22,7 @@ import {
   archiveSavedLists as localArchiveSavedLists,
   getShoppingHistory as localGetShoppingHistory,
   saveShoppingHistory as localSaveShoppingHistory,
+  updateShoppingHistory as localUpdateShoppingHistory,
   deleteShoppingHistory as localDeleteShoppingHistory,
   clearAllHistory as localClearAllHistory,
 } from "@/utils/storage";
@@ -238,6 +240,30 @@ export const useCloudSync = () => {
     }
   }, [userId]);
 
+  const updateShoppingHistory = useCallback(async (history: ShoppingHistory): Promise<boolean> => {
+    try {
+      // Always update locally first
+      const localSuccess = localUpdateShoppingHistory(history);
+      if (!localSuccess) {
+        console.error("[CloudSync] Failed to update history locally");
+        return false;
+      }
+
+      if (!userId) {
+        return true;
+      }
+
+      const cloudSuccess = await cloudUpdateShoppingHistory(userId, history);
+      if (!cloudSuccess) {
+        console.warn("[CloudSync] Local update succeeded but cloud sync failed");
+      }
+      return true;
+    } catch (error) {
+      console.error("[CloudSync] updateShoppingHistory error:", error);
+      return false;
+    }
+  }, [userId]);
+
   const deleteShoppingHistory = useCallback(async (historyId: string): Promise<boolean> => {
     try {
       if (userId) {
@@ -278,6 +304,7 @@ export const useCloudSync = () => {
     // Shopping history
     getShoppingHistory,
     saveShoppingHistory,
+    updateShoppingHistory,
     deleteShoppingHistory,
     clearAllHistory,
     

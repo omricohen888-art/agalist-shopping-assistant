@@ -250,6 +250,25 @@ export const cloudSaveShoppingHistory = async (userId: string, history: Shopping
   }
 };
 
+export const cloudUpdateShoppingHistory = async (userId: string, history: ShoppingHistory): Promise<boolean> => {
+  const { error } = await supabase
+    .from("shopping_history")
+    .update({
+      store: history.store,
+      started_at: history.date,
+      completed_at: history.date,
+    })
+    .eq("id", history.id)
+    .eq("user_id", userId);
+
+  if (error) {
+    console.error("Failed to update shopping history in cloud:", error);
+    return false;
+  }
+
+  return true;
+};
+
 export const cloudDeleteShoppingHistory = async (userId: string, historyId: string): Promise<boolean> => {
   const { error } = await supabase
     .from("shopping_history")

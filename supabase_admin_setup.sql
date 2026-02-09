@@ -7,8 +7,11 @@ CREATE TABLE IF NOT EXISTS public.system_settings (
 );
 
 -- 2. Insert Default Maintenance Mode (if not exists)
+-- 2. Insert Default Settings (if not exists)
 INSERT INTO public.system_settings (key, value, description)
-VALUES ('maintenance_mode', 'false'::jsonb, 'Global maintenance mode switch')
+VALUES 
+    ('maintenance_mode', 'false'::jsonb, 'Global maintenance mode switch'),
+    ('admin_pin', '"12345678"'::jsonb, 'Admin access PIN code')
 ON CONFLICT (key) DO NOTHING;
 
 -- 3. Enable RLS on system_settings

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,49 +13,120 @@ import { Loader2, Lock, ShieldAlert, Users, List, Activity } from 'lucide-react'
 const ADMIN_EMAIL = 'omri.cohen888@gmail.com';
 const ADMIN_PIN = '12345678';
 
-export default function Admin() {
+// Error Boundary Component
+class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean; error: Error | null }> {
+    constructor(props: { children: React.ReactNode }) {
+        super(props);
+        this.state = { hasError: false, error: null };
+    }
+
+    static getDerivedStateFromError(error: Error) {
+        return { hasError: true, error };
+    }
+
+    componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+        console.error("Admin Component Error:", error, errorInfo);
+    }
+
+    render() {
+        if (this.state.hasError) {
+            return (
+                <div className="p-8 text-center">
+                    <div className="bg-red-50 text-red-900 p-4 rounded-lg shadow-sm border border-red-200 inline-block text-left">
+                        <h2 className="text-xl font-bold mb-2 flex items-center gap-2">
+                            <ShieldAlert className="w-5 h-5" />
+                            Something went wrong
+                        </h2>
+                        <p className="mb-4">The admin panel encountered an error.</p>
+                        <pre className="bg-white/50 p-3 rounded text-xs font-mono overflow-auto max-w-lg border border-red-100">
+                            {this.state.error?.toString()}
+                        </pre>
+                        <Button
+                            variant="outline"
+                            className="mt-4 w-full border-red-200 hover:bg-red-100 hover:text-red-900"
+                            onClick={() => window.location.href = '/'}
+                        >
+                            Return to Home
+                        </Button>
+                    </div>
+                </div>
+            );
+        }
+        return this.props.children;
+    }
+}
+
+function AdminContent() {
     const { user, loading } = useAuth();
     const navigate = useNavigate();
     const { toast } = useToast();
+
+    console.log('[Admin] Render:', { user: user?.email, loading });
 
     const [pin, setPin] = useState('');
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [stats, setStats] = useState<any>(null);
     const [maintenanceMode, setMaintenanceMode] = useState(false);
     const [isLoadingStats, setIsLoadingStats] = useState(false);
+    const [adminPin, setAdminPin] = useState('12345678'); // Default fallback
+    const [newPin, setNewPin] = useState('');
+    const [isChangingPin, setIsChangingPin] = useState(false);
 
-    // Security Layer 1: Check Email
-    // Security Layer 1: Check Email
+    // Security Layer 1: Check Email (Normalized)
     useEffect(() => {
         if (!loading) {
             if (!user) {
-                // Not logged in -> Redirect to auth
-                toast({
-                    title: "Authentication Required",
-                    description: "Please sign in to access the admin panel.",
-                });
                 navigate('/auth');
-            } else if (user.email !== ADMIN_EMAIL) {
-                // Logged in but wrong email -> Show Access Denied (don't redirect immediately to avoid confusion)
-                // We will handle this in the render method
+            } else {
+                const userEmail = user.email?.toLowerCase() || '';
+                const adminEmail = ADMIN_EMAIL.toLowerCase();
+
+                console.log('[Admin] Checking Email:', { userEmail, adminEmail, match: userEmail === adminEmail });
+
+                if (userEmail !== adminEmail) {
+                    console.warn('[Admin] Email mismatch - Access Denied');
+                }
             }
         }
-    }, [user, loading, navigate, toast]);
+    }, [user, loading, navigate]);
 
     // Fetch Initial Settings & Stats once Authenticated
     useEffect(() => {
         if (isAuthenticated) {
+            console.log('[Admin] Authenticated. Fetching data...');
             fetchSettings();
             fetchStats();
+        } else {
+            // Fetch PIN regardless of auth to validate input
+            fetchPin();
         }
     }, [isAuthenticated]);
 
+    const fetchPin = async () => {
+        const { data, error } = await supabase
+            .from('system_settings')
+            .select('value')
+            .eq('key', 'admin_pin')
+            .single();
+
+        if (data) {
+            // Remove quotes if stored as JSON string
+            const cleanPin = typeof data.value === 'string' ? data.value.replace(/"/g, '') : String(data.value);
+            setAdminPin(cleanPin);
+            console.log('[Admin] PIN Fetched');
+        }
+        if (error) {
+            console.warn('[Admin] Could not fetch PIN (using default):', error.message);
+        }
+    };
+
     const handlePinSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (pin === ADMIN_PIN) {
+        console.log('[Admin] PIN Submitted');
+        if (pin === adminPin) {
             setIsAuthenticated(true);
             toast({
-                title: "Admin Access Granted",
+                title: "Access Granted",
                 description: "Welcome back, Commander.",
             });
         } else {
@@ -65,6 +136,41 @@ export default function Admin() {
                 description: "Incorrect PIN code.",
             });
             setPin('');
+        }
+    };
+
+    const handlePinChange = async () => {
+        if (!newPin || newPin.length < 4) {
+            toast({
+                variant: 'destructive',
+                title: 'Invalid PIN',
+                description: 'PIN must be at least 4 characters.'
+            });
+            return;
+        }
+
+        const { error } = await supabase
+            .from('system_settings')
+            .upsert({
+                key: 'admin_pin',
+                value: JSON.stringify(newPin),
+                updated_at: new Date().toISOString()
+            });
+
+        if (error) {
+            toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: 'Failed to update PIN: ' + error.message
+            });
+        } else {
+            setAdminPin(newPin);
+            setNewPin('');
+            setIsChangingPin(false);
+            toast({
+                title: 'Success',
+                description: 'Admin PIN updated successfully.'
+            });
         }
     };
 
@@ -79,7 +185,7 @@ export default function Admin() {
             setMaintenanceMode(data.value);
         }
         if (error) {
-            console.error('Error fetching settings:', error);
+            console.error('[Admin] Error fetching settings:', error);
         }
     };
 
@@ -88,11 +194,12 @@ export default function Admin() {
         const { data, error } = await supabase.rpc('get_admin_stats');
 
         if (error) {
-            console.error('Error fetching stats:', error);
+            console.error('[Admin] Error fetching stats:', error);
+            // Show more detailed error to user
             toast({
                 variant: "destructive",
-                title: "Error",
-                description: "Failed to load system statistics.",
+                title: "Stats Error",
+                description: error.message || "Failed to load system statistics.",
             });
         } else {
             setStats(data);
@@ -101,7 +208,6 @@ export default function Admin() {
     };
 
     const toggleMaintenanceMode = async (checked: boolean) => {
-        // Optimistic UI update
         setMaintenanceMode(checked);
 
         const { error } = await supabase
@@ -113,7 +219,6 @@ export default function Admin() {
             });
 
         if (error) {
-            // Revert on error
             setMaintenanceMode(!checked);
             toast({
                 variant: "destructive",
@@ -132,9 +237,12 @@ export default function Admin() {
         return <div className="flex items-center justify-center min-h-screen"><Loader2 className="w-8 h-8 animate-spin" /></div>;
     }
 
-    if (!user) return null; // Redirecting...
+    if (!user) return null; // Wait for redirect
 
-    if (user.email !== ADMIN_EMAIL) {
+    const userEmail = user.email?.toLowerCase() || '';
+    const adminEmail = ADMIN_EMAIL.toLowerCase();
+
+    if (userEmail !== adminEmail) {
         return (
             <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 p-4 text-center">
                 <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
@@ -145,6 +253,15 @@ export default function Admin() {
                     You are logged in as <span className="font-semibold text-foreground">{user.email}</span>,
                     but this account does not have administrator privileges.
                 </p>
+
+                {/* DEBUG INFO */}
+                <div className="bg-slate-100 dark:bg-slate-800 p-4 rounded-md text-left text-xs font-mono mb-6 w-full max-w-md overflow-auto">
+                    <p><strong>Required:</strong> {ADMIN_EMAIL}</p>
+                    <p><strong>Current:</strong> {user.email}</p>
+                    <p><strong>User ID:</strong> {user.id}</p>
+                    <p><strong>Match:</strong> {userEmail === adminEmail ? 'YES' : 'NO'}</p>
+                </div>
+
                 <Button onClick={() => navigate('/')} variant="outline">
                     Return to Home
                 </Button>
@@ -152,7 +269,6 @@ export default function Admin() {
         );
     }
 
-    // Security Layer 2: PIN Screen
     if (!isAuthenticated) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 p-4">
@@ -245,6 +361,38 @@ export default function Admin() {
                         </p>
                     </CardContent>
                 </Card>
+
+                {/* Change PIN Card */}
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-base font-medium">Security</CardTitle>
+                        <Lock className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        {isChangingPin ? (
+                            <div className="space-y-2">
+                                <Input
+                                    type="text"
+                                    placeholder="New PIN"
+                                    value={newPin}
+                                    onChange={(e) => setNewPin(e.target.value)}
+                                    maxLength={20}
+                                />
+                                <div className="flex gap-2">
+                                    <Button size="sm" onClick={handlePinChange} disabled={!newPin}>Save</Button>
+                                    <Button size="sm" variant="ghost" onClick={() => setIsChangingPin(false)}>Cancel</Button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div>
+                                <div className="text-md font-medium mb-1">Admin PIN</div>
+                                <Button variant="outline" size="sm" onClick={() => setIsChangingPin(true)}>
+                                    Change PIN
+                                </Button>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
             </section>
 
             {/* Stats Overview */}
@@ -307,5 +455,14 @@ export default function Admin() {
                 </CardContent>
             </Card>
         </div>
+    );
+}
+
+// Main Export with Error Boundary
+export default function Admin() {
+    return (
+        <ErrorBoundary>
+            <AdminContent />
+        </ErrorBoundary>
     );
 }

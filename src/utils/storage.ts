@@ -130,6 +130,20 @@ export const archiveSavedLists = (listIds: string[]): boolean => {
   }
 };
 
+export const updateShoppingHistory = (updatedTrip: ShoppingHistory): boolean => {
+  try {
+    const existing = getShoppingHistory();
+    const updated = existing.map((trip) =>
+      trip.id === updatedTrip.id ? updatedTrip : trip
+    );
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    return true;
+  } catch (error) {
+    console.error("Failed to update shopping history:", error);
+    return false;
+  }
+};
+
 export const getFrequentItems = (limit: number = 7): string[] => {
   try {
     const history = getShoppingHistory();

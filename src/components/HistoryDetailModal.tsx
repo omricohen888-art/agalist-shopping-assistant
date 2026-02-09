@@ -1,13 +1,14 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, MapPin, Receipt, Store, Calendar, ShoppingBag, X, Package } from "lucide-react";
+import { CheckCircle2, MapPin, Receipt, Store, Calendar, ShoppingBag, X, Package, Pencil } from "lucide-react";
 import { ShoppingHistory, UNITS } from "@/types/shopping";
 
 interface HistoryDetailModalProps {
   trip: ShoppingHistory | null;
   isOpen: boolean;
   onClose: () => void;
+  onEdit?: (trip: ShoppingHistory) => void;
   language: 'he' | 'en';
 }
 
@@ -15,6 +16,7 @@ export const HistoryDetailModal: React.FC<HistoryDetailModalProps> = ({
   trip,
   isOpen,
   onClose,
+  onEdit,
   language
 }) => {
   if (!trip) return null;
@@ -181,7 +183,13 @@ export const HistoryDetailModal: React.FC<HistoryDetailModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="border-t pt-4 flex justify-center">
+        <div className="border-t pt-4 flex justify-center gap-3">
+          {onEdit && (
+            <Button onClick={() => { onEdit(trip); onClose(); }} variant="outline" className="px-6 gap-2">
+              <Pencil className="h-4 w-4" />
+              {language === 'he' ? 'ערוך' : 'Edit'}
+            </Button>
+          )}
           <Button onClick={onClose} variant="outline" className="px-8">
             {language === 'he' ? 'סגור' : 'Close'}
           </Button>

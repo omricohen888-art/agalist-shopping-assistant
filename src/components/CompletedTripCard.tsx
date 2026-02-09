@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Trash2, CheckCircle2, MapPin, Receipt, Store, ChevronRight } from "lucide-react";
+import { Trash2, CheckCircle2, MapPin, Receipt, Store, ChevronRight, Pencil } from "lucide-react";
 import { ShoppingHistory, SHOPPING_TYPES } from "@/types/shopping";
 import { getStoreLogo } from "@/data/storeLogos";
 
@@ -10,6 +10,7 @@ interface CompletedTripCardProps {
   language: 'he' | 'en';
   onViewDetails: (trip: ShoppingHistory) => void;
   onDelete: (id: string) => void;
+  onEdit?: (trip: ShoppingHistory) => void;
 }
 
 export const CompletedTripCard: React.FC<CompletedTripCardProps> = ({
@@ -17,7 +18,8 @@ export const CompletedTripCard: React.FC<CompletedTripCardProps> = ({
   index,
   language,
   onViewDetails,
-  onDelete
+  onDelete,
+  onEdit
 }) => {
   const direction = language === 'he' ? 'rtl' : 'ltr';
 
@@ -118,15 +120,28 @@ export const CompletedTripCard: React.FC<CompletedTripCardProps> = ({
           <ChevronRight className={`h-4 w-4 ${language === 'he' ? 'rotate-180' : ''}`} />
         </button>
         
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={(e) => { e.stopPropagation(); onDelete(trip.id); }}
-          className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl"
-          title={language === 'he' ? 'מחק' : 'Delete'}
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center gap-1">
+          {onEdit && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(e) => { e.stopPropagation(); onEdit(trip); }}
+              className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-xl"
+              title={language === 'he' ? 'ערוך' : 'Edit'}
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={(e) => { e.stopPropagation(); onDelete(trip.id); }}
+            className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl"
+            title={language === 'he' ? 'מחק' : 'Delete'}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </div>
   );

@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
+import { EditHistoryModal } from "@/components/EditHistoryModal";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Trash2, Calendar as CalendarIcon, ShoppingCart, Receipt, List, X, Clock, Store, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowRight, Trash2, Calendar as CalendarIcon, ShoppingCart, Receipt, List, X, Clock, Store, ChevronDown, ChevronUp, Pencil } from "lucide-react";
 import { ShoppingHistory as ShoppingHistoryType, SHOPPING_TYPES } from "@/types/shopping";
 import { toast } from "sonner";
 import { useGlobalLanguage, Language } from "@/context/LanguageContext";
@@ -119,6 +120,7 @@ const History = () => {
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
   const [selectedTrip, setSelectedTrip] = useState<ShoppingHistoryType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [editingTrip, setEditingTrip] = useState<ShoppingHistoryType | null>(null);
   const { language } = useGlobalLanguage();
   const cloudSync = useCloudSync();
   const { getShoppingHistory, deleteShoppingHistory, clearAllHistory, isLoggedIn, userId } = cloudSync;
@@ -507,6 +509,14 @@ const History = () => {
                               {t.viewDetails}
                             </Button>
                             <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={(e) => { e.stopPropagation(); setEditingTrip(item); }}
+                              className="rounded-xl"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
                               variant="destructive"
                               size="sm"
                               onClick={(e) => handleDelete(item.id, e)}
@@ -558,6 +568,22 @@ const History = () => {
         trip={selectedTrip}
         isOpen={!!selectedTrip}
         onClose={() => setSelectedTrip(null)}
+        onEdit={(trip) => { setSelectedTrip(null); setEditingTrip(trip); }}
+        language={language}
+      />
+
+      <EditHistoryModal
+        trip={editingTrip}
+        isOpen={!!editingTrip}
+        onClose={() => setEditingTrip(null)}
+        onSave={async (updatedTrip) => {
+          const success = await cloudSync.updateShoppingHistory(updatedTrip);
+          if (success) {
+            const data = await getShoppingHistory();
+            setHistory(data);
+            toast.success(language === 'he' ? 'הקנייה עודכנה' : 'Purchase updated');
+          }
+        }}
         language={language}
       />
     </div>

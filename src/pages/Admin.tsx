@@ -151,11 +151,11 @@ function AdminContent() {
 
         const { error } = await supabase
             .from('system_settings')
-            .upsert({
-                key: 'admin_pin',
+            .update({
                 value: JSON.stringify(newPin),
                 updated_at: new Date().toISOString()
-            });
+            })
+            .eq('key', 'admin_pin');
 
         if (error) {
             toast({
@@ -208,27 +208,28 @@ function AdminContent() {
     };
 
     const toggleMaintenanceMode = async (checked: boolean) => {
+        // 1. Optimistic UI update
         setMaintenanceMode(checked);
 
+        // 2. Perform the update
         const { error } = await supabase
             .from('system_settings')
-            .upsert({
-                key: 'maintenance_mode',
-                value: checked,
-                updated_at: new Date().toISOString()
-            });
+            .update({ value: checked })
+            .eq('key', 'maintenance_mode');
 
         if (error) {
+            console.error('Error toggling maintenance:', error);
+            // Revert on error
             setMaintenanceMode(!checked);
             toast({
                 variant: "destructive",
                 title: "Error",
-                description: "Failed to update maintenance mode.",
+                description: 'Failed to update system settings.',
             });
         } else {
             toast({
-                title: checked ? "Maintenance Mode ENABLED" : "Maintenance Mode DISABLED",
-                description: checked ? "The app is now locked for non-admins." : "The app is live for everyone.",
+                title: 'System status updated!',
+                description: checked ? "Maintenance Mode ENABLED" : "Maintenance Mode DISABLED",
             });
         }
     };

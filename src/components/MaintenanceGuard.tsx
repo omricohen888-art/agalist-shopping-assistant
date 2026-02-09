@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
-import { ShieldAlert, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
+import MaintenancePage from '@/pages/MaintenancePage';
 
 const ADMIN_EMAIL = 'omri.cohen888@gmail.com';
 
@@ -68,31 +69,14 @@ export const MaintenanceGuard = ({ children }: MaintenanceGuardProps) => {
     }
 
     // Allow Admin to bypass maintenance mode
+    // Use optional chaining for safety as requested
     const isAdmin = user?.email === ADMIN_EMAIL;
 
+    // Strict Guard:
+    // 1. Maintenance Mode is ON
+    // 2. AND User is NOT the admin (includes guests/null users)
     if (isMaintenanceMode && !isAdmin) {
-        return (
-            <div className="flex flex-col items-center justify-center min-h-screen bg-neutral-50 dark:bg-neutral-900 p-4 text-center space-y-6">
-                <div className="w-20 h-20 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center shadow-lg animate-pulse">
-                    <ShieldAlert className="w-10 h-10 text-yellow-600 dark:text-yellow-400" />
-                </div>
-                <div className="space-y-2 max-w-md">
-                    <h1 className="text-3xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50">
-                        Under Maintenance
-                    </h1>
-                    <h2 className="text-xl font-medium text-neutral-600 dark:text-neutral-400 font-hebrew">
-                        חוזרים בקרוב
-                    </h2>
-                    <p className="text-muted-foreground pt-2">
-                        We are currently performing scheduled maintenance to improve your experience.
-                        Please check back in a few minutes.
-                    </p>
-                </div>
-                <div className="pt-8 text-xs text-muted-foreground/50 font-mono">
-                    System ID: {new Date().getTime().toString(36)}
-                </div>
-            </div>
-        );
+        return <MaintenancePage />;
     }
 
     return <>{children}</>;

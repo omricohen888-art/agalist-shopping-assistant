@@ -36,8 +36,8 @@ const AppContent = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <main className="flex-1">
-        <MaintenanceGuard>
+      <MaintenanceGuard>
+        <main className="flex-1">
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
@@ -53,19 +53,19 @@ const AppContent = () => {
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </MaintenanceGuard>
-      </main>
-      {!isShoppingMode && (
-        <Navigation onSettingsClick={() => setIsSettingsModalOpen(true)} />
-      )}
-      <SettingsModal open={isSettingsModalOpen} onOpenChange={setIsSettingsModalOpen} />
-      {!isShoppingMode && (
-        <footer className="w-full py-6 pb-8 text-center">
-          <p className="text-[11px] text-gray-400 dark:text-slate-700 font-medium">
-            © 2025 Agalist™ • v0.1.0 (Beta) • Dev by OC
-          </p>
-        </footer>
-      )}
+        </main>
+        {!isShoppingMode && (
+          <Navigation onSettingsClick={() => setIsSettingsModalOpen(true)} />
+        )}
+        <SettingsModal open={isSettingsModalOpen} onOpenChange={setIsSettingsModalOpen} />
+        {!isShoppingMode && (
+          <footer className="w-full py-6 pb-8 text-center">
+            <p className="text-[11px] text-gray-400 dark:text-slate-700 font-medium">
+              © 2025 Agalist™ • v0.1.0 (Beta) • Dev by OC
+            </p>
+          </footer>
+        )}
+      </MaintenanceGuard>
     </div>
   );
 };

@@ -1632,22 +1632,12 @@ export const ShoppingList = () => {
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
         <div className="flex justify-between items-center w-full gap-3 sm:gap-4">
           {/* Logo Section - Clickable to go Home */}
-          <button onClick={() => {
-            if (activeListId && items.length > 0) {
-              // If in edit mode with items, confirm before leaving
-              const confirmExit = window.confirm(language === 'he' ? 'האם אתה בטוח שברצונך לצאת? שינויים שלא נשמרו יאבדו.' : 'Are you sure you want to exit? Unsaved changes will be lost.');
-              if (!confirmExit) return;
-            }
-            // Reset all state
-            setActiveListId(null);
-            setItems([]);
-            setListName('');
-            setInputText('');
-            setNotepadItems([]);
-            setBulkInputText('');
-            setInputMode('single');
-          }} className="flex items-center gap-2 sm:gap-3 flex-shrink-0 hover:opacity-80 active:scale-95 transition-all duration-200 touch-manipulation">
-            <div onClick={handleSecretLogoClick} className="cursor-pointer">
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+            {/* Secret Entry Logo */}
+            <div
+              onClick={handleSecretLogoClick}
+              className="cursor-pointer hover:opacity-80 active:scale-95 transition-all duration-200 touch-manipulation"
+            >
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0 text-foreground">
                 {/* Checkbox background */}
                 <rect x="3" y="3" width="18" height="18" rx="2" fill="currentColor" stroke="currentColor" strokeWidth="2" />
@@ -1655,7 +1645,23 @@ export const ShoppingList = () => {
                 <polyline points="6 12 10 16 18 8" fill="none" stroke="hsl(48, 96%, 53%)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
-            <div className="flex flex-col">
+
+            {/* Home Link (Text Only) */}
+            <button onClick={() => {
+              if (activeListId && items.length > 0) {
+                // If in edit mode with items, confirm before leaving
+                const confirmExit = window.confirm(language === 'he' ? 'האם אתה בטוח שברצונך לצאת? שינויים שלא נשמרו יאבדו.' : 'Are you sure you want to exit? Unsaved changes will be lost.');
+                if (!confirmExit) return;
+              }
+              // Reset all state
+              setActiveListId(null);
+              setItems([]);
+              setListName('');
+              setInputText('');
+              setNotepadItems([]);
+              setBulkInputText('');
+              setInputMode('single');
+            }} className="flex flex-col hover:opacity-80 active:scale-95 transition-all duration-200 touch-manipulation">
               <div className="flex items-center gap-1 sm:gap-1.5">
                 <span className="text-2xl sm:text-3xl font-bold text-foreground">
                   {language === 'he' ? 'עגליסט' : 'ShopList'}
@@ -1669,8 +1675,8 @@ export const ShoppingList = () => {
                   <path d="M16.5 13.5H7.5" />
                 </svg>
               </div>
-            </div>
-          </button>
+            </button>
+          </div>
 
           {/* Spacer - Takes remaining space */}
           <div className="flex-grow" />

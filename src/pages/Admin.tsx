@@ -25,15 +25,19 @@ export default function Admin() {
     const [isLoadingStats, setIsLoadingStats] = useState(false);
 
     // Security Layer 1: Check Email
+    // Security Layer 1: Check Email
     useEffect(() => {
         if (!loading) {
-            if (!user || user.email !== ADMIN_EMAIL) {
+            if (!user) {
+                // Not logged in -> Redirect to auth
                 toast({
-                    variant: "destructive",
-                    title: "Access Denied",
-                    description: "You do not have permission to view this page.",
+                    title: "Authentication Required",
+                    description: "Please sign in to access the admin panel.",
                 });
-                navigate('/');
+                navigate('/auth');
+            } else if (user.email !== ADMIN_EMAIL) {
+                // Logged in but wrong email -> Show Access Denied (don't redirect immediately to avoid confusion)
+                // We will handle this in the render method
             }
         }
     }, [user, loading, navigate, toast]);
@@ -128,8 +132,24 @@ export default function Admin() {
         return <div className="flex items-center justify-center min-h-screen"><Loader2 className="w-8 h-8 animate-spin" /></div>;
     }
 
-    if (!user || user.email !== ADMIN_EMAIL) {
-        return null; // Will trigger redirect in useEffect
+    if (!user) return null; // Redirecting...
+
+    if (user.email !== ADMIN_EMAIL) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 p-4 text-center">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                    <ShieldAlert className="w-8 h-8 text-red-600" />
+                </div>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Access Denied</h1>
+                <p className="text-muted-foreground max-w-md mb-6">
+                    You are logged in as <span className="font-semibold text-foreground">{user.email}</span>,
+                    but this account does not have administrator privileges.
+                </p>
+                <Button onClick={() => navigate('/')} variant="outline">
+                    Return to Home
+                </Button>
+            </div>
+        );
     }
 
     // Security Layer 2: PIN Screen

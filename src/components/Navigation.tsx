@@ -23,13 +23,42 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const menuPanelRef = useRef<HTMLDivElement>(null);
 
+  const [secretClickCount, setSecretClickCount] = useState(0);
+  const secretClickTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleSecretEntry = () => {
+    // Clear existing timer
+    if (secretClickTimerRef.current) {
+      clearTimeout(secretClickTimerRef.current);
+    }
+
+    // Increment count
+    setSecretClickCount(prev => {
+      const newCount = prev + 1;
+      if (newCount >= 5) {
+        // Trigger Secret Entry
+        navigate('/admin');
+        return 0;
+      }
+      return newCount;
+    });
+
+    // Reset count after 3 seconds of inactivity
+    secretClickTimerRef.current = setTimeout(() => {
+      setSecretClickCount(0);
+    }, 3000);
+
+    // Toggle menu as usual
+    setIsMenuOpen(!isMenuOpen);
+  };
+
   // Close desktop menu when clicking outside (but not on button or panel)
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
       const clickedOnButton = menuButtonRef.current?.contains(target);
       const clickedOnPanel = menuPanelRef.current?.contains(target);
-      
+
       if (!clickedOnButton && !clickedOnPanel) {
         setIsDesktopMenuOpen(false);
       }
@@ -82,7 +111,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
   const userAvatarUrl = user?.user_metadata?.avatar_url;
 
   return (
-    <nav 
+    <nav
       className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-xl border-t border-border shadow-lg z-50"
     >
       {/* MOBILE BOTTOM NAVIGATION - UNIFIED FOR BOTH LOGGED-IN AND GUEST USERS */}
@@ -101,11 +130,10 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
                     handleNavigate(path);
                   }
                 }}
-                className={`flex items-center justify-center w-14 h-14 rounded-xl transition-all flex-shrink-0 active:scale-95 ${
-                  !isSettings && path && isActive(path)
-                    ? 'bg-primary text-primary-foreground shadow-md'
-                    : 'text-muted-foreground hover:bg-muted'
-                }`}
+                className={`flex items-center justify-center w-14 h-14 rounded-xl transition-all flex-shrink-0 active:scale-95 ${!isSettings && path && isActive(path)
+                  ? 'bg-primary text-primary-foreground shadow-md'
+                  : 'text-muted-foreground hover:bg-muted'
+                  }`}
                 title={label}
               >
                 <Icon className="h-6 w-6 flex-shrink-0" strokeWidth={1.5} />
@@ -115,7 +143,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
 
           {/* Menu Toggle Button */}
           <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            onClick={handleSecretEntry}
             className="h-14 w-14 flex items-center justify-center text-muted-foreground hover:bg-muted rounded-xl transition-colors ml-2 flex-shrink-0 active:scale-95"
             aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
           >
@@ -167,11 +195,10 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
                 {/* Account/Login Button */}
                 <button
                   onClick={handleAuthClick}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:scale-95 ${
-                    user 
-                      ? 'bg-destructive/10 text-destructive hover:bg-destructive/20'
-                      : 'bg-primary/10 text-primary hover:bg-primary/20'
-                  }`}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:scale-95 ${user
+                    ? 'bg-destructive/10 text-destructive hover:bg-destructive/20'
+                    : 'bg-primary/10 text-primary hover:bg-primary/20'
+                    }`}
                 >
                   {user ? (
                     <>
@@ -231,11 +258,10 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
                     handleNavigate(path);
                   }
                 }}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-medium active:scale-95 ${
-                  !isSettings && path && isActive(path)
-                    ? 'bg-primary text-primary-foreground shadow-sm'
-                    : 'text-muted-foreground hover:bg-muted'
-                }`}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-medium active:scale-95 ${!isSettings && path && isActive(path)
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'text-muted-foreground hover:bg-muted'
+                  }`}
                 title={label}
               >
                 <Icon className="h-5 w-5 flex-shrink-0" strokeWidth={1.5} />
@@ -303,8 +329,8 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
             onClick={() => setIsDesktopMenuOpen(false)}
           />
           {/* Side Panel */}
-          <div 
-            ref={menuPanelRef} 
+          <div
+            ref={menuPanelRef}
             className="fixed top-0 end-0 h-full w-64 bg-card border-s border-border shadow-2xl z-[9999] animate-slide-in-right"
             dir={direction}
           >

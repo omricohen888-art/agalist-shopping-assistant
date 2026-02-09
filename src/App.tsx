@@ -22,33 +22,38 @@ import { ShoppingMode } from "./pages/ShoppingMode";
 import Auth from "./pages/Auth";
 import OGDesign from "./pages/OGDesign";
 import Profile from "./pages/Profile";
+import Admin from "./pages/Admin";
+import { MaintenanceGuard } from "@/components/MaintenanceGuard";
 
 const queryClient = new QueryClient();
 
 const AppContent = () => {
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const location = useLocation();
-  
+
   // Hide navigation on shopping mode
   const isShoppingMode = location.pathname.startsWith('/shopping/');
 
   return (
     <div className="min-h-screen flex flex-col">
       <main className="flex-1">
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/shopping/:id" element={<ShoppingMode />} />
-          <Route path="/history" element={<History />} />
-          <Route path="/compare" element={<Compare />} />
-          <Route path="/insights" element={<Insights />} />
-          <Route path="/notebook" element={<MyNotebook />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/og-design" element={<OGDesign />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <MaintenanceGuard>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/shopping/:id" element={<ShoppingMode />} />
+            <Route path="/history" element={<History />} />
+            <Route path="/compare" element={<Compare />} />
+            <Route path="/insights" element={<Insights />} />
+            <Route path="/notebook" element={<MyNotebook />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/og-design" element={<OGDesign />} />
+            <Route path="/admin" element={<Admin />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </MaintenanceGuard>
       </main>
       {!isShoppingMode && (
         <Navigation onSettingsClick={() => setIsSettingsModalOpen(true)} />

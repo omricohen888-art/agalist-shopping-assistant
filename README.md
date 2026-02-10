@@ -19,8 +19,6 @@
     <td align="center" width="70%">
       <b>💻 Desktop Dashboard</b><br><br>
       <img src="https://github.com/user-attachments/assets/9f631b7c-e8b6-4bcc-ad78-ac9bb623eb49" />
-
- width="100%" alt="Desktop Dashboard Interface">
     </td>
   </tr>
 </table>

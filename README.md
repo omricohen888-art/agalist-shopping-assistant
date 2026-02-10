@@ -18,7 +18,8 @@
     </td>
     <td align="center" width="70%">
       <b>💻 Desktop Dashboard</b><br><br>
-      <img src="https://github.com/user-attachments/assets/a9cbf438-6458-4700-b631-dfa16cb1e1b9" width="100%" alt="Desktop Dashboard Interface">
+      <img src="https://github.com/user-attachments/assets/d5dc4b83-ed69-4839-a714-cbe278e1c8eb" />
+ width="100%" alt="Desktop Dashboard Interface">
     </td>
   </tr>
 </table>

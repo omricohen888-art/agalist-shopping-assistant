@@ -6,8 +6,7 @@
 ![RTL](https://img.shields.io/badge/RTL-Supported-0052CC?style=for-the-badge)
 ![Lovable](https://img.shields.io/badge/Developed%20with-Lovable-FF4F81?style=for-the-badge)
 
-> **Agalist** is more than just a list—it's a smart, collaborative shopping companion designed to streamline household management. By leveraging **Microsoft Azure** for robust hosting and **Supabase** for real-time data synchronization, Agalist ensures that your shopping list is always up-to-date across all family devices.
-
+> **Agalist** is a smart shopping companion designed to streamline list management. By leveraging **Microsoft Azure** for robust hosting and **Supabase** for real-time data synchronization, Agalist ensures that your shopping list is always accessible and up-to-date across all your devices.
 
 <br>
 <table align="center">
@@ -33,7 +32,7 @@
 
 ## 🚀 Application Modules & Capabilities
 
-Agalist is built with a focus on UX, efficiency, and financial awareness. Here is a breakdown of the core modules:
+Agalist is built with a focus on UX, efficiency, and system control. Here is a breakdown of the core modules:
 
 ### 1. Smart List Management
 * **Intuitive Item Entry:** Quickly add items with smart suggestions.
@@ -42,13 +41,18 @@ Agalist is built with a focus on UX, efficiency, and financial awareness. Here i
 
 ### 2. Financial Insights & Budgeting 💰
 * **Expense Tracking:** Provides real-time visibility into estimated shopping costs.
-* **Smart Summaries:** Helps users track their spending habits and manage the household budget effectively during the shopping trip.
+* **Smart Summaries:** Helps users track their spending habits and manage the budget effectively during the shopping trip.
 
-### 3. Real-Time Collaboration (The Core Engine)
-* **Family Sync:** Powered by Supabase Realtime, changes made on one device appear instantly on others. No refresh required.
-* **Live Status Updates:** See when a family member marks an item as "bought" in real-time.
+### 3. Real-Time Data Sync
+* **Cross-Device Synchronization:** Powered by Supabase Realtime, changes made on one device (e.g., desktop) appear instantly on others (e.g., mobile). No refresh required.
+* **Live Status Updates:** Instant visual feedback when items are marked as "bought" or edited.
 
-### 4. User Experience (UX)
+### 4. Admin & System Control 🛡️
+* **Administrative Dashboard:** A secured backend interface for monitoring user statistics, active lists, and system health.
+* **Maintenance Mode:** A global "kill-switch" capability. Admins can toggle the system offline for updates, instantly redirecting all active users to a maintenance page via real-time listeners.
+* **Enhanced Security:** Critical actions (like changing settings or accessing the dashboard) are protected by a secondary "Master Password" layer and environment-variable based credentials (`Defense in Depth` strategy).
+
+### 5. User Experience (UX)
 * **Cross-Platform Design:** A fully responsive interface that adapts seamlessly from desktop monitors to mobile screens.
 * **PWA Support:** Installable as a native-like app on iOS and Android devices for offline access and quick launch.
 * **Secure Authentication:** Frictionless login using Google OAuth or Magic Links.
@@ -60,7 +64,7 @@ Agalist is built with a focus on UX, efficiency, and financial awareness. Here i
 This project serves as a showcase of modern cloud-native development:
 
 * **Frontend:** Built with **React** and **Vite** for lightning-fast performance.
-* **Backend & Database:** Utilizes **Supabase (PostgreSQL)** for structured data storage and **Row Level Security (RLS)**.
+* **Backend & Database:** Utilizes **Supabase (PostgreSQL)** for structured data storage, **RPC Functions** for admin statistics, and **Row Level Security (RLS)**.
 * **DevOps & CI/CD:**
     * Code is managed in **GitHub**.
     * Automated workflows trigger deployment to **Azure Static Web Apps** on every push to the main branch.

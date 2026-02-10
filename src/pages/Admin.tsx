@@ -213,12 +213,14 @@ function AdminContent() {
         setIsLoadingStats(false);
     };
 
+    const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD;
+
     const toggleMaintenanceMode = async (checked: boolean) => {
         // SECURITY CHECK - BLOCKING
         // Using window.prompt to force a halt in execution
         const password = window.prompt("⚠️ פעולה רגישה! הכנס סיסמת מנהל להפעלת מצב חירום:");
 
-        if (password !== 'omri1991') {
+        if (password !== ADMIN_PASSWORD) {
             // Revert the switch visually since the action is cancelled
             setMaintenanceMode(!checked);
 
@@ -258,7 +260,7 @@ function AdminContent() {
 
     const handlePinChangeClick = () => {
         const auth = window.prompt("הכנס סיסמת מאסטר לשינוי קוד גישה:");
-        if (auth !== 'omri1991') {
+        if (auth !== ADMIN_PASSWORD) {
             toast({
                 variant: 'destructive',
                 title: 'Access Denied',
@@ -266,7 +268,6 @@ function AdminContent() {
             });
             return;
         }
-        setIsChangingPin(true);
         setIsChangingPin(true);
     };
 

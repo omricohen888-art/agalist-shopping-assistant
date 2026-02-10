@@ -510,9 +510,20 @@ export const ShoppingList = () => {
     }
   };
   const handleStartShopping = () => {
-    // Convert notepad items to shopping items
+    // Convert notepad items to shopping items, filtering invalid ones
+    let invalidCount = 0;
     let newItems: ShoppingItem[] = notepadItems
-      .filter(item => item.text.trim() !== '')
+      .filter(item => {
+        const text = item.text.trim();
+        if (text === '') return false;
+        const validation = validateInput(text);
+        const hasProfanity = containsProfanity(text);
+        if (!validation.isValid || hasProfanity) {
+          invalidCount++;
+          return false;
+        }
+        return true;
+      })
       .map((notepadItem, index) => ({
         id: `${createUUID()}-${index}`,
         text: notepadItem.text,
@@ -520,6 +531,10 @@ export const ShoppingList = () => {
         quantity: notepadItem.quantity || 1,
         unit: (notepadItem.unit || 'units') as Unit
       }));
+
+    if (invalidCount > 0) {
+      toast.warning(language === 'he' ? `${invalidCount} פריטים לא תקינים הוסרו` : `${invalidCount} invalid items removed`);
+    }
 
     // Apply smart sort if enabled
     if (isSmartSort) {
@@ -641,11 +656,16 @@ export const ShoppingList = () => {
     }
   };
   const handleTemplateClick = (templateItems: string[]) => {
-    let newNotepadItems: NotepadItem[] = templateItems.map((item, index) => ({
-      id: `template-${createUUID()}-${index}`,
-      text: item,
-      isChecked: false
-    }));
+    let newNotepadItems: NotepadItem[] = templateItems
+      .filter(item => {
+        const validation = validateInput(item);
+        return validation.isValid && !containsProfanity(item);
+      })
+      .map((item, index) => ({
+        id: `template-${createUUID()}-${index}`,
+        text: item,
+        isChecked: false
+      }));
 
     // Apply smart sort if enabled
     if (isSmartSort) {
@@ -1219,13 +1239,22 @@ export const ShoppingList = () => {
       const transcript = event.results[0][0].transcript;
       const items = transcript.split(/\s*(?:and|,|\s)\s*/).filter(item => item.trim().length > 0);
       if (items.length > 0) {
-        const newNotepadItems: NotepadItem[] = items.map((item, index) => ({
-          id: `voice-${Date.now()}-${index}`,
-          text: item.trim(),
-          isChecked: false
-        }));
-        setNotepadItems(prev => [...prev, ...newNotepadItems]);
-        toast.success(language === 'he' ? `התווספו ${items.length} פריטים מהקול` : `Added ${items.length} items from voice`);
+        const validItems = items.filter(item => {
+          const validation = validateInput(item.trim());
+          return validation.isValid && !containsProfanity(item.trim());
+        });
+        if (validItems.length > 0) {
+          const newNotepadItems: NotepadItem[] = validItems.map((item, index) => ({
+            id: `voice-${Date.now()}-${index}`,
+            text: item.trim(),
+            isChecked: false
+          }));
+          setNotepadItems(prev => [...prev, ...newNotepadItems]);
+          toast.success(language === 'he' ? `התווספו ${validItems.length} פריטים מהקול` : `Added ${validItems.length} items from voice`);
+        }
+        if (validItems.length < items.length) {
+          toast.error(language === 'he' ? 'פריט לא תקין' : 'Invalid item detected');
+        }
       }
     };
     recognition.onerror = event => {
@@ -1258,13 +1287,24 @@ export const ShoppingList = () => {
       // Split text by newlines and filter empty lines
       const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
       if (lines.length > 0) {
-        const newNotepadItems: NotepadItem[] = lines.map((line, index) => ({
-          id: `ocr-${Date.now()}-${index}`,
-          text: line,
-          isChecked: false
-        }));
-        setNotepadItems(prev => [...prev, ...newNotepadItems]);
-        toast.success(language === 'he' ? `התווספו ${lines.length} פריטים מהתמונה` : `Added ${lines.length} items from image`);
+        const validLines = lines.filter(line => {
+          const validation = validateInput(line);
+          return validation.isValid && !containsProfanity(line);
+        });
+        if (validLines.length < lines.length) {
+          toast.error(language === 'he' ? 'פריט לא תקין' : 'Invalid item detected');
+        }
+        if (validLines.length > 0) {
+          const newNotepadItems: NotepadItem[] = validLines.map((line, index) => ({
+            id: `ocr-${Date.now()}-${index}`,
+            text: line,
+            isChecked: false
+          }));
+          setNotepadItems(prev => [...prev, ...newNotepadItems]);
+          toast.success(language === 'he' ? `התווספו ${validLines.length} פריטים מהתמונה` : `Added ${validLines.length} items from image`);
+        } else {
+          toast.warning(language === 'he' ? 'לא נמצא טקסט בתמונה' : 'No text found in image');
+        }
       } else {
         toast.warning(language === 'he' ? 'לא נמצא טקסט בתמונה' : 'No text found in image');
       }
@@ -1298,13 +1338,24 @@ export const ShoppingList = () => {
       // Split text by newlines and filter empty lines
       const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
       if (lines.length > 0) {
-        const newNotepadItems: NotepadItem[] = lines.map((line, index) => ({
-          id: `handwriting-${Date.now()}-${index}`,
-          text: line,
-          isChecked: false
-        }));
-        setNotepadItems(prev => [...prev, ...newNotepadItems]);
-        toast.success(language === 'he' ? `התווספו ${lines.length} פריטים מהכתב` : `Added ${lines.length} items from handwriting`);
+        const validLines = lines.filter(line => {
+          const validation = validateInput(line);
+          return validation.isValid && !containsProfanity(line);
+        });
+        if (validLines.length < lines.length) {
+          toast.error(language === 'he' ? 'פריט לא תקין' : 'Invalid item detected');
+        }
+        if (validLines.length > 0) {
+          const newNotepadItems: NotepadItem[] = validLines.map((line, index) => ({
+            id: `handwriting-${Date.now()}-${index}`,
+            text: line,
+            isChecked: false
+          }));
+          setNotepadItems(prev => [...prev, ...newNotepadItems]);
+          toast.success(language === 'he' ? `התווספו ${validLines.length} פריטים מהכתב` : `Added ${validLines.length} items from handwriting`);
+        } else {
+          toast.warning(language === 'he' ? 'לא נמצא טקסט' : 'No text found');
+        }
       } else {
         toast.warning(language === 'he' ? 'לא נמצא טקסט' : 'No text found');
       }
@@ -1431,6 +1482,16 @@ export const ShoppingList = () => {
                 type="text"
                 value={item.text}
                 onChange={e => setNotepadItems(prev => prev.map(i => i.id === item.id ? { ...i, text: e.target.value } : i))}
+                onBlur={e => {
+                  const text = e.target.value.trim();
+                  if (text === '') return;
+                  const validation = validateInput(text);
+                  const hasProfanity = containsProfanity(text);
+                  if (!validation.isValid || hasProfanity) {
+                    setNotepadItems(prev => prev.map(i => i.id === item.id ? { ...i, text: '' } : i));
+                    toast.error(language === 'he' ? 'פריט לא תקין' : 'Invalid item');
+                  }
+                }}
                 onKeyDown={e => {
                   if (e.key === 'Enter') {
                     e.preventDefault();
@@ -1960,6 +2021,15 @@ export const ShoppingList = () => {
                     }} type="text" value={item.text} onChange={e => {
                       const newText = e.target.value;
                       setNotepadItems(prev => prev.map(i => i.id === item.id ? { ...i, text: newText } : i));
+                    }} onBlur={e => {
+                      const text = e.target.value.trim();
+                      if (text === '') return;
+                      const validation = validateInput(text);
+                      const hasProfanity = containsProfanity(text);
+                      if (!validation.isValid || hasProfanity) {
+                        setNotepadItems(prev => prev.map(i => i.id === item.id ? { ...i, text: '' } : i));
+                        toast.error(language === 'he' ? 'פריט לא תקין' : 'Invalid item');
+                      }
                     }} onKeyDown={e => {
                       const currentIndex = notepadItems.findIndex(i => i.id === item.id);
                       if (e.key === 'Enter') {

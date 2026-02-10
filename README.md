@@ -13,12 +13,11 @@
   <tr>
     <td align="center" width="30%">
       <b>📱 Mobile View</b><br><br>
-      <img src="https://github.com/user-attachments/assets/ddc1dd63-26a5-4a50-9b93-a7f8147165b7" />
->
+      <img src="https://github.com/user-attachments/assets/ddc1dd63-26a5-4a50-9b93-a7f8147165b7" width="100%" alt="Mobile Interface" />
     </td>
     <td align="center" width="70%">
       <b>💻 Desktop Dashboard</b><br><br>
-      <img src="https://github.com/user-attachments/assets/9f631b7c-e8b6-4bcc-ad78-ac9bb623eb49" />
+      <img src="https://github.com/user-attachments/assets/9f631b7c-e8b6-4bcc-ad78-ac9bb623eb49" width="100%" alt="Desktop Interface" />
     </td>
   </tr>
 </table>
@@ -86,10 +85,4 @@ This project demonstrates a high-efficiency development cycle using AI-driven to
 ## 🔒 Access Notice
 
 **Please Note:** This repository is for review and portfolio purposes only.
-Local installation and execution are restricted to the owner to ensure the security of private API configurations and cloud resources.
-
----
-
-## 👨‍💻 Connect with Me
-* **Author:** Omri Cohen (IT Student & Full Stack Enthusiast)
-* **LinkedIn:** <a href="https://www.linkedin.com/in/omri-cohen-it/" target="_blank">Omri Cohen Profile</a>
+Local installation and execution are restricted to

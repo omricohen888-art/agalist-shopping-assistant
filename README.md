@@ -13,7 +13,8 @@
   <tr>
     <td align="center" width="30%">
       <b>📱 Mobile View</b><br><br>
-      <img src="https://github.com/user-attachments/assets/aa103faf-57cd-4d49-88a4-b529435784d2" width="100%" alt="Mobile App Interface">
+      <img src="https://github.com/user-attachments/assets/ddc1dd63-26a5-4a50-9b93-a7f8147165b7" />
+>
     </td>
     <td align="center" width="70%">
       <b>💻 Desktop Dashboard</b><br><br>

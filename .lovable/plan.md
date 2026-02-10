@@ -1,49 +1,56 @@
 
 
-# הוספת עריכת קניות שהושלמו (היסטוריה)
+# תיקון מערכת אימות ספאם וקללות לכל נקודות ההזנה
 
-## מה ישתנה
-כרגע, כרטיסי "קניות שהושלמו" מציגים מידע לקריאה בלבד (שם חנות, סכום, תאריך, פריטים). התכנית היא להוסיף אפשרות עריכה לכל השדות האלו - גם למשתמש אורח (localStorage) וגם למשתמש מחובר (Supabase).
+## הבעיה
+מערכת האימות (ספאם + קללות) פועלת רק כשמזינים פריטים דרך ה-textarea הראשי בלחיצת Enter. אבל יש מספר נקודות עקיפה:
 
-## שינויים מתוכננים
+1. **עריכה ישירה של פריט קיים** - כשעורכים טקסט של פריט שכבר ברשימה, אין שום בדיקה
+2. **מעבר למצב קניות** - הפריטים עוברים כמו שהם ללא אימות מחדש
+3. **קלט קולי (Voice)** - פריטים נוספים ללא בדיקה
+4. **סריקת כתב יד (OCR/Handwriting)** - פריטים נוספים ללא בדיקה
+5. **תבניות (Templates)** - פריטים נוספים ללא בדיקה
 
-### 1. פונקציות עדכון בשכבת הנתונים
-- **storage.ts** - הוספת פונקציית `updateShoppingHistory` ל-localStorage
-- **cloudStorage.ts** - הוספת פונקציית `cloudUpdateShoppingHistory` עם Supabase UPDATE
-- **use-cloud-sync.ts** - הוספת `updateShoppingHistory` שמנתבת בין cloud/local לפי מצב ההתחברות
+## הפתרון
 
-### 2. מודל עריכה חדש - EditHistoryModal
-קומפוננטה חדשה `EditHistoryModal.tsx` שתכלול:
-- שדה לעריכת שם החנות (עם autocomplete מרשימת החנויות הקיימת)
-- שדה לעריכת הסכום הכולל
-- שדה לעריכת התאריך
-- אפשרות לעריכת סוג הקנייה (shoppingType)
-- כפתורי שמירה וביטול
+### 1. אימות בעריכה ישירה של פריטים (ShoppingList.tsx)
+בשני המקומות שמאפשרים עריכת טקסט של פריט קיים (תצוגת קטגוריות ותצוגה שטוחה), הוספת בדיקה ב-`onBlur` (כשהמשתמש יוצא מהשדה):
+- הרצת `validateInput` ו-`containsProfanity`
+- אם הטקסט לא תקין - החזרת הטקסט הקודם והצגת הודעת שגיאה
+- שמירת הטקסט הקודם ב-ref לצורך שחזור
 
-### 3. כפתור עריכה בכרטיס
-- הוספת כפתור עריכה (אייקון עיפרון) ב-`CompletedTripCard` ליד כפתור המחיקה בפוטר
-- הוספת כפתור עריכה גם ב-`HistoryDetailModal` (מודל הצפייה בפרטים)
+### 2. אימות במעבר למצב קניות (handleStartShopping)
+לפני המרת notepadItems לפריטי קנייה - סינון פריטים לא תקינים עם הודעה למשתמש
 
-### 4. חיבור ב-ShoppingList
-- העברת `onEdit` callback ל-CompletedTripCard
-- ניהול state של המודל (פתיחה/סגירה, הטריפ הנערך)
-- קריאה ל-`updateShoppingHistory` ורענון הרשימה לאחר שמירה
+### 3. אימות בקלט קולי, OCR וכתב יד
+הוספת `validateInput` ו-`containsProfanity` לפני הוספת פריטים מקלט קולי, סריקה וכתב יד
+
+### 4. אימות בתבניות
+הוספת בדיקה גם לפריטים שמגיעים מתבניות (למרות שזה פחות סביר שם)
 
 ## פרטים טכניים
 
-### קובצי עבודה:
-1. `src/utils/storage.ts` - הוספת updateShoppingHistory
-2. `src/utils/cloudStorage.ts` - הוספת cloudUpdateShoppingHistory
-3. `src/hooks/use-cloud-sync.ts` - הוספת updateShoppingHistory
-4. `src/components/EditHistoryModal.tsx` - קומפוננטה חדשה
-5. `src/components/CompletedTripCard.tsx` - הוספת כפתור עריכה
-6. `src/components/HistoryDetailModal.tsx` - הוספת כפתור עריכה
-7. `src/components/ShoppingList.tsx` - חיבור המודל והלוגיקה
-8. `src/pages/History.tsx` - חיבור עריכה גם בדף ההיסטוריה
+### קבצים שישתנו:
+- **src/components/ShoppingList.tsx** - 6 נקודות תיקון:
+  - שורות ~1433 ו-~1960: הוספת `onBlur` validation לשדות עריכה ישירה
+  - שורות ~512-522: הוספת אימות ב-`handleStartShopping`
+  - שורות ~1220-1224: אימות בקלט קולי
+  - שורות ~1259-1263: אימות ב-OCR
+  - שורות ~1299-1303: אימות בכתב יד
+  - שורות ~643-648: אימות בתבניות
 
-### שדות הניתנים לעריכה בטריפ (ShoppingHistory):
-- `store` - שם החנות
-- `totalAmount` - סכום כולל
-- `date` - תאריך
-- `shoppingType` - סוג הקנייה
-- `listName` - שם הרשימה
+### לוגיקת האימות בעריכה ישירה:
+```text
+onChange -> מעדכן טקסט חופשי (חוויית כתיבה רגילה)
+onBlur -> מריץ validateInput + containsProfanity
+  אם לא תקין -> מחזיר לטקסט קודם + toast שגיאה
+  אם תקין -> שומר
+```
+
+### לוגיקת האימות במעבר למצב קניות:
+```text
+handleStartShopping:
+  לכל פריט -> validateInput + containsProfanity
+  פריטים לא תקינים -> מוסרים עם toast אזהרה
+  אם אין פריטים תקינים -> toast שגיאה ולא ממשיכים
+```

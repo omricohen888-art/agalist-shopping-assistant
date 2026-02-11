@@ -26,7 +26,7 @@ import {
   X,
   History,
 } from "lucide-react";
-import { getShoppingHistory } from "@/utils/storage";
+import { useCloudSync } from "@/hooks/use-cloud-sync";
 import { ShoppingHistory as ShoppingHistoryType } from "@/types/shopping";
 import { useGlobalLanguage, Language } from "@/context/LanguageContext";
 import { toast } from "sonner";
@@ -216,6 +216,7 @@ const Insights = () => {
   const { language } = useGlobalLanguage();
   const t = translations[language];
   const direction = language === "he" ? "rtl" : "ltr";
+  const { getShoppingHistory } = useCloudSync();
 
   const [history, setHistory] = useState<ShoppingHistoryType[]>([]);
   const [budget, setBudget] = useState<BudgetData | null>(null);
@@ -235,21 +236,24 @@ const Insights = () => {
   const [isEditingGoal, setIsEditingGoal] = useState(false);
 
   useEffect(() => {
-    setHistory(getShoppingHistory());
+    const loadHistory = async () => {
+      const data = await getShoppingHistory();
+      setHistory(data);
+    };
+    loadHistory();
     
     const savedBudget = localStorage.getItem(BUDGET_KEY);
     if (savedBudget) {
       try {
         setBudget(JSON.parse(savedBudget));
       } catch {
-        // Legacy format - just a number
         setBudget({ amount: parseFloat(savedBudget), period: 'monthly' });
       }
     }
     
     const savedGoal = localStorage.getItem(SAVINGS_GOAL_KEY);
     if (savedGoal) setSavingsGoal(parseFloat(savedGoal));
-  }, []);
+  }, [getShoppingHistory]);
 
   // Date calculations based on selected month
   const viewMonth = selectedMonth.getMonth();

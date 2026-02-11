@@ -219,6 +219,7 @@ const Insights = () => {
   const { getShoppingHistory } = useCloudSync();
 
   const [history, setHistory] = useState<ShoppingHistoryType[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [budget, setBudget] = useState<BudgetData | null>(null);
   const [budgetInput, setBudgetInput] = useState("");
   const [budgetPeriod, setBudgetPeriod] = useState<BudgetPeriod>('monthly');
@@ -237,8 +238,15 @@ const Insights = () => {
 
   useEffect(() => {
     const loadHistory = async () => {
-      const data = await getShoppingHistory();
-      setHistory(data);
+      try {
+        const data = await getShoppingHistory();
+        console.log("[Insights] Loaded history:", data.length, "items");
+        setHistory(data);
+      } catch (error) {
+        console.error("[Insights] Failed to load history:", error);
+      } finally {
+        setIsLoading(false);
+      }
     };
     loadHistory();
     
@@ -447,6 +455,17 @@ const Insights = () => {
   const goalProgress = savingsGoal ? Math.min((savingsAmount / savingsGoal) * 100, 100) : 0;
 
   const formatCurrency = (amount: number) => `₪${amount.toLocaleString(language === 'he' ? 'he-IL' : 'en-US', { maximumFractionDigits: 0 })}`;
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background pb-24 flex items-center justify-center" dir={direction}>
+        <div className="text-center">
+          <div className="w-10 h-10 mx-auto mb-3 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm text-muted-foreground">{language === 'he' ? 'טוען נתונים...' : 'Loading data...'}</p>
+        </div>
+      </div>
+    );
+  }
 
   if (history.length === 0) {
     return (

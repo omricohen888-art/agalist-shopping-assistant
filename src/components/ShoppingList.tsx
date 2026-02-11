@@ -676,6 +676,19 @@ export const ShoppingList = () => {
       });
     }
     setNotepadItems(newNotepadItems);
+
+    // Scroll to top to show the items in the notepad
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 100);
+
+    // Show instruction toast
+    toast.success(
+      language === 'he' 
+        ? `✅ ${newNotepadItems.length} פריטים נוספו! ערכו את הרשימה ולחצו "יאללה לקניות"` 
+        : `✅ ${newNotepadItems.length} items added! Edit the list and click "Start Shopping"`,
+      { duration: 4000 }
+    );
   };
   const handleCreateTemplate = () => {
     if (!newTemplateName.trim() || !newTemplateItems.trim()) {

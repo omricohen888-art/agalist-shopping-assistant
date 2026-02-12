@@ -119,36 +119,7 @@ export const ShoppingListPreview: React.FC<ShoppingListPreviewProps> = ({
     };
 
     const handleCopyList = async () => {
-        const checkedItems = items.filter(item => item.checked);
-        const uncheckedItems = items.filter(item => !item.checked);
-
-        const formatItem = (item: ShoppingItem) => {
-            const checkbox = item.checked ? '✓' : '☐';
-            const quantityUnit = getDisplayQuantityUnit(item);
-            const quantityText = quantityUnit ? ` (${quantityUnit})` : '';
-            return `${checkbox} ${item.text}${quantityText}`;
-        };
-
-        let listText = '';
-        
-        if (uncheckedItems.length > 0) {
-            listText += uncheckedItems.map(formatItem).join('\n');
-        }
-        
-        if (checkedItems.length > 0) {
-            if (uncheckedItems.length > 0) {
-                listText += '\n\n' + (language === 'he' ? '── הושלמו ──' : '── Done ──') + '\n';
-            }
-            listText += checkedItems.map(formatItem).join('\n');
-        }
-
-        const header = `📋 ${list.name}`;
-        const divider = '─'.repeat(20);
-        const summary = language === 'he' 
-            ? `\n\n📊 סה"כ: ${items.length} פריטים | ✓ ${checkedItems.length} הושלמו`
-            : `\n\n📊 Total: ${items.length} items | ✓ ${checkedItems.length} done`;
-
-        const fullText = `${header}\n${divider}\n${listText}${summary}`;
+        const fullText = items.map(item => item.text).join('\n');
 
         try {
             await navigator.clipboard.writeText(fullText);

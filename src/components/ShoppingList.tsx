@@ -1121,36 +1121,7 @@ export const ShoppingList = () => {
       return `${item.quantity} ${unitText}`;
     };
 
-    const checkedItems = itemsToCopy.filter(item => item.isChecked);
-    const uncheckedItems = itemsToCopy.filter(item => !item.isChecked);
-
-    const formatItem = (item: NotepadItem) => {
-      const checkbox = item.isChecked ? '✓' : '☐';
-      const quantityUnit = getQuantityUnit(item);
-      const quantityText = quantityUnit ? ` (${quantityUnit})` : '';
-      return `${checkbox} ${item.text}${quantityText}`;
-    };
-
-    let listText = '';
-
-    if (uncheckedItems.length > 0) {
-      listText += uncheckedItems.map(formatItem).join('\n');
-    }
-
-    if (checkedItems.length > 0) {
-      if (uncheckedItems.length > 0) {
-        listText += '\n\n' + (language === 'he' ? '── הושלמו ──' : '── Done ──') + '\n';
-      }
-      listText += checkedItems.map(formatItem).join('\n');
-    }
-
-    const header = `📋 ${listName || (language === 'he' ? 'רשימת קניות' : 'Shopping List')}`;
-    const divider = '─'.repeat(20);
-    const summary = language === 'he'
-      ? `\n\n📊 סה"כ: ${itemsToCopy.length} פריטים | ✓ ${checkedItems.length} הושלמו`
-      : `\n\n📊 Total: ${itemsToCopy.length} items | ✓ ${checkedItems.length} done`;
-
-    const fullText = `${header}\n${divider}\n${listText}${summary}`;
+    const fullText = itemsToCopy.map(item => item.text).join('\n');
 
     try {
       await navigator.clipboard.writeText(fullText);

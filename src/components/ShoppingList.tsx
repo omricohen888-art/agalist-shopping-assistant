@@ -1488,7 +1488,7 @@ export const ShoppingList = () => {
               <Checkbox
                 checked={item.isChecked}
                 onCheckedChange={() => toggleNotepadItem(item.id)}
-                className="h-5 w-5 flex-shrink-0"
+                size="lg" className="rounded-md flex-shrink-0"
               />
               <input
                 ref={el => { notepadInputRefs.current[actualIndex] = el; }}
@@ -2028,7 +2028,7 @@ export const ShoppingList = () => {
                 {notepadItems.map((item, index) => <div key={item.id} className="flex items-center gap-2 py-1.5 w-full">
                   {/* Checkbox + Text */}
                   <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <Checkbox checked={item.isChecked} onCheckedChange={() => toggleNotepadItem(item.id)} className="h-5 w-5 flex-shrink-0" />
+                    <Checkbox checked={item.isChecked} onCheckedChange={() => toggleNotepadItem(item.id)} size="lg" className="rounded-md flex-shrink-0" />
                     <StandardizedInput variant="notepad" isChecked={item.isChecked} ref={el => {
                       notepadInputRefs.current[index] = el;
                     }} type="text" value={item.text} onChange={e => {

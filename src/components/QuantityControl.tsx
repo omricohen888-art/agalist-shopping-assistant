@@ -103,34 +103,39 @@ const QuantityControl = ({
     // 3. Increase Button (Right): Circle 40px, Green-500.
     // Layout: Flex with gap-4.
 
+    const btnSize = compact ? "w-7 h-7" : "w-10 h-10";
+    const iconSize = compact ? "w-3.5 h-3.5" : "w-5 h-5";
+    const gapClass = compact ? "gap-2" : "gap-4";
+    const textSize = compact ? "text-sm" : "text-lg";
+    const minWidth = compact ? "min-w-[24px]" : "min-w-[32px]";
+
     return (
-        <div className={`flex items-center gap-4 ${isCompleted ? 'opacity-50 grayscale' : ''}`} onClick={(e) => e.stopPropagation()}>
+        <div className={`flex items-center ${gapClass} ${isCompleted ? 'opacity-50 grayscale' : ''}`} onClick={(e) => e.stopPropagation()}>
 
             {/* DECREASE / DELETE BUTTON */}
             <button
                 type="button"
                 onClick={handleDecrement}
                 className={`
-                  w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-sm shrink-0
+                  ${btnSize} rounded-full flex items-center justify-center transition-all shadow-sm shrink-0
                   ${showTrash
-                        ? 'bg-red-500 text-white hover:bg-red-600 shadow-md'
+                        ? 'bg-red-100 text-red-500 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50'
                         : 'bg-gray-200 text-black hover:bg-gray-300 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600'
                     }
                 `}
             >
                 {showTrash ? (
-                    <Trash2 className="w-5 h-5" />
+                    <Trash2 className={iconSize} />
                 ) : (
-                    <Minus className="w-5 h-5" strokeWidth={2.5} />
+                    <Minus className={iconSize} strokeWidth={2.5} />
                 )}
             </button>
 
             {/* QUANTITY DISPLAY */}
-            <div className="flex flex-col items-center justify-center min-w-[32px]">
-                <span className="text-lg font-bold tabular-nums leading-none text-foreground">
+            <div className={`flex flex-col items-center justify-center ${minWidth}`}>
+                <span className={`${textSize} font-bold tabular-nums leading-none text-foreground`}>
                     {displayValue}
                 </span>
-                {/* Optional Unit display if needed, keeping it minimal as requested */}
                 {!isDiscrete && (
                     <span className="text-[10px] text-muted-foreground font-medium lowercase">
                         {unit}
@@ -142,13 +147,13 @@ const QuantityControl = ({
             <button
                 type="button"
                 onClick={handleIncrement}
-                className="
-          w-10 h-10 rounded-full flex items-center justify-center 
+                className={`
+          ${btnSize} rounded-full flex items-center justify-center 
           bg-green-500 text-white hover:bg-green-600 
           shadow-sm transition-all active:scale-95
-        "
+        `}
             >
-                <Plus className="w-5 h-5" strokeWidth={2.5} />
+                <Plus className={iconSize} strokeWidth={2.5} />
             </button>
         </div>
     );

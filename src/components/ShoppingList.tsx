@@ -1912,7 +1912,7 @@ export const ShoppingList = () => {
         <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleCameraOCR} className="hidden" />
 
         {/* Items List - Mobile Optimized */}
-        <div className="min-h-[120px] sm:min-h-[140px]" dir={language === 'he' ? 'rtl' : 'ltr'}>
+        <div className="min-h-[120px] sm:min-h-[140px] max-h-[50vh] overflow-y-auto scrollbar-thin" dir={language === 'he' ? 'rtl' : 'ltr'}>
           {notepadItems.length === 0 ?
             // Empty state - Google Keep style input
             <div className="relative">

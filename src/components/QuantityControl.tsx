@@ -103,11 +103,11 @@ const QuantityControl = ({
     // 3. Increase Button (Right): Circle 40px, Green-500.
     // Layout: Flex with gap-4.
 
-    const btnSize = compact ? "w-7 h-7" : "w-10 h-10";
-    const iconSize = compact ? "w-3.5 h-3.5" : "w-5 h-5";
-    const gapClass = compact ? "gap-2" : "gap-4";
-    const textSize = compact ? "text-sm" : "text-lg";
-    const minWidth = compact ? "min-w-[24px]" : "min-w-[32px]";
+    const btnSize = compact ? "w-6 h-6 sm:w-7 sm:h-7" : "w-10 h-10";
+    const iconSize = compact ? "w-3 h-3 sm:w-3.5 sm:h-3.5" : "w-5 h-5";
+    const gapClass = compact ? "gap-1 sm:gap-2" : "gap-4";
+    const textSize = compact ? "text-xs sm:text-sm" : "text-lg";
+    const minWidth = compact ? "min-w-[20px] sm:min-w-[24px]" : "min-w-[32px]";
 
     return (
         <div className={`flex items-center ${gapClass} ${isCompleted ? 'opacity-50 grayscale' : ''}`} onClick={(e) => e.stopPropagation()}>

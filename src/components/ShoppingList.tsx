@@ -1455,7 +1455,7 @@ export const ShoppingList = () => {
           {/* Items - Medium size */}
           {!isCollapsed && categoryItems.map((item) => {
             const actualIndex = notepadItems.findIndex(i => i.id === item.id);
-            return <div key={item.id} className="flex items-center gap-2 py-1 px-1">
+            return <div key={item.id} className="flex items-center gap-1 sm:gap-2 py-1 px-1 overflow-hidden">
               <Checkbox
                 checked={item.isChecked}
                 onCheckedChange={() => toggleNotepadItem(item.id)}
@@ -1518,7 +1518,7 @@ export const ShoppingList = () => {
               </div>
 
               {/* Quantity - Compact */}
-              <div className="flex items-center gap-0.5 px-0.5 flex-shrink-0">
+              <div className="flex items-center gap-0.5 flex-shrink-0">
                 <QuantityControl
                   value={item.quantity || 1}
                   onChange={(val) => setNotepadItems(prev => prev.map(i => i.id === item.id ? { ...i, quantity: val } : i))}
@@ -1912,7 +1912,7 @@ export const ShoppingList = () => {
         <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleCameraOCR} className="hidden" />
 
         {/* Items List - Mobile Optimized */}
-        <div className="min-h-[120px] sm:min-h-[140px] max-h-[50vh] overflow-y-auto scrollbar-thin" dir={language === 'he' ? 'rtl' : 'ltr'}>
+        <div className="min-h-[120px] sm:min-h-[140px] max-h-[50vh] overflow-y-auto overflow-x-hidden scrollbar-thin" dir={language === 'he' ? 'rtl' : 'ltr'}>
           {notepadItems.length === 0 ?
             // Empty state - Google Keep style input
             <div className="relative">
@@ -1996,7 +1996,7 @@ export const ShoppingList = () => {
               renderGroupedNotepadItems() :
               // Flat list view
               <div dir={language === 'he' ? 'rtl' : 'ltr'}>
-                {notepadItems.map((item, index) => <div key={item.id} className="flex items-center gap-2 py-1.5 w-full">
+                {notepadItems.map((item, index) => <div key={item.id} className="flex items-center gap-1 sm:gap-2 py-1.5 w-full overflow-hidden">
                   {/* Checkbox + Text */}
                   <div className="flex items-center gap-2 flex-1 min-w-0">
                     <Checkbox checked={item.isChecked} onCheckedChange={() => toggleNotepadItem(item.id)} size="lg" className="rounded-md flex-shrink-0" />
@@ -2056,7 +2056,7 @@ export const ShoppingList = () => {
                   </div>
 
                   {/* Quantity - Compact */}
-                  <div className="flex items-center gap-0.5 px-1.5 py-0.5 flex-shrink-0">
+                  <div className="flex items-center gap-0.5 flex-shrink-0">
                     <QuantityControl
                       value={item.quantity || 1}
                       onChange={(val) => setNotepadItems(prev => prev.map(i => i.id === item.id ? { ...i, quantity: val } : i))}

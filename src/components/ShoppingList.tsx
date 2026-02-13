@@ -1510,7 +1510,7 @@ export const ShoppingList = () => {
                   tabIndex={-1}
                   value={item.unit || 'units'}
                   onChange={e => setNotepadItems(prev => prev.map(i => i.id === item.id ? { ...i, unit: e.target.value as Unit } : i))}
-                  className="h-8 px-2 rounded-full border-0 bg-transparent hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors font-bold text-sm cursor-pointer outline-none appearance-none text-center"
+                  className="h-7 px-1 rounded-full border-0 bg-transparent hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors font-bold text-xs sm:text-sm cursor-pointer outline-none appearance-none text-center"
                   style={{ textAlignLast: 'center' }}
                 >
                   {UNITS.map(u => <option key={u.value} value={u.value}>{language === 'he' ? u.labelHe : u.labelEn}</option>)}
@@ -2048,7 +2048,7 @@ export const ShoppingList = () => {
                       tabIndex={-1}
                       value={item.unit || 'units'}
                       onChange={e => setNotepadItems(prev => prev.map(i => i.id === item.id ? { ...i, unit: e.target.value as Unit } : i))}
-                      className="h-8 px-2 rounded-full border-0 bg-transparent hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors font-bold text-sm cursor-pointer outline-none appearance-none text-center"
+                      className="h-7 px-1 rounded-full border-0 bg-transparent hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors font-bold text-xs sm:text-sm cursor-pointer outline-none appearance-none text-center"
                       style={{ textAlignLast: 'center' }}
                     >
                       {UNITS.map(u => <option key={u.value} value={u.value}>{language === 'he' ? u.labelHe : u.labelEn}</option>)}

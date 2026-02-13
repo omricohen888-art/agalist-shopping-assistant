@@ -13,12 +13,12 @@ export const SortModeToggle: React.FC<SortModeToggleProps> = ({
   language
 }) => {
   return (
-    <div className="flex items-center justify-center gap-1 p-0.5 glass rounded-full border border-border/50 w-full max-w-[240px] mx-auto">
+    <div className="flex items-center justify-center gap-0.5 p-0.5 glass rounded-full border border-border/50 w-fit max-w-full mx-auto">
       {/* Original Order Button - First */}
       <button
         onClick={() => onToggle(false)}
         className={`
-          flex-1 flex items-center justify-center gap-1 px-2 py-1 rounded-full text-[11px] font-medium
+          flex items-center justify-center gap-1 px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-medium
           transition-all duration-300 ease-out touch-manipulation
           ${!isSmartSort 
             ? 'bg-primary text-primary-foreground shadow-md shadow-primary/25 scale-[1.02]' 
@@ -26,9 +26,9 @@ export const SortModeToggle: React.FC<SortModeToggleProps> = ({
           }
         `}
       >
-        <ListOrdered className="h-2.5 w-2.5" />
+        <ListOrdered className="h-2.5 w-2.5 shrink-0" />
         <span className="whitespace-nowrap">
-          {language === 'he' ? 'סדר מקורי' : 'Original Order'}
+          {language === 'he' ? 'סדר מקורי' : 'Original'}
         </span>
       </button>
 
@@ -36,7 +36,7 @@ export const SortModeToggle: React.FC<SortModeToggleProps> = ({
       <button
         onClick={() => onToggle(true)}
         className={`
-          flex-1 flex items-center justify-center gap-1 px-2 py-1 rounded-full text-[11px] font-medium
+          flex items-center justify-center gap-1 px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-medium
           transition-all duration-300 ease-out touch-manipulation
           ${isSmartSort 
             ? 'bg-primary text-primary-foreground shadow-md shadow-primary/25 scale-[1.02]' 
@@ -44,7 +44,7 @@ export const SortModeToggle: React.FC<SortModeToggleProps> = ({
           }
         `}
       >
-        <Sparkles className={`h-2.5 w-2.5 ${isSmartSort ? 'animate-pulse' : ''}`} />
+        <Sparkles className={`h-2.5 w-2.5 shrink-0 ${isSmartSort ? 'animate-pulse' : ''}`} />
         <span className="whitespace-nowrap">
           {language === 'he' ? 'מיון חכם' : 'Smart Sort'}
         </span>

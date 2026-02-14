@@ -23,6 +23,7 @@ import Auth from "./pages/Auth";
 import OGDesign from "./pages/OGDesign";
 import Profile from "./pages/Profile";
 import Admin from "./pages/Admin";
+import Demo from "./pages/Demo";
 import { MaintenanceGuard } from "@/components/MaintenanceGuard";
 import { AnnouncementBanner } from "@/components/AnnouncementBanner";
 
@@ -32,8 +33,9 @@ const AppContent = () => {
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const location = useLocation();
 
-  // Hide navigation on shopping mode
+  // Hide navigation on shopping mode and demo
   const isShoppingMode = location.pathname.startsWith('/shopping/');
+  const isDemoMode = location.pathname === '/demo';
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -52,15 +54,16 @@ const AppContent = () => {
             <Route path="/about" element={<About />} />
             <Route path="/og-design" element={<OGDesign />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/demo" element={<Demo />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
-        {!isShoppingMode && (
+        {!isShoppingMode && !isDemoMode && (
           <Navigation onSettingsClick={() => setIsSettingsModalOpen(true)} />
         )}
         <SettingsModal open={isSettingsModalOpen} onOpenChange={setIsSettingsModalOpen} />
-        {!isShoppingMode && (
+        {!isShoppingMode && !isDemoMode && (
           <footer className="w-full py-6 pb-8 text-center">
             <p className="text-[11px] text-gray-400 dark:text-slate-700 font-medium">
               © 2025 Agalist™ • v0.1.0 (Beta) • Dev by OC

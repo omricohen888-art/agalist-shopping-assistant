@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Minus, Trash2, X, Save, ListPlus } from "lucide-react";
 import { SavedList, ShoppingItem, Unit, UNITS } from "@/types/shopping";
-import { updateSavedList } from "@/utils/storage";
+// Note: persistence is handled by the parent via onSave callback (supports both local and cloud sync)
 import { toast } from "sonner";
 
 interface EditListModalProps {
@@ -139,7 +139,7 @@ export const EditListModal: React.FC<EditListModalProps> = ({
       items
     };
 
-    updateSavedList(updatedList);
+    // Let parent handle persistence (supports both local and cloud sync)
     onSave(updatedList);
     onClose();
   };

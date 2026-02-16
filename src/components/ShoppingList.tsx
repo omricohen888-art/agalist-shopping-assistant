@@ -987,6 +987,7 @@ export const ShoppingList = () => {
       const lists = await cloudSync.getSavedLists();
       setSavedLists(lists);
       setItems([]);
+      setNotepadItems([]);
       setInputText("");
       setActiveListId(null);
       setListName("");
@@ -1094,9 +1095,16 @@ export const ShoppingList = () => {
   };
 
   const handleSaveEditedList = async (updatedList: SavedList) => {
-    const lists = await cloudSync.getSavedLists();
-    setSavedLists(lists);
-    toast.success(t.toasts.listSaved);
+    // Save to cloud (or local for guests) via cloudSync
+    const success = await cloudSync.updateSavedList(updatedList);
+    if (success) {
+      // Refresh lists from the correct source
+      const lists = await cloudSync.getSavedLists();
+      setSavedLists(lists);
+      toast.success(t.toasts.listSaved);
+    } else {
+      toast.error(language === 'he' ? 'שגיאה בשמירת הרשימה' : 'Error saving list');
+    }
   };
 
   const handleLoadList = (list: SavedList) => {

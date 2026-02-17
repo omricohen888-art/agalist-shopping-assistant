@@ -2114,22 +2114,27 @@ export const ShoppingList = () => {
           </div>
         </div>}
 
-        <div className="flex flex-col gap-2 sm:gap-3 mt-4 sm:mt-6 w-full justify-center items-center transition-all duration-300 ease-in-out relative z-10">
-          {/* Finish Shopping button - only when items are checked */}
-          {notepadItems.filter(item => item.isChecked).length > 0 && (
-            <button
-              onClick={openFinishDialog}
-              className="w-full py-3.5 sm:py-4 bg-primary border-2 border-black dark:border-slate-700 rounded-2xl font-bold text-base sm:text-lg text-primary-foreground flex items-center justify-center gap-2.5 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] dark:shadow-[3px_3px_0px_0px_rgba(100,116,139,0.8)] hover:translate-y-[2px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[1px_1px_0px_0px_rgba(100,116,139,0.8)] active:translate-y-[3px] active:shadow-none transition-all duration-200 touch-manipulation animate-fade-in"
-            >
-              <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6" />
-              <span>{language === 'he' ? 'סיים קנייה' : 'Finish Shopping'}</span>
-            </button>
-          )}
+        <div className="flex flex-col gap-1.5 sm:gap-3 mt-3 sm:mt-6 w-full justify-center items-center transition-all duration-300 ease-in-out relative z-10">
           {/* Two action buttons - Mobile Optimized */}
-          <div className={`flex flex-col sm:flex-row gap-2 sm:gap-3 w-full justify-center items-center ${notepadItems.length > 0 ? '' : 'pt-2'}`}>
-            <StartShoppingButton onClick={handleStartShopping} language={language} disabled={notepadItems.length === 0} />
+          <div className={`flex flex-col sm:flex-row gap-1.5 sm:gap-3 w-full justify-center items-center ${notepadItems.length > 0 ? '' : 'pt-2'}`}>
+            <StartShoppingButton onClick={handleStartShopping} language={language} disabled={notepadItems.length === 0} variant="compact" />
             <SaveListButton onClick={handleSaveList} language={language} disabled={notepadItems.length === 0} />
           </div>
+          {/* Finish Shopping button - below, only when items are checked */}
+          {notepadItems.filter(item => item.isChecked).length > 0 && (
+            <div className="w-full flex flex-col items-center gap-1 animate-fade-in">
+              <p className="text-xs text-muted-foreground text-center">
+                {language === 'he' ? 'סימנת פריטים? סיים את הקנייה ושמור לתיעוד' : 'Checked items? Finish shopping and save to history'}
+              </p>
+              <button
+                onClick={openFinishDialog}
+                className="w-full py-2.5 sm:py-3 bg-primary border-2 border-black dark:border-slate-700 rounded-xl font-bold text-sm sm:text-base text-primary-foreground flex items-center justify-center gap-2 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] dark:shadow-[3px_3px_0px_0px_rgba(100,116,139,0.8)] hover:translate-y-[2px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[1px_1px_0px_0px_rgba(100,116,139,0.8)] active:translate-y-[3px] active:shadow-none transition-all duration-200 touch-manipulation"
+              >
+                <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span>{language === 'he' ? 'סיים קנייה' : 'Finish Shopping'}</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

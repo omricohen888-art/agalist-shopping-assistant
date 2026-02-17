@@ -1578,6 +1578,26 @@ export const ShoppingList = () => {
     }
     setIsFinishDialogOpen(true);
   };
+
+  // Finish shopping directly from notepad (main screen)
+  const openFinishDialogFromNotepad = () => {
+    const checkedNotepad = notepadItems.filter(item => item.isChecked);
+    if (checkedNotepad.length === 0) return;
+    
+    // Convert notepad items to shopping items so handleFinishShopping works
+    const convertedItems: ShoppingItem[] = notepadItems
+      .filter(item => item.text.trim() !== '')
+      .map((notepadItem, index) => ({
+        id: `${createUUID()}-${index}`,
+        text: notepadItem.text,
+        checked: notepadItem.isChecked,
+        quantity: notepadItem.quantity || 1,
+        unit: (notepadItem.unit || 'units') as Unit
+      }));
+    
+    setItems(convertedItems);
+    setIsFinishDialogOpen(true);
+  };
   const handleFinishShopping = async () => {
     const amount = parseFloat(totalAmount);
     if (isNaN(amount) || amount <= 0) {
@@ -2127,7 +2147,7 @@ export const ShoppingList = () => {
                 {language === 'he' ? 'סימנת פריטים? סיים את הקנייה ושמור לתיעוד' : 'Checked items? Finish shopping and save to history'}
               </p>
               <button
-                onClick={openFinishDialog}
+                onClick={openFinishDialogFromNotepad}
                 className="w-full py-2.5 sm:py-3 bg-primary border-2 border-black dark:border-slate-700 rounded-xl font-bold text-sm sm:text-base text-primary-foreground flex items-center justify-center gap-2 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] dark:shadow-[3px_3px_0px_0px_rgba(100,116,139,0.8)] hover:translate-y-[2px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[1px_1px_0px_0px_rgba(100,116,139,0.8)] active:translate-y-[3px] active:shadow-none transition-all duration-200 touch-manipulation"
               >
                 <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />

@@ -31,7 +31,7 @@ import { StandardizedInput } from "@/components/ui/standardized-input";
 import { StandardizedTextarea } from "@/components/ui/standardized-textarea";
 import { HandwritingCanvas } from "@/components/HandwritingCanvas";
 import { toast } from "sonner";
-import { ShoppingItem, ShoppingHistory, ISRAELI_STORES, UNITS, Unit, SavedList, ShoppingType, SHOPPING_TYPES, STORES_BY_TYPE } from "@/types/shopping";
+import { ShoppingItem, ShoppingHistory, ISRAELI_STORES, UNITS, Unit, SavedList } from "@/types/shopping";
 import { ISRAELI_PRODUCTS } from "@/data/israeliProducts";
 import { ShoppingListItem } from "@/components/ShoppingListItem";
 import { GroupedShoppingList } from "@/components/GroupedShoppingList";
@@ -131,7 +131,6 @@ export const ShoppingList = () => {
   const [totalAmount, setTotalAmount] = useState("");
   const [selectedStore, setSelectedStore] = useState("");
   const [customStore, setCustomStore] = useState("");
-  const [selectedShoppingType, setSelectedShoppingType] = useState<ShoppingType>("supermarket");
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
   const [listName, setListName] = useState("");
   const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
@@ -1605,7 +1604,7 @@ export const ShoppingList = () => {
       toast.error(t.toasts.invalidAmount);
       return;
     }
-    const store = selectedStore === '__custom__' ? customStore : selectedStore;
+    const store = selectedStore === otherLabel ? customStore : selectedStore;
     if (!store) {
       toast.error(t.toasts.selectStore);
       return;
@@ -1618,8 +1617,7 @@ export const ShoppingList = () => {
       totalAmount: amount,
       store,
       completedItems,
-      totalItems: items.length,
-      shoppingType: selectedShoppingType,
+      totalItems: items.length
     };
     const success = await cloudSync.saveShoppingHistory(history);
     if (success) {
@@ -1640,7 +1638,6 @@ export const ShoppingList = () => {
       setTotalAmount("");
       setSelectedStore("");
       setCustomStore("");
-      setSelectedShoppingType("supermarket");
       setActiveListId(null);
       setListName("");
 
@@ -2628,145 +2625,55 @@ export const ShoppingList = () => {
       </div>}
 
       <Dialog open={isFinishDialogOpen} onOpenChange={setIsFinishDialogOpen}>
-        <DialogContent className="sm:max-w-md" dir={direction}>
+        <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle className="text-center text-xl font-bold">
-              {language === 'he' ? '🛒 סיום קנייה' : '🛒 Finish Shopping'}
-            </DialogTitle>
+            <DialogTitle className="text-2xl">{t.finishDialogTitle}</DialogTitle>
+            <DialogDescription className="text-base">
+              {t.finishDialogDescription}
+            </DialogDescription>
           </DialogHeader>
-
-          <div className="space-y-4 py-4">
-            {/* Shopping Type */}
+          <div className="space-y-6 py-4">
             <div className="space-y-2">
-              <Label htmlFor="shoppingType" className="text-sm font-medium">
-                {language === 'he' ? 'סוג קנייה' : 'Shopping Type'}
+              <Label htmlFor="amount" className="text-base font-semibold">
+                {t.amountLabel}
               </Label>
-              <Select
-                value={selectedShoppingType}
-                onValueChange={(value: ShoppingType) => {
-                  setSelectedShoppingType(value);
-                  setSelectedStore("");
-                }}
-              >
-                <SelectTrigger dir={direction} className="w-full h-12 text-base">
-                  {selectedShoppingType ? (
-                    <span className={`flex items-center gap-2 w-full ${direction === 'rtl' ? 'flex-row-reverse justify-end' : ''}`}>
-                      <span>{SHOPPING_TYPES.find(st => st.value === selectedShoppingType)?.icon}</span>
-                      <span>{language === 'he'
-                        ? SHOPPING_TYPES.find(st => st.value === selectedShoppingType)?.labelHe
-                        : SHOPPING_TYPES.find(st => st.value === selectedShoppingType)?.labelEn
-                      }</span>
-                    </span>
-                  ) : (
-                    <span>{language === 'he' ? 'בחר סוג' : 'Select type'}</span>
-                  )}
+              <Input id="amount" type="number" placeholder="0.00" value={totalAmount} onChange={e => setTotalAmount(e.target.value)} className="h-12 text-lg" min="0" step="0.01" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="store" className="text-base font-semibold">
+                {t.storeLabel}
+              </Label>
+              <Select value={selectedStore} onValueChange={setSelectedStore}>
+                <SelectTrigger className="h-12 text-lg">
+                  <SelectValue placeholder={t.selectPlaceholder} />
                 </SelectTrigger>
-                <SelectContent className="bg-background border border-border z-50" dir={direction}>
-                  {SHOPPING_TYPES.map((type) => (
-                    <SelectItem key={type.value} value={type.value}>
-                      <span className={`flex items-center gap-2 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
-                        <span>{type.icon}</span>
-                        <span>{language === 'he' ? type.labelHe : type.labelEn}</span>
-                      </span>
-                    </SelectItem>
-                  ))}
+                <SelectContent>
+                  {storeOptions.map(store => <SelectItem key={store} value={store} className="text-lg">
+                    {store}
+                  </SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
-
-            {/* Store */}
-            <div className="space-y-2">
-              <Label htmlFor="store" className="text-sm font-medium">
-                {language === 'he' ? 'רשת/חנות' : 'Store'}
+            {selectedStore === otherLabel && <div className="space-y-2">
+              <Label htmlFor="customStore" className="text-base font-semibold">
+                {t.customStoreLabel}
               </Label>
-              {selectedShoppingType === 'other' || STORES_BY_TYPE[selectedShoppingType].length === 0 ? (
-                <Input
-                  id="store"
-                  type="text"
-                  placeholder={language === 'he' ? 'הקלד שם חנות...' : 'Enter store name...'}
-                  value={selectedStore}
-                  onChange={(e) => setSelectedStore(e.target.value)}
-                  className="h-12 text-base"
-                  dir={direction}
-                />
-              ) : (
-                <div className="space-y-2">
-                  <Select value={selectedStore} onValueChange={setSelectedStore}>
-                    <SelectTrigger dir={direction} className="w-full h-12 text-base">
-                      {selectedStore && selectedStore !== '__custom__' ? (
-                        <span>{selectedStore}</span>
-                      ) : selectedStore === '__custom__' ? (
-                        <span className="text-muted-foreground">{language === 'he' ? 'הקלד שם...' : 'Enter name...'}</span>
-                      ) : (
-                        <span className="flex items-center gap-2">
-                          <span className="opacity-50">🏪</span>
-                          {language === 'he' ? 'בחר חנות' : 'Select store'}
-                        </span>
-                      )}
-                    </SelectTrigger>
-                    <SelectContent className="bg-background border border-border z-50 max-h-60" dir={direction}>
-                      {STORES_BY_TYPE[selectedShoppingType].map((store) => (
-                        <SelectItem key={store} value={store}>
-                          {store}
-                        </SelectItem>
-                      ))}
-                      <SelectItem value="__custom__">
-                        <span className="text-primary font-medium">
-                          {language === 'he' ? '➕ הקלד שם אחר...' : '➕ Enter custom name...'}
-                        </span>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {selectedStore === '__custom__' && (
-                    <Input
-                      type="text"
-                      placeholder={language === 'he' ? 'הקלד שם חנות...' : 'Enter store name...'}
-                      onChange={(e) => {
-                        if (e.target.value) {
-                          setSelectedStore(e.target.value);
-                        }
-                      }}
-                      className="h-12 text-base"
-                      dir={direction}
-                      autoFocus
-                    />
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Amount */}
-            <div className="space-y-2">
-              <Label htmlFor="amount" className="text-sm font-medium">
-                {language === 'he' ? 'סכום הקנייה (₪)' : 'Total Amount ($)'}
-              </Label>
-              <Input
-                id="amount"
-                type="number"
-                inputMode="decimal"
-                placeholder={language === 'he' ? 'לדוגמה: 250' : 'e.g., 250'}
-                value={totalAmount}
-                onChange={(e) => setTotalAmount(e.target.value)}
-                className="h-12 text-base text-center"
-              />
-            </div>
-
-            {/* Summary */}
-            <div className="bg-gradient-to-r from-success/10 to-primary/10 rounded-xl p-4 space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">{language === 'he' ? 'פריטים שהושלמו:' : 'Items completed:'}</span>
-                <span className="font-bold text-success">{items.filter(i => i.checked).length}/{items.length}</span>
-              </div>
+              <Input id="customStore" type="text" placeholder={t.customStorePlaceholder} value={customStore} onChange={e => setCustomStore(e.target.value)} className="h-12 text-lg" />
+            </div>}
+            <div className="bg-muted/50 rounded-lg p-4 space-y-1">
+              <p className="text-sm text-muted-foreground">{t.summaryLabel}</p>
+              <p className="text-lg font-semibold">
+                {t.progressText(items.filter(item => item.checked).length, items.length)}
+              </p>
             </div>
           </div>
-
-          <DialogFooter className={`flex gap-2 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
-            <Button variant="outline" onClick={() => setIsFinishDialogOpen(false)} className="flex-1">
-              {language === 'he' ? 'ביטול' : 'Cancel'}
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setIsFinishDialogOpen(false)} className="h-11 px-6">
+              {t.cancel}
             </Button>
-            <Button onClick={handleFinishShopping} className="flex-1 bg-success hover:bg-success/90">
-              <CheckCircle2 className="h-4 w-4 mr-2" />
-              {language === 'he' ? 'שמור וסיים' : 'Save & Finish'}
+            <Button onClick={handleFinishShopping} className="h-11 px-6 bg-success hover:bg-success/90">
+              <CheckCircle2 className="ml-2 h-4 w-4" />
+              {t.save}
             </Button>
           </DialogFooter>
         </DialogContent>

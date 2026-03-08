@@ -67,7 +67,7 @@ function AdminContent() {
     const [stats, setStats] = useState<any>(null);
     const [maintenanceMode, setMaintenanceMode] = useState(false);
     const [isLoadingStats, setIsLoadingStats] = useState(false);
-    const [adminPin, setAdminPin] = useState('12345678'); // Default fallback
+    const [adminPin, setAdminPin] = useState(''); // No fallback - must fetch from DB
     const [newPin, setNewPin] = useState('');
     const [isChangingPin, setIsChangingPin] = useState(false);
     const [announcement, setAnnouncement] = useState({ active: false, message: '', type: 'info' as 'info' | 'warning' });

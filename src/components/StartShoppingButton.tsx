@@ -21,7 +21,7 @@ export const StartShoppingButton: React.FC<StartShoppingButtonProps> = ({
       onClick={onClick}
       disabled={disabled}
       className={`
-        group relative overflow-hidden w-full sm:w-auto
+        group relative overflow-hidden w-full
         ${isCompact 
           ? 'h-11 sm:h-12 px-4 sm:px-6 rounded-xl' 
           : 'h-11 sm:h-12 px-5 sm:px-8 rounded-xl'

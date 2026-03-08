@@ -1877,7 +1877,7 @@ export const ShoppingList = () => {
                   : 'Or "Save for Later" to save in notebook'}
               </li>
             </ul>
-            <p className="mt-3 text-sm font-semibold text-primary text-center">
+            <p className="mt-3 text-sm font-semibold text-foreground/70 text-center">
               {language === 'he' ? '↓ התחילו להקליד למטה ↓' : '↓ Start typing below ↓'}
             </p>
           </div>

@@ -1842,31 +1842,40 @@ export const ShoppingList = () => {
         {/* Subtle gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] via-transparent to-transparent pointer-events-none rounded-2xl" />
 
-        {/* Instruction Card - Show when list is empty */}
+        {/* Instruction Card - Accessible per Israeli Standard SI 5568 (WCAG 2.0 AA) */}
         {notepadItems.length === 0 && (
-          <div className="bg-muted/50 dark:bg-muted/20 border border-border rounded-xl p-2.5 sm:p-4 mb-3 sm:mb-4">
+          <section
+            role="region"
+            aria-label={language === 'he' ? 'הוראות שימוש' : 'Usage instructions'}
+            dir={language === 'he' ? 'rtl' : 'ltr'}
+            lang={language === 'he' ? 'he' : 'en'}
+            className="bg-muted/50 dark:bg-muted/20 border border-border rounded-xl p-2.5 sm:p-4 mb-3 sm:mb-4"
+          >
             <h4 className="text-sm sm:text-base font-bold text-foreground flex items-center gap-1.5 mb-2">
-              <span className="text-base">🛒</span>
+              <span aria-hidden="true" className="text-base">🛒</span>
               {language === 'he' ? 'מתחילים!' : 'Let\'s go!'}
             </h4>
-            <div className="space-y-1 text-xs sm:text-sm text-foreground/90">
-              <p>
+            <ol className="space-y-1 text-xs sm:text-sm text-foreground list-none m-0 p-0">
+              <li>
+                <span aria-hidden="true">📌</span>
                 {language === 'he'
-                  ? <>📌 תנו <span className="font-bold">שם</span> לרשימה · הזינו פריטים למטה או <span className="font-bold">הדביקו</span> רשימה</>
-                  : <>📌 <span className="font-bold">Name</span> your list (store/topic) · Type items below or <span className="font-bold">Paste</span> a list</>}
-              </p>
-              <p>
+                  ? <> תנו <span className="font-bold">שם</span> לרשימה · הזינו פריטים למטה או <span className="font-bold">הדביקו</span> רשימה</>
+                  : <> <span className="font-bold">Name</span> your list (store/topic) · Type items below or <span className="font-bold">Paste</span> a list</>}
+              </li>
+              <li>
+                <span aria-hidden="true">🔢</span>
                 {language === 'he'
-                  ? <>🔢 כמות ויחידות — כפתורי <span className="font-bold">+/-</span> ליד כל פריט</>
-                  : <>🔢 Quantity & units — <span className="font-bold">+/-</span> buttons next to each item</>}
-              </p>
-              <p>
+                  ? <> כמות ויחידות — כפתורי <span className="font-bold" aria-label={language === 'he' ? 'פלוס מינוס' : 'plus minus'}>+/-</span> ליד כל פריט</>
+                  : <> Quantity & units — <span className="font-bold" aria-label="plus minus">+/-</span> buttons next to each item</>}
+              </li>
+              <li>
+                <span aria-hidden="true">✅</span>
                 {language === 'he'
-                  ? <>✅ מוכנים? <span className="font-bold">"יוצאים לקניות!"</span> · לא עכשיו? <span className="font-bold">"שמור לאחר כך"</span></>
-                  : <>✅ Ready? <span className="font-bold">"Let's Shop!"</span> · Not now? <span className="font-bold">"Save for Later"</span></>}
-              </p>
-            </div>
-          </div>
+                  ? <> מוכנים? <span className="font-bold">"יוצאים לקניות!"</span> · לא עכשיו? <span className="font-bold">"שמור לאחר כך"</span></>
+                  : <> Ready? <span className="font-bold">"Let's Shop!"</span> · Not now? <span className="font-bold">"Save for Later"</span></>}
+              </li>
+            </ol>
+          </section>
         )}
 
         {/* List Name Input + Quick Actions - Mobile Optimized */}

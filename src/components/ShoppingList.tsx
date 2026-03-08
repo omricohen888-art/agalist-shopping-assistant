@@ -1838,7 +1838,7 @@ export const ShoppingList = () => {
 
 
       {/* Modern Input Card - Mobile Optimized with Bold Black Borders */}
-      <div className="relative bg-gradient-to-b from-primary/[0.04] to-card dark:from-primary/[0.08] dark:to-slate-800/90 border-2 border-primary/30 dark:border-primary/25 rounded-2xl p-3 sm:p-4 md:p-6 mb-4 sm:mb-6 shadow-[0_4px_20px_-4px_hsl(var(--primary)/0.12)] hover:shadow-[0_6px_24px_-4px_hsl(var(--primary)/0.18)] focus-within:shadow-[0_6px_24px_-4px_hsl(var(--primary)/0.2)] transition-all duration-300 overflow-hidden backdrop-blur-sm">
+      <div className="relative bg-gradient-to-b from-primary/[0.04] to-card dark:from-primary/[0.08] dark:to-slate-800/90 border-2 border-foreground/80 dark:border-foreground/60 rounded-2xl p-3 sm:p-4 md:p-6 mb-4 sm:mb-6 shadow-[0_4px_20px_-4px_hsl(var(--primary)/0.12)] hover:shadow-[0_6px_24px_-4px_hsl(var(--primary)/0.18)] focus-within:shadow-[0_6px_24px_-4px_hsl(var(--primary)/0.2)] transition-all duration-300 overflow-hidden backdrop-blur-sm">
         {/* Subtle gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] via-transparent to-transparent pointer-events-none rounded-2xl" />
 

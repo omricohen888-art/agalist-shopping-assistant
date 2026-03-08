@@ -2162,8 +2162,7 @@ export const ShoppingList = () => {
         </div>
       </div>
 
-      {/* Quick Start Templates */}
-      {items.length === 0 && <SortableTemplates systemTemplates={currentTemplates} language={language} onTemplateClick={handleTemplateClick} onCreateNew={() => setIsCreateTemplateDialogOpen(true)} />}
+      {/* Quick Start Templates moved inside instruction card above */}
 
       {/* Dashboard - Saved Lists & Completed Trips */}
       {items.length === 0 && (savedLists.length > 0 || shoppingHistory.length > 0) && (() => {

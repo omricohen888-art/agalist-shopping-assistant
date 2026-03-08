@@ -233,7 +233,7 @@ const SwipeableItem = ({
       >
         {/* Normal View */}
         {!isEditing && (
-          <div className={`flex items-center gap-3 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
+          <div className={`flex items-center ${zoomConfig.gap} ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
             {/* Checkbox - Large and bouncy */}
             <motion.button
               onClick={() => {

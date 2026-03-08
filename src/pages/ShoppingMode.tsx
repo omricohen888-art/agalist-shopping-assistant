@@ -160,9 +160,9 @@ const SwipeableItem = ({
   const isEditing = editingItemId === item.id;
 
   const zoomConfig = {
-    normal: { checkbox: 'w-14 h-14 rounded-2xl', checkIcon: 'h-8 w-8', padding: 'p-3 sm:p-4', title: 'text-base sm:text-lg', subtitle: 'text-xs sm:text-sm', actionBtn: 'w-9 h-9', actionIcon: 'h-4 w-4', gap: 'gap-3', rounded: 'rounded-2xl', space: 'space-y-2' },
-    medium: { checkbox: 'w-10 h-10 rounded-xl', checkIcon: 'h-5 w-5', padding: 'p-2 sm:p-3', title: 'text-sm sm:text-base', subtitle: 'text-[11px] sm:text-xs', actionBtn: 'w-7 h-7', actionIcon: 'h-3 w-3', gap: 'gap-2', rounded: 'rounded-xl', space: 'space-y-1' },
-    compact: { checkbox: 'w-7 h-7 rounded-lg', checkIcon: 'h-4 w-4', padding: 'p-1.5 sm:p-2', title: 'text-xs sm:text-sm', subtitle: 'text-[10px]', actionBtn: 'w-6 h-6', actionIcon: 'h-2.5 w-2.5', gap: 'gap-1.5', rounded: 'rounded-lg', space: 'space-y-0.5' },
+    normal: { checkbox: 'w-14 h-14 rounded-2xl', checkIcon: 'h-8 w-8', padding: 'p-3 sm:p-4', title: 'text-base sm:text-lg', subtitle: 'text-sm sm:text-base', actionBtn: 'w-9 h-9', actionIcon: 'h-4 w-4', gap: 'gap-3', rounded: 'rounded-2xl', space: 'space-y-2' },
+    medium: { checkbox: 'w-10 h-10 rounded-xl', checkIcon: 'h-5 w-5', padding: 'p-2 sm:p-3', title: 'text-sm sm:text-base', subtitle: 'text-xs sm:text-sm', actionBtn: 'w-7 h-7', actionIcon: 'h-3 w-3', gap: 'gap-2', rounded: 'rounded-xl', space: 'space-y-1' },
+    compact: { checkbox: 'w-7 h-7 rounded-lg', checkIcon: 'h-4 w-4', padding: 'p-1.5 sm:p-2', title: 'text-xs sm:text-sm', subtitle: 'text-xs', actionBtn: 'w-6 h-6', actionIcon: 'h-2.5 w-2.5', gap: 'gap-1.5', rounded: 'rounded-lg', space: 'space-y-0.5' },
   }[zoomLevel];
 
   const handleDragEnd = () => {
@@ -279,7 +279,7 @@ const SwipeableItem = ({
                 {item.text}
               </p>
               <div className="flex flex-col gap-0.5">
-                <p className={`${zoomConfig.subtitle} text-muted-foreground font-medium`}>
+                <p className={`${zoomConfig.subtitle} text-foreground/70 font-semibold`}>
                   {item.quantity} {unitLabel}
                 </p>
                 {item.note && (

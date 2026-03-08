@@ -118,15 +118,14 @@ const SortableTemplateItem = ({
         onClick={() => !isEditMode && onClick(template.items)}
         disabled={isEditMode}
         className={`
-          w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl 
+          px-3 py-2 rounded-lg 
           bg-card text-foreground 
-          text-xs sm:text-sm font-semibold 
-          border-2 border-foreground/50 dark:border-foreground/40
-          shadow-sm
+          text-xs font-medium 
+          border border-foreground/30 dark:border-foreground/20
           transition-all duration-200 touch-manipulation 
           ${isEditMode
             ? 'cursor-default ring-2 ring-primary/50'
-            : 'hover:bg-muted/50 hover:shadow-md hover:border-primary active:scale-95'
+            : 'hover:bg-muted/50 hover:border-primary active:scale-95'
           }
         `}
       >

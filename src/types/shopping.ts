@@ -28,7 +28,7 @@ export const SHOPPING_TYPES = [
 export const STORES_BY_TYPE: Record<ShoppingType, readonly string[]> = {
   supermarket: [
     "שופרסל",
-    "רמי לוי", 
+    "רמי לוי",
     "ויקטורי",
     "יינות ביתן",
     "מחסני השוק",
@@ -43,6 +43,18 @@ export const STORES_BY_TYPE: Record<ShoppingType, readonly string[]> = {
     "פרש מרקט",
     "נתיב החסד",
     "מכולת שכונתית",
+    "קשת טעמים",
+    "סלקום שוק",
+    "ברקת",
+    "זול ובגדול",
+    "קינג סטור",
+    "סופר ספיר",
+    "חטיבת הצרכנות",
+    "סופר דוש",
+    "פרשמרקט",
+    "מיני מרקט",
+    "שוק העיר",
+    "גוד מרקט",
   ],
   online: [
     "Amazon",

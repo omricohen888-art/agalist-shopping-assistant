@@ -2609,7 +2609,7 @@ export const ShoppingList = () => {
             {items.filter(item => item.checked).map(item => <ShoppingListItem key={item.id} item={item} onToggle={toggleItem} onDelete={deleteItem} onQuantityChange={updateItemQuantity} onUnitChange={updateItemUnit} isCompleted={true} />)}
           </div>}
         </div>)}
-      {items && items.length > 0 && <div className="fixed bottom-0 left-0 right-0 z-[60] glass-strong border-t border-border/50 shadow-[0_-8px_30px_-5px_rgba(0,0,0,0.15)] p-4 sm:p-5 safe-area-inset-bottom">
+      {items && items.length > 0 && <div className="fixed bottom-20 md:bottom-0 left-0 right-0 z-[60] glass-strong border-t border-border/50 shadow-[0_-8px_30px_-5px_rgba(0,0,0,0.15)] p-4 sm:p-5 safe-area-inset-bottom">
         <div className="max-w-3xl mx-auto">
           <div className="flex flex-row gap-3 sm:gap-4">
             {(() => {

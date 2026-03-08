@@ -1853,6 +1853,12 @@ export const ShoppingList = () => {
               <p className="flex items-start gap-2">
                 <span className="font-bold text-primary mt-0.5">1.</span>
                 {language === 'he'
+                  ? <>תנו שם לרשימה למעלה — למשל <span className="text-muted-foreground">"רמי לוי"</span> או <span className="text-muted-foreground">"ניקיון"</span></>
+                  : <>Name your list above — e.g. <span className="text-muted-foreground">"Walmart"</span> or <span className="text-muted-foreground">"Cleaning"</span></>}
+              </p>
+              <p className="flex items-start gap-2">
+                <span className="font-bold text-primary mt-0.5">2.</span>
+                {language === 'he'
                   ? 'כתבו למטה מה צריך לקנות — פריט בכל שורה'
                   : 'Write below what you need to buy — one item per line'}
               </p>

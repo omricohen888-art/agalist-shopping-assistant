@@ -11,7 +11,6 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, Lock, ShieldAlert, Users, List, Activity } from 'lucide-react';
 
 const ADMIN_EMAIL = 'omri.cohen888@gmail.com';
-const ADMIN_PIN = '12345678';
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean; error: Error | null }> {

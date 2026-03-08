@@ -1844,47 +1844,26 @@ export const ShoppingList = () => {
 
         {/* Instruction Card - Show when list is empty */}
         {notepadItems.length === 0 && (
-          <div className="bg-muted/50 dark:bg-muted/20 border border-border rounded-xl p-3 sm:p-4 mb-4">
-            <h4 className="text-base font-bold text-foreground flex items-center gap-2 mb-3">
-              <span className="text-lg">🛒</span>
-              {language === 'he' ? 'הרשימה שלכם מתחילה כאן' : 'Your list starts here'}
+          <div className="bg-muted/50 dark:bg-muted/20 border border-border rounded-xl p-2.5 sm:p-4 mb-3 sm:mb-4">
+            <h4 className="text-sm sm:text-base font-bold text-foreground flex items-center gap-1.5 mb-2">
+              <span className="text-base">🛒</span>
+              {language === 'he' ? 'מתחילים!' : 'Let\'s go!'}
             </h4>
-            <div className="space-y-2 text-sm text-foreground/90">
-              <p className="flex items-start gap-2">
-                <span className="font-bold text-primary mt-0.5">1.</span>
+            <div className="space-y-1 text-xs sm:text-sm text-foreground/90">
+              <p>
                 {language === 'he'
-                  ? <>תנו שם לרשימה למעלה — למשל <span className="text-muted-foreground">"רמי לוי"</span> או <span className="text-muted-foreground">"ניקיון"</span></>
-                  : <>Name your list above — e.g. <span className="text-muted-foreground">"Walmart"</span> or <span className="text-muted-foreground">"Cleaning"</span></>}
+                  ? <>📌 תנו <span className="font-bold">שם</span> לרשימה (חנות/נושא) · כתבו פריטים למטה או <span className="font-bold">הדביקו</span> רשימה</>
+                  : <>📌 <span className="font-bold">Name</span> your list (store/topic) · Type items below or <span className="font-bold">Paste</span> a list</>}
               </p>
-              <p className="flex items-start gap-2">
-                <span className="font-bold text-primary mt-0.5">2.</span>
+              <p>
                 {language === 'he'
-                  ? 'כתבו למטה מה צריך לקנות — פריט בכל שורה'
-                  : 'Write below what you need to buy — one item per line'}
+                  ? <>🔢 כמות ויחידות — כפתורי <span className="font-bold">+/-</span> ליד כל פריט</>
+                  : <>🔢 Quantity & units — <span className="font-bold">+/-</span> buttons next to each item</>}
               </p>
-              <p className="flex items-start gap-2">
-                <span className="font-bold text-primary mt-0.5">3.</span>
+              <p>
                 {language === 'he'
-                  ? <>יש רשימה מוכנה? לחצו <span className="font-bold">הדבק</span> למעלה</>
-                  : <>Have a list ready? Click <span className="font-bold">Paste</span> above</>}
-              </p>
-              <p className="flex items-start gap-2">
-                <span className="font-bold text-primary mt-0.5">4.</span>
-                {language === 'he'
-                  ? 'כמות ויחידות? השתמשו בכפתורי +/- וברשימת היחידות שליד כל פריט'
-                  : 'Quantity & units? Use the +/- buttons and unit selector next to each item'}
-              </p>
-              <p className="flex items-start gap-2">
-                <span className="font-bold text-primary mt-0.5">5.</span>
-                {language === 'he'
-                  ? <>לחצו <span className="font-bold">"יוצאים לקניות!"</span> כשמוכנים — ותסמנו פריטים תוך כדי קנייה</>
-                  : <>Hit <span className="font-bold">"Let's Shop!"</span> when ready — and check items off as you go</>}
-              </p>
-              <p className="flex items-start gap-2">
-                <span className="font-bold text-primary mt-0.5">6.</span>
-                {language === 'he'
-                  ? <>לא קונים עכשיו? לחצו <span className="font-bold">"שמור לאחר כך"</span> והרשימה תישמר בפנקס</>
-                  : <>Not shopping now? Click <span className="font-bold">"Save for Later"</span> to keep the list in your notebook</>}
+                  ? <>✅ מוכנים? <span className="font-bold">"יוצאים לקניות!"</span> · לא עכשיו? <span className="font-bold">"שמור לאחר כך"</span></>
+                  : <>✅ Ready? <span className="font-bold">"Let's Shop!"</span> · Not now? <span className="font-bold">"Save for Later"</span></>}
               </p>
             </div>
           </div>

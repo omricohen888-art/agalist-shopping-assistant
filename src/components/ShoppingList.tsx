@@ -1957,15 +1957,15 @@ export const ShoppingList = () => {
                   ? 'הוסיפו פריטים...\n\nחלב\nלחם\nביצים\nגבינה'
                   : 'Add items...\n\nMilk\nBread\nEggs\nCheese'}
                 className="w-full bg-muted/20 dark:bg-slate-800/40 
-                    border-2 border-muted-foreground/10 hover:border-primary/30 
-                    focus:border-primary/40 focus:ring-2 focus:ring-primary/10
+                    border-2 border-primary/30 hover:border-primary/40 
+                    focus:border-primary/50 focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.15)]
                     rounded-xl outline-none 
                     text-lg leading-relaxed font-medium text-foreground 
-                    placeholder:text-muted-foreground/40 
+                    placeholder:text-muted-foreground/60 
                     py-4 px-5 pr-8
                     resize-none min-h-[200px]
                     transition-all duration-200
-                    shadow-inner"
+                    shadow-sm"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();

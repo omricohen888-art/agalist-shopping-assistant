@@ -1125,24 +1125,27 @@ export const ShoppingMode = () => {
               onToggle={setIsSmartSort}
               language={language}
             />
-            <div className="flex items-center bg-muted rounded-full p-0.5 gap-0.5">
-              {([
-                { key: 'normal' as const, label: language === 'he' ? 'גדול' : 'Large' },
-                { key: 'medium' as const, label: language === 'he' ? 'בינוני' : 'Medium' },
-                { key: 'compact' as const, label: language === 'he' ? 'צפוף' : 'Dense' },
-              ]).map(({ key, label }) => (
-                <button
-                  key={key}
-                  onClick={() => setZoomLevel(key)}
-                  className={`px-2.5 py-1 text-[11px] rounded-full transition-all duration-200 font-medium whitespace-nowrap ${
-                    zoomLevel === key
-                      ? 'bg-background text-foreground shadow-sm'
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
+            <div className="flex items-center gap-1.5">
+              <ZoomIn className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+              <div className="flex items-center bg-muted rounded-full p-0.5 gap-0.5">
+                {([
+                  { key: 'normal' as const, label: language === 'he' ? 'גדול' : 'Large' },
+                  { key: 'medium' as const, label: language === 'he' ? 'בינוני' : 'Medium' },
+                  { key: 'compact' as const, label: language === 'he' ? 'צפוף' : 'Dense' },
+                ]).map(({ key, label }) => (
+                  <button
+                    key={key}
+                    onClick={() => setZoomLevel(key)}
+                    className={`px-2.5 py-1 text-[11px] rounded-full transition-all duration-200 font-medium whitespace-nowrap ${
+                      zoomLevel === key
+                        ? 'bg-background text-foreground shadow-sm'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         )}

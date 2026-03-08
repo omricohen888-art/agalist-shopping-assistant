@@ -148,7 +148,7 @@ const STORAGE_KEY_CUSTOM = 'customTemplatesData';
 const STORAGE_KEY_EXPANDED = 'templatesExpanded';
 
 // Default system template IDs
-const DEFAULT_TEMPLATE_IDS = ['grocery', 'hiking', 'tech', 'bbq', 'cleaning', 'family'];
+const DEFAULT_TEMPLATE_IDS = ['grocery', 'bbq', 'cleaning', 'family'];
 
 export const SortableTemplates = ({
   systemTemplates,

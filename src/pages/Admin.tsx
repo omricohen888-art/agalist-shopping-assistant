@@ -12,6 +12,26 @@ import { Loader2, Lock, ShieldAlert, Users, List, Activity } from 'lucide-react'
 
 const ADMIN_EMAIL = 'omri.cohen888@gmail.com';
 
+// Helper to call the admin-verify Edge Function
+const callAdminFunction = async (action: string, payload: Record<string, unknown> = {}) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.access_token) throw new Error('Not authenticated');
+
+    const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+    const res = await fetch(`https://${projectId}.supabase.co/functions/v1/admin-verify`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ action, ...payload }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Request failed');
+    return data;
+};
+
 // Error Boundary Component
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean; error: Error | null }> {
     constructor(props: { children: React.ReactNode }) {
@@ -31,18 +51,18 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
         if (this.state.hasError) {
             return (
                 <div className="p-8 text-center">
-                    <div className="bg-red-50 text-red-900 p-4 rounded-lg shadow-sm border border-red-200 inline-block text-left">
+                    <div className="bg-destructive/10 text-destructive p-4 rounded-lg shadow-sm border border-destructive/20 inline-block text-left">
                         <h2 className="text-xl font-bold mb-2 flex items-center gap-2">
                             <ShieldAlert className="w-5 h-5" />
                             Something went wrong
                         </h2>
                         <p className="mb-4">The admin panel encountered an error.</p>
-                        <pre className="bg-white/50 p-3 rounded text-xs font-mono overflow-auto max-w-lg border border-red-100">
+                        <pre className="bg-background/50 p-3 rounded text-xs font-mono overflow-auto max-w-lg border border-border">
                             {this.state.error?.toString()}
                         </pre>
                         <Button
                             variant="outline"
-                            className="mt-4 w-full border-red-200 hover:bg-red-100 hover:text-red-900"
+                            className="mt-4 w-full"
                             onClick={() => window.location.href = '/'}
                         >
                             Return to Home
@@ -69,22 +89,12 @@ function AdminContent() {
     const [isChangingPin, setIsChangingPin] = useState(false);
     const [isPinLoading, setIsPinLoading] = useState(false);
     const [announcement, setAnnouncement] = useState({ active: false, message: '', type: 'info' as 'info' | 'warning' });
-    const [newPin, setNewPin] = useState('');
-    const [isChangingPin, setIsChangingPin] = useState(false);
-    const [announcement, setAnnouncement] = useState({ active: false, message: '', type: 'info' as 'info' | 'warning' });
 
     // Security Layer 1: Check Email (Normalized)
     useEffect(() => {
         if (!loading) {
             if (!user) {
                 navigate('/auth');
-            } else {
-                const userEmail = user.email?.toLowerCase() || '';
-                const adminEmail = ADMIN_EMAIL.toLowerCase();
-
-                if (userEmail !== adminEmail) {
-                    console.warn('[Admin] Access Denied');
-                }
             }
         }
     }, [user, loading, navigate]);
@@ -92,56 +102,40 @@ function AdminContent() {
     // Fetch Initial Settings & Stats once Authenticated
     useEffect(() => {
         if (isAuthenticated) {
-            console.log('[Admin] Authenticated. Fetching data...');
             fetchSettings();
             fetchStats();
-        } else {
-            // Fetch PIN regardless of auth to validate input
-            fetchPin();
         }
     }, [isAuthenticated]);
 
-    const fetchPin = async () => {
-        const { data, error } = await supabase
-            .from('system_settings')
-            .select('value')
-            .eq('key', 'admin_pin')
-            .single();
-
-        if (data) {
-            // Remove quotes if stored as JSON string
-            const cleanPin = typeof data.value === 'string' ? data.value.replace(/"/g, '') : String(data.value);
-            setAdminPin(cleanPin);
-            console.log('[Admin] PIN Fetched');
-        }
-        if (error) {
-            console.warn('[Admin] Could not fetch PIN (using default):', error.message);
-        }
-    };
-
-    const handlePinSubmit = (e: React.FormEvent) => {
+    const handlePinSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!adminPin) {
+        if (!pin) return;
+
+        setIsPinLoading(true);
+        try {
+            const result = await callAdminFunction('verify-pin', { pin });
+            if (result.valid) {
+                setIsAuthenticated(true);
+                toast({
+                    title: "Access Granted",
+                    description: "Welcome back, Commander.",
+                });
+            } else {
+                toast({
+                    variant: "destructive",
+                    title: "Access Denied",
+                    description: "Incorrect PIN code.",
+                });
+                setPin('');
+            }
+        } catch {
             toast({
                 variant: "destructive",
                 title: "Error",
                 description: "Could not verify PIN. Please try again.",
             });
-            return;
-        }
-        if (pin === adminPin) {
-            setIsAuthenticated(true);
-            toast({
-                title: "Access Granted",
-                description: "Welcome back, Commander.",
-            });
-        } else {
-            toast({
-                variant: "destructive",
-                title: "Access Denied",
-                description: "Incorrect PIN code.",
-            });
-            setPin('');
+        } finally {
+            setIsPinLoading(false);
         }
     };
 
@@ -155,27 +149,19 @@ function AdminContent() {
             return;
         }
 
-        const { error } = await supabase
-            .from('system_settings')
-            .update({
-                value: JSON.stringify(newPin),
-                updated_at: new Date().toISOString()
-            })
-            .eq('key', 'admin_pin');
-
-        if (error) {
-            toast({
-                variant: 'destructive',
-                title: 'Error',
-                description: 'Failed to update PIN: ' + error.message
-            });
-        } else {
-            setAdminPin(newPin);
+        try {
+            await callAdminFunction('change-pin', { newValue: newPin });
             setNewPin('');
             setIsChangingPin(false);
             toast({
                 title: 'Success',
                 description: 'Admin PIN updated successfully.'
+            });
+        } catch (err: any) {
+            toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: 'Failed to update PIN: ' + (err.message || 'Unknown error')
             });
         }
     };
@@ -205,8 +191,6 @@ function AdminContent() {
         const { data, error } = await supabase.rpc('get_admin_stats');
 
         if (error) {
-            console.error('[Admin] Error fetching stats:', error);
-            // Show more detailed error to user
             toast({
                 variant: "destructive",
                 title: "Stats Error",
@@ -218,61 +202,35 @@ function AdminContent() {
         setIsLoadingStats(false);
     };
 
-    const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD;
-
     const toggleMaintenanceMode = async (checked: boolean) => {
-        // SECURITY CHECK - BLOCKING
-        // Using window.prompt to force a halt in execution
-        const password = window.prompt("⚠️ פעולה רגישה! הכנס סיסמת מנהל להפעלת מצב חירום:");
+        // Confirmation via prompt (no password - auth is server-side)
+        const confirmed = window.confirm(
+            checked
+                ? "⚠️ Are you sure you want to enable maintenance mode? All non-admin users will be locked out."
+                : "Re-enable the system for all users?"
+        );
 
-        if (password !== ADMIN_PASSWORD) {
-            // Revert the switch visually since the action is cancelled
-            setMaintenanceMode(!checked);
+        if (!confirmed) return;
 
-            toast({
-                variant: 'destructive',
-                title: 'Access Denied',
-                description: 'סיסמה שגויה! הפעולה בוטלה.'
-            });
-            return; // <--- CRITICAL: STOPS EXECUTION HERE
-        }
-
-        // 1. Optimistic UI update
         setMaintenanceMode(checked);
 
-        // 2. Perform the update
-        const { error } = await supabase
-            .from('system_settings')
-            .update({ value: checked })
-            .eq('key', 'maintenance_mode');
-
-        if (error) {
-            console.error('Error toggling maintenance:', error);
-            // Revert on error
+        try {
+            await callAdminFunction('toggle-maintenance', { newValue: checked });
+            toast({
+                title: 'Success',
+                description: 'סטטוס מערכת עודכן בהצלחה',
+            });
+        } catch {
             setMaintenanceMode(!checked);
             toast({
                 variant: "destructive",
                 title: "Error",
                 description: 'שגיאה בעדכון המערכת',
             });
-        } else {
-            toast({
-                title: 'Success',
-                description: 'סטטוס מערכת עודכן בהצלחה',
-            });
         }
     };
 
     const handlePinChangeClick = () => {
-        const auth = window.prompt("הכנס סיסמת מאסטר לשינוי קוד גישה:");
-        if (auth !== ADMIN_PASSWORD) {
-            toast({
-                variant: 'destructive',
-                title: 'Access Denied',
-                description: 'סיסמה שגויה! אין הרשאה לשנות קוד.'
-            });
-            return;
-        }
         setIsChangingPin(true);
     };
 
@@ -303,21 +261,21 @@ function AdminContent() {
         return <div className="flex items-center justify-center min-h-screen"><Loader2 className="w-8 h-8 animate-spin" /></div>;
     }
 
-    if (!user) return null; // Wait for redirect
+    if (!user) return null;
 
     const userEmail = user.email?.toLowerCase() || '';
     const adminEmail = ADMIN_EMAIL.toLowerCase();
 
     if (userEmail !== adminEmail) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 p-4 text-center">
-                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
-                    <ShieldAlert className="w-8 h-8 text-red-600" />
+            <div className="flex flex-col items-center justify-center min-h-screen bg-background p-4 text-center">
+                <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mb-4">
+                    <ShieldAlert className="w-8 h-8 text-destructive" />
                 </div>
+                <h1 className="text-2xl font-bold text-foreground mb-2">Access Denied</h1>
                 <p className="text-muted-foreground max-w-md mb-6">
                     Your account does not have administrator access.
                 </p>
-
                 <Button onClick={() => navigate('/')} variant="outline">
                     Return to Home
                 </Button>
@@ -327,11 +285,11 @@ function AdminContent() {
 
     if (!isAuthenticated) {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 p-4">
+            <div className="flex items-center justify-center min-h-screen bg-muted p-4">
                 <Card className="w-full max-w-md">
                     <CardHeader className="text-center">
-                        <div className="mx-auto bg-red-100 p-3 rounded-full w-fit mb-4">
-                            <Lock className="w-6 h-6 text-red-600" />
+                        <div className="mx-auto bg-destructive/10 p-3 rounded-full w-fit mb-4">
+                            <Lock className="w-6 h-6 text-destructive" />
                         </div>
                         <CardTitle className="text-2xl font-bold">Admin Locked</CardTitle>
                     </CardHeader>
@@ -346,11 +304,12 @@ function AdminContent() {
                                     value={pin}
                                     onChange={(e) => setPin(e.target.value)}
                                     className="text-center text-lg tracking-widest"
-                                    maxLength={8}
+                                    maxLength={20}
                                     autoFocus
                                 />
                             </div>
-                            <Button type="submit" className="w-full" size="lg">
+                            <Button type="submit" className="w-full" size="lg" disabled={isPinLoading || !pin}>
+                                {isPinLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                                 Unlock Dashboard
                             </Button>
                         </form>
@@ -362,13 +321,13 @@ function AdminContent() {
 
     // Dashboard UI
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6 space-y-8 pb-32">
+        <div className="min-h-screen bg-muted p-6 space-y-8 pb-32">
             <header className="flex items-center justify-between mb-8">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">System Dashboard</h1>
                     <p className="text-muted-foreground">Manage global settings and view statistics.</p>
                 </div>
-                <div className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-4 py-2 rounded-lg font-mono text-sm border border-blue-200 dark:border-blue-800">
+                <div className="bg-primary/10 text-primary px-4 py-2 rounded-lg font-mono text-sm border border-primary/20">
                     v0.1.0-BETA
                 </div>
             </header>
@@ -376,17 +335,17 @@ function AdminContent() {
             {/* Quick Actions */}
             <section className="grid md:grid-cols-2 gap-6">
                 {/* Maintenance Mode Card */}
-                <Card className={`border-l-4 ${maintenanceMode ? 'border-l-red-500 bg-red-50/50 dark:bg-red-900/10' : 'border-l-green-500'}`}>
+                <Card className={`border-l-4 ${maintenanceMode ? 'border-l-destructive bg-destructive/5' : 'border-l-green-500'}`}>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-base font-medium">
                             System Status
                         </CardTitle>
-                        <ShieldAlert className={`h-5 w-5 ${maintenanceMode ? 'text-red-500' : 'text-green-500'}`} />
+                        <ShieldAlert className={`h-5 w-5 ${maintenanceMode ? 'text-destructive' : 'text-green-500'}`} />
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-center justify-between mt-4">
                             <div className="space-y-1">
-                                <p className={`text-2xl font-bold ${maintenanceMode ? 'text-red-700 dark:text-red-400' : 'text-green-700 dark:text-green-400'}`}>
+                                <p className={`text-2xl font-bold ${maintenanceMode ? 'text-destructive' : 'text-green-600'}`}>
                                     {maintenanceMode ? 'MAINTENANCE MODE' : 'SYSTEM ONLINE'}
                                 </p>
                                 <p className="text-xs text-muted-foreground">
@@ -428,7 +387,7 @@ function AdminContent() {
                         {isChangingPin ? (
                             <div className="space-y-2">
                                 <Input
-                                    type="text"
+                                    type="password"
                                     placeholder="New PIN"
                                     value={newPin}
                                     onChange={(e) => setNewPin(e.target.value)}
@@ -454,9 +413,8 @@ function AdminContent() {
                     </CardContent>
                 </Card>
 
-
                 {/* Global Announcement Card */}
-                <Card className="md:col-span-2 border-l-4 border-l-blue-500">
+                <Card className="md:col-span-2 border-l-4 border-l-primary">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-base font-medium">Global Announcement</CardTitle>
                         <div className="flex items-center space-x-2">
@@ -492,8 +450,8 @@ function AdminContent() {
                                     <Button
                                         size="sm"
                                         variant={announcement.type === 'warning' ? 'destructive' : 'outline'}
-                                        className={`w-full ${announcement.type === 'warning' && 'bg-amber-600 hover:bg-amber-700'}`}
                                         onClick={() => setAnnouncement(prev => ({ ...prev, type: 'warning' }))}
+                                        className="w-full"
                                     >
                                         Warning (Yellow)
                                     </Button>
@@ -549,7 +507,7 @@ function AdminContent() {
                                         </div>
                                         <div className="flex flex-col">
                                             <span className="text-sm font-medium">{u.email}</span>
-                                            <span className="text-xs text-muted-foreground">User ID: ...</span>
+                                            <span className="text-xs text-muted-foreground">User</span>
                                         </div>
                                     </div>
                                     <div className="text-xs text-muted-foreground">
@@ -564,7 +522,7 @@ function AdminContent() {
                     )}
                 </CardContent>
             </Card>
-        </div >
+        </div>
     );
 }
 

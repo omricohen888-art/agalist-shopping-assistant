@@ -61,7 +61,12 @@ const LISTS_KEY = "saved_lists";
 export const getSavedLists = (): SavedList[] => {
   try {
     const data = localStorage.getItem(LISTS_KEY);
-    const parsed: SavedList[] = data ? JSON.parse(data) : [];
+    if (!data) return [];
+    const raw = JSON.parse(data);
+    if (!Array.isArray(raw)) return [];
+    const parsed: SavedList[] = raw.filter(
+      (item: any) => item && typeof item === 'object' && typeof item.name === 'string'
+    );
 
     // Ensure all IDs are strings (convert any non-string IDs)
     // Filter out archived lists

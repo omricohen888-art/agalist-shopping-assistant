@@ -1162,7 +1162,7 @@ export const ShoppingMode = () => {
             {/* Pinned Items */}
             <AnimatePresence>
               {pinnedItems.length > 0 && (
-                <motion.div layout className="space-y-2">
+                <motion.div layout className={zoomLevel === 'compact' ? 'space-y-1' : 'space-y-2'}>
                   <div className="flex items-center gap-2 px-1">
                     <Pin className="h-3.5 w-3.5 text-destructive fill-destructive" />
                     <span className="text-xs font-bold text-destructive">

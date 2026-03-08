@@ -1844,9 +1844,9 @@ export const ShoppingList = () => {
 
         {/* Instruction Card - Show when list is empty */}
         {notepadItems.length === 0 && (
-          <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-2 border-primary/30 rounded-xl p-3 sm:p-4 mb-4">
-            <h4 className="text-sm font-bold text-primary flex items-center gap-2 mb-2.5">
-              <span className="text-base">📝</span>
+          <div className="bg-primary/10 dark:bg-primary/15 border-2 border-primary/40 rounded-xl p-3 sm:p-4 mb-4">
+            <h4 className="text-base font-bold text-primary flex items-center gap-2 mb-2.5 animate-pulse">
+              <span className="text-lg">📝</span>
               {language === 'he' ? 'איך מתחילים?' : 'How to start?'}
             </h4>
             <ul className="space-y-1.5 text-xs sm:text-sm text-muted-foreground">
@@ -1877,6 +1877,9 @@ export const ShoppingList = () => {
                   : 'Or "Save for Later" to save in notebook'}
               </li>
             </ul>
+            <p className="mt-3 text-sm font-semibold text-primary text-center">
+              {language === 'he' ? '↓ התחילו להקליד למטה ↓' : '↓ Start typing below ↓'}
+            </p>
           </div>
         )}
 

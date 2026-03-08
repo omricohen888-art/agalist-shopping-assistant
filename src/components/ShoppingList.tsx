@@ -1639,6 +1639,7 @@ export const ShoppingList = () => {
       setTotalAmount("");
       setSelectedStore("");
       setCustomStore("");
+      setSelectedShoppingType('supermarket');
       setActiveListId(null);
       setListName("");
 

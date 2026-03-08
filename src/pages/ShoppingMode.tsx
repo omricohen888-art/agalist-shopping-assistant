@@ -261,7 +261,7 @@ const SwipeableItem = ({
                     exit={{ scale: 0 }}
                     transition={{ type: "spring", stiffness: 500, damping: 15 }}
                   >
-                    <Check className="h-8 w-8" strokeWidth={3} />
+                    <Check className={zoomConfig.checkIcon} strokeWidth={3} />
                   </motion.div>
                 )}
               </AnimatePresence>

@@ -1107,12 +1107,31 @@ export const ShoppingMode = () => {
       {/* Items List */}
       <div className="max-w-3xl mx-auto px-4 py-4 space-y-4">
         {activeItemsCount > 0 && (
-          <div className="mb-2">
+          <div className="mb-2 flex items-center justify-between gap-2">
             <SortModeToggle
               isSmartSort={isSmartSort}
               onToggle={setIsSmartSort}
               language={language}
             />
+            <div className="flex items-center bg-muted rounded-full p-0.5 gap-0.5">
+              {([
+                { key: 'normal' as const, label: language === 'he' ? 'רגיל' : 'Normal', icon: '🔍' },
+                { key: 'medium' as const, label: language === 'he' ? 'בינוני' : 'Medium', icon: '🔎' },
+                { key: 'compact' as const, label: language === 'he' ? 'קומפקט' : 'Compact', icon: '📋' },
+              ]).map(({ key, label, icon }) => (
+                <button
+                  key={key}
+                  onClick={() => setZoomLevel(key)}
+                  className={`px-2 py-1 text-xs rounded-full transition-all duration-200 font-medium whitespace-nowrap ${
+                    zoomLevel === key
+                      ? 'bg-background text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  {icon}
+                </button>
+              ))}
+            </div>
           </div>
         )}
 

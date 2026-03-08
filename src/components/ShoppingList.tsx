@@ -1852,7 +1852,7 @@ export const ShoppingList = () => {
             <div className="space-y-1 text-xs sm:text-sm text-foreground/90">
               <p>
                 {language === 'he'
-                  ? <>📌 תנו <span className="font-bold">שם</span> לרשימה (חנות/נושא) · ? <>📌 תנו <span className="font-bold">שם</span> לרשימה (חנות/נושא) · הזינו פריטים למטה או <span className="font-bold">הדביקו</span> רשימה</> <span className="font-bold">הדביקו</span> רשימה</>
+                  ? <>📌 תנו <span className="font-bold">שם</span> לרשימה · הזינו פריטים למטה או <span className="font-bold">הדביקו</span> רשימה</>
                   : <>📌 <span className="font-bold">Name</span> your list (store/topic) · Type items below or <span className="font-bold">Paste</span> a list</>}
               </p>
               <p>

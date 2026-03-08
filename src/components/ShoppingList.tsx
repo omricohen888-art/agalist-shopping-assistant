@@ -1939,8 +1939,8 @@ export const ShoppingList = () => {
                 autoFocus
                 rows={6}
                 placeholder={language === 'he'
-                  ? 'הוסיפו פריטים...\n\nחלב\nלחם\nביצים\nגבינה'
-                  : 'Add items...\n\nMilk\nBread\nEggs\nCheese'}
+                  ? 'חלב\nלחם\nביצים\nגבינה צהובה\nמים מינרליים'
+                  : 'Milk\nBread\nEggs\nCheese\nWater'}
                 className="w-full bg-card dark:bg-slate-900 
                     border-2 border-foreground/20 hover:border-foreground/40 
                     focus:border-foreground/60 focus:shadow-[0_0_0_3px_hsl(var(--foreground)/0.08)]

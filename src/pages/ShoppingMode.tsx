@@ -279,7 +279,7 @@ const SwipeableItem = ({
                 {item.text}
               </p>
               <div className="flex flex-col gap-0.5">
-                <p className={`${zoomConfig.subtitle} text-muted-foreground font-medium`}>
+                <p className={`${zoomConfig.subtitle} text-foreground/70 font-semibold`}>
                   {item.quantity} {unitLabel}
                 </p>
                 {item.note && (

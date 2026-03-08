@@ -11,7 +11,6 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, Lock, ShieldAlert, Users, List, Activity } from 'lucide-react';
 
 const ADMIN_EMAIL = 'omri.cohen888@gmail.com';
-const ADMIN_PIN = '12345678';
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean; error: Error | null }> {
@@ -61,14 +60,14 @@ function AdminContent() {
     const navigate = useNavigate();
     const { toast } = useToast();
 
-    console.log('[Admin] Render:', { user: user?.email, loading });
+    console.log('[Admin] Render:', { loading });
 
     const [pin, setPin] = useState('');
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [stats, setStats] = useState<any>(null);
     const [maintenanceMode, setMaintenanceMode] = useState(false);
     const [isLoadingStats, setIsLoadingStats] = useState(false);
-    const [adminPin, setAdminPin] = useState('12345678'); // Default fallback
+    const [adminPin, setAdminPin] = useState(''); // No fallback - must fetch from DB
     const [newPin, setNewPin] = useState('');
     const [isChangingPin, setIsChangingPin] = useState(false);
     const [announcement, setAnnouncement] = useState({ active: false, message: '', type: 'info' as 'info' | 'warning' });
@@ -82,10 +81,8 @@ function AdminContent() {
                 const userEmail = user.email?.toLowerCase() || '';
                 const adminEmail = ADMIN_EMAIL.toLowerCase();
 
-                console.log('[Admin] Checking Email:', { userEmail, adminEmail, match: userEmail === adminEmail });
-
                 if (userEmail !== adminEmail) {
-                    console.warn('[Admin] Email mismatch - Access Denied');
+                    console.warn('[Admin] Access Denied');
                 }
             }
         }
@@ -123,7 +120,14 @@ function AdminContent() {
 
     const handlePinSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        console.log('[Admin] PIN Submitted');
+        if (!adminPin) {
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Could not verify PIN. Please try again.",
+            });
+            return;
+        }
         if (pin === adminPin) {
             setIsAuthenticated(true);
             toast({
@@ -309,19 +313,9 @@ function AdminContent() {
                 <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
                     <ShieldAlert className="w-8 h-8 text-red-600" />
                 </div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Access Denied</h1>
                 <p className="text-muted-foreground max-w-md mb-6">
-                    You are logged in as <span className="font-semibold text-foreground">{user.email}</span>,
-                    but this account does not have administrator privileges.
+                    Your account does not have administrator access.
                 </p>
-
-                {/* DEBUG INFO */}
-                <div className="bg-slate-100 dark:bg-slate-800 p-4 rounded-md text-left text-xs font-mono mb-6 w-full max-w-md overflow-auto">
-                    <p><strong>Required:</strong> {ADMIN_EMAIL}</p>
-                    <p><strong>Current:</strong> {user.email}</p>
-                    <p><strong>User ID:</strong> {user.id}</p>
-                    <p><strong>Match:</strong> {userEmail === adminEmail ? 'YES' : 'NO'}</p>
-                </div>
 
                 <Button onClick={() => navigate('/')} variant="outline">
                     Return to Home

@@ -60,7 +60,7 @@ function AdminContent() {
     const navigate = useNavigate();
     const { toast } = useToast();
 
-    console.log('[Admin] Render:', { user: user?.email, loading });
+    console.log('[Admin] Render:', { loading });
 
     const [pin, setPin] = useState('');
     const [isAuthenticated, setIsAuthenticated] = useState(false);

@@ -292,12 +292,12 @@ const SwipeableItem = ({
             </button>
 
             {/* Action buttons - vertical stack */}
-            <div className="flex flex-col items-center gap-1 flex-shrink-0">
+            <div className={`flex flex-col items-center gap-0.5 flex-shrink-0 ${zoomLevel === 'compact' ? 'flex-row' : ''}`}>
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 onClick={(e) => onPin(item.id, e)}
                 className={`
-                  w-9 h-9 rounded-xl flex items-center justify-center
+                  ${zoomConfig.actionBtn} rounded-xl flex items-center justify-center
                   border-2 transition-all duration-200
                   ${item.pinned
                     ? 'bg-destructive text-destructive-foreground border-destructive'
@@ -305,27 +305,29 @@ const SwipeableItem = ({
                   }
                 `}
               >
-                {item.pinned ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
+                {item.pinned ? <PinOff className={zoomConfig.actionIcon} /> : <Pin className={zoomConfig.actionIcon} />}
               </motion.button>
 
-              <div className="flex items-center gap-0.5">
-                <motion.button
-                  whileTap={{ scale: 0.9 }}
-                  onClick={(e) => onEdit(item, e)}
-                  className="w-7 h-7 rounded-lg flex items-center justify-center
-                    text-muted-foreground/60 hover:text-primary hover:bg-primary/10"
-                >
-                  <Pencil className="h-3 w-3" />
-                </motion.button>
-                <motion.button
-                  whileTap={{ scale: 0.9 }}
-                  onClick={(e) => onDelete(item.id, e)}
-                  className="w-7 h-7 rounded-lg flex items-center justify-center
-                    text-muted-foreground/60 hover:text-destructive hover:bg-destructive/10"
-                >
-                  <Trash2 className="h-3 w-3" />
-                </motion.button>
-              </div>
+              {zoomLevel !== 'compact' && (
+                <div className="flex items-center gap-0.5">
+                  <motion.button
+                    whileTap={{ scale: 0.9 }}
+                    onClick={(e) => onEdit(item, e)}
+                    className={`${zoomConfig.actionBtn} rounded-lg flex items-center justify-center
+                      text-muted-foreground/60 hover:text-primary hover:bg-primary/10`}
+                  >
+                    <Pencil className={zoomConfig.actionIcon} />
+                  </motion.button>
+                  <motion.button
+                    whileTap={{ scale: 0.9 }}
+                    onClick={(e) => onDelete(item.id, e)}
+                    className={`${zoomConfig.actionBtn} rounded-lg flex items-center justify-center
+                      text-muted-foreground/60 hover:text-destructive hover:bg-destructive/10`}
+                  >
+                    <Trash2 className={zoomConfig.actionIcon} />
+                  </motion.button>
+                </div>
+              )}
             </div>
           </div>
         )}

@@ -120,7 +120,14 @@ function AdminContent() {
 
     const handlePinSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        console.log('[Admin] PIN Submitted');
+        if (!adminPin) {
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Could not verify PIN. Please try again.",
+            });
+            return;
+        }
         if (pin === adminPin) {
             setIsAuthenticated(true);
             toast({

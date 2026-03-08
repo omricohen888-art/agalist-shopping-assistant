@@ -1605,7 +1605,7 @@ export const ShoppingList = () => {
       toast.error(t.toasts.invalidAmount);
       return;
     }
-    const store = selectedStore === otherLabel ? customStore : selectedStore;
+    const store = selectedStore === '__custom__' ? customStore : selectedStore;
     if (!store) {
       toast.error(t.toasts.selectStore);
       return;

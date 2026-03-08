@@ -1865,6 +1865,12 @@ export const ShoppingList = () => {
               <p className="flex items-start gap-2">
                 <span className="font-bold text-primary mt-0.5">3.</span>
                 {language === 'he'
+                  ? 'כמות ויחידות? לחצו על הפריט אחרי ההוספה כדי לערוך'
+                  : 'Quantity & units? Tap the item after adding to edit'}
+              </p>
+              <p className="flex items-start gap-2">
+                <span className="font-bold text-primary mt-0.5">4.</span>
+                {language === 'he'
                   ? <>לחצו <span className="font-bold">"יוצאים לקניות!"</span> כשמוכנים — ותסמנו פריטים תוך כדי קנייה</>
                   : <>Hit <span className="font-bold">"Let's Shop!"</span> when ready — and check items off as you go</>}
               </p>

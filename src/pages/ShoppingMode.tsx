@@ -952,18 +952,28 @@ export const ShoppingMode = () => {
       </motion.div>
 
       {/* Floating Add Button - Accessible */}
-      <motion.button
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        whileTap={{ scale: 0.9 }}
-        onClick={() => {
-          setShowAddItemInput(true);
-          setTimeout(() => addItemInputRef.current?.focus(), 100);
-        }}
-        className="fixed bottom-36 right-4 z-30 w-14 h-14 rounded-full bg-success text-success-foreground shadow-xl flex items-center justify-center"
-      >
-        <Plus className="h-7 w-7" />
-      </motion.button>
+      <div className="fixed bottom-36 right-4 z-30 flex flex-col items-center gap-1">
+        <motion.span
+          initial={{ opacity: 0, y: 5 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.5, duration: 0.4 }}
+          className="text-[10px] font-medium text-muted-foreground bg-card/90 backdrop-blur-sm px-2 py-0.5 rounded-full shadow-sm border border-border/50 whitespace-nowrap"
+        >
+          {language === 'he' ? 'הוסף פריט' : 'Add item'}
+        </motion.span>
+        <motion.button
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={() => {
+            setShowAddItemInput(true);
+            setTimeout(() => addItemInputRef.current?.focus(), 100);
+          }}
+          className="w-14 h-14 rounded-full bg-success text-success-foreground shadow-xl flex items-center justify-center"
+        >
+          <Plus className="h-7 w-7" />
+        </motion.button>
+      </div>
 
       {/* Add Item Modal */}
       <AnimatePresence>

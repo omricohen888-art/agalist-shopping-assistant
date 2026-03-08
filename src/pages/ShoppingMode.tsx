@@ -275,11 +275,11 @@ const SwipeableItem = ({
               }}
               className={`flex-1 min-w-0 text-${direction === 'rtl' ? 'right' : 'left'} touch-manipulation py-2`}
             >
-              <p className="text-base sm:text-lg font-bold text-foreground truncate">
+              <p className={`${zoomConfig.title} font-bold text-foreground truncate`}>
                 {item.text}
               </p>
               <div className="flex flex-col gap-0.5">
-                <p className="text-xs sm:text-sm text-muted-foreground font-medium">
+                <p className={`${zoomConfig.subtitle} text-muted-foreground font-medium`}>
                   {item.quantity} {unitLabel}
                 </p>
                 {item.note && (

@@ -1898,7 +1898,7 @@ export const ShoppingList = () => {
           <div className="flex items-center gap-2 flex-shrink-0">
             <button
               onClick={handleQuickPaste}
-              className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-lg bg-muted/80 hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer text-xs sm:text-sm font-medium border border-foreground/20"
+              className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary hover:text-primary transition-all cursor-pointer text-xs sm:text-sm font-semibold border border-primary/30"
               title={language === 'he' ? 'הדבק מהלוח' : 'Paste from clipboard'}
             >
               <ClipboardPaste className="h-3.5 w-3.5 sm:h-4 sm:w-4" />

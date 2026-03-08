@@ -103,6 +103,8 @@ const getProgressFeedback = (
 };
 
 // Swipeable Item Component
+type ZoomLevel = 'normal' | 'medium' | 'compact';
+
 const SwipeableItem = ({
   item,
   onComplete,
@@ -121,6 +123,7 @@ const SwipeableItem = ({
   setEditingNote,
   saveItemEdit,
   cancelEdit,
+  zoomLevel = 'normal',
 }: {
   item: ShoppingItem;
   onComplete: (id: string) => void;
@@ -139,6 +142,7 @@ const SwipeableItem = ({
   setEditingNote: (n: string) => void;
   saveItemEdit: () => void;
   cancelEdit: () => void;
+  zoomLevel?: ZoomLevel;
 }) => {
   const x = useMotionValue(0);
   const background = useTransform(
@@ -154,6 +158,12 @@ const SwipeableItem = ({
 
   const unitLabel = UNITS.find(u => u.value === item.unit)?.[language === 'he' ? 'labelHe' : 'labelEn'] || '';
   const isEditing = editingItemId === item.id;
+
+  const zoomConfig = {
+    normal: { checkbox: 'w-14 h-14 rounded-2xl', checkIcon: 'h-8 w-8', padding: 'p-3 sm:p-4', title: 'text-base sm:text-lg', subtitle: 'text-xs sm:text-sm', actionBtn: 'w-9 h-9', actionIcon: 'h-4 w-4', gap: 'gap-3', rounded: 'rounded-2xl', space: 'space-y-2' },
+    medium: { checkbox: 'w-10 h-10 rounded-xl', checkIcon: 'h-5 w-5', padding: 'p-2 sm:p-3', title: 'text-sm sm:text-base', subtitle: 'text-[11px] sm:text-xs', actionBtn: 'w-7 h-7', actionIcon: 'h-3 w-3', gap: 'gap-2', rounded: 'rounded-xl', space: 'space-y-1' },
+    compact: { checkbox: 'w-7 h-7 rounded-lg', checkIcon: 'h-4 w-4', padding: 'p-1.5 sm:p-2', title: 'text-xs sm:text-sm', subtitle: 'text-[10px]', actionBtn: 'w-6 h-6', actionIcon: 'h-2.5 w-2.5', gap: 'gap-1.5', rounded: 'rounded-lg', space: 'space-y-0.5' },
+  }[zoomLevel];
 
   const handleDragEnd = () => {
     const xValue = x.get();
@@ -181,9 +191,9 @@ const SwipeableItem = ({
         scale: { type: "spring", stiffness: 500, damping: 25 }
       }}
       className={`
-        relative overflow-hidden rounded-2xl
+        relative overflow-hidden ${zoomConfig.rounded}
         border-2 transition-colors duration-300
-        shadow-sm hover:shadow-lg
+        ${zoomLevel === 'compact' ? 'shadow-none' : 'shadow-sm hover:shadow-lg'}
         ${item.pinned
           ? 'border-destructive bg-destructive/5 ring-2 ring-destructive/20'
           : 'border-foreground/20 hover:border-primary/50'
@@ -219,11 +229,11 @@ const SwipeableItem = ({
         dragConstraints={{ left: direction === 'rtl' ? 0 : -100, right: direction === 'rtl' ? 100 : 0 }}
         dragElastic={0.1}
         onDragEnd={handleDragEnd}
-        className="relative bg-card p-3 sm:p-4"
+        className={`relative bg-card ${zoomConfig.padding}`}
       >
         {/* Normal View */}
         {!isEditing && (
-          <div className={`flex items-center gap-3 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
+          <div className={`flex items-center ${zoomConfig.gap} ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
             {/* Checkbox - Large and bouncy */}
             <motion.button
               onClick={() => {
@@ -233,7 +243,7 @@ const SwipeableItem = ({
               whileTap={{ scale: 0.85 }}
               whileHover={{ scale: 1.05 }}
               className={`
-                flex-shrink-0 w-14 h-14 rounded-2xl
+                flex-shrink-0 ${zoomConfig.checkbox}
                 flex items-center justify-center
                 border-2 transition-all duration-300
                 touch-manipulation
@@ -251,7 +261,7 @@ const SwipeableItem = ({
                     exit={{ scale: 0 }}
                     transition={{ type: "spring", stiffness: 500, damping: 15 }}
                   >
-                    <Check className="h-8 w-8" strokeWidth={3} />
+                    <Check className={zoomConfig.checkIcon} strokeWidth={3} />
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -265,11 +275,11 @@ const SwipeableItem = ({
               }}
               className={`flex-1 min-w-0 text-${direction === 'rtl' ? 'right' : 'left'} touch-manipulation py-2`}
             >
-              <p className="text-base sm:text-lg font-bold text-foreground truncate">
+              <p className={`${zoomConfig.title} font-bold text-foreground truncate`}>
                 {item.text}
               </p>
               <div className="flex flex-col gap-0.5">
-                <p className="text-xs sm:text-sm text-muted-foreground font-medium">
+                <p className={`${zoomConfig.subtitle} text-muted-foreground font-medium`}>
                   {item.quantity} {unitLabel}
                 </p>
                 {item.note && (
@@ -282,12 +292,12 @@ const SwipeableItem = ({
             </button>
 
             {/* Action buttons - vertical stack */}
-            <div className="flex flex-col items-center gap-1 flex-shrink-0">
+            <div className={`flex flex-col items-center gap-0.5 flex-shrink-0 ${zoomLevel === 'compact' ? 'flex-row' : ''}`}>
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 onClick={(e) => onPin(item.id, e)}
                 className={`
-                  w-9 h-9 rounded-xl flex items-center justify-center
+                  ${zoomConfig.actionBtn} rounded-xl flex items-center justify-center
                   border-2 transition-all duration-200
                   ${item.pinned
                     ? 'bg-destructive text-destructive-foreground border-destructive'
@@ -295,27 +305,29 @@ const SwipeableItem = ({
                   }
                 `}
               >
-                {item.pinned ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
+                {item.pinned ? <PinOff className={zoomConfig.actionIcon} /> : <Pin className={zoomConfig.actionIcon} />}
               </motion.button>
 
-              <div className="flex items-center gap-0.5">
-                <motion.button
-                  whileTap={{ scale: 0.9 }}
-                  onClick={(e) => onEdit(item, e)}
-                  className="w-7 h-7 rounded-lg flex items-center justify-center
-                    text-muted-foreground/60 hover:text-primary hover:bg-primary/10"
-                >
-                  <Pencil className="h-3 w-3" />
-                </motion.button>
-                <motion.button
-                  whileTap={{ scale: 0.9 }}
-                  onClick={(e) => onDelete(item.id, e)}
-                  className="w-7 h-7 rounded-lg flex items-center justify-center
-                    text-muted-foreground/60 hover:text-destructive hover:bg-destructive/10"
-                >
-                  <Trash2 className="h-3 w-3" />
-                </motion.button>
-              </div>
+              {zoomLevel !== 'compact' && (
+                <div className="flex items-center gap-0.5">
+                  <motion.button
+                    whileTap={{ scale: 0.9 }}
+                    onClick={(e) => onEdit(item, e)}
+                    className={`${zoomConfig.actionBtn} rounded-lg flex items-center justify-center
+                      text-muted-foreground/60 hover:text-primary hover:bg-primary/10`}
+                  >
+                    <Pencil className={zoomConfig.actionIcon} />
+                  </motion.button>
+                  <motion.button
+                    whileTap={{ scale: 0.9 }}
+                    onClick={(e) => onDelete(item.id, e)}
+                    className={`${zoomConfig.actionBtn} rounded-lg flex items-center justify-center
+                      text-muted-foreground/60 hover:text-destructive hover:bg-destructive/10`}
+                  >
+                    <Trash2 className={zoomConfig.actionIcon} />
+                  </motion.button>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -490,6 +502,7 @@ export const ShoppingMode = () => {
   const [customStoreName, setCustomStoreName] = useState("");
   const [selectedShoppingType, setSelectedShoppingType] = useState<ShoppingType>("supermarket");
   const [showAddItemInput, setShowAddItemInput] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState<'normal' | 'medium' | 'compact'>('normal');
   const [newItemText, setNewItemText] = useState("");
   const [isSmartSort, setIsSmartSort] = useState(false);
   const [showExitDialog, setShowExitDialog] = useState(false);
@@ -1106,18 +1119,37 @@ export const ShoppingMode = () => {
       {/* Items List */}
       <div className="max-w-3xl mx-auto px-4 py-4 space-y-4">
         {activeItemsCount > 0 && (
-          <div className="mb-2">
+          <div className="mb-2 flex items-center justify-between gap-2">
             <SortModeToggle
               isSmartSort={isSmartSort}
               onToggle={setIsSmartSort}
               language={language}
             />
+            <div className="flex items-center bg-muted rounded-full p-0.5 gap-0.5">
+              {([
+                { key: 'normal' as const, label: language === 'he' ? 'רגיל' : 'Normal', icon: '🔍' },
+                { key: 'medium' as const, label: language === 'he' ? 'בינוני' : 'Medium', icon: '🔎' },
+                { key: 'compact' as const, label: language === 'he' ? 'קומפקט' : 'Compact', icon: '📋' },
+              ]).map(({ key, label, icon }) => (
+                <button
+                  key={key}
+                  onClick={() => setZoomLevel(key)}
+                  className={`px-2 py-1 text-xs rounded-full transition-all duration-200 font-medium whitespace-nowrap ${
+                    zoomLevel === key
+                      ? 'bg-background text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  {icon}
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
         {/* Active Items */}
         {activeItemsCount > 0 && (
-          <div className="space-y-3">
+          <div className={zoomLevel === 'compact' ? 'space-y-1' : zoomLevel === 'medium' ? 'space-y-2' : 'space-y-3'}>
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-semibold text-foreground">
                 {language === 'he' ? 'לאסוף' : 'To Collect'}
@@ -1130,14 +1162,14 @@ export const ShoppingMode = () => {
             {/* Pinned Items */}
             <AnimatePresence>
               {pinnedItems.length > 0 && (
-                <motion.div layout className="space-y-2">
+                <motion.div layout className={zoomLevel === 'compact' ? 'space-y-1' : 'space-y-2'}>
                   <div className="flex items-center gap-2 px-1">
                     <Pin className="h-3.5 w-3.5 text-destructive fill-destructive" />
                     <span className="text-xs font-bold text-destructive">
                       {language === 'he' ? 'פריטים דחופים' : 'Urgent Items'}
                     </span>
                   </div>
-                  <div className="space-y-2">
+                  <div className={zoomLevel === 'compact' ? 'space-y-1' : 'space-y-2'}>
                     {pinnedItems.map((item) => (
                       <SwipeableItem
                         key={item.id}
@@ -1158,6 +1190,7 @@ export const ShoppingMode = () => {
                         setEditingNote={setEditingNote}
                         saveItemEdit={saveItemEdit}
                         cancelEdit={cancelEdit}
+                        zoomLevel={zoomLevel}
                       />
                     ))}
                   </div>
@@ -1172,7 +1205,7 @@ export const ShoppingMode = () => {
                   if (categoryItems.length === 0) return null;
                   const categoryInfo = getCategoryInfo(categoryKey);
                   return (
-                    <motion.div layout key={categoryKey} className="space-y-2">
+                    <motion.div layout key={categoryKey} className={zoomLevel === 'compact' ? 'space-y-1' : 'space-y-2'}>
                       <div className="flex items-center gap-2 px-1">
                         <span className="text-base">{categoryInfo.icon}</span>
                         <span className="text-xs font-bold text-muted-foreground">
@@ -1180,7 +1213,7 @@ export const ShoppingMode = () => {
                         </span>
                         <span className="text-xs text-muted-foreground/70">({categoryItems.length})</span>
                       </div>
-                      <div className="space-y-2">
+                      <div className={zoomLevel === 'compact' ? 'space-y-1' : 'space-y-2'}>
                         <AnimatePresence>
                           {categoryItems.map((item) => (
                             <SwipeableItem
@@ -1202,6 +1235,7 @@ export const ShoppingMode = () => {
                               setEditingNote={setEditingNote}
                               saveItemEdit={saveItemEdit}
                               cancelEdit={cancelEdit}
+                              zoomLevel={zoomLevel}
                             />
                           ))}
                         </AnimatePresence>
@@ -1214,7 +1248,7 @@ export const ShoppingMode = () => {
 
             {/* Original Order */}
             {!isSmartSort && flatSortedItems.length > 0 && (
-              <div className="space-y-2">
+              <div className={zoomLevel === 'compact' ? 'space-y-1' : 'space-y-2'}>
                 <AnimatePresence>
                   {flatSortedItems.map((item) => (
                     <SwipeableItem
@@ -1236,6 +1270,7 @@ export const ShoppingMode = () => {
                       setEditingNote={setEditingNote}
                       saveItemEdit={saveItemEdit}
                       cancelEdit={cancelEdit}
+                      zoomLevel={zoomLevel}
                     />
                   ))}
                 </AnimatePresence>

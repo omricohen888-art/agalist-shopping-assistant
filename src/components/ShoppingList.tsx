@@ -131,6 +131,7 @@ export const ShoppingList = () => {
   const [totalAmount, setTotalAmount] = useState("");
   const [selectedStore, setSelectedStore] = useState("");
   const [customStore, setCustomStore] = useState("");
+  const [selectedShoppingType, setSelectedShoppingType] = useState<ShoppingType>('supermarket');
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
   const [listName, setListName] = useState("");
   const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);

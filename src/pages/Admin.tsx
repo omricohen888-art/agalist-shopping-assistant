@@ -81,10 +81,8 @@ function AdminContent() {
                 const userEmail = user.email?.toLowerCase() || '';
                 const adminEmail = ADMIN_EMAIL.toLowerCase();
 
-                console.log('[Admin] Checking Email:', { userEmail, adminEmail, match: userEmail === adminEmail });
-
                 if (userEmail !== adminEmail) {
-                    console.warn('[Admin] Email mismatch - Access Denied');
+                    console.warn('[Admin] Access Denied');
                 }
             }
         }

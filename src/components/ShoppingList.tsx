@@ -1875,7 +1875,7 @@ export const ShoppingList = () => {
                   : 'Quantity & units? Use the +/- buttons and unit selector next to each item'}
               </p>
               <p className="flex items-start gap-2">
-                <span className="font-bold text-primary mt-0.5">4.</span>
+                <span className="font-bold text-primary mt-0.5">5.</span>
                 {language === 'he'
                   ? <>לחצו <span className="font-bold">"יוצאים לקניות!"</span> כשמוכנים — ותסמנו פריטים תוך כדי קנייה</>
                   : <>Hit <span className="font-bold">"Let's Shop!"</span> when ready — and check items off as you go</>}

@@ -229,7 +229,7 @@ const SwipeableItem = ({
         dragConstraints={{ left: direction === 'rtl' ? 0 : -100, right: direction === 'rtl' ? 100 : 0 }}
         dragElastic={0.1}
         onDragEnd={handleDragEnd}
-        className="relative bg-card p-3 sm:p-4"
+        className={`relative bg-card ${zoomConfig.padding}`}
       >
         {/* Normal View */}
         {!isEditing && (

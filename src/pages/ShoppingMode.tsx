@@ -103,6 +103,8 @@ const getProgressFeedback = (
 };
 
 // Swipeable Item Component
+type ZoomLevel = 'normal' | 'medium' | 'compact';
+
 const SwipeableItem = ({
   item,
   onComplete,
@@ -121,6 +123,7 @@ const SwipeableItem = ({
   setEditingNote,
   saveItemEdit,
   cancelEdit,
+  zoomLevel = 'normal',
 }: {
   item: ShoppingItem;
   onComplete: (id: string) => void;
@@ -139,6 +142,7 @@ const SwipeableItem = ({
   setEditingNote: (n: string) => void;
   saveItemEdit: () => void;
   cancelEdit: () => void;
+  zoomLevel?: ZoomLevel;
 }) => {
   const x = useMotionValue(0);
   const background = useTransform(

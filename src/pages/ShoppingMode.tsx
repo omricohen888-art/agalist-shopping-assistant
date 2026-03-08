@@ -13,6 +13,7 @@ import { useSoundSettings } from "@/hooks/use-sound-settings.tsx";
 import { useHaptics } from "@/hooks/use-haptics";
 import { ConfettiEffect } from "@/components/ConfettiEffect";
 import { toast } from "sonner";
+import { StoreAutocomplete } from "@/components/StoreAutocomplete";
 import { getSavedLists } from "@/utils/storage";
 import { SavedList } from "@/types/shopping";
 import { useCloudSync } from "@/hooks/use-cloud-sync";

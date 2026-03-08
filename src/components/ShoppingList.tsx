@@ -31,7 +31,7 @@ import { StandardizedInput } from "@/components/ui/standardized-input";
 import { StandardizedTextarea } from "@/components/ui/standardized-textarea";
 import { HandwritingCanvas } from "@/components/HandwritingCanvas";
 import { toast } from "sonner";
-import { ShoppingItem, ShoppingHistory, ISRAELI_STORES, UNITS, Unit, SavedList } from "@/types/shopping";
+import { ShoppingItem, ShoppingHistory, ISRAELI_STORES, UNITS, Unit, SavedList, SHOPPING_TYPES, STORES_BY_TYPE, ShoppingType } from "@/types/shopping";
 import { ISRAELI_PRODUCTS } from "@/data/israeliProducts";
 import { ShoppingListItem } from "@/components/ShoppingListItem";
 import { GroupedShoppingList } from "@/components/GroupedShoppingList";
@@ -131,6 +131,7 @@ export const ShoppingList = () => {
   const [totalAmount, setTotalAmount] = useState("");
   const [selectedStore, setSelectedStore] = useState("");
   const [customStore, setCustomStore] = useState("");
+  const [selectedShoppingType, setSelectedShoppingType] = useState<ShoppingType>('supermarket');
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
   const [listName, setListName] = useState("");
   const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
@@ -1604,7 +1605,7 @@ export const ShoppingList = () => {
       toast.error(t.toasts.invalidAmount);
       return;
     }
-    const store = selectedStore === otherLabel ? customStore : selectedStore;
+    const store = selectedStore === '__custom__' ? customStore : selectedStore;
     if (!store) {
       toast.error(t.toasts.selectStore);
       return;
@@ -1638,6 +1639,7 @@ export const ShoppingList = () => {
       setTotalAmount("");
       setSelectedStore("");
       setCustomStore("");
+      setSelectedShoppingType('supermarket');
       setActiveListId(null);
       setListName("");
 
@@ -2632,34 +2634,101 @@ export const ShoppingList = () => {
               {t.finishDialogDescription}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-6 py-4">
+          <div className="space-y-4 py-4">
+            {/* Shopping Type */}
             <div className="space-y-2">
-              <Label htmlFor="amount" className="text-base font-semibold">
-                {t.amountLabel}
+              <Label className="text-sm font-medium">
+                {language === 'he' ? 'סוג קנייה' : 'Shopping Type'}
               </Label>
-              <Input id="amount" type="number" placeholder="0.00" value={totalAmount} onChange={e => setTotalAmount(e.target.value)} className="h-12 text-lg" min="0" step="0.01" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="store" className="text-base font-semibold">
-                {t.storeLabel}
-              </Label>
-              <Select value={selectedStore} onValueChange={setSelectedStore}>
-                <SelectTrigger className="h-12 text-lg">
-                  <SelectValue placeholder={t.selectPlaceholder} />
+              <Select
+                value={selectedShoppingType}
+                onValueChange={(value: ShoppingType) => {
+                  setSelectedShoppingType(value);
+                  setSelectedStore("");
+                }}
+              >
+                <SelectTrigger dir={direction} className="w-full h-12 text-base">
+                  {selectedShoppingType ? (
+                    <span className={`flex items-center gap-2 w-full ${direction === 'rtl' ? 'flex-row-reverse justify-end' : ''}`}>
+                      <span>{SHOPPING_TYPES.find(st => st.value === selectedShoppingType)?.icon}</span>
+                      <span>{language === 'he'
+                        ? SHOPPING_TYPES.find(st => st.value === selectedShoppingType)?.labelHe
+                        : SHOPPING_TYPES.find(st => st.value === selectedShoppingType)?.labelEn
+                      }</span>
+                    </span>
+                  ) : (
+                    <span>{language === 'he' ? 'בחר סוג' : 'Select type'}</span>
+                  )}
                 </SelectTrigger>
-                <SelectContent>
-                  {storeOptions.map(store => <SelectItem key={store} value={store} className="text-lg">
-                    {store}
-                  </SelectItem>)}
+                <SelectContent className="bg-background border border-border z-50" dir={direction}>
+                  {SHOPPING_TYPES.map((type) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      <span className={`flex items-center gap-2 ${direction === 'rtl' ? 'flex-row-reverse' : ''}`}>
+                        <span>{type.icon}</span>
+                        <span>{language === 'he' ? type.labelHe : type.labelEn}</span>
+                      </span>
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
-            {selectedStore === otherLabel && <div className="space-y-2">
-              <Label htmlFor="customStore" className="text-base font-semibold">
-                {t.customStoreLabel}
+
+            {/* Store */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">
+                {language === 'he' ? 'רשת/חנות' : 'Store'}
               </Label>
-              <Input id="customStore" type="text" placeholder={t.customStorePlaceholder} value={customStore} onChange={e => setCustomStore(e.target.value)} className="h-12 text-lg" />
-            </div>}
+              {selectedShoppingType === 'other' || STORES_BY_TYPE[selectedShoppingType].length === 0 ? (
+                <Input
+                  type="text"
+                  placeholder={language === 'he' ? 'הקלד שם חנות...' : 'Enter store name...'}
+                  value={selectedStore}
+                  onChange={(e) => setSelectedStore(e.target.value)}
+                  className="h-12 text-base"
+                  dir={direction}
+                />
+              ) : (
+                <div className="space-y-2">
+                  <Select value={selectedStore} onValueChange={setSelectedStore}>
+                    <SelectTrigger dir={direction} className="w-full h-12 text-base">
+                      <SelectValue placeholder={language === 'he' ? 'בחר חנות' : 'Select store'} />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background border border-border z-50 max-h-60" dir={direction}>
+                      {STORES_BY_TYPE[selectedShoppingType].map((store) => (
+                        <SelectItem key={store} value={store}>
+                          {store}
+                        </SelectItem>
+                      ))}
+                      <SelectItem value="__custom__">
+                        <span className="text-primary font-medium">
+                          {language === 'he' ? '➕ הקלד שם אחר...' : '➕ Enter custom name...'}
+                        </span>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {selectedStore === '__custom__' && (
+                    <Input
+                      type="text"
+                      placeholder={language === 'he' ? 'הקלד שם חנות...' : 'Enter store name...'}
+                      value={customStore}
+                      onChange={(e) => setCustomStore(e.target.value)}
+                      className="h-12 text-base"
+                      dir={direction}
+                      autoFocus
+                    />
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Amount */}
+            <div className="space-y-2">
+              <Label htmlFor="amount" className="text-sm font-medium">
+                {t.amountLabel}
+              </Label>
+              <Input id="amount" type="number" inputMode="decimal" placeholder="0.00" value={totalAmount} onChange={e => setTotalAmount(e.target.value)} className="h-12 text-lg text-center" min="0" step="0.01" />
+            </div>
+
             <div className="bg-muted/50 rounded-lg p-4 space-y-1">
               <p className="text-sm text-muted-foreground">{t.summaryLabel}</p>
               <p className="text-lg font-semibold">

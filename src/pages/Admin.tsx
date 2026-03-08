@@ -313,19 +313,9 @@ function AdminContent() {
                 <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
                     <ShieldAlert className="w-8 h-8 text-red-600" />
                 </div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Access Denied</h1>
                 <p className="text-muted-foreground max-w-md mb-6">
-                    You are logged in as <span className="font-semibold text-foreground">{user.email}</span>,
-                    but this account does not have administrator privileges.
+                    Your account does not have administrator access.
                 </p>
-
-                {/* DEBUG INFO */}
-                <div className="bg-slate-100 dark:bg-slate-800 p-4 rounded-md text-left text-xs font-mono mb-6 w-full max-w-md overflow-auto">
-                    <p><strong>Required:</strong> {ADMIN_EMAIL}</p>
-                    <p><strong>Current:</strong> {user.email}</p>
-                    <p><strong>User ID:</strong> {user.id}</p>
-                    <p><strong>Match:</strong> {userEmail === adminEmail ? 'YES' : 'NO'}</p>
-                </div>
 
                 <Button onClick={() => navigate('/')} variant="outline">
                     Return to Home

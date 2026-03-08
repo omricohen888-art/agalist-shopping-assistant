@@ -1881,7 +1881,7 @@ export const ShoppingList = () => {
                   : <>Hit <span className="font-bold">"Let's Shop!"</span> when ready — and check items off as you go</>}
               </p>
               <p className="flex items-start gap-2">
-                <span className="font-bold text-primary mt-0.5">5.</span>
+                <span className="font-bold text-primary mt-0.5">6.</span>
                 {language === 'he'
                   ? <>לא קונים עכשיו? לחצו <span className="font-bold">"שמור לאחר כך"</span> והרשימה תישמר בפנקס</>
                   : <>Not shopping now? Click <span className="font-bold">"Save for Later"</span> to keep the list in your notebook</>}

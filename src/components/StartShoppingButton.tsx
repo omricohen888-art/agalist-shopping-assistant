@@ -23,7 +23,7 @@ export const StartShoppingButton: React.FC<StartShoppingButtonProps> = ({
       className={`
         group relative overflow-hidden w-full sm:w-auto
         ${isCompact 
-          ? 'h-10 sm:h-11 px-4 sm:px-6 rounded-lg sm:rounded-xl' 
+          ? 'h-11 sm:h-12 px-4 sm:px-6 rounded-xl' 
           : 'h-11 sm:h-12 px-5 sm:px-8 rounded-xl'
         }
         font-bold text-primary-foreground
@@ -83,7 +83,7 @@ export const SaveListButton: React.FC<{
       disabled={disabled}
       className={`
         relative
-        h-11 sm:h-14 px-4 sm:px-6 rounded-xl sm:rounded-2xl w-full sm:w-auto
+        h-11 sm:h-12 px-4 sm:px-6 rounded-xl w-full sm:w-auto
         font-semibold
         bg-card/80 backdrop-blur-sm
         border-2 border-foreground/60

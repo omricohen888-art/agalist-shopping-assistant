@@ -1821,7 +1821,7 @@ export const ShoppingList = () => {
     </div>}
 
     {/* Main Content */}
-    <div className="max-w-3xl mx-auto p-3 sm:p-4 md:p-6 lg:p-8 pb-40 sm:pb-44 md:pb-48 overflow-hidden w-full min-w-0">
+    <div className="max-w-3xl mx-auto p-3 sm:p-4 md:p-6 lg:p-8 pb-28 md:pb-8 overflow-hidden w-full min-w-0">
       {/* Welcome Header */}
       <div className="text-center mb-3 sm:mb-4 md:mb-6 mt-2 sm:mt-3">
         <h1 className="text-xl sm:text-2xl font-bold text-foreground mb-1 inline-block">
@@ -2138,7 +2138,7 @@ export const ShoppingList = () => {
           </div>
         </div>}
 
-        <div className="flex flex-col items-center gap-2 sm:gap-3 mt-4 sm:mt-6 w-full transition-all duration-300 ease-in-out relative z-10 pb-[calc(env(safe-area-inset-bottom)+5.5rem)] md:pb-0">
+        <div className="flex flex-col items-center gap-2 sm:gap-3 mt-4 sm:mt-6 w-full transition-all duration-300 ease-in-out relative z-10">
           {/* Primary actions - side by side */}
           <div className="flex gap-2 sm:gap-3 w-full sm:max-w-xl sm:justify-center">
             <div className="flex-1">

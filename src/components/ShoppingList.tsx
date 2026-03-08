@@ -31,7 +31,7 @@ import { StandardizedInput } from "@/components/ui/standardized-input";
 import { StandardizedTextarea } from "@/components/ui/standardized-textarea";
 import { HandwritingCanvas } from "@/components/HandwritingCanvas";
 import { toast } from "sonner";
-import { ShoppingItem, ShoppingHistory, ISRAELI_STORES, UNITS, Unit, SavedList } from "@/types/shopping";
+import { ShoppingItem, ShoppingHistory, ISRAELI_STORES, UNITS, Unit, SavedList, SHOPPING_TYPES, STORES_BY_TYPE, ShoppingType } from "@/types/shopping";
 import { ISRAELI_PRODUCTS } from "@/data/israeliProducts";
 import { ShoppingListItem } from "@/components/ShoppingListItem";
 import { GroupedShoppingList } from "@/components/GroupedShoppingList";

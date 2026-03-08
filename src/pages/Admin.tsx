@@ -60,14 +60,15 @@ function AdminContent() {
     const navigate = useNavigate();
     const { toast } = useToast();
 
-    console.log('[Admin] Render:', { loading });
-
     const [pin, setPin] = useState('');
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [stats, setStats] = useState<any>(null);
     const [maintenanceMode, setMaintenanceMode] = useState(false);
     const [isLoadingStats, setIsLoadingStats] = useState(false);
-    const [adminPin, setAdminPin] = useState(''); // No fallback - must fetch from DB
+    const [newPin, setNewPin] = useState('');
+    const [isChangingPin, setIsChangingPin] = useState(false);
+    const [isPinLoading, setIsPinLoading] = useState(false);
+    const [announcement, setAnnouncement] = useState({ active: false, message: '', type: 'info' as 'info' | 'warning' });
     const [newPin, setNewPin] = useState('');
     const [isChangingPin, setIsChangingPin] = useState(false);
     const [announcement, setAnnouncement] = useState({ active: false, message: '', type: 'info' as 'info' | 'warning' });

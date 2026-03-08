@@ -243,7 +243,7 @@ const SwipeableItem = ({
               whileTap={{ scale: 0.85 }}
               whileHover={{ scale: 1.05 }}
               className={`
-                flex-shrink-0 w-14 h-14 rounded-2xl
+                flex-shrink-0 ${zoomConfig.checkbox}
                 flex items-center justify-center
                 border-2 transition-all duration-300
                 touch-manipulation

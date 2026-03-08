@@ -1853,29 +1853,35 @@ export const ShoppingList = () => {
               <p className="flex items-start gap-2">
                 <span className="font-bold text-primary mt-0.5">1.</span>
                 {language === 'he'
+                  ? <>תנו שם לרשימה למעלה — למשל <span className="text-muted-foreground">"רמי לוי"</span> או <span className="text-muted-foreground">"ניקיון"</span></>
+                  : <>Name your list above — e.g. <span className="text-muted-foreground">"Walmart"</span> or <span className="text-muted-foreground">"Cleaning"</span></>}
+              </p>
+              <p className="flex items-start gap-2">
+                <span className="font-bold text-primary mt-0.5">2.</span>
+                {language === 'he'
                   ? 'כתבו למטה מה צריך לקנות — פריט בכל שורה'
                   : 'Write below what you need to buy — one item per line'}
               </p>
               <p className="flex items-start gap-2">
-                <span className="font-bold text-primary mt-0.5">2.</span>
+                <span className="font-bold text-primary mt-0.5">3.</span>
                 {language === 'he'
                   ? <>יש רשימה מוכנה? לחצו <span className="font-bold">הדבק</span> למעלה</>
                   : <>Have a list ready? Click <span className="font-bold">Paste</span> above</>}
               </p>
               <p className="flex items-start gap-2">
-                <span className="font-bold text-primary mt-0.5">3.</span>
+                <span className="font-bold text-primary mt-0.5">4.</span>
                 {language === 'he'
                   ? 'כמות ויחידות? השתמשו בכפתורי +/- וברשימת היחידות שליד כל פריט'
                   : 'Quantity & units? Use the +/- buttons and unit selector next to each item'}
               </p>
               <p className="flex items-start gap-2">
-                <span className="font-bold text-primary mt-0.5">4.</span>
+                <span className="font-bold text-primary mt-0.5">5.</span>
                 {language === 'he'
                   ? <>לחצו <span className="font-bold">"יוצאים לקניות!"</span> כשמוכנים — ותסמנו פריטים תוך כדי קנייה</>
                   : <>Hit <span className="font-bold">"Let's Shop!"</span> when ready — and check items off as you go</>}
               </p>
               <p className="flex items-start gap-2">
-                <span className="font-bold text-primary mt-0.5">5.</span>
+                <span className="font-bold text-primary mt-0.5">6.</span>
                 {language === 'he'
                   ? <>לא קונים עכשיו? לחצו <span className="font-bold">"שמור לאחר כך"</span> והרשימה תישמר בפנקס</>
                   : <>Not shopping now? Click <span className="font-bold">"Save for Later"</span> to keep the list in your notebook</>}

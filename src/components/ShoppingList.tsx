@@ -1863,7 +1863,7 @@ export const ShoppingList = () => {
                   : 'Write below what you need to buy — one item per line'}
               </p>
               <p className="flex items-start gap-2">
-                <span className="font-bold text-primary mt-0.5">2.</span>
+                <span className="font-bold text-primary mt-0.5">3.</span>
                 {language === 'he'
                   ? <>יש רשימה מוכנה? לחצו <span className="font-bold">הדבק</span> למעלה</>
                   : <>Have a list ready? Click <span className="font-bold">Paste</span> above</>}

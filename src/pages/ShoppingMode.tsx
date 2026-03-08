@@ -485,6 +485,8 @@ export const ShoppingMode = () => {
   const [showUncollectedWarning, setShowUncollectedWarning] = useState(false);
   const [totalAmount, setTotalAmount] = useState("");
   const [selectedStore, setSelectedStore] = useState("");
+  const [isCustomStore, setIsCustomStore] = useState(false);
+  const [customStoreName, setCustomStoreName] = useState("");
   const [selectedShoppingType, setSelectedShoppingType] = useState<ShoppingType>("supermarket");
   const [showAddItemInput, setShowAddItemInput] = useState(false);
   const [newItemText, setNewItemText] = useState("");

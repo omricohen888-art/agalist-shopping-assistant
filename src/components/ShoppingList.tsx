@@ -1842,7 +1842,7 @@ export const ShoppingList = () => {
         {/* Subtle gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] via-transparent to-transparent pointer-events-none rounded-2xl" />
 
-        {/* Instruction Card - Accessible per Israeli Standard SI 5568 (WCAG 2.0 AA) */}
+        {/* Instruction Card + Templates - Accessible per Israeli Standard SI 5568 (WCAG 2.0 AA) */}
         {notepadItems.length === 0 && (
           <section
             role="region"
@@ -1875,6 +1875,16 @@ export const ShoppingList = () => {
                   : <> Ready? <span className="font-bold">"Let's Shop!"</span> · Not now? <span className="font-bold">"Save for Later"</span></>}
               </li>
             </ol>
+
+            {/* Quick Templates - inline within instructions */}
+            <div className="mt-3 pt-3 border-t border-border/50">
+              <SortableTemplates
+                systemTemplates={currentTemplates}
+                language={language}
+                onTemplateClick={handleTemplateClick}
+                onCreateNew={() => setIsCreateTemplateDialogOpen(true)}
+              />
+            </div>
           </section>
         )}
 
@@ -2152,8 +2162,7 @@ export const ShoppingList = () => {
         </div>
       </div>
 
-      {/* Quick Start Templates */}
-      {items.length === 0 && <SortableTemplates systemTemplates={currentTemplates} language={language} onTemplateClick={handleTemplateClick} onCreateNew={() => setIsCreateTemplateDialogOpen(true)} />}
+      {/* Quick Start Templates moved inside instruction card above */}
 
       {/* Dashboard - Saved Lists & Completed Trips */}
       {items.length === 0 && (savedLists.length > 0 || shoppingHistory.length > 0) && (() => {

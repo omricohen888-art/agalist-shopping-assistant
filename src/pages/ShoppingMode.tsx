@@ -1427,10 +1427,22 @@ export const ShoppingMode = () => {
                 />
               ) : (
                 <div className="space-y-2">
-                  <Select value={selectedStore} onValueChange={setSelectedStore}>
+                  <Select value={isCustomStore ? '__custom__' : selectedStore} onValueChange={(val) => {
+                    if (val === '__custom__') {
+                      setIsCustomStore(true);
+                      setCustomStoreName("");
+                      setSelectedStore("");
+                    } else {
+                      setIsCustomStore(false);
+                      setCustomStoreName("");
+                      setSelectedStore(val);
+                    }
+                  }}>
                     <SelectTrigger dir={direction} className="w-full h-12 text-base">
-                      {selectedStore && !STORES_BY_TYPE[selectedShoppingType].includes(selectedStore) ? (
-                        <span>{selectedStore}</span>
+                      {isCustomStore ? (
+                        <span className="text-primary font-medium">
+                          {language === 'he' ? '➕ הקלד שם אחר...' : '➕ Enter custom name...'}
+                        </span>
                       ) : selectedStore ? (
                         <span>{selectedStore}</span>
                       ) : (
@@ -1453,14 +1465,14 @@ export const ShoppingMode = () => {
                       </SelectItem>
                     </SelectContent>
                   </Select>
-                  {selectedStore === '__custom__' && (
+                  {isCustomStore && (
                     <Input
                       type="text"
                       placeholder={language === 'he' ? 'הקלד שם חנות...' : 'Enter store name...'}
+                      value={customStoreName}
                       onChange={(e) => {
-                        if (e.target.value) {
-                          setSelectedStore(e.target.value);
-                        }
+                        setCustomStoreName(e.target.value);
+                        setSelectedStore(e.target.value);
                       }}
                       className="h-12 text-base"
                       dir={direction}

@@ -1869,7 +1869,7 @@ export const ShoppingList = () => {
                   : <>Have a list ready? Click <span className="font-bold">Paste</span> above</>}
               </p>
               <p className="flex items-start gap-2">
-                <span className="font-bold text-primary mt-0.5">3.</span>
+                <span className="font-bold text-primary mt-0.5">4.</span>
                 {language === 'he'
                   ? 'כמות ויחידות? השתמשו בכפתורי +/- וברשימת היחידות שליד כל פריט'
                   : 'Quantity & units? Use the +/- buttons and unit selector next to each item'}

@@ -1169,7 +1169,7 @@ export const ShoppingMode = () => {
                       {language === 'he' ? 'פריטים דחופים' : 'Urgent Items'}
                     </span>
                   </div>
-                  <div className="space-y-2">
+                  <div className={zoomLevel === 'compact' ? 'space-y-1' : 'space-y-2'}>
                     {pinnedItems.map((item) => (
                       <SwipeableItem
                         key={item.id}
@@ -1190,6 +1190,7 @@ export const ShoppingMode = () => {
                         setEditingNote={setEditingNote}
                         saveItemEdit={saveItemEdit}
                         cancelEdit={cancelEdit}
+                        zoomLevel={zoomLevel}
                       />
                     ))}
                   </div>

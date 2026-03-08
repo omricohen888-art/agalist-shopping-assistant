@@ -1415,72 +1415,13 @@ export const ShoppingMode = () => {
               <Label htmlFor="store" className="text-sm font-medium">
                 {language === 'he' ? 'רשת/חנות' : 'Store'}
               </Label>
-              {selectedShoppingType === 'other' || STORES_BY_TYPE[selectedShoppingType].length === 0 ? (
-                <Input
-                  id="store"
-                  type="text"
-                  placeholder={language === 'he' ? 'הקלד שם חנות...' : 'Enter store name...'}
-                  value={selectedStore}
-                  onChange={(e) => setSelectedStore(e.target.value)}
-                  className="h-12 text-base"
-                  dir={direction}
-                />
-              ) : (
-                <div className="space-y-2">
-                  <Select value={isCustomStore ? '__custom__' : selectedStore} onValueChange={(val) => {
-                    if (val === '__custom__') {
-                      setIsCustomStore(true);
-                      setCustomStoreName("");
-                      setSelectedStore("");
-                    } else {
-                      setIsCustomStore(false);
-                      setCustomStoreName("");
-                      setSelectedStore(val);
-                    }
-                  }}>
-                    <SelectTrigger dir={direction} className="w-full h-12 text-base">
-                      {isCustomStore ? (
-                        <span className="text-primary font-medium">
-                          {language === 'he' ? '➕ הקלד שם אחר...' : '➕ Enter custom name...'}
-                        </span>
-                      ) : selectedStore ? (
-                        <span>{selectedStore}</span>
-                      ) : (
-                        <span className="flex items-center gap-2">
-                          <Store className="h-4 w-4 opacity-50" />
-                          {language === 'he' ? 'בחר חנות' : 'Select store'}
-                        </span>
-                      )}
-                    </SelectTrigger>
-                    <SelectContent className="bg-background border border-border z-50 max-h-60" dir={direction}>
-                      {STORES_BY_TYPE[selectedShoppingType].map((store) => (
-                        <SelectItem key={store} value={store}>
-                          {store}
-                        </SelectItem>
-                      ))}
-                      <SelectItem value="__custom__">
-                        <span className="text-primary font-medium">
-                          {language === 'he' ? '➕ הקלד שם אחר...' : '➕ Enter custom name...'}
-                        </span>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {isCustomStore && (
-                    <Input
-                      type="text"
-                      placeholder={language === 'he' ? 'הקלד שם חנות...' : 'Enter store name...'}
-                      value={customStoreName}
-                      onChange={(e) => {
-                        setCustomStoreName(e.target.value);
-                        setSelectedStore(e.target.value);
-                      }}
-                      className="h-12 text-base"
-                      dir={direction}
-                      autoFocus
-                    />
-                  )}
-                </div>
-              )}
+              <StoreAutocomplete
+                stores={selectedShoppingType !== 'other' ? [...STORES_BY_TYPE[selectedShoppingType]] : []}
+                value={selectedStore}
+                onChange={setSelectedStore}
+                placeholder={language === 'he' ? 'הקלד או בחר חנות...' : 'Type or select store...'}
+                direction={direction}
+              />
             </div>
 
             <div className="space-y-2">

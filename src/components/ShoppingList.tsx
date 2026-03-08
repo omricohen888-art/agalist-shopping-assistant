@@ -1945,23 +1945,19 @@ export const ShoppingList = () => {
         {/* Items List - Mobile Optimized */}
         <div className="min-h-[120px] sm:min-h-[140px] max-h-[50vh] overflow-y-auto overflow-x-hidden scrollbar-thin" dir={language === 'he' ? 'rtl' : 'ltr'}>
           {notepadItems.length === 0 ?
-            // Empty state - Google Keep style input
             <div className="relative">
-              {/* Notebook line effect */}
-              <div className="absolute top-0 bottom-0 right-5 w-0.5 bg-primary/15 rounded-full pointer-events-none" />
-
               <textarea
                 autoFocus
                 rows={6}
                 placeholder={language === 'he'
                   ? 'הוסיפו פריטים...\n\nחלב\nלחם\nביצים\nגבינה'
                   : 'Add items...\n\nMilk\nBread\nEggs\nCheese'}
-                className="w-full bg-muted/20 dark:bg-slate-800/40 
-                    border-2 border-primary/30 hover:border-primary/40 
-                    focus:border-primary/50 focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.15)]
+                className="w-full bg-card dark:bg-slate-900 
+                    border-2 border-foreground/20 hover:border-foreground/40 
+                    focus:border-foreground/60 focus:shadow-[0_0_0_3px_hsl(var(--foreground)/0.08)]
                     rounded-xl outline-none 
                     text-lg leading-relaxed font-medium text-foreground 
-                    placeholder:text-muted-foreground/60 
+                    placeholder:text-muted-foreground/50 
                     py-4 px-5 pr-8
                     resize-none min-h-[200px]
                     transition-all duration-200

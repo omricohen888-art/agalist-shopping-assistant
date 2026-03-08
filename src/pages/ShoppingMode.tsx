@@ -273,18 +273,24 @@ const SwipeableItem = ({
                 triggerHaptic(50);
                 onComplete(item.id);
               }}
-              className={`flex-1 min-w-0 text-${direction === 'rtl' ? 'right' : 'left'} touch-manipulation py-2`}
+              className={`flex-1 min-w-0 text-${direction === 'rtl' ? 'right' : 'left'} touch-manipulation ${zoomLevel === 'compact' ? 'py-0.5' : 'py-2'}`}
             >
-              <div className={`flex items-baseline ${direction === 'rtl' ? 'flex-row' : 'flex-row-reverse'} gap-2`}>
+              <div className={`flex items-center ${direction === 'rtl' ? 'flex-row' : 'flex-row-reverse'} gap-2`}>
                 <p className={`${zoomConfig.title} font-bold text-foreground truncate flex-1 min-w-0`}>
                   {item.text}
                 </p>
-                <span className={`${zoomConfig.subtitle} text-foreground font-bold flex-shrink-0 bg-muted px-1.5 py-0.5 rounded-md border border-border`}>
-                  {item.quantity} {unitLabel}
-                </span>
+                {zoomLevel === 'compact' ? (
+                  <span className="text-xs text-muted-foreground font-semibold flex-shrink-0">
+                    {item.quantity} {unitLabel}
+                  </span>
+                ) : (
+                  <span className={`${zoomConfig.subtitle} text-foreground font-bold flex-shrink-0 bg-muted px-1.5 py-0.5 rounded-md border border-border`}>
+                    {item.quantity} {unitLabel}
+                  </span>
+                )}
               </div>
               {item.note && (
-                <p className="text-xs text-destructive font-medium flex items-center gap-1 mt-0.5">
+                <p className={`text-xs text-destructive font-medium flex items-center gap-1 ${zoomLevel === 'compact' ? '' : 'mt-0.5'}`}>
                   <MessageSquare className="h-3 w-3 inline" />
                   {item.note}
                 </p>

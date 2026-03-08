@@ -1205,7 +1205,7 @@ export const ShoppingMode = () => {
                   if (categoryItems.length === 0) return null;
                   const categoryInfo = getCategoryInfo(categoryKey);
                   return (
-                    <motion.div layout key={categoryKey} className="space-y-2">
+                    <motion.div layout key={categoryKey} className={zoomLevel === 'compact' ? 'space-y-1' : 'space-y-2'}>
                       <div className="flex items-center gap-2 px-1">
                         <span className="text-base">{categoryInfo.icon}</span>
                         <span className="text-xs font-bold text-muted-foreground">

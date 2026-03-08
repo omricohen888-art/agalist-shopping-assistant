@@ -145,9 +145,11 @@ interface SortableTemplatesProps {
 const STORAGE_KEY = 'activeTemplateIds';
 const STORAGE_KEY_CUSTOM = 'customTemplatesData';
 const STORAGE_KEY_EXPANDED = 'templatesExpanded';
+const STORAGE_KEY_VERSION = 'templateVersion';
 
-// Default system template IDs
+// Default system template IDs - 4 most useful for families
 const DEFAULT_TEMPLATE_IDS = ['grocery', 'bbq', 'cleaning', 'family'];
+const CURRENT_VERSION = 2; // bump to reset user templates to new defaults
 
 export const SortableTemplates = ({
   systemTemplates,
@@ -158,11 +160,17 @@ export const SortableTemplates = ({
   // Store only template IDs for ordering
   const [activeTemplateIds, setActiveTemplateIds] = useState<string[]>(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        return parsed.length > 0 ? parsed : DEFAULT_TEMPLATE_IDS;
+      const version = localStorage.getItem(STORAGE_KEY_VERSION);
+      if (version && parseInt(version) >= CURRENT_VERSION) {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          return parsed.length > 0 ? parsed : DEFAULT_TEMPLATE_IDS;
+        }
       }
+      // Reset to new defaults
+      localStorage.setItem(STORAGE_KEY_VERSION, String(CURRENT_VERSION));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_TEMPLATE_IDS));
       return DEFAULT_TEMPLATE_IDS;
     } catch {
       return DEFAULT_TEMPLATE_IDS;

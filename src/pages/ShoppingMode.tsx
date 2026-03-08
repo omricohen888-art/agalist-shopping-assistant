@@ -1213,7 +1213,7 @@ export const ShoppingMode = () => {
                         </span>
                         <span className="text-xs text-muted-foreground/70">({categoryItems.length})</span>
                       </div>
-                      <div className="space-y-2">
+                      <div className={zoomLevel === 'compact' ? 'space-y-1' : 'space-y-2'}>
                         <AnimatePresence>
                           {categoryItems.map((item) => (
                             <SwipeableItem
@@ -1235,6 +1235,7 @@ export const ShoppingMode = () => {
                               setEditingNote={setEditingNote}
                               saveItemEdit={saveItemEdit}
                               cancelEdit={cancelEdit}
+                              zoomLevel={zoomLevel}
                             />
                           ))}
                         </AnimatePresence>

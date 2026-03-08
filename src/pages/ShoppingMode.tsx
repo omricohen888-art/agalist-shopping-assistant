@@ -490,6 +490,7 @@ export const ShoppingMode = () => {
   const [customStoreName, setCustomStoreName] = useState("");
   const [selectedShoppingType, setSelectedShoppingType] = useState<ShoppingType>("supermarket");
   const [showAddItemInput, setShowAddItemInput] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState<'normal' | 'medium' | 'compact'>('normal');
   const [newItemText, setNewItemText] = useState("");
   const [isSmartSort, setIsSmartSort] = useState(false);
   const [showExitDialog, setShowExitDialog] = useState(false);

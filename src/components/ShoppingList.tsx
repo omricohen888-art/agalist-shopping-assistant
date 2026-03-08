@@ -1838,15 +1838,15 @@ export const ShoppingList = () => {
 
 
       {/* Modern Input Card - Mobile Optimized with Bold Black Borders */}
-      <div className="relative bg-card dark:bg-slate-800/90 border-2 border-foreground/80 dark:border-foreground/60 rounded-2xl p-3 sm:p-4 md:p-6 mb-4 sm:mb-6 shadow-lg hover:shadow-xl focus-within:shadow-xl transition-all duration-300 overflow-hidden backdrop-blur-sm">
+      <div className="relative bg-gradient-to-b from-primary/5 to-card dark:from-primary/10 dark:to-slate-800/90 border-2 border-primary/60 dark:border-primary/40 rounded-2xl p-3 sm:p-4 md:p-6 mb-4 sm:mb-6 shadow-[0_4px_20px_-4px_hsl(var(--primary)/0.15)] hover:shadow-[0_6px_24px_-4px_hsl(var(--primary)/0.2)] focus-within:shadow-[0_6px_24px_-4px_hsl(var(--primary)/0.25)] transition-all duration-300 overflow-hidden backdrop-blur-sm">
         {/* Subtle gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none rounded-2xl" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-transparent to-transparent pointer-events-none rounded-2xl" />
 
         {/* Instruction Card - Show when list is empty */}
         {notepadItems.length === 0 && (
-          <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-2 border-primary/30 rounded-xl p-3 sm:p-4 mb-4">
-            <h4 className="text-sm font-bold text-primary flex items-center gap-2 mb-2.5">
-              <span className="text-base">📝</span>
+          <div className="bg-primary/10 dark:bg-primary/15 border-2 border-primary/40 rounded-xl p-3 sm:p-4 mb-4">
+            <h4 className="text-base font-bold text-primary flex items-center gap-2 mb-2.5 animate-pulse">
+              <span className="text-lg">📝</span>
               {language === 'he' ? 'איך מתחילים?' : 'How to start?'}
             </h4>
             <ul className="space-y-1.5 text-xs sm:text-sm text-muted-foreground">
@@ -1877,6 +1877,9 @@ export const ShoppingList = () => {
                   : 'Or "Save for Later" to save in notebook'}
               </li>
             </ul>
+            <p className="mt-3 text-sm font-semibold text-primary text-center">
+              {language === 'he' ? '↓ התחילו להקליד למטה ↓' : '↓ Start typing below ↓'}
+            </p>
           </div>
         )}
 
@@ -1895,7 +1898,7 @@ export const ShoppingList = () => {
           <div className="flex items-center gap-2 flex-shrink-0">
             <button
               onClick={handleQuickPaste}
-              className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-lg bg-muted/80 hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer text-xs sm:text-sm font-medium border border-foreground/20"
+              className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary hover:text-primary transition-all cursor-pointer text-xs sm:text-sm font-semibold border border-primary/30"
               title={language === 'he' ? 'הדבק מהלוח' : 'Paste from clipboard'}
             >
               <ClipboardPaste className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -1954,15 +1957,15 @@ export const ShoppingList = () => {
                   ? 'הוסיפו פריטים...\n\nחלב\nלחם\nביצים\nגבינה'
                   : 'Add items...\n\nMilk\nBread\nEggs\nCheese'}
                 className="w-full bg-muted/20 dark:bg-slate-800/40 
-                    border-2 border-muted-foreground/10 hover:border-primary/30 
-                    focus:border-primary/40 focus:ring-2 focus:ring-primary/10
+                    border-2 border-primary/30 hover:border-primary/40 
+                    focus:border-primary/50 focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.15)]
                     rounded-xl outline-none 
                     text-lg leading-relaxed font-medium text-foreground 
-                    placeholder:text-muted-foreground/40 
+                    placeholder:text-muted-foreground/60 
                     py-4 px-5 pr-8
                     resize-none min-h-[200px]
                     transition-all duration-200
-                    shadow-inner"
+                    shadow-sm"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();

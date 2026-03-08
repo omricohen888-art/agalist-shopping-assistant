@@ -1865,14 +1865,20 @@ export const ShoppingList = () => {
               <p className="flex items-start gap-2">
                 <span className="font-bold text-primary mt-0.5">3.</span>
                 {language === 'he'
-                  ? 'כמות ויחידות? לחצו על הפריט אחרי ההוספה כדי לערוך'
-                  : 'Quantity & units? Tap the item after adding to edit'}
+                  ? 'כמות ויחידות? השתמשו בכפתורי +/- וברשימת היחידות שליד כל פריט'
+                  : 'Quantity & units? Use the +/- buttons and unit selector next to each item'}
               </p>
               <p className="flex items-start gap-2">
                 <span className="font-bold text-primary mt-0.5">4.</span>
                 {language === 'he'
                   ? <>לחצו <span className="font-bold">"יוצאים לקניות!"</span> כשמוכנים — ותסמנו פריטים תוך כדי קנייה</>
                   : <>Hit <span className="font-bold">"Let's Shop!"</span> when ready — and check items off as you go</>}
+              </p>
+              <p className="flex items-start gap-2">
+                <span className="font-bold text-primary mt-0.5">5.</span>
+                {language === 'he'
+                  ? <>לא קונים עכשיו? לחצו <span className="font-bold">"שמור לאחר כך"</span> והרשימה תישמר בפנקס</>
+                  : <>Not shopping now? Click <span className="font-bold">"Save for Later"</span> to keep the list in your notebook</>}
               </p>
             </div>
           </div>

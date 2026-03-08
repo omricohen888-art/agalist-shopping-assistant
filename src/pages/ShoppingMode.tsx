@@ -191,9 +191,9 @@ const SwipeableItem = ({
         scale: { type: "spring", stiffness: 500, damping: 25 }
       }}
       className={`
-        relative overflow-hidden rounded-2xl
+        relative overflow-hidden ${zoomConfig.rounded}
         border-2 transition-colors duration-300
-        shadow-sm hover:shadow-lg
+        ${zoomLevel === 'compact' ? 'shadow-none' : 'shadow-sm hover:shadow-lg'}
         ${item.pinned
           ? 'border-destructive bg-destructive/5 ring-2 ring-destructive/20'
           : 'border-foreground/20 hover:border-primary/50'

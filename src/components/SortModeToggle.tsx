@@ -13,7 +13,7 @@ export const SortModeToggle: React.FC<SortModeToggleProps> = ({
   language
 }) => {
   return (
-    <div className="flex items-center justify-center gap-0.5 p-0.5 glass rounded-full border border-border/50 w-fit max-w-full mx-auto">
+    <div className="flex items-center justify-center gap-0.5 p-0.5 glass rounded-full border border-border/50 w-fit max-w-full">
       {/* Original Order Button - First */}
       <button
         onClick={() => onToggle(false)}

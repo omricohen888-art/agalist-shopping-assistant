@@ -17,7 +17,17 @@ export const saveShoppingHistory = (history: ShoppingHistory) => {
 export const getShoppingHistory = (): ShoppingHistory[] => {
   try {
     const data = localStorage.getItem(STORAGE_KEY);
-    return data ? JSON.parse(data) : [];
+    if (!data) return [];
+    const parsed = JSON.parse(data);
+    if (!Array.isArray(parsed)) return [];
+    // Validate each entry has required fields
+    return parsed.filter(
+      (item: any) =>
+        item &&
+        typeof item === 'object' &&
+        typeof item.id === 'string' &&
+        Array.isArray(item.items)
+    );
   } catch (error) {
     console.error("Failed to load shopping history:", error);
     return [];
@@ -51,7 +61,12 @@ const LISTS_KEY = "saved_lists";
 export const getSavedLists = (): SavedList[] => {
   try {
     const data = localStorage.getItem(LISTS_KEY);
-    const parsed: SavedList[] = data ? JSON.parse(data) : [];
+    if (!data) return [];
+    const raw = JSON.parse(data);
+    if (!Array.isArray(raw)) return [];
+    const parsed: SavedList[] = raw.filter(
+      (item: any) => item && typeof item === 'object' && typeof item.name === 'string'
+    );
 
     // Ensure all IDs are strings (convert any non-string IDs)
     // Filter out archived lists

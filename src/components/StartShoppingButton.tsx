@@ -83,7 +83,7 @@ export const SaveListButton: React.FC<{
       disabled={disabled}
       className={`
         relative
-        h-11 sm:h-12 px-4 sm:px-6 rounded-xl w-full sm:w-auto
+        h-11 sm:h-12 px-4 sm:px-6 rounded-xl w-full
         font-semibold
         bg-card/80 backdrop-blur-sm
         border-2 border-foreground/60

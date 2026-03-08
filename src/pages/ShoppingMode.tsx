@@ -1381,6 +1381,8 @@ export const ShoppingMode = () => {
                 onValueChange={(value: ShoppingType) => {
                   setSelectedShoppingType(value);
                   setSelectedStore("");
+                  setIsCustomStore(false);
+                  setCustomStoreName("");
                 }}
               >
                 <SelectTrigger dir={direction} className="w-full h-12 text-base">

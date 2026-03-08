@@ -275,20 +275,20 @@ const SwipeableItem = ({
               }}
               className={`flex-1 min-w-0 text-${direction === 'rtl' ? 'right' : 'left'} touch-manipulation py-2`}
             >
-              <p className={`${zoomConfig.title} font-bold text-foreground truncate`}>
-                {item.text}
-              </p>
-              <div className="flex flex-col gap-0.5">
-                <p className={`${zoomConfig.subtitle} text-foreground/70 font-semibold`}>
-                  {item.quantity} {unitLabel}
+              <div className={`flex items-baseline ${direction === 'rtl' ? 'flex-row' : 'flex-row-reverse'} gap-2`}>
+                <p className={`${zoomConfig.title} font-bold text-foreground truncate flex-1 min-w-0`}>
+                  {item.text}
                 </p>
-                {item.note && (
-                  <p className="text-xs text-destructive font-medium flex items-center gap-1">
-                    <MessageSquare className="h-3 w-3 inline" />
-                    {item.note}
-                  </p>
-                )}
+                <span className={`${zoomConfig.subtitle} text-primary font-bold flex-shrink-0 bg-primary/10 px-1.5 py-0.5 rounded-md`}>
+                  {item.quantity} {unitLabel}
+                </span>
               </div>
+              {item.note && (
+                <p className="text-xs text-destructive font-medium flex items-center gap-1 mt-0.5">
+                  <MessageSquare className="h-3 w-3 inline" />
+                  {item.note}
+                </p>
+              )}
             </button>
 
             {/* Action buttons - vertical stack */}

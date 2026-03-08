@@ -294,7 +294,7 @@ export const SortableTemplates = ({
             items={activeTemplateIds}
             strategy={verticalListSortingStrategy}
           >
-            <div className="flex flex-wrap justify-center gap-2">
+            <div className="flex flex-wrap justify-center gap-1.5">
               {activeTemplates.map((template) => (
                 <SortableTemplateItem
                   key={template.id}
@@ -307,25 +307,15 @@ export const SortableTemplates = ({
               ))}
 
               {/* Create New Template Button */}
-              <button
-                onClick={onCreateNew}
-                disabled={isEditMode}
-                className={`
-                  px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl 
-                  bg-primary/10 text-primary 
-                  text-xs sm:text-sm font-semibold 
-                  border border-primary/20
-                  transition-all duration-200 touch-manipulation 
-                  flex items-center gap-1.5 
-                  ${isEditMode
-                    ? 'opacity-50 cursor-not-allowed'
-                    : 'hover:bg-primary/20 hover:border-primary/40 active:scale-95'
-                  }
-                `}
-              >
-                <Plus className="h-4 w-4" />
-                {createLabel}
-              </button>
+              {isEditMode && (
+                <button
+                  onClick={onCreateNew}
+                  className="px-3 py-2 rounded-xl bg-primary/10 text-primary text-xs font-semibold border border-primary/20 transition-all duration-200 touch-manipulation flex items-center gap-1 hover:bg-primary/20 active:scale-95"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  {createLabel}
+                </button>
+              )}
             </div>
           </SortableContext>
         </DndContext>

@@ -1844,42 +1844,31 @@ export const ShoppingList = () => {
 
         {/* Instruction Card - Show when list is empty */}
         {notepadItems.length === 0 && (
-          <div className="bg-primary/[0.07] dark:bg-primary/[0.12] border border-primary/20 rounded-xl p-3 sm:p-4 mb-4">
-            <h4 className="text-base font-bold text-foreground flex items-center gap-2 mb-2.5">
-              <span className="text-lg">📝</span>
-              {language === 'he' ? 'איך מתחילים?' : 'How to start?'}
+          <div className="bg-muted/50 dark:bg-muted/20 border border-border rounded-xl p-3 sm:p-4 mb-4">
+            <h4 className="text-base font-bold text-foreground flex items-center gap-2 mb-3">
+              <span className="text-lg">🛒</span>
+              {language === 'he' ? 'הרשימה שלכם מתחילה כאן' : 'Your list starts here'}
             </h4>
-            <ul className="space-y-1.5 text-xs sm:text-sm text-foreground/80">
-              <li className="flex items-center gap-2">
-                <Check className="h-3.5 w-3.5 text-success flex-shrink-0" />
+            <div className="space-y-2 text-sm text-foreground/90">
+              <p className="flex items-start gap-2">
+                <span className="font-bold text-primary mt-0.5">1.</span>
                 {language === 'he'
-                  ? 'הקלידו פריטים, כל אחד בשורה נפרדת'
-                  : 'Type items, each on a new line'}
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-3.5 w-3.5 text-success flex-shrink-0" />
+                  ? 'כתבו למטה מה צריך לקנות — פריט בכל שורה'
+                  : 'Write below what you need to buy — one item per line'}
+              </p>
+              <p className="flex items-start gap-2">
+                <span className="font-bold text-primary mt-0.5">2.</span>
                 {language === 'he'
-                  ? 'או הדביקו רשימה קיימת מ-WhatsApp / Notes'
-                  : 'Or paste an existing list'}
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-3.5 w-3.5 text-success flex-shrink-0" />
-                <span className="text-foreground">
-                  {language === 'he'
-                    ? <>"יוצאים לקניות" – <span className="font-bold relative inline-block">מצב חכם<span className="absolute bottom-0 left-0 right-0 h-[3px] bg-foreground rounded-full transform -rotate-1 opacity-80"></span></span> לסימון פריטים בזמן אמת</>
-                    : <>"Let's Shop" – <span className="font-bold relative inline-block">Smart mode<span className="absolute bottom-0 left-0 right-0 h-[3px] bg-foreground rounded-full transform rotate-1 opacity-80"></span></span> for real-time item tracking</>}
-                </span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-3.5 w-3.5 text-success flex-shrink-0" />
+                  ? <>יש רשימה מוכנה? לחצו <span className="font-bold">הדבק</span> למעלה</>
+                  : <>Have a list ready? Click <span className="font-bold">Paste</span> above</>}
+              </p>
+              <p className="flex items-start gap-2">
+                <span className="font-bold text-primary mt-0.5">3.</span>
                 {language === 'he'
-                  ? 'או "שמור לאחר כך" לשמירה בפנקס'
-                  : 'Or "Save for Later" to save in notebook'}
-              </li>
-            </ul>
-            <p className="mt-3 text-sm font-semibold text-foreground/70 text-center">
-              {language === 'he' ? '↓ התחילו להקליד למטה ↓' : '↓ Start typing below ↓'}
-            </p>
+                  ? <>לחצו <span className="font-bold">"יוצאים לקניות!"</span> כשמוכנים — ותסמנו פריטים תוך כדי קנייה</>
+                  : <>Hit <span className="font-bold">"Let's Shop!"</span> when ready — and check items off as you go</>}
+              </p>
+            </div>
           </div>
         )}
 

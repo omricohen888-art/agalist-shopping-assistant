@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import {
   CheckCircle2, X, Check, ShoppingCart, Timer, Store,
   Plus, ClipboardPaste, Clock, Pin, PinOff, Trash2, Pencil, MessageSquare, Minus,
-  Zap, Sparkles, Trophy, ArrowRight
+  Zap, Sparkles, Trophy, ArrowRight, ZoomIn
 } from "lucide-react";
 import { useGlobalLanguage } from "@/context/LanguageContext";
 import { useSoundSettings } from "@/hooks/use-sound-settings.tsx";

@@ -1149,7 +1149,7 @@ export const ShoppingMode = () => {
 
         {/* Active Items */}
         {activeItemsCount > 0 && (
-          <div className="space-y-3">
+          <div className={zoomLevel === 'compact' ? 'space-y-1' : zoomLevel === 'medium' ? 'space-y-2' : 'space-y-3'}>
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-semibold text-foreground">
                 {language === 'he' ? 'לאסוף' : 'To Collect'}

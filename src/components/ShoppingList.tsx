@@ -1844,12 +1844,12 @@ export const ShoppingList = () => {
 
         {/* Instruction Card - Show when list is empty */}
         {notepadItems.length === 0 && (
-          <div className="bg-primary/10 dark:bg-primary/15 border-2 border-primary/40 rounded-xl p-3 sm:p-4 mb-4">
-            <h4 className="text-base font-bold text-primary flex items-center gap-2 mb-2.5 animate-pulse">
+          <div className="bg-primary/5 dark:bg-primary/10 border border-primary/25 rounded-xl p-3 sm:p-4 mb-4">
+            <h4 className="text-base font-bold text-foreground flex items-center gap-2 mb-2.5">
               <span className="text-lg">📝</span>
               {language === 'he' ? 'איך מתחילים?' : 'How to start?'}
             </h4>
-            <ul className="space-y-1.5 text-xs sm:text-sm text-muted-foreground">
+            <ul className="space-y-1.5 text-xs sm:text-sm text-foreground/80">
               <li className="flex items-center gap-2">
                 <Check className="h-3.5 w-3.5 text-success flex-shrink-0" />
                 {language === 'he'

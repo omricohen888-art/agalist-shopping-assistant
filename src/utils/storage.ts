@@ -17,7 +17,17 @@ export const saveShoppingHistory = (history: ShoppingHistory) => {
 export const getShoppingHistory = (): ShoppingHistory[] => {
   try {
     const data = localStorage.getItem(STORAGE_KEY);
-    return data ? JSON.parse(data) : [];
+    if (!data) return [];
+    const parsed = JSON.parse(data);
+    if (!Array.isArray(parsed)) return [];
+    // Validate each entry has required fields
+    return parsed.filter(
+      (item: any) =>
+        item &&
+        typeof item === 'object' &&
+        typeof item.id === 'string' &&
+        Array.isArray(item.items)
+    );
   } catch (error) {
     console.error("Failed to load shopping history:", error);
     return [];

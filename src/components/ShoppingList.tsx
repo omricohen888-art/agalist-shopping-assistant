@@ -2134,9 +2134,9 @@ export const ShoppingList = () => {
           </div>
         </div>}
 
-        <div className="flex flex-col gap-2 sm:gap-3 mt-4 sm:mt-6 w-full sm:max-w-2xl sm:mx-auto transition-all duration-300 ease-in-out relative z-10">
+        <div className="flex flex-col items-center gap-2 sm:gap-3 mt-4 sm:mt-6 w-full transition-all duration-300 ease-in-out relative z-10">
           {/* Primary actions - side by side */}
-          <div className="flex gap-2 sm:gap-3 w-full">
+          <div className="flex gap-2 sm:gap-3 w-full sm:max-w-xl sm:justify-center">
             <div className="flex-1">
               <StartShoppingButton onClick={handleStartShopping} language={language} disabled={notepadItems.length === 0} variant="compact" />
             </div>

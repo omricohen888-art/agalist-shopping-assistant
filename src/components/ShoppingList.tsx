@@ -1838,18 +1838,18 @@ export const ShoppingList = () => {
 
 
       {/* Modern Input Card - Mobile Optimized with Bold Black Borders */}
-      <div className="relative bg-gradient-to-b from-primary/5 to-card dark:from-primary/10 dark:to-slate-800/90 border-2 border-primary/60 dark:border-primary/40 rounded-2xl p-3 sm:p-4 md:p-6 mb-4 sm:mb-6 shadow-[0_4px_20px_-4px_hsl(var(--primary)/0.15)] hover:shadow-[0_6px_24px_-4px_hsl(var(--primary)/0.2)] focus-within:shadow-[0_6px_24px_-4px_hsl(var(--primary)/0.25)] transition-all duration-300 overflow-hidden backdrop-blur-sm">
+      <div className="relative bg-card dark:bg-slate-800/90 border-2 border-primary/40 dark:border-primary/30 rounded-2xl p-3 sm:p-4 md:p-6 mb-4 sm:mb-6 shadow-[0_4px_20px_-4px_hsl(var(--primary)/0.1)] hover:shadow-[0_6px_24px_-4px_hsl(var(--primary)/0.15)] focus-within:shadow-[0_6px_24px_-4px_hsl(var(--primary)/0.2)] transition-all duration-300 overflow-hidden backdrop-blur-sm">
         {/* Subtle gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-transparent to-transparent pointer-events-none rounded-2xl" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/3 via-transparent to-transparent pointer-events-none rounded-2xl" />
 
         {/* Instruction Card - Show when list is empty */}
         {notepadItems.length === 0 && (
-          <div className="bg-primary/10 dark:bg-primary/15 border-2 border-primary/40 rounded-xl p-3 sm:p-4 mb-4">
-            <h4 className="text-base font-bold text-primary flex items-center gap-2 mb-2.5 animate-pulse">
+          <div className="bg-primary/5 dark:bg-primary/10 border border-primary/25 rounded-xl p-3 sm:p-4 mb-4">
+            <h4 className="text-base font-bold text-foreground flex items-center gap-2 mb-2.5">
               <span className="text-lg">📝</span>
               {language === 'he' ? 'איך מתחילים?' : 'How to start?'}
             </h4>
-            <ul className="space-y-1.5 text-xs sm:text-sm text-muted-foreground">
+            <ul className="space-y-1.5 text-xs sm:text-sm text-foreground/80">
               <li className="flex items-center gap-2">
                 <Check className="h-3.5 w-3.5 text-success flex-shrink-0" />
                 {language === 'he'
@@ -1877,7 +1877,7 @@ export const ShoppingList = () => {
                   : 'Or "Save for Later" to save in notebook'}
               </li>
             </ul>
-            <p className="mt-3 text-sm font-semibold text-primary text-center">
+            <p className="mt-3 text-sm font-semibold text-foreground/70 text-center">
               {language === 'he' ? '↓ התחילו להקליד למטה ↓' : '↓ Start typing below ↓'}
             </p>
           </div>

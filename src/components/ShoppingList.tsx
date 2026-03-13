@@ -1736,7 +1736,7 @@ export const ShoppingList = () => {
               setInputMode('single');
             }} className="flex flex-col hover:opacity-80 active:scale-95 transition-all duration-200 touch-manipulation">
               <div className="flex items-center gap-1 sm:gap-1.5">
-                <span className="text-2xl sm:text-3xl font-bold text-foreground">
+                <span className="text-xl sm:text-2xl font-bold text-foreground">
                   {language === 'he' ? 'עגליסט' : 'ShopList'}
                 </span>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-7 w-7 sm:h-8 sm:w-8 text-foreground flex-shrink-0 -ml-0.5">

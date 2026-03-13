@@ -528,7 +528,7 @@ export const ShoppingMode = () => {
   // Stopwatch state
   const [elapsedTime, setElapsedTime] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(true);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const startTimeRef = useRef<number>(Date.now());
   const addItemInputRef = useRef<HTMLTextAreaElement>(null);
 

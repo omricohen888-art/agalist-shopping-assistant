@@ -221,7 +221,7 @@ export const ShoppingList = () => {
 
   // Secret Admin Entry Logic
   const [secretClickCount, setSecretClickCount] = useState(0);
-  const secretClickTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const secretClickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleSecretLogoClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent "Go Home" / Reset logic

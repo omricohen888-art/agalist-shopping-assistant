@@ -88,7 +88,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
       {/* MOBILE BOTTOM NAVIGATION - UNIFIED FOR BOTH LOGGED-IN AND GUEST USERS */}
       {/* All buttons including Settings are visible to both user types */}
       <div className="md:hidden">
-        <div className="flex items-center justify-center h-20 px-3">
+        <div className="flex items-center justify-center h-14 px-3">
           {/* Navigation Items - Centered */}
           <div className="flex items-center justify-center gap-1.5">
             {navigationItems.map(({ path, icon: Icon, label, id, isSettings }) => (
@@ -101,13 +101,13 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
                     handleNavigate(path);
                   }
                 }}
-                className={`flex items-center justify-center w-14 h-14 rounded-xl transition-all flex-shrink-0 active:scale-95 ${!isSettings && path && isActive(path)
+                className={`flex items-center justify-center w-11 h-11 rounded-xl transition-all flex-shrink-0 active:scale-95 ${!isSettings && path && isActive(path)
                   ? 'bg-primary text-primary-foreground shadow-md'
                   : 'text-muted-foreground hover:bg-muted'
                   }`}
                 title={label}
               >
-                <Icon className="h-6 w-6 flex-shrink-0" strokeWidth={1.5} />
+                <Icon className="h-5 w-5 flex-shrink-0" strokeWidth={1.5} />
               </button>
             ))}
           </div>
@@ -115,7 +115,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
           {/* Menu Toggle Button */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="h-14 w-14 flex items-center justify-center text-muted-foreground hover:bg-muted rounded-xl transition-colors ml-2 flex-shrink-0 active:scale-95"
+            className="h-11 w-11 flex items-center justify-center text-muted-foreground hover:bg-muted rounded-xl transition-colors ml-2 flex-shrink-0 active:scale-95"
             aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
           >
             {isMenuOpen ? (

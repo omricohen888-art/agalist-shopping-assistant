@@ -1701,7 +1701,7 @@ export const ShoppingList = () => {
     </div>}
 
     {/* Sticky Header Group */}
-    <div className="sticky top-0 z-50 glass-strong border-b border-border/30 transition-all duration-300">
+    <div className="sticky top-0 z-50 glass-strong border-b border-border/30 transition-all duration-300 pt-[env(safe-area-inset-top)]">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
         <div className="flex justify-between items-center w-full gap-3 sm:gap-4">
           {/* Logo Section - Clickable to go Home */}

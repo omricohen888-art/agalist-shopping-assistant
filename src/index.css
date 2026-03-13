@@ -323,6 +323,10 @@ All colors MUST be HSL.
   .touch-target-sm {
     @apply min-h-[36px] min-w-[36px];
   }
+
+  .safe-top {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
 }
 
 /* Smooth transitions for interactive elements */

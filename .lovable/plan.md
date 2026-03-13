@@ -1,21 +1,32 @@
 
+# הוספת כפתור "סיים קנייה" למסך הראשי
 
-# תיקון התאמת החלק העליון לאייפון 14+
+## מה ייעשה
+כפתור "סיים קנייה" יתווסף לאזור כפתורי הפעולה במסך הראשי (ליד "יוצאים לקניות" ו"שמור לאחר כך"). הכפתור יופיע **רק כאשר לפחות פריט אחד מסומן בוי** ברשימה.
 
-## הבעיה
-ההדר העליון (sticky header) מתחיל ב-`top-0` בלי להתחשב ב-safe area של אייפון 14 ומעלה (Dynamic Island / notch). כתוצאה הלוגו והכפתורים נחתכים מלמעלה.
+## עיצוב הכפתור
+- זהה לכפתור במצב קניות חכם (כפי שנראה בצילום המסך הראשון)
+- רקע צהוב מותגי עם אייקון CheckCircle
+- טקסט "סיים קנייה" / "Finish Shopping"
+- מוצג בשורה נפרדת מעל שני הכפתורים הקיימים, ברוחב מלא
 
-## הפתרון
-הוספת `padding-top` שמתחשב ב-`env(safe-area-inset-top)` להדר הדביק, כדי שהתוכן ייתחיל מתחת ל-Dynamic Island/notch.
+## פרטים טכניים
 
-## שינויים טכניים
+### קובץ: `src/components/ShoppingList.tsx`
+1. חישוב כמות הפריטים המסומנים מתוך `notepadItems`:
+   ```
+   const checkedNotepadCount = notepadItems.filter(item => item.checked).length;
+   ```
 
-### `src/components/ShoppingList.tsx`
-- **שורה 1704** — להדר הדביק, להוסיף `pt-[env(safe-area-inset-top)]` כדי שירד מתחת לאזור ה-notch/Dynamic Island.
+2. הוספת כפתור "סיים קנייה" באזור הכפתורים (שורה ~2117-2123), מעל הכפתורים הקיימים, מותנה ב-`checkedNotepadCount > 0`:
+   - כפתור ברוחב מלא בסגנון צהוב מותגי
+   - אייקון CheckCircle2
+   - לחיצה תפעיל את `openFinishDialog` הקיים
 
-### `src/index.css`
-- הוספת utility class `safe-top` עם `padding-top: env(safe-area-inset-top, 0px)` למקרה שנצטרך לשימוש חוזר.
+### קובץ: `src/components/StartShoppingButton.tsx`
+3. ייצוא רכיב חדש `FinishShoppingButton` בסגנון זהה לכפתור במצב קניות -- רקע צהוב, border שחור, אייקון וי, עם אנימציית לחיצה
 
-### `index.html`
-- כבר יש `viewport-fit=cover` ו-`apple-mobile-web-app-status-bar-style: black-translucent` — אלה נדרשים כדי ש-`env(safe-area-inset-top)` יעבוד, וזה כבר במקום.
-
+## התנהגות
+- הכפתור מוסתר כשאין פריטים מסומנים
+- הכפתור מופיע עם אנימציה כשפריט ראשון מסומן
+- לחיצה פותחת את דיאלוג סיום הקנייה הקיים (הזנת סכום ושם חנות)

@@ -184,7 +184,7 @@ export const ShoppingList = () => {
     category: CategoryKey;
   }>>([]);
   const [showSortHint, setShowSortHint] = useState(false); // Feature discovery hint visibility
-  const sortHintTimeoutRef = useRef<NodeJS.Timeout | null>(null); // Hint auto-dismiss timeout
+  const sortHintTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null); // Hint auto-dismiss timeout
 
   // Shopping History States
   const [shoppingHistory, setShoppingHistory] = useState<ShoppingHistory[]>([]);

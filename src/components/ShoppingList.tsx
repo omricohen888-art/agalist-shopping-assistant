@@ -1711,7 +1711,7 @@ export const ShoppingList = () => {
               onClick={handleSecretLogoClick}
               className="cursor-pointer hover:opacity-80 active:scale-95 transition-all duration-200 touch-manipulation"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0 text-foreground">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 sm:h-8 sm:w-8 flex-shrink-0 text-foreground">
                 {/* Checkbox background */}
                 <rect x="3" y="3" width="18" height="18" rx="2" fill="currentColor" stroke="currentColor" strokeWidth="2" />
                 {/* Checkmark - yellow */}

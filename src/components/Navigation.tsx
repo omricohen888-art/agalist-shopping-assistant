@@ -107,7 +107,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
                   }`}
                 title={label}
               >
-                <Icon className="h-6 w-6 flex-shrink-0" strokeWidth={1.5} />
+                <Icon className="h-5 w-5 flex-shrink-0" strokeWidth={1.5} />
               </button>
             ))}
           </div>

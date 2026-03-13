@@ -101,7 +101,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
                     handleNavigate(path);
                   }
                 }}
-                className={`flex items-center justify-center w-14 h-14 rounded-xl transition-all flex-shrink-0 active:scale-95 ${!isSettings && path && isActive(path)
+                className={`flex items-center justify-center w-11 h-11 rounded-xl transition-all flex-shrink-0 active:scale-95 ${!isSettings && path && isActive(path)
                   ? 'bg-primary text-primary-foreground shadow-md'
                   : 'text-muted-foreground hover:bg-muted'
                   }`}

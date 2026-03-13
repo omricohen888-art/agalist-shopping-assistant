@@ -88,7 +88,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
       {/* MOBILE BOTTOM NAVIGATION - UNIFIED FOR BOTH LOGGED-IN AND GUEST USERS */}
       {/* All buttons including Settings are visible to both user types */}
       <div className="md:hidden">
-        <div className="flex items-center justify-center h-20 px-3">
+        <div className="flex items-center justify-center h-14 px-3">
           {/* Navigation Items - Centered */}
           <div className="flex items-center justify-center gap-1.5">
             {navigationItems.map(({ path, icon: Icon, label, id, isSettings }) => (

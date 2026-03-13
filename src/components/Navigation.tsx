@@ -115,7 +115,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onSettingsClick }) => {
           {/* Menu Toggle Button */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="h-14 w-14 flex items-center justify-center text-muted-foreground hover:bg-muted rounded-xl transition-colors ml-2 flex-shrink-0 active:scale-95"
+            className="h-11 w-11 flex items-center justify-center text-muted-foreground hover:bg-muted rounded-xl transition-colors ml-2 flex-shrink-0 active:scale-95"
             aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
           >
             {isMenuOpen ? (

@@ -184,7 +184,7 @@ export const ShoppingList = () => {
     category: CategoryKey;
   }>>([]);
   const [showSortHint, setShowSortHint] = useState(false); // Feature discovery hint visibility
-  const sortHintTimeoutRef = useRef<NodeJS.Timeout | null>(null); // Hint auto-dismiss timeout
+  const sortHintTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null); // Hint auto-dismiss timeout
 
   // Shopping History States
   const [shoppingHistory, setShoppingHistory] = useState<ShoppingHistory[]>([]);
@@ -221,7 +221,7 @@ export const ShoppingList = () => {
 
   // Secret Admin Entry Logic
   const [secretClickCount, setSecretClickCount] = useState(0);
-  const secretClickTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const secretClickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleSecretLogoClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent "Go Home" / Reset logic

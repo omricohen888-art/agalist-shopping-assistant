@@ -46,14 +46,14 @@ export const AgalistCommercial: React.FC = () => {
   );
 
   // Current item typing progress (character by character)
-  const currentItemIndex = Math.min(
+  const currentItemIndex = Math.max(0, Math.min(
     ITEMS.length - 1,
     Math.floor(typingFrame / framesPerItem)
-  );
+  ));
   const currentItemProgress =
     (typingFrame % framesPerItem) / framesPerItem;
-  const currentItemText = ITEMS[currentItemIndex];
-  const typedChars = Math.floor(currentItemProgress * currentItemText.length);
+  const currentItemText = ITEMS[currentItemIndex] || "";
+  const typedChars = Math.floor(currentItemProgress * (currentItemText.length || 1));
 
   // Scene 3: Shopping mode - checking items (8s-13s)
   const shoppingFrame = frame - TIMELINE.SHOPPING_START;
